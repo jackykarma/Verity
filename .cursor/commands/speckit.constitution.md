@@ -2,7 +2,7 @@
 description: 根据交互式输入或提供的原则输入创建或更新项目章程，确保所有依赖的模板保持同步。
 handoffs: 
   - label: 构建规范
-    agent: speckit.specify
+    agent: speckit.feature
     prompt: 根据更新后的章程实现功能规范。我想要构建……
 ---
 

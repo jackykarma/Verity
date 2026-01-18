@@ -5,6 +5,10 @@ handoffs:
     agent: speckit.tasks
     prompt: 将 Plan 的 Story Breakdown 拆解为可执行 tasks.md
     send: true
+  - label: 同步 EPIC 总览（可选）
+    agent: speckit.epicsync
+    prompt: 将本 Feature 的 plan 进展同步到 EPIC 总览
+    send: false
   - label: 创建检查清单
     agent: speckit.checklist
     prompt: 为以下领域创建检查清单……

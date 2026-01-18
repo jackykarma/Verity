@@ -30,7 +30,7 @@ $ARGUMENTS
      - `PLAN` = FEATURE_DIR/plan.md
      - `TASKS` = FEATURE_DIR/tasks.md（可选）
      - `FULL_DESIGN` = FEATURE_DIR/full-design.md（生成目标）
-   - 若 `spec.md` 或 `plan.md` 缺失：终止并提示先运行 `/speckit.specify` 或 `/speckit.plan`。
+   - 若 `spec.md` 或 `plan.md` 缺失：终止并提示先运行 `/speckit.feature`（生成 Feature spec.md）或 `/speckit.plan`。
 
 2. **加载上下文（渐进式披露）**：
    - 必读：`spec.md`、`plan.md`

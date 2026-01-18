@@ -146,7 +146,7 @@ $ARGUMENTS
 
 - 若存在CRITICAL级问题：建议在执行 `/speckit.implement` 前解决
 - 若仅存在LOW/MEDIUM级问题：用户可继续推进，但需提供优化建议
-- 给出明确的命令建议：例如，“运行 /speckit.specify 进行细化”、“运行 /speckit.plan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
+- 给出明确的命令建议：例如，“运行 /speckit.feature 生成/细化 Feature spec.md”、“运行 /speckit.plan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
 
 ### 8. 提供整改建议
 
