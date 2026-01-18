@@ -1,89 +1,90 @@
 ---
-description: Execute the implementation planning workflow using the plan template to generate design artifacts.
-handoffs: 
-  - label: Create Tasks
-    agent: speckit.tasks
-    prompt: Break the plan into tasks
-    send: true
-  - label: Create Checklist
-    agent: speckit.checklist
-    prompt: Create a checklist for the following domain...
+描述：使用计划模板执行实施规划工作流，以生成设计产物。
+交接项：
+  - 标签：创建任务
+    执行主体：speckit.tasks
+    提示信息：将计划拆解为具体任务
+    发送状态：是
+  - 标签：创建检查清单
+    执行主体：speckit.checklist
+    提示信息：为以下领域创建检查清单……
 ---
 
-## User Input
+## 用户输入
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+在继续操作前，你**必须**参考用户输入内容（若不为空）。
 
-## Outline
+## 大纲
 
-1. **Setup**: Run `.specify/scripts/powershell/setup-plan.ps1 -Json` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+1. **环境搭建**：从代码库根目录运行 `.specify/scripts/powershell/setup-plan.ps1 -Json` 脚本，并解析 JSON 数据以获取 FEATURE_SPEC（功能规格）、IMPL_PLAN（实施计划）、SPECS_DIR（规格目录）、BRANCH（分支）。若参数中包含单引号（如 "I'm Groot"），需使用转义语法：例如 'I'\''m Groot'（若可行，也可使用双引号："I'm Groot"）。
 
-2. **Load context**: Read FEATURE_SPEC and `.specify/memory/constitution.md`. Load IMPL_PLAN template (already copied).
+2. **加载上下文**：读取 FEATURE_SPEC 文件和 `.specify/memory/constitution.md` 文件。加载已复制的 IMPL_PLAN 模板。
 
-3. **Execute plan workflow**: Follow the structure in IMPL_PLAN template to:
-   - Fill Technical Context (mark unknowns as "NEEDS CLARIFICATION")
-   - Fill Constitution Check section from constitution
-   - Evaluate gates (ERROR if violations unjustified)
-   - Phase 0: Generate research.md (resolve all NEEDS CLARIFICATION)
-   - Phase 1: Generate data-model.md, contracts/, quickstart.md
-   - Phase 1: Update agent context by running the agent script
-   - Re-evaluate Constitution Check post-design
+3. **执行计划工作流**：按照 IMPL_PLAN 模板的结构执行以下操作：
+    - 填写技术背景（将未知项标记为“需澄清”）
+    - 从章程文件中填充章程检查章节内容
+    - 评估管控节点（若违规且无合理解释，判定为错误）
+    - 第 0 阶段：生成 research.md 文件（解决所有“需澄清”项）
+    - 第 1 阶段：生成 data-model.md、contracts/ 目录、quickstart.md 文件
+    - 第 1 阶段：运行代理脚本更新代理上下文
+    - 设计完成后重新评估章程检查结果
 
-4. **Stop and report**: Command ends after Phase 2 planning. Report branch, IMPL_PLAN path, and generated artifacts.
+4. **停止并报告**：命令在第 2 阶段规划完成后终止。报告分支名称、IMPL_PLAN 文件路径及生成的产物。
 
-## Phases
+## 阶段说明
 
-### Phase 0: Outline & Research
+### 第 0 阶段：大纲梳理与调研
 
-1. **Extract unknowns from Technical Context** above:
-   - For each NEEDS CLARIFICATION → research task
-   - For each dependency → best practices task
-   - For each integration → patterns task
+1. **提取技术背景中的未知项**：
+    - 每一项“需澄清”内容 → 对应一个调研任务
+    - 每一项依赖项 → 对应一个最佳实践调研任务
+    - 每一项集成项 → 对应一个模式调研任务
 
-2. **Generate and dispatch research agents**:
+2. **生成并分派调研执行主体**：
 
    ```text
-   For each unknown in Technical Context:
-     Task: "Research {unknown} for {feature context}"
-   For each technology choice:
-     Task: "Find best practices for {tech} in {domain}"
+   针对技术背景中的每一项未知内容：
+     任务：“为{功能背景}调研{未知项}”
+   针对每一项技术选型：
+     任务：“查找{领域}中{技术}的最佳实践”
    ```
 
-3. **Consolidate findings** in `research.md` using format:
-   - Decision: [what was chosen]
-   - Rationale: [why chosen]
-   - Alternatives considered: [what else evaluated]
+3. **整理调研结果**并写入 `research.md` 文件，格式如下：
+    - 决策：[选定的方案]
+    - 依据：[选择该方案的原因]
+    - 备选方案：[评估过的其他方案]
 
-**Output**: research.md with all NEEDS CLARIFICATION resolved
+**输出物**：包含所有“需澄清”项解决方案的 research.md 文件
 
-### Phase 1: Design & Contracts
+### 第 1 阶段：设计与契约制定
 
-**Prerequisites:** `research.md` complete
+**前置条件**：`research.md` 文件内容完整
 
-1. **Extract entities from feature spec** → `data-model.md`:
-   - Entity name, fields, relationships
-   - Validation rules from requirements
-   - State transitions if applicable
+1. **从功能规格中提取实体** → 生成 `data-model.md` 文件：
+    - 实体名称、字段、关联关系
+    - 需求中的校验规则
+    - 适用的状态流转逻辑
 
-2. **Generate API contracts** from functional requirements:
-   - For each user action → endpoint
-   - Use standard REST/GraphQL patterns
-   - Output OpenAPI/GraphQL schema to `/contracts/`
+2. **根据功能需求生成 API 契约**：
+    - 每个用户操作对应一个接口端点
+    - 遵循 REST/GraphQL 标准设计模式
+    - 将 OpenAPI/GraphQL 模式文件输出至 `/contracts/` 目录
 
-3. **Agent context update**:
-   - Run `.specify/scripts/powershell/update-agent-context.ps1 -AgentType cursor-agent`
-   - These scripts detect which AI agent is in use
-   - Update the appropriate agent-specific context file
-   - Add only new technology from current plan
-   - Preserve manual additions between markers
+3. **代理上下文更新**：
+    - 运行 `.specify/scripts/powershell/update-agent-context.ps1 -AgentType cursor-agent` 脚本
+    - 该脚本可识别当前使用的 AI 代理类型
+    - 更新对应的代理专属上下文文件
+    - 仅新增当前计划中涉及的技术内容
+    - 保留标记区间内的手动新增内容
 
-**Output**: data-model.md, /contracts/*, quickstart.md, agent-specific file
+**输出物**：data-model.md 文件、/contracts/ 目录下所有文件、quickstart.md 文件、代理专属文件
 
-## Key rules
+## 核心规则
 
-- Use absolute paths
-- ERROR on gate failures or unresolved clarifications
+- 使用绝对路径
+- 若管控节点校验失败或存在未解决的澄清项，判定为错误
+```

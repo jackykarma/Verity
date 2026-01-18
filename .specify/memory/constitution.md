@@ -1,50 +1,60 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# [项目名称] 章程
+<!-- 示例：规范章程、任务流章程等 -->
 
-## Core Principles
+## 核心原则
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### [原则1名称]
+<!-- 示例：一、库优先原则 -->
+[原则1描述]
+<!-- 示例：所有功能均以独立库为起点；库必须具备自包含性、可独立测试性且有完整文档；需明确用途——禁止仅服务于组织架构的库 -->
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### [原则2名称]
+<!-- 示例：二、命令行界面（CLI）原则 -->
+[原则2描述]
+<!-- 示例：所有库均通过命令行界面（CLI）开放功能；文本输入输出协议：标准输入/参数 → 标准输出，错误信息 → 标准错误输出；支持JSON格式与人类可读格式 -->
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### [原则3名称]
+<!-- 示例：三、测试优先原则（不可协商） -->
+[原则3描述]
+<!-- 示例：测试驱动开发（TDD）为强制要求：先编写测试用例 → 经用户确认 → 测试用例执行失败 → 再进行功能实现；严格遵循红-绿-重构循环 -->
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### [原则4名称]
+<!-- 示例：四、集成测试原则 -->
+[原则4描述]
+<!-- 示例：需开展集成测试的重点领域：新库契约测试、契约变更、服务间通信、共享模式 -->
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### [原则5名称]
+<!-- 示例：五、可观测性原则、六、版本控制与破坏性变更原则、七、简洁性原则 -->
+[原则5描述]
+<!-- 示例：文本输入输出确保可调试性；要求结构化日志；或：采用主版本.次版本.构建版本格式；或：从简出发，遵循“你不会需要它”（YAGNI）原则 -->
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## [第二部分名称]
+<!-- 示例：附加约束、安全要求、性能标准等 -->
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+[第二部分内容]
+<!-- 示例：技术栈要求、合规标准、部署策略等 -->
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## [第三部分名称]
+<!-- 示例：开发工作流、评审流程、质量门槛等 -->
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+[第三部分内容]
+<!-- 示例：代码评审要求、测试门槛、部署审批流程等 -->
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+## 治理规则
+<!-- 示例：本章程优先于所有其他实践规范；章程修订需形成文档、获得批准并制定迁移计划 -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+[治理细则]
+<!-- 示例：所有拉取请求（PR）/评审均需验证合规性；复杂度需有合理依据；运行时开发需遵循[指导文件] -->
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**版本**：[章程版本] | **批准日期**：[正式批准日期] | **最后修订日期**：[末次修订日期]
+<!-- 示例：版本：2.1.1 | 批准日期：2025-06-13 | 最后修订日期：2025-07-16 -->
+
+### 翻译说明
+1. 专业术语：如`CLI`保留英文缩写并补充中文释义（命令行界面），`TDD`译为“测试驱动开发”并标注英文缩写，符合技术文档翻译惯例；
+2. 格式保留：原Markdown结构、注释占位符（如`[PRINCIPLE_1_NAME]`）、注释示例均完整保留，仅翻译注释内的说明文本；
+3. 语义适配：
+    - `self-contained` 译为“自包含性”（技术领域通用译法）；
+    - `Red-Green-Refactor` 译为“红-绿-重构”（TDD领域标准译法）；
+    - `YAGNI` 补充中文释义“你不会需要它”并保留英文缩写；
+    - `Governance` 结合上下文译为“治理规则/治理细则”（而非单纯“治理”），贴合章程类文档语境；
+4. 语气适配：`NON-NEGOTIABLE` 译为“不可协商”，体现规则的强制性；`mandatory` 译为“强制要求”，符合技术章程的正式语气。

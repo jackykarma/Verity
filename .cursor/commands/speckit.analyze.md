@@ -1,184 +1,175 @@
 ---
-description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.
+description: 在任务生成完成后，对spec.md、plan.md和tasks.md这三类核心工件进行非破坏性的跨工件一致性与质量分析。
 ---
 
-## User Input
+## 用户输入
 
 ```text
 $ARGUMENTS
 ```
 
-You **MUST** consider the user input before proceeding (if not empty).
+在继续执行前，你**必须**考量用户输入的内容（若不为空）。
 
-## Goal
+## 目标
 
-Identify inconsistencies, duplications, ambiguities, and underspecified items across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/speckit.tasks` has successfully produced a complete `tasks.md`.
+在项目实施前，识别三类核心工件（`spec.md`、`plan.md`、`tasks.md`）中存在的不一致、重复、模糊不清以及描述不充分的问题。该命令**仅允许**在 `/speckit.tasks` 成功生成完整的 `tasks.md` 文件后运行。
 
-## Operating Constraints
+## 操作约束
 
-**STRICTLY READ-ONLY**: Do **not** modify any files. Output a structured analysis report. Offer an optional remediation plan (user must explicitly approve before any follow-up editing commands would be invoked manually).
+**严格只读**：请勿修改任何文件。输出结构化的分析报告。可提供可选的整改方案（需用户明确批准后，方可手动触发后续的编辑命令）。
 
-**Constitution Authority**: The project constitution (`.specify/memory/constitution.md`) is **non-negotiable** within this analysis scope. Constitution conflicts are automatically CRITICAL and require adjustment of the spec, plan, or tasks—not dilution, reinterpretation, or silent ignoring of the principle. If a principle itself needs to change, that must occur in a separate, explicit constitution update outside `/speckit.analyze`.
+**章程权威性**：项目章程（`.specify/memory/constitution.md`）在本次分析范围内**不可协商**。违反章程的问题自动判定为CRITICAL（严重）级别，需调整规格说明（spec）、计划（plan）或任务（tasks）——而非淡化、重新解读或默认忽略相关原则。若章程原则本身需要变更，必须在 `/speckit.analyze` 之外通过单独、明确的章程更新流程完成。
 
-## Execution Steps
+## 执行步骤
 
-### 1. Initialize Analysis Context
+### 1. 初始化分析上下文
 
-Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` once from repo root and parse JSON for FEATURE_DIR and AVAILABLE_DOCS. Derive absolute paths:
+从代码库根目录运行一次 `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` 脚本，并解析返回的JSON数据以获取 FEATURE_DIR（功能目录）和 AVAILABLE_DOCS（可用文档）。推导绝对路径：
 
-- SPEC = FEATURE_DIR/spec.md
-- PLAN = FEATURE_DIR/plan.md
-- TASKS = FEATURE_DIR/tasks.md
+- 规格说明文件（SPEC）= FEATURE_DIR/spec.md
+- 计划文件（PLAN）= FEATURE_DIR/plan.md
+- 任务文件（TASKS）= FEATURE_DIR/tasks.md
 
-Abort with an error message if any required file is missing (instruct the user to run missing prerequisite command).
-For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+若任一必要文件缺失，终止操作并输出错误信息（指导用户运行对应的前置命令以补全缺失文件）。
+对于参数中包含单引号的情况（如 "I'm Groot"），需使用转义语法：例如 'I'\''m Groot'（若可行，也可使用双引号："I'm Groot"）。
 
-### 2. Load Artifacts (Progressive Disclosure)
+### 2. 加载工件内容（渐进式披露）
 
-Load only the minimal necessary context from each artifact:
+仅从每个工件中加载完成分析所需的最少必要上下文：
 
-**From spec.md:**
+**从spec.md中加载**：
+- 概述/背景
+- 功能需求
+- 非功能需求
+- 用户故事
+- 边缘场景（若存在）
 
-- Overview/Context
-- Functional Requirements
-- Non-Functional Requirements
-- User Stories
-- Edge Cases (if present)
+**从plan.md中加载**：
+- 架构/技术栈选择
+- 数据模型引用
+- 实施阶段
+- 技术约束
 
-**From plan.md:**
+**从tasks.md中加载**：
+- 任务ID
+- 任务描述
+- 阶段分组
+- 并行标记 [P]
+- 引用的文件路径
 
-- Architecture/stack choices
-- Data Model references
-- Phases
-- Technical constraints
+**从章程文件中加载**：
+- 加载 `.specify/memory/constitution.md` 以验证相关原则的合规性
 
-**From tasks.md:**
+### 3. 构建语义模型
 
-- Task IDs
-- Descriptions
-- Phase grouping
-- Parallel markers [P]
-- Referenced file paths
+创建内部表征（请勿在输出中包含工件原始内容）：
 
-**From constitution:**
+- **需求清单**：为每一项功能需求和非功能需求分配稳定的标识键（基于祈使句式生成短标识；例如，"用户可上传文件" → `user-can-upload-file`）
+- **用户故事/操作清单**：梳理独立的用户操作及对应的验收标准
+- **任务覆盖映射**：将每个任务映射到一个或多个需求/用户故事（通过关键词或显式引用模式如ID、关键短语进行推断）
+- **章程规则集**：提取原则名称及带有MUST/SHOULD（必须/应当）的规范性表述
 
-- Load `.specify/memory/constitution.md` for principle validation
+### 4. 检测环节（高token效率分析）
 
-### 3. Build Semantic Models
+聚焦高价值发现。总计最多输出50条发现结果；其余结果汇总至溢出摘要中。
 
-Create internal representations (do not include raw artifacts in output):
+#### A. 重复项检测
+- 识别近乎重复的需求
+- 标记需整合的低质量表述
 
-- **Requirements inventory**: Each functional + non-functional requirement with a stable key (derive slug based on imperative phrase; e.g., "User can upload file" → `user-can-upload-file`)
-- **User story/action inventory**: Discrete user actions with acceptance criteria
-- **Task coverage mapping**: Map each task to one or more requirements or stories (inference by keyword / explicit reference patterns like IDs or key phrases)
-- **Constitution rule set**: Extract principle names and MUST/SHOULD normative statements
+#### B. 模糊性检测
+- 标记缺乏可量化标准的模糊形容词（如快速、可扩展、安全、直观、健壮等）
+- 标记未解决的占位符（如TODO、TKTK、???、`<placeholder>` 等）
 
-### 4. Detection Passes (Token-Efficient Analysis)
+#### C. 描述不充分问题
+- 仅包含动词、但缺失对象或可量化结果的需求
+- 验收标准未对齐的用户故事
+- 引用了spec/plan中未定义的文件或组件的任务
 
-Focus on high-signal findings. Limit to 50 findings total; aggregate remainder in overflow summary.
+#### D. 章程一致性检测
+- 任何违反章程中MUST（必须）类原则的需求或计划内容
+- 缺失章程中强制要求的章节或质量关卡
 
-#### A. Duplication Detection
+#### E. 覆盖缺口检测
+- 无关联任务的需求
+- 未映射到任何需求/用户故事的任务
+- 任务中未体现的非功能需求（如性能、安全）
 
-- Identify near-duplicate requirements
-- Mark lower-quality phrasing for consolidation
+#### F. 不一致性检测
+- 术语漂移（同一概念在不同文件中命名不同）
+- 计划中引用但规格说明中缺失的数据实体（或反之）
+- 任务排序矛盾（如集成任务排在基础搭建任务之前且无依赖说明）
+- 冲突的需求（如一项要求使用Next.js，另一项指定Vue）
 
-#### B. Ambiguity Detection
+### 5. 严重程度赋值
 
-- Flag vague adjectives (fast, scalable, secure, intuitive, robust) lacking measurable criteria
-- Flag unresolved placeholders (TODO, TKTK, ???, `<placeholder>`, etc.)
+采用以下启发式规则对发现结果排序：
 
-#### C. Underspecification
+- **CRITICAL（严重）**：违反章程MUST条款、核心规格工件缺失，或阻碍基线功能实现且无覆盖的需求
+- **HIGH（高）**：重复/冲突的需求、模糊的安全/性能属性、不可测试的验收标准
+- **MEDIUM（中）**：术语漂移、非功能任务覆盖缺失、描述不充分的边缘场景
+- **LOW（低）**：格式/措辞优化、不影响执行顺序的轻微冗余
 
-- Requirements with verbs but missing object or measurable outcome
-- User stories missing acceptance criteria alignment
-- Tasks referencing files or components not defined in spec/plan
+### 6. 生成精简分析报告
 
-#### D. Constitution Alignment
+输出Markdown格式的报告（不写入文件），结构如下：
 
-- Any requirement or plan element conflicting with a MUST principle
-- Missing mandated sections or quality gates from constitution
+## 规格分析报告
 
-#### E. Coverage Gaps
-
-- Requirements with zero associated tasks
-- Tasks with no mapped requirement/story
-- Non-functional requirements not reflected in tasks (e.g., performance, security)
-
-#### F. Inconsistency
-
-- Terminology drift (same concept named differently across files)
-- Data entities referenced in plan but absent in spec (or vice versa)
-- Task ordering contradictions (e.g., integration tasks before foundational setup tasks without dependency note)
-- Conflicting requirements (e.g., one requires Next.js while other specifies Vue)
-
-### 5. Severity Assignment
-
-Use this heuristic to prioritize findings:
-
-- **CRITICAL**: Violates constitution MUST, missing core spec artifact, or requirement with zero coverage that blocks baseline functionality
-- **HIGH**: Duplicate or conflicting requirement, ambiguous security/performance attribute, untestable acceptance criterion
-- **MEDIUM**: Terminology drift, missing non-functional task coverage, underspecified edge case
-- **LOW**: Style/wording improvements, minor redundancy not affecting execution order
-
-### 6. Produce Compact Analysis Report
-
-Output a Markdown report (no file writes) with the following structure:
-
-## Specification Analysis Report
-
-| ID | Category | Severity | Location(s) | Summary | Recommendation |
+| ID | 类别 | 严重程度 | 位置 | 摘要 | 建议 |
 |----|----------|----------|-------------|---------|----------------|
-| A1 | Duplication | HIGH | spec.md:L120-134 | Two similar requirements ... | Merge phrasing; keep clearer version |
+| A1 | 重复项 | 高 | spec.md:第120-134行 | 两处相似的需求... | 合并表述，保留更清晰的版本 |
 
-(Add one row per finding; generate stable IDs prefixed by category initial.)
+（每条发现结果对应一行；生成以类别首字母为前缀的稳定ID。）
 
-**Coverage Summary Table:**
+**覆盖情况汇总表：**
 
-| Requirement Key | Has Task? | Task IDs | Notes |
+| 需求标识键 | 是否有对应任务 | 任务ID | 备注 |
 |-----------------|-----------|----------|-------|
 
-**Constitution Alignment Issues:** (if any)
+**章程一致性问题：**（如有）
 
-**Unmapped Tasks:** (if any)
+**未映射任务：**（如有）
 
-**Metrics:**
+**指标：**
 
-- Total Requirements
-- Total Tasks
-- Coverage % (requirements with >=1 task)
-- Ambiguity Count
-- Duplication Count
-- Critical Issues Count
+- 总需求数
+- 总任务数
+- 覆盖率（有至少1个关联任务的需求占比）
+- 模糊性问题数量
+- 重复项数量
+- 严重问题数量
 
-### 7. Provide Next Actions
+### 7. 提供后续行动建议
 
-At end of report, output a concise Next Actions block:
+在报告末尾输出简洁的“后续行动”模块：
 
-- If CRITICAL issues exist: Recommend resolving before `/speckit.implement`
-- If only LOW/MEDIUM: User may proceed, but provide improvement suggestions
-- Provide explicit command suggestions: e.g., "Run /speckit.specify with refinement", "Run /speckit.plan to adjust architecture", "Manually edit tasks.md to add coverage for 'performance-metrics'"
+- 若存在CRITICAL级问题：建议在执行 `/speckit.implement` 前解决
+- 若仅存在LOW/MEDIUM级问题：用户可继续推进，但需提供优化建议
+- 给出明确的命令建议：例如，“运行 /speckit.specify 进行细化”、“运行 /speckit.plan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
 
-### 8. Offer Remediation
+### 8. 提供整改建议
 
-Ask the user: "Would you like me to suggest concrete remediation edits for the top N issues?" (Do NOT apply them automatically.)
+向用户询问：“是否需要我为排名前N的问题提供具体的整改编辑建议？”（**请勿自动执行**整改操作。）
 
-## Operating Principles
+## 操作原则
 
-### Context Efficiency
+### 上下文效率
 
-- **Minimal high-signal tokens**: Focus on actionable findings, not exhaustive documentation
-- **Progressive disclosure**: Load artifacts incrementally; don't dump all content into analysis
-- **Token-efficient output**: Limit findings table to 50 rows; summarize overflow
-- **Deterministic results**: Rerunning without changes should produce consistent IDs and counts
+- **高价值低token输出**：聚焦可落地的发现结果，而非详尽的文档罗列
+- **渐进式披露**：增量加载工件内容；避免将所有内容纳入分析
+- **token高效输出**：发现结果表格最多显示50行；其余内容汇总展示
+- **结果确定性**：无变更情况下重复运行，应生成一致的ID和统计数据
 
-### Analysis Guidelines
+### 分析准则
 
-- **NEVER modify files** (this is read-only analysis)
-- **NEVER hallucinate missing sections** (if absent, report them accurately)
-- **Prioritize constitution violations** (these are always CRITICAL)
-- **Use examples over exhaustive rules** (cite specific instances, not generic patterns)
-- **Report zero issues gracefully** (emit success report with coverage statistics)
+- **禁止修改文件**（本次分析为只读操作）
+- **禁止虚构缺失章节**（若内容缺失，需准确报告）
+- **优先处理章程违规问题**（此类问题一律判定为CRITICAL级）
+- **以示例替代穷尽式规则**（引用具体案例，而非泛化的模式）
+- **无问题时友好反馈**（输出包含覆盖统计的成功报告）
 
-## Context
+## 上下文
 
 $ARGUMENTS
+```
