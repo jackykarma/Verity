@@ -263,7 +263,7 @@ description: "EPIC 规格说明模板（输入为大需求容器，输出 Featur
 <!-- BEGIN_FEATURE_REGISTRY -->
 | Feature | 分支 | Feature Version | Plan Version | Tasks Version | Full Design | 状态 | 备注 |
 |---|---|---|---|---|---|---|---|
-| [Feature A] | 001-feature-a | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md | Plan Ready |  |
+| 单词库管理 (FEAT-001) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | v0.1.1 | Tasks Ready |  |
 <!-- END_FEATURE_REGISTRY -->
 
 ## 变更记录（增量变更）

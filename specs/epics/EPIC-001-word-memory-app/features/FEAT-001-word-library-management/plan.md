@@ -62,24 +62,28 @@
 
 ```mermaid
 flowchart LR
-  %% TODO: 用真实系统名替换，并体现“系统边界”与“外部系统”
-  subgraph Client["客户端/调用方（本系统的一部分，若适用）"]
-    UI[UI]
-  end
-  subgraph System["本系统（System Boundary）"]
-    Core[核心业务/领域]
-    Data[数据访问/缓存/同步]
+  subgraph System["本系统（System Boundary）<br/>词库管理模块"]
+    UI[UI 层<br/>词库列表/导入界面]
+    ViewModel[ViewModel 层<br/>状态管理]
+    UseCase[领域层<br/>业务用例]
+    Repository[数据层<br/>词库仓库]
+    Parser[解析层<br/>文件解析器]
+    DataSource[数据源层<br/>本地数据源]
   end
   subgraph External["外部系统/依赖（System 外部）"]
-    SvcA[外部服务A]
-    SvcB[外部服务B]
-    OS[OS/设备能力]
+    SAF["Android Storage Access Framework<br/>（文件选择器）"]
+    FileSystem["Android 文件系统<br/>（文件存储/读取）"]
+    SharedPrefs["Android SharedPreferences<br/>（元数据存储）"]
   end
-  UI --> Core
-  Core <--> Data
-  Data -->|REST/gRPC/MQ 等| SvcA
-  Data -->|REST/gRPC/MQ 等| SvcB
-  Core -->|SDK/权限/系统API| OS
+  UI --> ViewModel
+  ViewModel --> UseCase
+  UseCase --> Repository
+  Repository --> DataSource
+  UseCase --> Parser
+  UI -->|Intent 调用| SAF
+  Parser -->|ContentResolver API| FileSystem
+  DataSource -->|系统 API| SharedPrefs
+  DataSource -->|ContentResolver/File API| FileSystem
 ```
 
 #### A2.3 部署视图（必须）
@@ -286,25 +290,53 @@ flowchart LR
 >
 > 要求：
 > - 若存在多个关键流程（如“登录”“同步”“下单”“上传”等），则每个流程单独一张图。
-> - 每张图必须包含：触发条件、关键决策点、外部依赖调用、重试/降级/兜底路径、最终可观测信号（日志/指标/埋点）。
-
-#### 流程 1：词库文件导入流程
-
 ```mermaid
 flowchart TD
-  %% TODO: 将“正常+异常”都画在同一张流程图里（可用 subgraph 分区）
-  Start([Start]) --> Precheck{前置条件OK?}
-  Precheck -->|否| Abort[提示/阻断/引导] --> End([End])
-  Precheck -->|是| CallExt[调用外部依赖]
-
-  CallExt -->|成功| Next[后续处理] --> Success[成功返回/落库/更新UI] --> End
-  CallExt -->|超时| Timeout[超时处理]
-  CallExt -->|失败| Fail[失败处理]
-  CallExt -->|限流| RateLimit[限流处理]
-
-  Timeout --> Retry{可重试?}
-  Fail --> Retry
-  RateLimit --> Retry
+  Start([用户点击导入按钮]) --> CheckQueue{导入队列是否空闲?}
+  CheckQueue -->|否| QueueWait[加入队列等待] --> CheckQueue
+  CheckQueue -->|是| OpenSAF[打开 Storage Access Framework<br/>文件选择器]
+  
+  OpenSAF --> UserSelect{用户选择文件?}
+  UserSelect -->|取消| Cancel[取消导入] --> End([结束])
+  UserSelect -->|选择文件| GetURI[获取文件 URI]
+  
+  GetURI --> CheckPermission{检查文件访问权限}
+  CheckPermission -->|权限被拒绝| PermissionError[显示权限错误提示<br/>引导用户到设置授权] --> End
+  CheckPermission -->|权限正常| CheckStorage{检查存储空间<br/>≥50MB?}
+  
+  CheckStorage -->|存储空间不足| StorageError[显示存储空间不足提示<br/>引导用户清理空间] --> End
+  CheckStorage -->|空间充足| CheckFormat{检查文件格式<br/>JSON/CSV/TXT?}
+  
+  CheckFormat -->|格式不支持| FormatError[显示格式错误提示<br/>说明支持的格式] --> End
+  CheckFormat -->|格式支持| CheckSize{检查文件大小<br/>≤50MB?}
+  
+  CheckSize -->|文件过大| SizeWarning[警告提示文件过大<br/>询问是否继续] --> UserConfirm{用户确认继续?}
+  UserConfirm -->|否| Cancel
+  UserConfirm -->|是| CheckDuplicate{检查是否重复导入<br/>文件指纹匹配?}
+  CheckSize -->|文件大小正常| CheckDuplicate
+  
+  CheckDuplicate -->|已存在| DuplicateError[提示词库已存在<br/>询问是否覆盖] --> OverwriteConfirm{用户确认覆盖?}
+  OverwriteConfirm -->|否| Cancel
+  OverwriteConfirm -->|是| ParseFile[开始解析文件<br/>显示进度]
+  CheckDuplicate -->|新文件| ParseFile
+  
+  ParseFile --> ParseResult{解析结果}
+  ParseResult -->|解析失败| ParseError[显示解析错误提示<br/>说明失败原因<br/>记录错误日志] --> End
+  ParseResult -->|解析超时| TimeoutError[显示超时错误提示<br/>允许重新选择文件] --> End
+  ParseResult -->|解析成功| SaveFile[保存词库文件到<br/>应用私有目录]
+  
+  SaveFile --> SaveResult{保存结果}
+  SaveResult -->|保存失败| SaveError[显示保存错误提示<br/>回滚操作<br/>记录错误日志] --> End
+  SaveResult -->|保存成功| SaveMetadata[保存词库元数据到<br/>SharedPreferences]
+  
+  SaveMetadata --> MetadataResult{元数据保存结果}
+  MetadataResult -->|保存失败| MetadataError[显示保存错误提示<br/>回滚文件保存<br/>记录错误日志] --> End
+  MetadataResult -->|保存成功| UpdateCache[更新内存缓存]
+  
+  UpdateCache --> UpdateUI[更新 UI<br/>显示导入成功]
+  UpdateUI --> LogSuccess[记录导入成功事件<br/>词库名称/大小/格式/耗时]
+  LogSuccess --> End
+```
 
   Retry -->|是| Backoff[退避] --> CallExt
   Retry -->|否| Degrade[降级/兜底/告警] --> End
