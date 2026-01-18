@@ -31,48 +31,144 @@ description: "EPIC Full Design 技术方案模板（整合多个 Feature 的 Pla
 - **整体 FR/NFR（EPIC Level）**：
 - **通用能力（Capability）**：
 
-## 2. 0 层架构概览（EPIC 级）
+## 2. 0 层架构设计（EPIC 级：对外系统边界、部署、通信、交互）
 
-> 说明：基于各 Feature 的 plan.md 进行汇总，若存在差异必须显式指出来源差异，不得强行统一。
+> 定义：0 层架构设计反映“本系统与外部系统之间的关系”。在 EPIC 级别，本节用于跨 Feature 汇总对外边界、部署拓扑、通信与交互方式，并显式暴露差异与冲突。
+>
+> 说明：基于各 Feature 的 `plan.md` 进行汇总；若存在差异必须显式指出来源差异，不得强行统一。
+
+### 2.1 外部系统与依赖汇总（跨 Feature）
+
+| 外部系统/依赖 | 类型 | 涉及 Feature | 通信方式（协议/鉴权） | SLA/限流/超时 | 故障模式 | 我方策略 | 差异/冲突点（如有） | 引用来源 |
+|---|---|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |  | FEAT-xxx plan.md:A2.1 |
+
+### 2.2 0 层架构图（EPIC 级视图）
 
 ```mermaid
 flowchart LR
   %% TODO(Clarify): 若各 Feature 的 0 层图不一致，需先在对应 plan.md 对齐
 ```
 
-## 3. Feature → Story → Task 汇总追溯
+### 2.3 部署视图（EPIC 级视图）
 
-### 3.1 Feature 列表与状态（来自 epic.md Feature Registry）
+```mermaid
+flowchart TB
+  %% TODO(Clarify): 若各 Feature 的部署拓扑不一致，需先在对应 plan.md 对齐
+```
+
+### 2.4 通信与交互方式汇总（跨 Feature）
+
+- **协议**：REST / gRPC / WebSocket / MQ / 文件 / 设备能力（按实际汇总）
+- **鉴权**：OAuth2 / JWT / mTLS / API Key（按实际汇总）
+- **超时与重试**：阈值与退避策略（标注差异与来源）
+- **幂等**：幂等键/语义（标注差异与来源）
+- **限流**：外部限流与我方退避/降级（标注差异与来源）
+- **一致性与补偿**：强一致/最终一致、补偿策略（标注差异与来源）
+
+## 3. 1 层架构设计一致性（跨 Feature：框架图、模块拆分、接口协议）
+
+> 定义：1 层架构设计描述“系统内部的模块拆分与协作”。在 EPIC 级别，本节用于汇总各 Feature 的 1 层框架与关键模块设计，并显式标注不一致之处与对齐建议（不新增决策）。
+
+### 3.1 1 层框架图（EPIC 级一致性视图）
+
+```mermaid
+flowchart LR
+  %% TODO(Clarify): 若各 Feature 的 1 层框架图不一致，需先在对应 plan.md 对齐
+```
+
+### 3.2 模块与接口协议一致性问题（汇总）
+
+| 模块/能力 | 涉及 Feature | 接口/协议/契约（引用） | 版本/兼容策略 | 不一致点 | 风险 | 处理建议（指向应修改的 Feature/Plan） |
+|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |
+
+### 3.3 关键模块设计汇总（跨 Feature）
+
+| 关键模块 | 涉及 Feature | 设计要点（引用来源） | 策略/取舍（引用来源） | NFR 责任（性能/功耗/内存/安全/可观测性） | 风险 |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
+
+## 4. 关键流程设计（EPIC 级：端到端流程，每个流程一张流程图，含正常 + 全部异常）
+
+> 定义：在 EPIC 级别，关键流程应覆盖跨 Feature 的端到端用户旅程/系统链路（例如登录→鉴权→下单→支付→回调→通知）。
+>
+> 要求：
+> - 每个关键流程必须用 `flowchart` 绘制，且同一张图内覆盖正常流程与全部关键异常分支（失败/超时/限流/并发/生命周期等）。
+> - 流程图中必须标注“跨 Feature 边界点”（哪些步骤属于哪个 Feature/模块），并引用来源（对应 Feature 的 plan/full-design）。
+> - 若不同 Feature 的流程定义不一致，必须显式标注差异，并用 `TODO(Clarify)` 指向应修改的 Feature/Plan。
+
+### 流程 1：[流程名称]
+
+```mermaid
+flowchart TD
+  %% TODO: EPIC 级端到端流程（同图含正常+异常）；标注跨 Feature 边界与外部依赖
+  Start([Start]) --> End([End])
+```
+
+### 流程 2：[流程名称]
+
+```mermaid
+flowchart TD
+  %% TODO
+  Start2([Start]) --> End2([End])
+```
+
+## 5. Feature → Story → Task 汇总追溯
+
+### 5.1 Feature 列表与状态（来自 epic.md Feature Registry）
 
 | Feature | 分支 | Feature Version | Plan Version | Tasks Version | 状态 |
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
 
-### 3.2 Story 汇总（跨 Feature）
+### 5.2 Story 汇总（跨 Feature）
 
 | Feature | Story ID | 类型 | 目标 | 覆盖 FR/NFR | 依赖 | 关键风险 |
 |---|---|---|---|---|---|---|
 |  | ST-001 |  |  |  |  |  |
 
-### 3.3 追溯矩阵（EPIC-FR/NFR → Feature-FR/NFR → Story → Task）
+### 5.3 追溯矩阵（EPIC-FR/NFR → Feature-FR/NFR → Story → Task）
 
 | EPIC FR/NFR | Feature | Feature FR/NFR | Story | Task | 验证方式 | 备注 |
 |---|---|---|---|---|---|---|
 | EPIC-NFR-PERF-001 |  | NFR-PERF-001 | ST-??? | T??? |  |  |
 
-## 4. 跨 Feature 通用能力设计（来自 epic.md + 各 Feature plan）
+## 6. 跨 Feature 通用能力设计（来自 epic.md + 各 Feature plan）
 
 | 能力 | 设计要点（引用来源） | 关键接口/契约（引用来源） | 风险 | 影响 Feature |
 |---|---|---|---|---|
 |  |  |  |  |  |
 
-## 5. 风险与一致性问题（汇总）
+### 常见 Capability Feature 汇总（建议）
+
+> 说明：当 EPIC 存在横切能力（埋点/动效/算法）时，建议将其作为 Capability Feature 独立交付，并在 EPIC Full Design 中汇总其“交付物与接入契约”，以便业务 Feature 对齐接入方式与验收口径。
+
+#### 6.1 埋点与可观测性（产品埋点 + 技术埋点）
+
+| Capability Feature | 事件/指标范围 | 字段口径/隐私策略 | 接入方式（SDK/API） | 版本/兼容策略 | 影响的业务 Feature | 引用来源 |
+|---|---|---|---|---|---|---|
+| FEAT-??? |  |  |  |  |  | epic.md + FEAT-??? plan/full-design |
+
+#### 6.2 动效与交互组件库
+
+| Capability Feature | 资产/组件范围 | 性能预算与验收 | 接入方式（组件/API） | 兼容策略 | 影响的业务 Feature | 引用来源 |
+|---|---|---|---|---|---|---|
+| FEAT-??? |  |  |  |  |  | epic.md + FEAT-??? plan/full-design |
+
+#### 6.3 算法能力（每模型/每能力一个 Feature）
+
+| Capability Feature | 模型/能力 | 推理部署（端侧/服务端） | SDK/API 契约 | 评估指标与监控 | 回退/降级策略 | 影响的业务 Feature | 引用来源 |
+|---|---|---|---|---|---|---|---|
+| FEAT-??? |  |  |  |  |  |  | epic.md + FEAT-??? plan/full-design |
+
+## 7. 风险与一致性问题（汇总）
 
 - **跨 Feature 冲突**：TODO(Clarify)
 - **接口/数据模型不一致**：TODO(Clarify)
 - **NFR 预算冲突（性能/功耗/内存）**：TODO(Clarify)
 
-## 6. 执行指引（不新增 Task）
+## 8. 执行指引（不新增 Task）
 
 - 每个 Feature 按各自 `tasks.md` 执行
 - 任何跨 Feature 变更必须先更新对应 Feature 的 plan/spec，并运行 `/speckit.epicsync` 更新总览
