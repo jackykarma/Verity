@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Create a new feature
+# Create a new feature (EPIC branch workflow)
 [CmdletBinding()]
 param(
     [switch]$Json,
@@ -35,9 +35,7 @@ if (-not $FeatureDescription -or $FeatureDescription.Count -eq 0) {
 
 $featureDesc = ($FeatureDescription -join ' ').Trim()
 
-# Resolve repository root. Prefer git information when available, but fall back
-# to searching for repository markers so the workflow still functions in repositories that
-# were initialized with --no-git.
+# Resolve repository root. Prefer git information when available.
 function Find-RepositoryRoot {
     param(
         [string]$StartDir,
@@ -150,7 +148,41 @@ try {
 Set-Location $repoRoot
 
 $specsDir = Join-Path $repoRoot 'specs'
-New-Item -ItemType Directory -Path $specsDir -Force | Out-Null
+$epicsDir = Join-Path $specsDir 'epics'
+New-Item -ItemType Directory -Path $epicsDir -Force | Out-Null
+
+function Get-CurrentEpicDirName {
+    # Prefer explicit env var set by create-new-epic
+    if ($env:SPECIFY_EPIC) { return $env:SPECIFY_EPIC }
+    # Try infer from current branch: epic/EPIC-001-xxx
+    try {
+        $b = git rev-parse --abbrev-ref HEAD 2>$null
+        if ($LASTEXITCODE -eq 0 -and $b -match '^epic/(EPIC-\d{3}-[^/]+)$') {
+            return $Matches[1]
+        }
+        if ($LASTEXITCODE -eq 0 -and $b -match '^epic/(EPIC-\d{3})') {
+            # find dir by epic id
+            $epicId = $Matches[1]
+            $dir = Get-ChildItem -Path $epicsDir -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "$epicId-*" } | Select-Object -First 1
+            if ($dir) { return $dir.Name }
+        }
+    } catch {}
+    return ""
+}
+
+function Get-NextFeatNumber {
+    param([string]$FeaturesDir)
+    $highest = 0
+    if (Test-Path $FeaturesDir) {
+        Get-ChildItem -Path $FeaturesDir -Directory | ForEach-Object {
+            if ($_.Name -match '^FEAT-(\d{3})-') {
+                $num = [int]$matches[1]
+                if ($num -gt $highest) { $highest = $num }
+            }
+        }
+    }
+    return ($highest + 1)
+}
 
 # Function to generate branch name with stop word filtering and length filtering
 function Get-BranchName {
@@ -206,53 +238,29 @@ if ($ShortName) {
     $branchSuffix = Get-BranchName -Description $featureDesc
 }
 
-# Determine branch number
+$epicDirName = Get-CurrentEpicDirName
+if (-not $epicDirName) {
+    Write-Error "Error: Unable to determine current EPIC. Ensure you're on epic/EPIC-###-... branch or set SPECIFY_EPIC."
+    exit 1
+}
+
+$epicDir = Join-Path $epicsDir $epicDirName
+New-Item -ItemType Directory -Path $epicDir -Force | Out-Null
+
+$featuresDir = Join-Path $epicDir 'features'
+New-Item -ItemType Directory -Path $featuresDir -Force | Out-Null
+
+# Determine feature number within this EPIC
 if ($Number -eq 0) {
-    if ($hasGit) {
-        # Check existing branches on remotes
-        $Number = Get-NextBranchNumber -SpecsDir $specsDir
-    } else {
-        # Fall back to local directory check
-        $Number = (Get-HighestNumberFromSpecs -SpecsDir $specsDir) + 1
-    }
+    $Number = Get-NextFeatNumber -FeaturesDir $featuresDir
 }
-
-$featureNum = ('{0:000}' -f $Number)
-$branchName = "$featureNum-$branchSuffix"
-
-# GitHub enforces a 244-byte limit on branch names
-# Validate and truncate if necessary
-$maxBranchLength = 244
-if ($branchName.Length -gt $maxBranchLength) {
-    # Calculate how much we need to trim from suffix
-    # Account for: feature number (3) + hyphen (1) = 4 chars
-    $maxSuffixLength = $maxBranchLength - 4
-    
-    # Truncate suffix
-    $truncatedSuffix = $branchSuffix.Substring(0, [Math]::Min($branchSuffix.Length, $maxSuffixLength))
-    # Remove trailing hyphen if truncation created one
-    $truncatedSuffix = $truncatedSuffix -replace '-$', ''
-    
-    $originalBranchName = $branchName
-    $branchName = "$featureNum-$truncatedSuffix"
-    
-    Write-Warning "[specify] Branch name exceeded GitHub's 244-byte limit"
-    Write-Warning "[specify] Original: $originalBranchName ($($originalBranchName.Length) bytes)"
-    Write-Warning "[specify] Truncated to: $branchName ($($branchName.Length) bytes)"
-}
-
-if ($hasGit) {
-    try {
-        git checkout -b $branchName | Out-Null
-    } catch {
-        Write-Warning "Failed to create git branch: $branchName"
-    }
-} else {
-    Write-Warning "[specify] Warning: Git repository not detected; skipped branch creation for $branchName"
-}
-
-$featureDir = Join-Path $specsDir $branchName
+$featNum = ('{0:000}' -f $Number)
+$featId = "FEAT-$featNum"
+$featDirName = "$featId-$branchSuffix"
+$featureDir = Join-Path $featuresDir $featDirName
 New-Item -ItemType Directory -Path $featureDir -Force | Out-Null
+
+$featureKey = "epics/$epicDirName/features/$featDirName"
 
 $template = Join-Path $repoRoot '.specify/templates/spec-template.md'
 $specFile = Join-Path $featureDir 'spec.md'
@@ -262,22 +270,28 @@ if (Test-Path $template) {
     New-Item -ItemType File -Path $specFile | Out-Null 
 }
 
-# Set the SPECIFY_FEATURE environment variable for the current session
-$env:SPECIFY_FEATURE = $branchName
+# Set the SPECIFY_FEATURE environment variable to the feature key (relative path under specs/)
+$env:SPECIFY_FEATURE = $featureKey
 
 if ($Json) {
     $obj = [PSCustomObject]@{ 
-        BRANCH_NAME = $branchName
+        EPIC_DIR_NAME = $epicDirName
+        FEATURE_ID = $featId
+        FEATURE_KEY = $featureKey
+        FEATURE_DIR = $featureDir
         SPEC_FILE = $specFile
-        FEATURE_NUM = $featureNum
+        FEATURE_NUM = $featNum
         HAS_GIT = $hasGit
     }
     $obj | ConvertTo-Json -Compress
 } else {
-    Write-Output "BRANCH_NAME: $branchName"
+    Write-Output "EPIC_DIR_NAME: $epicDirName"
+    Write-Output "FEATURE_ID: $featId"
+    Write-Output "FEATURE_KEY: $featureKey"
+    Write-Output "FEATURE_DIR: $featureDir"
     Write-Output "SPEC_FILE: $specFile"
-    Write-Output "FEATURE_NUM: $featureNum"
+    Write-Output "FEATURE_NUM: $featNum"
     Write-Output "HAS_GIT: $hasGit"
-    Write-Output "SPECIFY_FEATURE environment variable set to: $branchName"
+    Write-Output "SPECIFY_FEATURE environment variable set to: $featureKey"
 }
 

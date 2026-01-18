@@ -5,11 +5,11 @@ description: "Story → Task 落地任务清单模板"
 # Tasks：[Feature 名称]
 
 **Epic**：EPIC-[编号] - [名称]
-**Feature ID**：FEAT-[编号或沿用分支号，例如 001]
+**Feature ID**：FEAT-[编号，例如 001]
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0（来自 `plan.md`）
 **Tasks Version**：v0.1.0
-**输入**：来自 `/specs/[###-feature-short-name]/` 的设计文档（`spec.md`、`plan.md` 以及可选工件）
+**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md` 以及可选工件）
 
 > 规则：
 > - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。

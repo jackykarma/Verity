@@ -1,10 +1,11 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Create a new EPIC spec directory and epic.md without creating a git branch.
+Create a new EPIC dev branch and epic.md.
 
 .DESCRIPTION
-Creates specs/epics/EPIC-###-<short-name>/epic.md from template:
+Creates a new git branch for the EPIC (epic/EPIC-###-<short-name>) and
+creates specs/epics/EPIC-###-<short-name>/epic.md from template:
   .specify/templates/epic-template.md
 
 .PARAMETER Json
@@ -67,6 +68,26 @@ function Get-NextEpicNumber {
     return ($highest + 1)
 }
 
+# Find the next epic number from git branches (epic/EPIC-###-*) as well.
+function Get-HighestEpicNumberFromBranches {
+    $highest = 0
+    try {
+        $branches = git branch -a 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            foreach ($branch in $branches) {
+                $cleanBranch = $branch.Trim() -replace '^\*?\s+', '' -replace '^remotes/[^/]+/', ''
+                if ($cleanBranch -match '^epic/EPIC-(\d{3})-') {
+                    $num = [int]$matches[1]
+                    if ($num -gt $highest) { $highest = $num }
+                }
+            }
+        }
+    } catch {
+        # ignore
+    }
+    return $highest
+}
+
 # Determine epic short name
 if ($ShortName) {
     $short = ConvertTo-CleanName -Name $ShortName
@@ -83,12 +104,28 @@ $epicsDir = Join-Path $specsDir 'epics'
 New-Item -ItemType Directory -Path $epicsDir -Force | Out-Null
 
 if ($Number -eq 0) {
-    $Number = Get-NextEpicNumber -EpicsDir $epicsDir
+    $highestDir = (Get-NextEpicNumber -EpicsDir $epicsDir) - 1
+    $highestBranch = Get-HighestEpicNumberFromBranches
+    $Number = [Math]::Max($highestDir, $highestBranch) + 1
 }
 
 $epicNum = ('{0:000}' -f $Number)
 $epicId = "EPIC-$epicNum"
 $epicDirName = "$epicId-$short"
+
+$hasGit = Test-HasGit
+if ($hasGit) {
+    $epicBranch = "epic/$epicDirName"
+    try {
+        git checkout -b $epicBranch | Out-Null
+    } catch {
+        Write-Warning "Failed to create git branch: $epicBranch"
+    }
+} else {
+    $epicBranch = ""
+    Write-Warning "[specify] Warning: Git repository not detected; skipped EPIC branch creation"
+}
+
 $epicDir = Join-Path $epicsDir $epicDirName
 New-Item -ItemType Directory -Path $epicDir -Force | Out-Null
 
@@ -101,16 +138,20 @@ if (Test-Path $template) {
 }
 
 $env:SPECIFY_EPIC = $epicDirName
+# Clear active feature selection when creating a new epic
+Remove-Item Env:SPECIFY_FEATURE -ErrorAction SilentlyContinue
 
 if ($Json) {
     [PSCustomObject]@{
         EPIC_ID   = $epicId
+        EPIC_BRANCH = $epicBranch
         EPIC_DIR  = $epicDir
         EPIC_FILE = $epicFile
         EPIC_DESC = $epicDesc
     } | ConvertTo-Json -Compress
 } else {
     Write-Output "EPIC_ID: $epicId"
+    if ($epicBranch) { Write-Output "EPIC_BRANCH: $epicBranch" }
     Write-Output "EPIC_DIR: $epicDir"
     Write-Output "EPIC_FILE: $epicFile"
 }

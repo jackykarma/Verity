@@ -1,5 +1,5 @@
 ---
-description: 基于 Feature 描述创建 Feature 分支与 Feature 规格说明（spec.md），供 /speckit.plan → /speckit.tasks → /speckit.fulldesign → /speckit.implement 使用。
+description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /speckit.plan → /speckit.tasks → /speckit.fulldesign → /speckit.implement 使用。
 handoffs:
   - label: 澄清规格说明要求
     agent: speckit.clarify
@@ -7,7 +7,7 @@ handoffs:
     send: true
   - label: 制定技术方案
     agent: speckit.plan
-    prompt: 为该规格说明制定方案。我正在基于……进行开发
+    prompt: 为该规格说明制定方案（由 SE/TL 在 EPIC 分支产出与维护）。我正在基于……进行开发
 ---
 
 ## 用户输入
@@ -20,11 +20,11 @@ $ARGUMENTS
 
 ## 大纲
 
-目标：创建并切换到一个 Feature 分支（`###-short-name`），并在 `specs/<branch>/spec.md` 生成 Feature 规格说明（包含 Epic/Feature/FR-NFR/依赖/边界/版本等）。
+目标：在当前 EPIC（`specs/epics/<EPIC>/`）下创建一个 Feature 文档目录（`features/FEAT-xxx-.../`），并生成 `spec.md`（包含 Epic/Feature/FR-NFR/依赖/边界/版本等）。
 
 执行步骤：
 
-1. **为分支生成简洁短名称**（2-4 个词）：
+1. **为 Feature 生成简洁短名称**（2-4 个词）：
    - 动作-名词优先，保留缩写（OAuth2/API/JWT）
 
 2. **运行创建脚本**：从仓库根目录执行：
@@ -34,7 +34,10 @@ $ARGUMENTS
 ```
 
 解析 JSON 输出获取：
-- `BRANCH_NAME`
+- `EPIC_DIR_NAME`
+- `FEATURE_ID`
+- `FEATURE_KEY`（相对 `specs/` 的路径：`epics/<EPIC>/features/<FEAT>`）
+- `FEATURE_DIR`（绝对路径）
 - `SPEC_FILE`
 - `FEATURE_NUM`
 
@@ -49,7 +52,7 @@ $ARGUMENTS
 
 5. **质量检查清单**：在 `FEATURE_DIR/checklists/requirements.md` 生成需求质量清单（与 Feature 模板结构一致）。
 
-6. **完成报告**：输出分支名、spec.md 路径、检查清单路径，并提示下一步：
+6. **完成报告**：输出 Feature Key、spec.md 路径、检查清单路径，并提示下一步：
 - `/speckit.clarify`（建议先做）
 - `/speckit.plan`
 

@@ -16,12 +16,7 @@ function Get-RepoRoot {
 }
 
 function Get-CurrentBranch {
-    # First check if SPECIFY_FEATURE environment variable is set
-    if ($env:SPECIFY_FEATURE) {
-        return $env:SPECIFY_FEATURE
-    }
-    
-    # Then check git if available
+    # Prefer git branch name when available (EPIC/Story branch workflow).
     try {
         $result = git rev-parse --abbrev-ref HEAD 2>$null
         if ($LASTEXITCODE -eq 0) {
@@ -29,6 +24,11 @@ function Get-CurrentBranch {
         }
     } catch {
         # Git command failed
+    }
+
+    # For non-git repos, allow SPECIFY_FEATURE override
+    if ($env:SPECIFY_FEATURE) {
+        return $env:SPECIFY_FEATURE
     }
     
     # For non-git repos, try to find the latest feature directory
@@ -58,6 +58,16 @@ function Get-CurrentBranch {
     return "main"
 }
 
+function Get-CurrentFeatureKey {
+    # Feature key is a relative path under specs/, e.g.
+    #   epics/EPIC-001-xxx/features/FEAT-001-yyy
+    # For legacy workflow, it may be the feature branch name (001-foo).
+    if ($env:SPECIFY_FEATURE) {
+        return $env:SPECIFY_FEATURE
+    }
+    return ""
+}
+
 function Test-HasGit {
     try {
         git rev-parse --show-toplevel 2>$null | Out-Null
@@ -79,9 +89,15 @@ function Test-FeatureBranch {
         return $true
     }
     
+    # If SPECIFY_FEATURE is set, we are using explicit feature directory selection
+    # and do not enforce branch naming (supports epic/* and story/* branches).
+    if ($env:SPECIFY_FEATURE) { return $true }
+
     if ($Branch -notmatch '^[0-9]{3}-') {
-        Write-Output "ERROR: Not on a feature branch. Current branch: $Branch"
-        Write-Output "Feature branches should be named like: 001-feature-name"
+        Write-Output "ERROR: Not on a feature branch and SPECIFY_FEATURE is not set. Current branch: $Branch"
+        Write-Output "Either:"
+        Write-Output "  - switch to a feature branch named like: 001-feature-name, OR"
+        Write-Output "  - set SPECIFY_FEATURE to a specs/ subpath (epic workflow), e.g. epics/EPIC-001-xxx/features/FEAT-001-yyy"
         return $false
     }
     return $true
@@ -96,12 +112,18 @@ function Get-FeaturePathsEnv {
     $repoRoot = Get-RepoRoot
     $currentBranch = Get-CurrentBranch
     $hasGit = Test-HasGit
-    $featureDir = Get-FeatureDir -RepoRoot $repoRoot -Branch $currentBranch
+    $featureKey = Get-CurrentFeatureKey
+    if ($featureKey) {
+        $featureDir = Join-Path $repoRoot "specs/$featureKey"
+    } else {
+        $featureDir = Get-FeatureDir -RepoRoot $repoRoot -Branch $currentBranch
+    }
     
     [PSCustomObject]@{
         REPO_ROOT     = $repoRoot
         CURRENT_BRANCH = $currentBranch
         HAS_GIT       = $hasGit
+        FEATURE_KEY   = $featureKey
         FEATURE_DIR   = $featureDir
         FEATURE_SPEC  = Join-Path $featureDir 'spec.md'
         IMPL_PLAN     = Join-Path $featureDir 'plan.md'

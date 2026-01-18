@@ -1,9 +1,9 @@
 ---
-description: 根据自然语言的需求描述创建或更新 EPIC 规格说明（EPIC 容器 + Feature 拆分列表）。Feature 的分支与 spec.md 请使用 /speckit.feature 单独创建。
+description: 根据自然语言的需求描述创建或更新 EPIC 规格说明（EPIC 容器 + Feature 拆分列表）。Feature 的文档目录与 spec.md 请使用 /speckit.feature 单独创建。
 handoffs: 
   - label: 创建 Feature（逐个）
     agent: speckit.feature
-    prompt: 为某个 Feature 创建分支与 spec.md。Feature 描述如下……
+    prompt: 为某个 Feature 创建文档目录与 spec.md。Feature 描述如下……
     send: false
 ---
 
@@ -25,6 +25,7 @@ $ARGUMENTS
 
 - 从仓库根目录执行 `.specify/scripts/powershell/create-new-epic.ps1 -Json "$ARGUMENTS"` 并解析 JSON 输出，得到：
   - `EPIC_ID`（例如 EPIC-001）
+  - `EPIC_BRANCH`（例如 epic/EPIC-001-xxx）
   - `EPIC_DIR`
   - `EPIC_FILE`
 
@@ -42,7 +43,7 @@ $ARGUMENTS
 
 ### 4) 输出下一步指令（逐个 Feature 手动触发）
 
-在命令输出中列出建议的下一步（不自动创建多个分支）：
+在命令输出中列出建议的下一步（不自动批量创建多个 Feature 文档目录）：
 - 对每个 Feature 输出一条建议命令：`/speckit.feature <Feature 描述>`
 
 ### 5) 完成报告
@@ -55,7 +56,7 @@ $ARGUMENTS
 ## 重要说明（避免流程混淆）
 
 - `/speckit.specify`：EPIC 入口（产出 epic.md + Feature 拆分列表）
-- `/speckit.feature`：Feature 入口（创建分支 + 产出 specs/<feature>/spec.md）
+- `/speckit.feature`：Feature 入口（创建 Feature 文档目录 + 产出 spec.md；本工作流不为 Feature 创建 git 分支）
 
 ## 通用指南
 

@@ -1,12 +1,13 @@
 # Plan（工程级蓝图）：[Feature 名称]
 
 **Epic**：EPIC-[编号] - [名称]
-**Feature ID**：FEAT-[编号或沿用分支号，例如 001]
+**Feature ID**：FEAT-[编号，例如 001]
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**分支**：`[###-feature-short-name]`
+**当前工作分支**：`[epic/... 或 story/... ]`
+**Feature 目录**：`specs/epics/EPIC-[编号]-[short-name]/features/FEAT-[编号]-[short-name]/`
 **日期**：[YYYY-MM-DD]
-**输入**：来自 `/specs/[###-feature-short-name]/spec.md`
+**输入**：来自 `Feature 目录/spec.md`
 
 > 规则：
 > - Plan 阶段必须包含工程决策、风险评估、算法/功耗/性能/内存评估（量化 + 验收指标）。

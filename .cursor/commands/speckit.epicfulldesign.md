@@ -25,8 +25,8 @@ $ARGUMENTS
    - 在 `specs/epics/` 下定位 `EPIC-xxx-*` 目录，读取 `epic.md`
 
 2. **发现关联 Feature**：
-   - 从 `epic.md` 的 Feature Registry 区块读取 Feature 分支列表
-   - 对每个分支目录（`specs/<branch>/`）加载可用工件：`spec.md`、`plan.md`、`tasks.md`、`full-design.md`
+   - 从 `epic.md` 的 Feature Registry 区块读取 Feature 目录列表（Feature Key，相对 `specs/`，例如 `epics/EPIC-001-xxx/features/FEAT-001-yyy`）
+   - 对每个 Feature 目录（`specs/<FEATURE_KEY>/`）加载可用工件：`spec.md`、`plan.md`、`tasks.md`、`full-design.md`
 
 3. **加载模板**：读取 `.specify/templates/epic-full-design-template.md`
 

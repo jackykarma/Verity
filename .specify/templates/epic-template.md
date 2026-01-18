@@ -52,7 +52,7 @@ description: "EPIC 规格说明模板（输入为大需求容器，输出 Featur
 > 规则：
 > - 每个 Feature 必须可独立交付（Product / Platform-Capability）。
 > - FR/NFR 属于 Feature，不属于 EPIC；EPIC 只提供边界与方向。
-> - 本节输出用于后续逐个运行 `/speckit.feature` 创建 Feature 分支与 spec.md。
+> - 本节输出用于后续逐个运行 `/speckit.feature` 创建 Feature 文档目录与 spec.md（本工作流不为 Feature 创建 git 分支）。
 
 ### Feature 列表（候选）
 

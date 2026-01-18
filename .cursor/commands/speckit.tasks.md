@@ -1,5 +1,5 @@
 ---
-描述：基于 plan.md 的 Story Breakdown（ST-xxx）与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序的 tasks.md 文件（Story → Task），严禁改写 Plan 的技术决策。
+描述：基于 plan.md 的 Story Breakdown（ST-xxx）与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序的 tasks.md 文件（Story → Task），严禁改写 Plan 的技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
 交接项：
   - 标签：一致性分析
     执行主体：speckit.analyze
@@ -24,6 +24,8 @@ $ARGUMENTS
 在继续操作前，你**必须**参考用户输入（若不为空）。
 
 ## 大纲
+
+执行主体：**SE/TL（或架构师）**。开发者应将 `tasks.md` 视为只读执行清单；如需调整任务边界/顺序/验证方式，提交变更提案（PR/Issue/评论）并由 SE/TL 更新后再继续实现。
 
 1. **环境搭建**：从代码库根目录运行 `.specify/scripts/powershell/check-prerequisites.ps1 -Json` 脚本，并解析 FEATURE_DIR（功能目录）和 AVAILABLE_DOCS（可用文档列表）。所有路径必须为绝对路径。对于参数中包含单引号的情况（如 "I'm Groot"），需使用转义语法：例如 'I'\''m Groot'（若可行，也可使用双引号："I'm Groot"）。
 

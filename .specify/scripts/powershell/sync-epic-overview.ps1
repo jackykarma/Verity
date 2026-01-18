@@ -4,8 +4,8 @@
 Sync current Feature status into its EPIC epic.md Feature Registry block.
 
 .DESCRIPTION
-- Reads current Feature paths via common.ps1 (branch-based)
-- Parses EPIC ID from specs/<branch>/spec.md line: **Epic**：EPIC-001 - ...
+- Reads current Feature paths via common.ps1 (SPECIFY_FEATURE / EPIC branch workflow)
+- Parses EPIC ID from Feature spec (specs/epics/<EPIC>/features/<FEAT>/spec.md) line: **Epic**：EPIC-001 - ...
 - Locates specs/epics/EPIC-001-*/epic.md
 - Updates only the block between:
   <!-- BEGIN_FEATURE_REGISTRY -->

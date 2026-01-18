@@ -1,5 +1,5 @@
 ---
-description: 生成工程级 Plan（Plan-A/Plan-B + Story Breakdown），包含工程决策、风险评估与算法/功耗/性能/内存量化验收指标。
+description: 生成工程级 Plan（Plan-A/Plan-B + Story Breakdown），包含工程决策、风险评估与算法/功耗/性能/内存量化验收指标（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
 handoffs:
   - label: 生成任务（Story → Task）
     agent: speckit.tasks
@@ -29,6 +29,8 @@ $ARGUMENTS
 - **Plan-A**：工程决策、模块架构、关键流程、风险与消解、边界/异常枚举、算法/功耗/性能/内存评估（必须量化 + 验收指标）。
 - **Plan-B**：技术规约与实现约束（保留原 spec-kit 约定：技术背景字段、合规性检查、项目结构等）。
 - **Story Breakdown**：把 Feature 拆为可开发的技术 Story（ST-xxx），并映射覆盖 FR/NFR。
+
+建议：在 **EPIC 分支** 执行，并确保已通过 `SPECIFY_FEATURE` 选中目标 Feature（避免写入错误目录或造成设计分叉）。
 
 执行步骤：
 
@@ -71,5 +73,6 @@ $ARGUMENTS
 
 核心规则：
 - 所有评估（算法/功耗/性能/内存）必须可量化且带验收指标与测试方法。
+- 执行主体：**SE/TL（或架构师）**。开发者应将 `plan.md` 视为只读输入；如需变更必须提交变更提案（PR/Issue/评论）并由 SE/TL 在 EPIC 分支落地后再继续实现。
 - Plan 内容是 Implement 的唯一权威输入；Implement 期不得“边写边改设计”。
 ```

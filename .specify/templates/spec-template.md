@@ -2,9 +2,10 @@
 
 **Epic**：EPIC-[编号] - [名称]
 **Feature 类型**：Product Feature / Platform/Capability Feature
-**Feature ID**：FEAT-[编号或沿用分支号，例如 001]
+**Feature ID**：FEAT-[编号，例如 001]
 **Feature Version**：v0.1.0
-**功能分支**：`[###-feature-short-name]`
+**EPIC 分支**：`epic/EPIC-[编号]-[short-name]`
+**Feature 目录**：`specs/epics/EPIC-[编号]-[short-name]/features/FEAT-[编号]-[short-name]/`
 **创建时间**：[YYYY-MM-DD]
 **状态**：草稿 / 待澄清 / 就绪（可进入 Plan） / 冻结（Implement 中）
 **输入**：用户描述：`"$ARGUMENTS"`
