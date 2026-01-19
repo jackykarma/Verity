@@ -1,4 +1,4 @@
----
+﻿---
 description: "EPIC 规格说明模板（输入为大需求容器，输出 Feature 列表与边界）"
 ---
 
@@ -263,8 +263,8 @@ description: "EPIC 规格说明模板（输入为大需求容器，输出 Featur
 <!-- BEGIN_FEATURE_REGISTRY -->
 | Feature | 分支 | Feature Version | Plan Version | Tasks Version | Full Design | 状态 | 备注 |
 |---|---|---|---|---|---|---|---|
-| 单词库管理 (FEAT-001) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | v0.1.1 | Tasks Ready |  |
-| 间隔重复学习算法引擎 (FEAT-002) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | v0.1.0 | Tasks Ready |  |
+| 单词库管理 (FEAT-001) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md (v0.1.1) | Tasks Ready |  |
+| 间隔重复学习算法引擎 (FEAT-002) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md (v0.1.0) | Tasks Ready |  |
 <!-- END_FEATURE_REGISTRY -->
 
 ## 变更记录（增量变更）

@@ -206,6 +206,7 @@ flowchart LR
   - 错误码：使用 Sealed Class 定义错误类型（AlgorithmError, CalculationError, DataError）
   - 版本策略：接口向后兼容，新增方法使用默认参数，数据结构变更时自动迁移
   - 幂等约束：学习状态更新基于单词 ID + 时间戳去重，确保幂等
+  - 契约位置：详见 plan.md:Plan-B:B4（对外接口契约 + 依赖契约）
 
 - **并发与线程模型**：
   - 主线程：不执行算法计算，仅用于接口调用入口
@@ -303,6 +304,15 @@ flowchart LR
   - 漂移监测：监控算法参数效果，收集用户学习数据用于未来优化
   - 告警：算法计算失败率超过阈值时告警
   - 灰度策略：算法参数调整时支持 A/B 测试（未来扩展）
+
+### 3.5 数据模型与存储设计（物理）（来自 plan.md）
+
+> 汇总：本 Feature 使用 Room（SQLite）持久化学习状态与复习记录；详细表/字段/索引/迁移策略见 plan.md:Plan-B:B3.2。
+
+- **数据库**：`LearningDatabase`（DB 文件名建议 `learning.db`；Schema v1）
+- **表**：
+  - `learning_state`：学习状态（PK：`word_id`；索引：`next_review_time` 等）
+  - `review_record`：复习记录（复合 PK：`word_id + review_time`；FK：`word_id` → `learning_state`）
 
 ## 4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）（来自 plan.md）
 

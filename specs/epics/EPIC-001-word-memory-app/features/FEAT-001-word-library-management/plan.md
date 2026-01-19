@@ -1,4 +1,4 @@
-﻿# Plan（工程级蓝图）：单词库管理
+# Plan（工程级蓝图）：单词库管理
 
 **Epic**：EPIC-001 - 无痛记忆单词神器APP
 **Feature ID**：FEAT-001
@@ -534,9 +534,62 @@ flowchart TD
 - 文件大小：≤ 50MB
 - 创建时间：有效时间戳（>0）
 
+#### B3.1 存储形态与边界（必须）
+
+- **存储形态**：文件（词库内容） + SharedPreferences（词库索引/元数据）
+- **System of Record（权威来源）**：
+  - 词库内容：应用私有目录内的词库文件为准
+  - 词库“索引/列表”：SharedPreferences 为准（可通过扫描私有目录重建，作为降级手段）
+- **缓存与派生数据**：
+  - 内存缓存（如 `StateFlow<List<WordLibrary>>`）为派生数据，可随时从 SharedPreferences 重建
+- **生命周期**：
+  - SharedPreferences：写入后持久化
+  - 词库文件：导入成功后持久化；删除/覆盖时需要一致性处理（先写文件，再写元数据；失败可回滚）
+- **数据规模与增长**：
+  - 词库数量 ≤ 50
+  - 单库文件 ≤ 50MB
+
+#### B3.2 物理数据结构（键/文件结构设计）
+
+> 要求：明确“键名/字段含义/序列化结构/版本迁移”，避免实现期各处随意拼 Key。
+
+#####（SharedPreferences）键清单
+
+| Key | 用途 | 结构版本 | 值类型 | Schema/字段说明 | 迁移策略 |
+|---|---|---|---|---|---|
+| `library_metadata_list` | 所有词库元数据列表 | v1 | String（JSON） | 见下方 `LibraryMetadataList` | 新增字段默认值；旧字段保留并废弃 |
+| `selected_library_id` | 当前选中的词库 ID | v1 | String | 单个 `id` | 若 id 不存在则清空并要求重新选择 |
+
+#####（SharedPreferences）JSON 结构：`LibraryMetadataList`（建议）
+
+```json
+{
+  "version": 1,
+  "libraries": [
+    {
+      "id": "string",
+      "name": "string",
+      "wordCount": 123,
+      "createdAt": 1730000000000,
+      "filePath": "string",
+      "fileSize": 123456,
+      "format": "JSON|CSV|TXT"
+    }
+  ]
+}
+```
+
+#####（文件存储）词库文件命名与位置（建议）
+
+- **目录**：`context.filesDir/word_libraries/`（或同等私有目录）
+- **文件名**：`<libraryId>.<ext>`（`ext` 与 `format` 对齐，如 `json/csv/txt`）
+- **覆盖策略**：覆盖导入时先写临时文件 → 校验完成 → 原子替换（避免半写入）
+
 ### B4. 接口规范/协议（引用或内联）
 
-**Repository 接口**：
+#### B4.1 本 Feature 对外提供的接口（词库管理）
+
+**Repository 接口（对外）**：
 
 ```kotlin
 interface LibraryRepository {
@@ -547,6 +600,15 @@ interface LibraryRepository {
 }
 ```
 
+**输入约束（契约）**：
+- `uri`：必须来自 Storage Access Framework；实现必须申请并持久化读取权限（若适用），否则应返回 `StorageError`
+- `libraryId`：必须存在；否则返回 `NotFoundError`
+- `query`：允许空字符串；空时返回全部词库
+
+**并发与取消语义**：
+- 支持并发读取（`getLibraries/searchLibraries`）；导入/覆盖/删除类写操作需要串行化（避免元数据与文件不一致）
+- 协程取消：取消时不得留下半写入文件或半写入元数据（需要临时文件 + 回滚）
+
 **UseCase 接口**：
 
 ```kotlin
@@ -556,6 +618,21 @@ class ImportLibraryUseCase(private val repository: LibraryRepository) {
     }
 }
 ```
+
+#### B4.2 本 Feature 依赖的外部接口/契约（依赖方）
+
+- **Android Storage Access Framework（SAF）**：
+  - 依赖点：文件选择、URI 读取权限、`takePersistableUriPermission`
+  - 失败模式：权限拒绝/URI 失效/ContentResolver 读取失败 → 映射为 `StorageError`
+- **文件系统（应用私有目录）**：
+  - 依赖点：写入、原子替换、空间不足检测
+  - 失败模式：空间不足/写入失败/损坏 → 回滚并返回 `StorageError`
+
+#### B4.3 契约工件（contracts/）（推荐）
+
+- 建议新增 `contracts/`：
+  - `library-file-format.md`：JSON/CSV/TXT 的字段要求与示例（避免“格式不规范”口径不一致）
+  - `errors.md`：LibraryError 错误码/语义（可重试/不可重试）
 
 **版本策略**：
 - 数据结构版本：使用字段版本号（添加字段时设置默认值，确保向后兼容）

@@ -41,6 +41,23 @@ if (-not (Test-Path $specFile)) {
     exit 1
 }
 
+$FullWidthColon = [char]0xFF1A # ：
+
+function Normalize-Colon {
+    param([string]$s)
+    if (-not $s) { return "" }
+    return ($s -replace [regex]::Escape($FullWidthColon), ':')
+}
+
+function Extract-After-FirstColon {
+    param([string]$line)
+    if (-not $line) { return "" }
+    $n = Normalize-Colon -s $line
+    $idx = $n.IndexOf(':')
+    if ($idx -lt 0) { return "" }
+    return $n.Substring($idx + 1).Trim()
+}
+
 function Get-FirstMatch {
     param([string]$Path, [string]$Pattern)
     $m = Select-String -LiteralPath $Path -Pattern $Pattern -Encoding utf8 -AllMatches | Select-Object -First 1
@@ -52,16 +69,15 @@ function Extract-Version {
     param([string]$Path, [string]$Label)
     if (-not (Test-Path $Path)) { return "N/A" }
     # e.g. **Plan Version**：v0.1.0 OR **Plan Version**: v0.1.0
-    $line = Get-FirstMatch -Path $Path -Pattern "^\*\*${Label}\*\*[:：]\s*(.+)$"
+    $line = Get-FirstMatch -Path $Path -Pattern "^\*\*${Label}\*\*"
     if (-not $line) { return "N/A" }
-    if ($line -match "^\*\*${Label}\*\*[:：]\s*(.+)$") {
-        return $Matches[1].Trim()
-    }
-    return "N/A"
+    $v = Extract-After-FirstColon -line $line
+    if (-not $v) { return "N/A" }
+    return $v
 }
 
 # EPIC line e.g. **Epic**：EPIC-001 - xxx
-$epicLine = Get-FirstMatch -Path $specFile -Pattern "^\*\*Epic\*\*[:：]\s*(EPIC-\d{3})\b"
+$epicLine = Get-FirstMatch -Path $specFile -Pattern "^\*\*Epic\*\*"
 if (-not $epicLine -or ($epicLine -notmatch "(EPIC-\d{3})")) {
     Write-Error "Cannot find EPIC ID in spec.md. Expected line like '**Epic**：EPIC-001 - ...'"
     exit 1
@@ -71,8 +87,22 @@ $epicId = $Matches[1]
 # Feature name from first heading
 $titleLine = Get-FirstMatch -Path $specFile -Pattern "^#\s+"
 $featureName = $branch
-if ($titleLine -match "^#\s+Feature\s+规格说明[:：]\s*(.+)$") { $featureName = $Matches[1].Trim() }
-elseif ($titleLine -match "^#\s+(.+)$") { $featureName = $Matches[1].Trim() }
+if ($titleLine) {
+    # Normalize colon and strip leading "#"
+    $t = (Normalize-Colon -s $titleLine).Trim()
+    if ($t.StartsWith('#')) { $t = $t.TrimStart('#').Trim() }
+    # If the heading has ":", use the part after it as the display name.
+    $after = Extract-After-FirstColon -line $t
+    if ($after) { $featureName = $after } else { $featureName = $t }
+}
+$featureName = $featureName.Trim([char]0xFEFF).Trim()
+
+# Feature ID line e.g. **Feature ID**：FEAT-002
+$featureIdLine = Get-FirstMatch -Path $specFile -Pattern "^\*\*Feature ID\*\*"
+$featureId = ""
+if ($featureIdLine -and ($featureIdLine -match "(FEAT-\d{3})")) { $featureId = $Matches[1] }
+
+$featureDisplayName = if ($featureId) { "$featureName ($featureId)" } else { $featureName }
 
 # Locate epic directory
 $epicsRoot = Join-Path $repoRoot "specs/epics"
@@ -116,8 +146,16 @@ function Escape-Pipe {
 
 $notesCell = Escape-Pipe -s $Notes
 
-# Build row
-$row = "| $(Escape-Pipe $featureName) | $branch | $featureVersion | $planVersion | $tasksVersion | $fullDesignLink | $status | $notesCell |"
+$row = '| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} |' -f @(
+    (Escape-Pipe -s $featureDisplayName),
+    $branch,
+    $featureVersion,
+    $planVersion,
+    $tasksVersion,
+    $fullDesignLink,
+    $status,
+    $notesCell
+)
 
 # Read epic.md and replace registry block rows
 $lines = Get-Content -LiteralPath $epicFile -Encoding utf8
@@ -158,16 +196,34 @@ foreach ($line in $block) {
         $cells = $line.Trim() -split '\s*\|\s*'
         # cells: leading '' then col1.. then trailing '' maybe
         if ($cells.Count -ge 3) {
+            $featureCell = $cells[1].Trim()
             $branchCell = $cells[2].Trim()
-            if ($branchCell -eq $branch) {
+            $isSameFeature = $false
+            if ($featureId -and ($featureCell -match [regex]::Escape($featureId))) { $isSameFeature = $true }
+            elseif ($featureName -and ($featureCell -match [regex]::Escape($featureName))) { $isSameFeature = $true }
+            elseif (-not $featureId -and ($branchCell -eq $branch)) { $isSameFeature = $true }
+
+            if ($isSameFeature) {
+                # De-duplicate: if multiple rows match the same feature, keep only one.
+                if ($rowWritten) { continue }
                 if (-not $OverwriteNotes -and $Notes) {
                     # preserve existing notes if any
                     $existingNotes = ""
                     if ($cells.Count -ge 9) { $existingNotes = $cells[8].Trim() }
                     if ($existingNotes) {
                         # append with separator
-                        $notesCell = Escape-Pipe -s ($existingNotes + "；" + $Notes)
-                        $row = "| $(Escape-Pipe $featureName) | $branch | $featureVersion | $planVersion | $tasksVersion | $fullDesignLink | $status | $notesCell |"
+                        # Use ASCII separator for maximum PS5 compatibility.
+                        $notesCell = Escape-Pipe -s ($existingNotes + "; " + $Notes)
+                        $row = '| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} |' -f @(
+                            (Escape-Pipe -s $featureDisplayName),
+                            $branch,
+                            $featureVersion,
+                            $planVersion,
+                            $tasksVersion,
+                            $fullDesignLink,
+                            $status,
+                            $notesCell
+                        )
                     }
                 }
                 $newBlock.Add($row)
@@ -198,7 +254,7 @@ $before | ForEach-Object { $out.Add($_) }
 $newBlock | ForEach-Object { $out.Add($_) }
 $after | ForEach-Object { $out.Add($_) }
 
-Set-Content -LiteralPath $epicFile -Value ($out -join "`n") -Encoding utf8
+Set-Content -LiteralPath $epicFile -Value ($out -join [Environment]::NewLine) -Encoding utf8
 
 Write-Output "OK: Synced $branch into $epicFile (EPIC: $epicId)"
 

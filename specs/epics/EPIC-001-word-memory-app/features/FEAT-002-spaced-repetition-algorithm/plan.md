@@ -573,9 +573,87 @@ flowchart TD
 - 复习间隔：1 小时-365 天（毫秒）
 - 难度因子：1.3-3.0
 
+#### B3.1 存储形态与边界（必须）
+
+- **存储形态**：Room（SQLite）
+- **System of Record（权威来源）**：Room 数据库为准（内存缓存为派生/可重建）
+- **缓存与派生数据**：
+  - `memoryStrength` 可由学习历史派生（但为性能考虑可持久化；迁移时可回填/重算）
+  - 复习列表可由 `nextReviewTime` + 排序规则派生（不单独落库）
+- **生命周期**：
+  - 学习状态：应用运行期间可缓存，退出/崩溃后依赖 Room 持久化恢复
+  - 复习记录：长期保留（用于调试/统计/算法评估），可按策略归档（未来扩展）
+- **数据规模与增长**：
+  - LearningState：≤ 10000 行（每 wordId 一行）
+  - ReviewRecord：随使用增长，按“每天学习 200 个单词”估算（月级别 6000+ 行）
+
+#### B3.2 物理数据结构（Room/SQLite 表设计）
+
+> 注意：本节用于“表/字段/索引/外键/迁移”的可落地设计；实现时 Room Entity/DAO 必须与此对齐。
+
+##### 数据库：`LearningDatabase`
+
+- **DB 文件名**：`learning.db`（建议；实现时与 `Room.databaseBuilder(..., "learning.db")` 对齐）
+- **Schema 版本**：v1（Room `version = 1`，后续每次结构变更递增）
+
+##### 表：`learning_state`（学习状态）
+
+- **用途**：每个 `wordId` 一条记录，支撑任务列表与复习列表查询
+- **主键**：`word_id`
+- **索引**（建议）：
+  - `idx_learning_state_next_review_time(next_review_time)`：支撑“到期复习”查询
+  - `idx_learning_state_mastered_next_review(mastered, next_review_time)`：支撑“未掌握且到期”组合过滤
+  - （可选）`idx_learning_state_memory_strength(memory_strength)`：支撑按记忆强度排序/筛选
+
+| 字段 | 类型 | 约束（NOT NULL/默认值/范围） | 含义 | 来源/生成方式 | 用途（读写场景） |
+|---|---|---|---|---|---|
+| `word_id` | TEXT | PK, NOT NULL | 单词 ID | 来自词库（FEAT-001） | 关联状态与业务单词 |
+| `learning_count` | INTEGER | NOT NULL, default 0, ≥0 | 学习次数 | 状态更新 | 算法输入 |
+| `last_review_time` | INTEGER | NOT NULL, default 0 | 上次复习时间（ms） | 状态更新 | 算法输入/统计 |
+| `memory_strength` | REAL | NOT NULL, 0.0-1.0 | 记忆强度 | 评估器计算 | 排序/筛选/展示 |
+| `next_review_time` | INTEGER | NOT NULL | 下次复习时间（ms） | 算法计算 | 复习列表筛选 |
+| `mastered` | INTEGER | NOT NULL, default 0（0/1） | 是否掌握 | 状态机更新 | 过滤已掌握 |
+| `difficulty_factor` | REAL | NOT NULL, 1.3-3.0 | EF（难度因子） | SM-2 更新 | 算法输入 |
+| `current_interval` | INTEGER | NOT NULL, 1h-365d | 当前间隔（ms） | SM-2 更新 | 算法输入 |
+
+##### 表：`review_record`（复习记录）
+
+- **用途**：记录每次复习事件（调试/统计/算法评估）
+- **主键**：`(word_id, review_time)`（复合主键）
+- **外键**：`word_id` → `learning_state.word_id`（建议 `ON DELETE CASCADE`，删除学习状态时级联清理记录）
+- **索引**（建议）：
+  - `idx_review_record_word_id(word_id)`：按单词查询历史
+  - （可选）`idx_review_record_review_time(review_time)`：按时间范围统计
+
+| 字段 | 类型 | 约束（NOT NULL/默认值/范围） | 含义 | 来源/生成方式 | 用途（读写场景） |
+|---|---|---|---|---|---|
+| `word_id` | TEXT | NOT NULL | 单词 ID | 来自调用输入 | 关联复习事件 |
+| `review_time` | INTEGER | NOT NULL | 复习时间（ms） | 记录写入时生成 | 复合主键的一部分 |
+| `quality` | INTEGER | NOT NULL, 0-5 | SM-2 质量分 | 调用输入 | 算法输入/统计 |
+| `interval` | INTEGER | NOT NULL, 1h-365d | 本次计算间隔（ms） | 算法结果 | 统计/回放 |
+| `result` | INTEGER/TEXT | NOT NULL | 复习结果（正确/错误） | 由 quality 映射 | 统计/分析 |
+
+##### 典型查询（用于索引校验）
+
+1. **获取待复习列表**：`mastered = 0 AND next_review_time <= now`，按 `memory_strength ASC, next_review_time ASC` 排序，`LIMIT limit`
+2. **读取单词学习状态**：按 `word_id` 精确查询（PK）
+3. **按单词拉取复习历史**：按 `word_id` + `review_time DESC`（用于调试/统计；可选索引）
+
+##### 迁移与兼容策略
+
+- **v1 → v2+（原则）**：
+  - **新增列**：必须提供默认值/可回填策略（保证旧数据可读）
+  - **字段废弃**：先保留并停止写入，再在后续大版本移除
+  - **索引变更**：可在迁移中新增/删除索引；注意迁移耗时与失败回滚
+- **迁移失败策略**：
+  - 若迁移失败导致 DB 无法打开：优先保证应用可用（可选：清库重建并回退到默认参数；记录错误日志与告警埋点）
+  - 任何“清库重建”必须在 plan 的风险/合规中明确（此处先作为 TODO(Clarify)：是否允许丢失学习历史）
+
 ### B4. 接口规范/协议（引用或内联）
 
-**算法引擎接口**：
+#### B4.1 本 Feature 对外提供的接口（算法引擎）
+
+**算法引擎接口（对外）**：
 
 ```kotlin
 interface SpacedRepetitionEngine {
@@ -598,6 +676,38 @@ interface SpacedRepetitionEngine {
     suspend fun getReviewList(limit: Int): Result<List<LearningState>>
 }
 ```
+
+**输入约束（契约）**：
+- `wordId`：必须来自词库系统，稳定且全局唯一（至少在当前设备/用户维度唯一）；长度 ≤ 100
+- `quality`：取值 0-5（SM-2）；超范围返回 `InvalidInputError`
+- `limit`：>0 且有上限（建议 ≤ 200），超范围返回 `InvalidInputError` 或截断（需实现侧统一）
+
+**并发与取消语义**：
+- 允许并发调用；接口实现需线程安全（内部通过 Room 事务 + 同步策略保证一致性）
+- 支持协程取消：取消时不得落半写入状态（写入必须在事务内，或保证幂等重试）
+
+**错误语义（对外）**：
+- `CalculationError`：算法计算失败/溢出/异常（可降级为默认参数或上次成功结果）
+- `DataError`：数据库读写失败/数据损坏（可降级；必须记录错误日志）
+- `InvalidInputError`：入参不合法（不可重试，调用方应修正输入）
+
+#### B4.2 本 Feature 依赖的外部接口/契约（依赖方）
+
+> 说明：本 Feature 的硬依赖不是“单词内容”，而是 `wordId` 的稳定性与词库/用户数据的可用性假设。
+
+- **依赖 FEAT-001（单词库管理）契约**：
+  - 必须能提供：当前学习词库的单词 ID 列表（或可遍历的 wordId 流）
+  - 保证：同一单词在同一词库中的 `wordId` 稳定不变（否则学习状态会错位）
+  - 失败语义：词库缺失/为空时，算法引擎返回空任务列表（不抛异常），并记录错误日志
+- **依赖 FEAT-007（用户账户与数据管理）契约（若仍作为外部 Feature 存在）**：
+  - 需要明确：学习状态/复习记录由谁的 DB 承载（本 Feature Room vs 统一 UserData DB）
+  - TODO(Clarify)：若后续统一到 FEAT-007 的 DB，本 Feature 的表结构/迁移责任边界需重新对齐
+
+#### B4.3 契约工件（contracts/）（推荐）
+
+- 建议新增 `contracts/`：
+  - `errors.md`：AlgorithmError 错误码/语义（可重试/不可重试）
+  - （如对外提供跨模块 API）`api.md`：接口方法/入参出参示例
 
 **版本策略**：
 - 接口版本：使用接口版本号（v1.0），新增方法使用默认参数，确保向后兼容

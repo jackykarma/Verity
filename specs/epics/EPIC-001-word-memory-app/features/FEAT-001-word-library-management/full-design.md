@@ -217,6 +217,7 @@ flowchart LR
   - 错误码：使用 Sealed Class 定义错误类型（ImportError, ParseError）
   - 版本策略：数据结构向后兼容，新增字段使用默认值
   - 幂等约束：导入操作基于文件指纹（路径+大小+修改时间）去重
+  - 契约位置：详见 plan.md:Plan-B:B4（对外接口/依赖接口约束）
 
 - **并发与线程模型**：
   - 主线程：UI 操作、状态更新
@@ -293,6 +294,14 @@ flowchart LR
   - **优点**：流式处理支持大文件、异步解析不阻塞主线程、支持进度反馈
   - **缺点/代价**：实现复杂度较高（需要处理多种格式和错误场景）
   - **替代方案与否决理由**：不使用同步解析（会阻塞主线程）；不使用一次性加载（内存溢出风险）
+
+### 3.5 数据模型与存储设计（物理）（来自 plan.md）
+
+> 汇总：本 Feature 使用“文件（词库内容）+ SharedPreferences（元数据索引）”的持久化方案；完整的键/结构/迁移策略见 plan.md:Plan-B:B3.2。
+
+- **SharedPreferences（关键键）**：`library_metadata_list`、`selected_library_id`
+- **元数据结构版本**：`LibraryMetadataList.version = 1`（新增字段默认值；旧字段废弃不立即删除）
+- **文件存储**：应用私有目录 `word_libraries/`，文件名建议 `<libraryId>.<ext>`；覆盖导入采用“临时文件 → 校验 → 原子替换”
 
 ## 4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）（来自 plan.md）
 
