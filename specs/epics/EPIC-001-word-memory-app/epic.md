@@ -265,6 +265,9 @@ description: "EPIC 规格说明模板（输入为大需求容器，输出 Featur
 |---|---|---|---|---|---|---|---|
 | 单词库管理 (FEAT-001) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md (v0.1.1) | Tasks Ready |  |
 | 间隔重复学习算法引擎 (FEAT-002) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md (v0.1.0) | Tasks Ready |  |
+| 学习界面与交互 (FEAT-003) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md (v0.1.0) | Tasks Ready |  |
+| 游戏化与激励机制 (FEAT-004) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md (v0.1.0) | Tasks Ready |  |
+| 学习进度与统计 (FEAT-005) | epic/EPIC-001-word-memory-app | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md (v0.1.0) | Tasks Ready |  |
 <!-- END_FEATURE_REGISTRY -->
 
 ## 变更记录（增量变更）
