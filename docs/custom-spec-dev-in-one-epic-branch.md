@@ -72,6 +72,110 @@
 
 ---
 
+## 3.4 plan.md、full-design.md、epic-full-design.md 的关系与区别
+
+### 3.4.1 文档定位与作用
+
+| 文档 | 层级 | 路径 | 主要作用 | 输入工件 | 输出内容 |
+|---|---|---|---|---|---|
+| **plan.md** | Feature 级 | `specs/epics/<EPIC>/features/<FEAT>/plan.md` | **工程级蓝图**：技术选型、架构设计、Story 拆分、风险评估、NFR 评估 | `spec.md` | Plan-A（工程决策与风险评估）+ Plan-B（技术规格）+ Story Breakdown（ST-xxx） |
+| **full-design.md** | Feature 级 | `specs/epics/<EPIC>/features/<FEAT>/full-design.md` | **Feature 完整技术方案**：整合 Feature 内所有设计工件，提供统一技术指导 | `spec.md`、`plan.md`、`tasks.md` | 整合后的架构设计、关键流程、追溯矩阵、验证方式（不新增决策，只整合） |
+| **epic-full-design.md** | EPIC 级 | `specs/epics/<EPIC>/epic-full-design.md` | **EPIC 全局技术方案**：跨 Feature 整合与一致性呈现，提供端到端统一视图 | `epic.md` + 各 Feature 的 `spec.md`/`plan.md`/`tasks.md`/`full-design.md` | EPIC 模块目录、跨 Feature 映射、端到端流程、一致性检查、追溯矩阵 |
+
+### 3.4.2 核心区别
+
+#### plan.md（工程级蓝图）
+
+- **定位**：Feature 的**技术决策文档**，由 SE/TL 在 Plan 阶段产出
+- **内容**：
+  - **Plan-A**：工程决策（技术选型、架构设计、风险评估、NFR 评估）
+  - **Plan-B**：技术规格（架构细化、数据模型、接口契约、性能预算）
+  - **Story Breakdown**：将 Feature 拆分为可开发的 Story（ST-xxx）
+  - **Story Detailed Design（L2）**：可选，Story 的详细设计（类图、时序图、异常矩阵）
+- **特点**：
+  - **包含技术决策**：技术选型、架构边界、接口设计等
+  - **可独立评审**：作为技术方案的权威来源
+  - **版本管理**：技术决策变更时需更新版本号
+
+#### full-design.md（Feature 完整技术方案）
+
+- **定位**：Feature 的**整合技术方案文档**，由 `/speckit.fulldesign` 自动生成
+- **内容**：
+  - 整合 `spec.md` 的需求与约束
+  - 整合 `plan.md` 的架构设计与 Story
+  - 整合 `tasks.md` 的任务与验证方式
+  - 生成追溯矩阵（FR/NFR → Story → Task）
+  - 生成关键流程设计
+- **特点**：
+  - **不新增决策**：只整合现有产物，不引入新的技术决策
+  - **可追溯性**：提供完整的需求到实现的追溯链路
+  - **评审友好**：结构化呈现，便于技术评审
+  - **自动生成**：基于 spec/plan/tasks 自动整合，保持一致性
+
+#### epic-full-design.md（EPIC 全局技术方案）
+
+- **定位**：EPIC 的**跨 Feature 整合文档**，由 `/speckit.epicfulldesign` 自动生成
+- **内容**：
+  - 整合 `epic.md` 的 EPIC 总览与整体 FR/NFR
+  - 汇总各 Feature 的模块设计（EPIC 模块目录与映射）
+  - 汇总各 Feature 的 Story 与 Task
+  - 生成 EPIC 级 UML 视图（模块级类图、端到端时序图）
+  - 检查跨 Feature 一致性（接口/数据模型/NFR 预算）
+  - 生成端到端流程设计
+- **特点**：
+  - **跨 Feature 视角**：从 EPIC 能力/子系统视角整合各 Feature
+  - **一致性检查**：暴露接口/数据模型/NFR 预算的冲突与缺口
+  - **不新增决策**：只整合与映射，冲突用 `TODO(Clarify)` 标注
+  - **端到端视图**：提供完整的用户旅程/系统链路视图
+
+### 3.4.3 生成时机与依赖关系
+
+```
+epic.md (EPIC 总览)
+    ↓
+spec.md (Feature 规格)
+    ↓
+plan.md (Feature 工程蓝图) ←──┐
+    ↓                          │
+tasks.md (Feature 任务) ←──────┤
+    ↓                          │
+full-design.md (Feature 完整方案) ←─┐
+    ↓                                │
+epic-full-design.md (EPIC 全局方案) ←┘
+```
+
+**生成顺序**：
+1. **plan.md**：在 Plan 阶段由 SE/TL 产出（输入：spec.md）
+2. **tasks.md**：在 Tasks 阶段由 SE/TL 产出（输入：plan.md 的 Story Breakdown）
+3. **full-design.md**：在 Full Design 阶段由 `/speckit.fulldesign` 生成（输入：spec.md + plan.md + tasks.md）
+4. **epic-full-design.md**：在 EPIC Full Design 阶段由 `/speckit.epicfulldesign` 生成（输入：epic.md + 各 Feature 的 spec/plan/tasks/full-design）
+
+**依赖关系**：
+- `plan.md` 依赖 `spec.md`（需求与约束）
+- `tasks.md` 依赖 `plan.md`（Story Breakdown）
+- `full-design.md` 依赖 `spec.md` + `plan.md` + `tasks.md`（整合所有 Feature 级工件）
+- `epic-full-design.md` 依赖 `epic.md` + 各 Feature 的 `spec.md`/`plan.md`/`tasks.md`/`full-design.md`（整合所有 EPIC 级和 Feature 级工件）
+
+### 3.4.4 使用场景
+
+| 文档 | 主要使用者 | 使用场景 |
+|---|---|---|
+| **plan.md** | SE/TL、架构师 | 技术方案评审、架构决策、Story 拆分、风险评估 |
+| **full-design.md** | SE/TL、开发者、评审者 | Feature 技术方案评审、实现指导、追溯验证 |
+| **epic-full-design.md** | EPIC 负责人、架构师、SE/TL | EPIC 全局技术评审、跨 Feature 一致性检查、端到端流程设计 |
+
+### 3.4.5 变更管理
+
+- **plan.md 变更**：技术决策变更时，需更新 plan.md 版本，并重新生成 tasks.md 和 full-design.md
+- **full-design.md 变更**：通常由 spec/plan/tasks 变更触发，自动重新生成
+- **epic-full-design.md 变更**：通常由 epic.md 或各 Feature 的 spec/plan/tasks/full-design 变更触发，自动重新生成
+
+**重要原则**：
+- **plan.md** 是技术决策的权威来源，变更需显式记录版本与原因
+- **full-design.md** 和 **epic-full-design.md** 是整合文档，不新增决策，变更由源文档变更触发
+
+---
+
 ## 4. 关键机制：SPECIFY_FEATURE（决定当前操作的 Feature）
 
 Spec-Kit 用环境变量 `SPECIFY_FEATURE` 指定“当前要操作的 Feature 目录”（相对 `specs/`）：
