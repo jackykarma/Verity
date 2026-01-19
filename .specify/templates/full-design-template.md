@@ -121,6 +121,50 @@ flowchart LR
 > - 若存在 `data-model.md`：在此引用其“物理模型”部分
 > - 否则：引用 plan.md:Plan-B:B3.2（表结构/键结构/迁移策略）
 
+### 3.6 模块级 UML 总览（全局查看入口，只引用 plan.md）
+
+> 目标：在 Feature 级 Full Design 中提供“全局视角”入口，方便评审/开发快速浏览每个模块的整体设计。
+>
+> 规则：
+> - 模块清单以 `plan.md:A3.2 模块拆分与职责` 为准（行数/名称必须一致）。
+> - 本节只做索引与引用，不复制粘贴整张图；所有 UML 图的权威内容在 `plan.md:A3.4`。
+
+| 模块（来自 plan.md:A3.2） | 职责（摘要） | UML 类图入口（plan.md:A3.4） | 时序图-成功入口（plan.md:A3.4） | 时序图-异常入口（plan.md:A3.4） | 关键异常（摘要） | NFR 责任（摘要） |
+|---|---|---|---|---|---|---|
+| [模块A] |  | plan.md:A3.4:[模块A]:UML类图 | plan.md:A3.4:[模块A]:时序-成功 | plan.md:A3.4:[模块A]:时序-异常 |  | PERF/POWER/MEM/SEC/OBS/REL |
+
+### 3.7 模块级 UML（按模块汇总，来自 plan.md:A3.4）
+
+> 目标：在 Full Design 中直接呈现每个模块的 UML（类图 + 成功/异常时序），便于评审与全局浏览。
+>
+> 规则：
+> - 本节内容必须**逐字复用/复制** `plan.md:A3.4` 的模块级 UML；不得新增模块、不得新增新的分支决策。
+> - 模块小节顺序必须与 `plan.md:A3.2 模块拆分与职责` 一致。
+> - 若某个模块在 plan.md 尚未补齐 UML，必须标注 `TODO(Clarify)` 并指回 plan.md 对应模块小节补齐。
+
+#### 模块：[模块名]（来自 plan.md:A3.2）
+
+##### UML 类图（来自 plan.md:A3.4）
+
+```mermaid
+classDiagram
+  %% 直接复制 plan.md:A3.4 对应模块的类图
+```
+
+##### UML 时序图 - 成功链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  %% 直接复制 plan.md:A3.4 对应模块的“时序-成功”
+```
+
+##### UML 时序图 - 异常链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  %% 直接复制 plan.md:A3.4 对应模块的“时序-异常”
+```
+
 ## 4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）（来自 plan.md）
 
 > 定义：每个关键流程必须用 `flowchart` 绘制，且同一张图内覆盖正常流程与全部关键异常分支（失败/超时/并发/生命周期等）。
@@ -151,9 +195,9 @@ flowchart TD
 
 ### 5.1 Story 列表（来自 plan.md）
 
-| Story ID | 类型 | 目标 | 覆盖 FR/NFR | 依赖 | 关键风险 |
-|---|---|---|---|---|---|
-| ST-001 |  |  |  |  |  |
+| Story ID | 类型 | 目标 | 覆盖 FR/NFR | 依赖 | 关键风险 | Story 详细设计入口（来自 plan.md） |
+|---|---|---|---|---|---|---|
+| ST-001 |  |  |  |  |  | plan.md:Story Detailed Design:ST-001 |
 
 ### 5.2 追溯矩阵（FR/NFR → Story → Task）
 

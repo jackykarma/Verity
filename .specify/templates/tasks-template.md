@@ -14,6 +14,7 @@ description: "Story → Task 落地任务清单模板"
 > 规则：
 > - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
+> - 若 plan.md 已包含 Story 二层详细设计（Story Detailed Design / L2）：每个 Task 必须提供**设计引用**（指向 plan.md 对应 ST-xxx 的小节/图表/异常矩阵）。
 
 ## Task 行格式（首行必须严格遵循）
 
@@ -30,6 +31,10 @@ description: "Story → Task 落地任务清单模板"
 ### Task 详细信息（紧随首行的子项）
 
 - **依赖**：T???（无则写“无”）
+- **设计引用**：
+  - 模块级：`plan.md:A3.4:<模块名>:UML类图/时序-成功/时序-异常`
+  - 或 Story 级：`plan.md:Story Detailed Design:ST-xxx:...`
+  - （若该 Story/模块设计尚未补齐，则写 `N/A` 并在 Plan 中补齐）
 - **步骤**：
   - 1) …
   - 2) …

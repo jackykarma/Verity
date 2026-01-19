@@ -70,6 +70,75 @@ flowchart TB
 
 > 定义：1 层架构设计描述“系统内部的模块拆分与协作”。在 EPIC 级别，本节用于汇总各 Feature 的 1 层框架与关键模块设计，并显式标注不一致之处与对齐建议（不新增决策）。
 
+### 3.0 EPIC 模块目录（EPIC Module Catalog）与映射关系（跨 Feature，核心）
+
+> 目标：从 EPIC 视角定义“模块/能力”的全局目录，并把它与各 Feature 的模块拆分建立明确映射，支持端到端一致性评审。
+>
+> 概念区分（必须遵守）：
+> - **Feature 模块**：来自各 Feature 的 `plan.md:A3.2 模块拆分与职责`（实现落码视角）。
+> - **EPIC 模块**：EPIC 级别的能力/子系统视角，用于跨 Feature 对齐边界与契约；通常由多个 Feature 模块**归并/抽象**而来。
+>
+> 规则：
+> - 本节只做“汇总、归并、映射、暴露差异”，不得新增技术决策；若归并规则存在争议，标注 `TODO(Clarify)` 并指向应修改的 Feature plan。
+> - 所有引用必须指向来源 Feature 的 `plan.md`（优先：A3.2/A3.4/B4）或 `contracts/` 工件。
+
+#### 3.0.1 EPIC 模块目录（Catalog）
+
+| EPIC 模块 | 职责边界（一句话） | 涉及 Feature | 提供的接口/契约（引用） | 依赖的接口/契约（引用） | NFR 责任（性能/功耗/内存/安全/可观测性/可靠性） | 差异/冲突点（如有） | 引用来源 |
+|---|---|---|---|---|---|---|---|
+| [EPIC 模块A] |  | FEAT-xxx, FEAT-yyy | FEAT-xxx plan.md:B4.1 / contracts/ | FEAT-yyy plan.md:B4.2 | PERF/POWER/MEM/SEC/OBS/REL |  | epic.md + FEAT-xxx plan |
+
+#### 3.0.2 EPIC 模块 ↔ Feature 模块映射（Module Mapping）
+
+> 要求：将每个 Feature 的 `A3.2` 模块**逐行映射**到某个 EPIC 模块；若无法映射，必须标注原因与 `TODO(Clarify)`。
+
+| EPIC 模块 | 来源 Feature | Feature 模块（来自 FEAT plan.md:A3.2） | 关系类型（Owned-by/Consumed-by/Adapter/Shared） | 引用来源（A3.2/A3.4/B4） | 备注/差异 |
+|---|---|---|---|---|---|
+| [EPIC 模块A] | FEAT-xxx | [模块名] | Owned-by | FEAT-xxx plan.md:A3.2 / A3.4 |  |
+
+#### 3.0.3 EPIC 模块级 UML 总览（全局查看入口，只引用 Feature Plan）
+
+> 目标：从 EPIC 角度“一页看全”各 EPIC 模块的 UML 视图入口（类图 + 成功/异常时序）。
+>
+> 规则：EPIC Full Design 不复制粘贴各 Feature 的模块 UML 图；只提供索引入口，图的权威内容在各 Feature `plan.md:A3.4`。
+
+| EPIC 模块 | 类图入口（引用） | 时序-成功入口（引用） | 时序-异常入口（引用） | 关键异常（摘要） | 涉及 Feature |
+|---|---|---|---|---|---|
+| [EPIC 模块A] | FEAT-xxx plan.md:A3.4:[模块X]:UML类图 | FEAT-xxx plan.md:A3.4:[模块X]:时序-成功 | FEAT-xxx plan.md:A3.4:[模块X]:时序-异常 |  | FEAT-xxx, FEAT-yyy |
+
+#### 3.0.4 EPIC 模块级 UML（EPIC 视角一致性视图，建议）
+
+> 目标：从 EPIC 角度给出“模块/能力”的整体静态/动态视图，便于端到端一致性评审。
+>
+> 规则（严格）：
+> - 本节是**一致性视图**：必须完全基于 3.0.1/3.0.2 的 Catalog/Mapping 与各 Feature 的 plan/契约工件推导；不得引入新的模块边界决策。
+> - 若无法从现有 Feature 工件推导出该视图（例如契约缺失/边界不清），必须标注 `TODO(Clarify)` 并指向应补齐的 Feature plan（优先：A3.2/A3.4/B4）。
+> - 视图粒度：只画**模块边界/接口契约/关键数据流**，不下沉到 Feature 内部实现类细节（那属于各 Feature 的 plan.md）。
+
+##### EPIC 模块级类图（静态视图）
+
+```mermaid
+classDiagram
+  %% TODO: 以 EPIC 模块为中心画边界与契约（接口/数据），不画实现细节
+  %% 若存在冲突，标注 TODO(Clarify) 并指向来源 Feature plan
+```
+
+##### EPIC 端到端时序图 - 成功链路（动态视图）
+
+```mermaid
+sequenceDiagram
+  %% TODO: 选择 1~2 条核心端到端用户旅程/系统链路，按 EPIC 模块标注交互
+  %% 要求：每一步标注所属 EPIC 模块与来源 Feature（引用）
+```
+
+##### EPIC 端到端时序图 - 异常链路（动态视图）
+
+```mermaid
+sequenceDiagram
+  %% TODO: 用 alt/else 覆盖关键异常（跨模块失败传播、降级、重试、兜底、可观测性信号）
+  %% 若异常策略不一致，必须在 3.2/3.4 的一致性问题表中体现，并指向对应 Feature plan 修正
+```
+
 ### 3.1 1 层框架图（EPIC 级一致性视图）
 
 ```mermaid

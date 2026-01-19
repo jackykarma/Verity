@@ -134,8 +134,8 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 
 0) 在 EPIC 分支确保已选定目标 Feature：设置 `SPECIFY_FEATURE` 指向对应 Feature 目录  
 1) （可选）运行 `/speckit.clarify`：用于补齐 spec 的关键澄清项（由 SE/TL 决定是否需要）  
-2) 运行 `/speckit.plan`：生成 `plan.md`（Plan-A/Plan-B + Story Breakdown：ST-xxx）  
-3) 运行 `/speckit.tasks`：生成 `tasks.md`（按 ST-xxx 拆为可执行 Task）  
+2) 运行 `/speckit.plan`：生成 `plan.md`（Plan-A/Plan-B + Story Breakdown：ST-xxx；可在 Plan 中补齐 Story 二层详细设计用于指导落码）  
+3) 运行 `/speckit.tasks`：生成 `tasks.md`（按 ST-xxx 拆为可执行 Task；若 Plan 含二层设计，Task 需引用对应设计入口）  
 4) （可选）运行 `/speckit.fulldesign`：生成 Feature 级 `full-design.md`（只整合，不新增决策）  
 5) （建议）运行 `/speckit.epicsync "<备注>"`：把该 Feature 的版本/状态同步回 `epic.md` Registry
 
