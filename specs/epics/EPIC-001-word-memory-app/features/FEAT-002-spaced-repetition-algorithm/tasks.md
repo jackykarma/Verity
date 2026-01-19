@@ -3,8 +3,8 @@
 **Epic**：EPIC-001 - 无痛记忆单词神器APP
 **Feature ID**：FEAT-002
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.0（来自 `plan.md`）
-**Tasks Version**：v0.1.0
+**Plan Version**：v0.2.0（来自 `plan.md`）
+**Tasks Version**：v0.2.0
 **输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`）
 
 > 规则：
@@ -44,13 +44,16 @@
 
 - [ ] T001 在 `specs/epics/EPIC-001-word-memory-app/features/FEAT-002-spaced-repetition-algorithm/` 中核对 `spec.md`、`plan.md` 的 Version 字段一致性并补齐变更记录
   - **依赖**：无
+  - **设计引用**：N/A（准备阶段）
   - **步骤**：
-    - 1) 确认 `Feature Version`（v0.1.0）、`Plan Version`（v0.1.0）已填写
+    - 1) 确认 `Feature Version`（v0.1.0）、`Plan Version`（v0.2.0）已填写
     - 2) 确认 Plan 的 Story Breakdown 已完成（ST-001 至 ST-007）
     - 3) 确认所有 FR/NFR 已映射到 Story
+    - 4) 确认 plan.md 已补齐模块级 UML 设计（A3.4）
   - **验证**：
-    - [ ] tasks.md 中 `Plan Version` 与 plan.md 一致（v0.1.0）
+    - [ ] tasks.md 中 `Plan Version` 与 plan.md 一致（v0.2.0）
     - [ ] Story 列表完整（7 个 Story）
+    - [ ] plan.md 包含完整的模块级 UML 设计
   - **产物**：`spec.md`、`plan.md`、`tasks.md`
 
 ---
@@ -102,8 +105,9 @@
 
 - [ ] T020 搭建错误处理基础设施（路径：`app/src/main/java/com/jacky/verity/algorithm/core/AlgorithmError.kt`）
   - **依赖**：T012
+  - **设计引用**：plan.md:Plan-B:B2（错误处理规范）
   - **步骤**：
-    - 1) 创建 `AlgorithmError` Sealed Class（包含 `CalculationError`、`DataError`、`InvalidInputError`）
+    - 1) 创建 `AlgorithmError` Sealed Class（包含 `CalculationError`、`DataError`、`InvalidInputError`），参考 plan.md:Plan-B:B2 错误处理规范
     - 2) 创建 `Result<T>` 类型别名或使用标准 Result 类
     - 3) 定义错误码和错误消息规范
   - **验证**：
@@ -124,13 +128,14 @@
 
 - [ ] T022 [P] 创建算法引擎接口定义（路径：`app/src/main/java/com/jacky/verity/algorithm/api/SpacedRepetitionEngine.kt`）
   - **依赖**：T020
+  - **设计引用**：plan.md:Plan-B:B4.1（本 Feature 对外提供的接口）
   - **步骤**：
-    - 1) 定义 `SpacedRepetitionEngine` 接口（符合 Plan-B B4 接口规范）
-    - 2) 定义接口方法签名（`calculateNextReview`、`getLearningTaskList`、`updateLearningState` 等）
+    - 1) 定义 `SpacedRepetitionEngine` 接口（符合 Plan-B B4 接口规范），参考 plan.md:Plan-B:B4.1
+    - 2) 定义接口方法签名（`calculateNextReview`、`getLearningTaskList`、`updateLearningState`、`getLearningState`、`getReviewList`）
     - 3) 定义输入输出数据类型（`LearningState`、`ReviewResult` 等）
   - **验证**：
-    - [ ] 接口定义符合 Plan-B B4 接口规范
-    - [ ] 接口方法签名完整
+    - [ ] 接口定义符合 Plan-B B4.1 接口规范
+    - [ ] 接口方法签名完整（5 个方法）
   - **产物**：`SpacedRepetitionEngine.kt`
 
 **检查点**：基础层就绪——Story 实现可并行启动
@@ -160,16 +165,17 @@
 
 - [ ] T101 [P] [ST-001] 创建 SM-2 算法核心实现（路径：`app/src/main/java/com/jacky/verity/algorithm/core/sm2/SM2Algorithm.kt`）
   - **依赖**：T100
+  - **设计引用**：plan.md:A3.4:SM-2算法实现:UML类图、plan.md:A3.4:SM-2算法实现:时序-成功、plan.md:A3.4:SM-2算法实现:时序-异常
   - **步骤**：
-    - 1) 实现 SM-2 算法核心逻辑（根据 quality 调整 EF 和 interval）
+    - 1) 实现 SM-2 算法核心逻辑（根据 quality 调整 EF 和 interval），参考 plan.md:A3.4:SM-2算法实现 模块设计
     - 2) 实现边界处理（间隔限制在 1 小时-365 天，EF 限制在 1.3-3.0）
-    - 3) 实现异常处理（捕获计算溢出、除零等异常）
-    - 4) 使用协程在 IO 线程执行计算
+    - 3) 实现异常处理（捕获计算溢出、除零等异常），参考 plan.md:A3.4:SM-2算法实现:关键异常清单
+    - 4) 使用协程在 IO 线程执行计算（Dispatchers.IO）
   - **验证**：
     - [ ] 算法计算结果与标准 SM-2 算法一致（使用测试数据集验证）
     - [ ] 计算耗时 ≤ 10ms（p95）（性能测试）
     - [ ] 边界情况处理正确（quality 0-5、各种间隔值）
-    - [ ] 异常情况有明确的错误处理和降级策略
+    - [ ] 异常情况有明确的错误处理和降级策略（EX-004 至 EX-007）
   - **产物**：`SM2Algorithm.kt`
 
 - [ ] T102 [ST-001] 实现记忆强度更新功能（路径：`app/src/main/java/com/jacky/verity/algorithm/core/sm2/SM2Algorithm.kt`）
@@ -222,12 +228,13 @@
 
 - [ ] T200 [P] [ST-002] 创建学习状态实体（路径：`app/src/main/java/com/jacky/verity/algorithm/data/database/entity/LearningStateEntity.kt`）
   - **依赖**：T104
+  - **设计引用**：plan.md:Plan-B:B3.2（物理数据结构：learning_state 表）
   - **步骤**：
-    - 1) 定义 `LearningStateEntity` Room Entity（包含 `wordId`、`learningCount`、`lastReviewTime`、`memoryStrength`、`nextReviewTime`、`mastered`、`difficultyFactor`、`currentInterval`）
-    - 2) 设置主键为 `wordId`
-    - 3) 添加索引（`nextReviewTime`、`memoryStrength`）
+    - 1) 定义 `LearningStateEntity` Room Entity（包含 `wordId`、`learningCount`、`lastReviewTime`、`memoryStrength`、`nextReviewTime`、`mastered`、`difficultyFactor`、`currentInterval`），参考 plan.md:Plan-B:B3.2 表结构定义
+    - 2) 设置主键为 `wordId`（TEXT, PK, NOT NULL）
+    - 3) 添加索引（`idx_learning_state_next_review_time`、`idx_learning_state_mastered_next_review`、`idx_learning_state_memory_strength`）
   - **验证**：
-    - [ ] 实体定义符合 Plan-B B3 数据模型
+    - [ ] 实体定义符合 Plan-B B3.2 数据模型（字段、类型、约束）
     - [ ] 索引创建成功
   - **产物**：`LearningStateEntity.kt`
 
@@ -257,31 +264,39 @@
 
 - [ ] T203 [ST-002] 实现学习状态仓库（路径：`app/src/main/java/com/jacky/verity/algorithm/data/repository/LearningStateRepository.kt`）
   - **依赖**：T202
+  - **设计引用**：plan.md:A3.4:学习状态仓库:UML类图、plan.md:A3.4:学习状态仓库:时序-成功、plan.md:A3.4:学习状态仓库:时序-异常
   - **步骤**：
-    - 1) 实现 `LearningStateRepository` 接口
-    - 2) 实现学习状态查询方法（`getLearningState`、`getLearningStates`）
-    - 3) 实现学习状态更新方法（`updateLearningState`，使用事务确保一致性）
+    - 1) 实现 `LearningStateRepository` 接口，参考 plan.md:A3.4:学习状态仓库 模块设计
+    - 2) 实现学习状态查询方法（`getState` 返回 Flow、`getReviewList`）
+    - 3) 实现学习状态更新方法（`updateState`，使用事务确保一致性）
     - 4) 实现内存缓存机制（首次加载后缓存，数据库变更时更新缓存）
     - 5) 实现批量更新支持
+    - 6) 实现异常处理（数据库操作失败、数据转换失败），参考 plan.md:A3.4:学习状态仓库:关键异常清单（EX-016、EX-017）
   - **验证**：
     - [ ] 状态查询正确（单元测试）
     - [ ] 状态更新耗时 ≤ 100ms（p95）（性能测试）
     - [ ] 内存缓存机制正常工作
     - [ ] 事务确保数据一致性
+    - [ ] 异常处理正确（EX-016、EX-017）
   - **产物**：`LearningStateRepository.kt`
 
 - [ ] T204 [ST-002] 实现学习状态管理器（路径：`app/src/main/java/com/jacky/verity/algorithm/domain/manager/LearningStateManager.kt`）
   - **依赖**：T203
+  - **设计引用**：plan.md:A3.4:学习状态管理器:UML类图、plan.md:A3.4:学习状态管理器:时序-成功、plan.md:A3.4:学习状态管理器:时序-异常
   - **步骤**：
-    - 1) 实现 `LearningStateManager` 类
+    - 1) 实现 `LearningStateManager` 类，参考 plan.md:A3.4:学习状态管理器 模块设计
     - 2) 实现学习状态创建逻辑（首次学习时初始化状态）
     - 3) 实现学习状态更新逻辑（基于算法计算结果更新状态）
     - 4) 实现状态机逻辑（未学习 → 学习中 → 已掌握）
     - 5) 实现幂等性保证（基于单词 ID + 时间戳去重）
+    - 6) 实现内存缓存机制（ConcurrentHashMap），参考 plan.md:A3.4:学习状态管理器:UML类图
+    - 7) 实现异常处理（数据库操作失败、数据损坏、并发冲突），参考 plan.md:A3.4:学习状态管理器:关键异常清单（EX-008 至 EX-010）
   - **验证**：
     - [ ] 状态创建和更新正确（单元测试）
     - [ ] 状态机转换正确
     - [ ] 幂等性保证生效
+    - [ ] 内存缓存机制正常工作
+    - [ ] 异常处理正确（EX-008、EX-009、EX-010）
   - **产物**：`LearningStateManager.kt`
 
 - [ ] T205 [ST-002] 添加学习状态更新事件日志（路径：`app/src/main/java/com/jacky/verity/algorithm/domain/manager/LearningStateManager.kt`）
@@ -429,13 +444,15 @@
 
 - [ ] T600 [ST-006] 实现算法计算异常处理（路径：`app/src/main/java/com/jacky/verity/algorithm/core/sm2/SM2Algorithm.kt`）
   - **依赖**：T104
+  - **设计引用**：plan.md:A3.4:SM-2算法实现:时序-异常、plan.md:A3.4:SM-2算法实现:关键异常清单（EX-004 至 EX-007）
   - **步骤**：
-    - 1) 捕获计算溢出异常，使用边界值
+    - 1) 捕获计算溢出异常，使用边界值（参考 EX-005、EX-006）
     - 2) 捕获除零异常，使用默认参数
     - 3) 捕获其他计算异常，使用降级策略（默认参数或上次成功结果）
-    - 4) 记录错误日志（错误类型、输入参数、异常详情）
+    - 4) 实现计算超时处理（参考 EX-007）
+    - 5) 记录错误日志（错误类型、输入参数、异常详情），符合 NFR-OBS-002
   - **验证**：
-    - [ ] 所有异常场景都有明确的错误处理（单元测试）
+    - [ ] 所有异常场景都有明确的错误处理（单元测试，覆盖 EX-004 至 EX-007）
     - [ ] 错误日志正确记录（符合 NFR-OBS-002）
     - [ ] 降级策略生效（算法计算失败不影响用户体验）
   - **产物**：`SM2Algorithm.kt`（更新）

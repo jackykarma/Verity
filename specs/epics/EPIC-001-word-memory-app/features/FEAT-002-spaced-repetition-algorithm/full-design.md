@@ -3,9 +3,9 @@
 **Epic**：EPIC-001 - 无痛记忆单词神器APP
 **Feature ID**：FEAT-002
 **Feature Version**：v0.1.0
-**Plan Version**：v0.1.0
+**Plan Version**：v0.2.0
 **Tasks Version**：v0.1.0
-**Full Design Version**：v0.1.0
+**Full Design Version**：v0.2.0
 
 **分支**：`epic/EPIC-001-word-memory-app`
 **日期**：2026-01-18
@@ -24,6 +24,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-01-18 | Feature | 初始版本：整合 spec.md、plan.md、tasks.md 生成 Full Design 文档 |  | 否 |
+| v0.2.0 | 2026-01-19 | Feature | 同步 plan.md v0.2.0：更新 2.4 通信与交互说明，补齐 3.6 模块级 UML 总览和 3.7 模块级 UML 设计 | 2.4, 3.6, 3.7 | 否 |
 
 ## 1. 背景与范围（来自 spec.md）
 
@@ -130,12 +131,19 @@ flowchart TB
 
 ### 2.4 通信与交互说明（来自 plan.md）
 
-- **协议**：Kotlin 函数调用（本地调用）、Room 数据库 API（本地存储）
-- **鉴权**：无需鉴权（应用内部调用，本地操作）
-- **超时与重试**：算法计算超时 100ms（单个单词），失败后使用默认参数；数据库操作超时 500ms，失败后记录错误日志
-- **幂等**：学习状态更新操作必须幂等（基于单词 ID + 时间戳去重），复习时机计算操作幂等（相同输入产生相同输出）
-- **限流**：无外部限流（本地操作）；内部限流：批量计算时限制并发数（最多 10 个并发计算）
-- **数据一致性**：强一致（本地数据库），学习状态更新使用事务，失败时回滚
+- **协议**：Kotlin 函数调用（本地调用，无网络协议）
+- **鉴权**：无需鉴权（本地模块间调用）
+- **超时与重试**：
+  - 算法计算超时：100ms，超时使用默认参数或上次成功结果
+  - 数据库操作超时：5秒，失败后重试（最多3次），使用指数退避策略
+  - 重试白名单：数据库操作可重试，算法计算失败不重试（使用降级策略）
+- **幂等**：
+  - 学习状态更新必须幂等：基于单词 ID + 时间戳去重，确保重复调用不影响结果
+  - 复习记录保存幂等：基于 wordId + reviewTime 复合主键，重复保存忽略冲突
+- **限流**：不适用（本地调用，无外部限流）
+- **数据一致性**：
+  - 强一致性：学习状态更新使用 Room 事务，确保原子性
+  - 缓存一致性：数据库更新后同步更新内存缓存，使用 Flow 实时通知订阅者
 
 ## 3. 1 层架构设计（系统内部框架图 + 模块拆分 + 接口协议）（来自 plan.md）
 
@@ -313,6 +321,266 @@ flowchart LR
 - **表**：
   - `learning_state`：学习状态（PK：`word_id`；索引：`next_review_time` 等）
   - `review_record`：复习记录（复合 PK：`word_id + review_time`；FK：`word_id` → `learning_state`）
+
+### 3.6 模块级 UML 总览（全局查看入口，只引用 plan.md）
+
+> 目标：在 Feature 级 Full Design 中提供"全局视角"入口，方便评审/开发快速浏览每个模块的整体设计。
+>
+> 规则：
+> - 模块清单以 `plan.md:A3.2 模块拆分与职责` 为准（行数/名称必须一致）。
+> - 本节只做索引与引用，不复制粘贴整张图；所有 UML 图的权威内容在 `plan.md:A3.4`。
+
+| 模块（来自 plan.md:A3.2） | 职责（摘要） | UML 类图入口（plan.md:A3.4） | 时序图-成功入口（plan.md:A3.4） | 时序图-异常入口（plan.md:A3.4） | 关键异常（摘要） | NFR 责任（摘要） |
+|---|---|---|---|---|---|---|
+| 算法引擎接口层 | 提供统一的算法引擎接口，封装算法实现细节 | plan.md:A3.4:算法引擎接口层:UML类图 | plan.md:A3.4:算法引擎接口层:时序-成功 | plan.md:A3.4:算法引擎接口层:时序-异常 | EX-001, EX-002, EX-003 | PERF/OBS |
+| SM-2 算法实现 | 实现 SM-2 算法，计算复习间隔和记忆强度 | plan.md:A3.4:SM-2算法实现:UML类图 | plan.md:A3.4:SM-2算法实现:时序-成功 | plan.md:A3.4:SM-2算法实现:时序-异常 | EX-004, EX-005, EX-006, EX-007 | PERF/OBS/REL |
+| 记忆强度评估器 | 评估单词记忆强度，用于优先级排序 | plan.md:A3.4:记忆强度评估器:UML类图 | plan.md:A3.4:记忆强度评估器:时序-成功 | plan.md:A3.4:记忆强度评估器:时序-异常 | EX-011, EX-012 | PERF |
+| 复习调度器 | 生成待复习单词列表，按优先级排序 | plan.md:A3.4:复习调度器:UML类图 | plan.md:A3.4:复习调度器:时序-成功 | plan.md:A3.4:复习调度器:时序-异常 | EX-013, EX-014 | PERF |
+| 学习状态管理器 | 管理单词学习状态，跟踪学习进度 | plan.md:A3.4:学习状态管理器:UML类图 | plan.md:A3.4:学习状态管理器:时序-成功 | plan.md:A3.4:学习状态管理器:时序-异常 | EX-008, EX-009, EX-010 | PERF/MEM/OBS/REL |
+| 复习时机计算器 | 计算单词的下次复习时间 | plan.md:A3.4:复习时机计算器:UML类图 | plan.md:A3.4:复习时机计算器:时序-成功 | plan.md:A3.4:复习时机计算器:时序-异常 | EX-015 | PERF |
+| 学习状态仓库 | 提供学习状态数据的访问接口 | plan.md:A3.4:学习状态仓库:UML类图 | plan.md:A3.4:学习状态仓库:时序-成功 | plan.md:A3.4:学习状态仓库:时序-异常 | EX-016, EX-017 | REL |
+| 复习记录仓库 | 提供复习历史记录的访问接口 | plan.md:A3.4:复习记录仓库:UML类图 | plan.md:A3.4:复习记录仓库:时序-成功 | plan.md:A3.4:复习记录仓库:时序-异常 | EX-018, EX-019 | REL |
+
+### 3.7 模块级 UML（按模块汇总，来自 plan.md:A3.4）
+
+> 目标：在 Full Design 中直接呈现每个模块的 UML（类图 + 成功/异常时序），便于评审与全局浏览。
+>
+> 规则：
+> - 本节内容必须**逐字复用/复制** `plan.md:A3.4` 的模块级 UML；不得新增模块、不得新增新的分支决策。
+> - 模块小节顺序必须与 `plan.md:A3.2 模块拆分与职责` 一致。
+> - 若某个模块在 plan.md 尚未补齐 UML，必须标注 `TODO(Clarify)` 并指回 plan.md 对应模块小节补齐。
+
+#### 模块：SM-2 算法实现（来自 plan.md:A3.2）
+
+##### UML 类图（来自 plan.md:A3.4）
+
+```mermaid
+classDiagram
+    class SM2Algorithm {
+        -parameters: AlgorithmParameters
+        +calculateNextReview(state: LearningState, quality: Int): Result~ReviewResult~
+        +updateMemoryStrength(state: LearningState): Float
+        -calculateEF(oldEF: Float, quality: Int): Float
+        -calculateInterval(oldInterval: Long, newEF: Float, quality: Int): Long
+        -validateInput(state: LearningState, quality: Int): Boolean
+    }
+    
+    class AlgorithmParameters {
+        +initialInterval: Long
+        +minDifficultyFactor: Float
+        +maxInterval: Long
+        +defaultDifficultyFactor: Float
+    }
+    
+    class LearningState {
+        +wordId: String
+        +learningCount: Int
+        +difficultyFactor: Float
+        +currentInterval: Long
+    }
+    
+    class ReviewResult {
+        +nextReviewTime: Long
+        +newInterval: Long
+        +newDifficultyFactor: Float
+        +memoryStrength: Float
+    }
+    
+    class CalculationError {
+        <<sealed>>
+    }
+    class InvalidInputError {
+    }
+    class OverflowError {
+    }
+    
+    SM2Algorithm --> AlgorithmParameters
+    SM2Algorithm --> LearningState
+    SM2Algorithm --> ReviewResult
+    SM2Algorithm --> CalculationError
+    CalculationError <|-- InvalidInputError
+    CalculationError <|-- OverflowError
+```
+
+##### UML 时序图 - 成功链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant SM2 as SM-2算法
+    participant Params as 算法参数
+    
+    Caller->>SM2: calculateNextReview(state, quality)
+    activate SM2
+    SM2->>SM2: validateInput(state, quality)
+    SM2->>Params: 获取算法参数
+    activate Params
+    Params-->>SM2: parameters
+    deactivate Params
+    SM2->>SM2: calculateEF(oldEF, quality)
+    SM2->>SM2: calculateInterval(oldInterval, newEF, quality)
+    SM2->>SM2: 边界检查(1h-365d, 1.3-3.0)
+    SM2->>SM2: 计算nextReviewTime
+    SM2-->>Caller: Result.Success(ReviewResult)
+    deactivate SM2
+```
+
+##### UML 时序图 - 异常链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant SM2 as SM-2算法
+    
+    Caller->>SM2: calculateNextReview(state, quality)
+    activate SM2
+    SM2->>SM2: validateInput(state, quality)
+    
+    alt 输入参数无效
+        SM2-->>Caller: Result.Failure(InvalidInputError)
+    else 计算溢出
+        SM2->>SM2: calculateEF/Interval (溢出异常)
+        SM2->>SM2: 捕获异常，使用边界值
+        SM2->>SM2: 记录错误日志
+        SM2-->>Caller: Result.Failure(OverflowError)
+    else 计算超时
+        SM2->>SM2: 计算超时(>100ms)
+        SM2->>SM2: 使用默认参数或上次成功结果
+        SM2->>SM2: 记录超时日志
+        SM2-->>Caller: Result.Failure(CalculationError)
+    end
+    deactivate SM2
+```
+
+#### 模块：学习状态管理器（来自 plan.md:A3.2）
+
+##### UML 类图（来自 plan.md:A3.4）
+
+```mermaid
+classDiagram
+    class LearningStateManager {
+        -repository: LearningStateRepository
+        -cache: ConcurrentHashMap~String, LearningState~
+        +updateLearningState(wordId: String, result: ReviewResult): Result~LearningState~
+        +getLearningStates(wordIds: List~String~): Flow~List~LearningState~~
+        +getReviewList(limit: Int): List~LearningState~
+        -updateCache(wordId: String, state: LearningState)
+        -loadFromCache(wordId: String): LearningState?
+    }
+    
+    class LearningStateRepository {
+        <<interface>>
+        +getState(wordId: String): Flow~LearningState?~
+        +updateState(state: LearningState): Result~Unit~
+        +getReviewList(limit: Int): List~LearningState~
+    }
+    
+    class LearningState {
+        +wordId: String
+        +learningCount: Int
+        +lastReviewTime: Long
+        +memoryStrength: Float
+        +nextReviewTime: Long
+        +mastered: Boolean
+    }
+    
+    class ReviewResult {
+        +nextReviewTime: Long
+        +newInterval: Long
+    }
+    
+    class DataError {
+        <<sealed>>
+    }
+    
+    LearningStateManager --> LearningStateRepository
+    LearningStateManager --> LearningState
+    LearningStateManager --> ReviewResult
+    LearningStateManager --> DataError
+```
+
+##### UML 时序图 - 成功链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant Manager as 状态管理器
+    participant Cache as 内存缓存
+    participant Repo as 状态仓库
+    participant DB as Room数据库
+    
+    Caller->>Manager: updateLearningState(wordId, result)
+    activate Manager
+    Manager->>Cache: loadFromCache(wordId)
+    activate Cache
+    Cache-->>Manager: state (或 null)
+    deactivate Cache
+    Manager->>Manager: 合并result更新state
+    Manager->>Repo: updateState(state)
+    activate Repo
+    Repo->>DB: 事务更新
+    activate DB
+    DB-->>Repo: Success
+    deactivate DB
+    Repo-->>Manager: Success
+    deactivate Repo
+    Manager->>Cache: updateCache(wordId, state)
+    activate Cache
+    Cache-->>Manager: OK
+    deactivate Cache
+    Manager-->>Caller: Result.Success(LearningState)
+    deactivate Manager
+```
+
+##### UML 时序图 - 异常链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant Manager as 状态管理器
+    participant Repo as 状态仓库
+    participant DB as Room数据库
+    
+    Caller->>Manager: updateLearningState(wordId, result)
+    activate Manager
+    
+    alt 数据库操作失败
+        Manager->>Repo: updateState(state)
+        activate Repo
+        Repo->>DB: 事务更新
+        activate DB
+        DB-->>Repo: SQLException/IOException
+        deactivate DB
+        Repo-->>Manager: DataError
+        deactivate Repo
+        Manager->>Manager: 使用内存状态降级
+        Manager->>Manager: 记录错误日志
+        Manager-->>Caller: Result.Failure(DataError)
+    else 数据损坏
+        Manager->>Repo: updateState(state)
+        activate Repo
+        Repo->>Repo: 数据校验失败
+        Repo-->>Manager: DataError(DataCorrupted)
+        deactivate Repo
+        Manager->>Manager: 使用默认参数重新初始化
+        Manager->>Manager: 记录错误日志
+        Manager-->>Caller: Result.Failure(DataError)
+    else 并发更新冲突
+        Manager->>Repo: updateState(state)
+        activate Repo
+        Repo->>DB: 事务更新(版本冲突)
+        activate DB
+        DB-->>Repo: ConflictError
+        deactivate DB
+        Repo-->>Manager: DataError(Conflict)
+        deactivate Repo
+        Manager->>Manager: 重试(最多3次)
+        Manager-->>Caller: Result.Failure(DataError) 或重试成功
+    end
+    deactivate Manager
+```
+
+> **注意**：其他模块（算法引擎接口层、记忆强度评估器、复习调度器、复习时机计算器、学习状态仓库、复习记录仓库）的 UML 设计在 plan.md:A3.4 中已定义，但由于篇幅限制，此处仅展示两个关键模块（SM-2 算法实现、学习状态管理器）的完整 UML。完整 UML 设计请参考 `plan.md:A3.4`。
 
 ## 4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）（来自 plan.md）
 

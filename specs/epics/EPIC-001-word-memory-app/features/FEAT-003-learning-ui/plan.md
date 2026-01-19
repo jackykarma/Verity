@@ -3,7 +3,7 @@
 **Epic**：EPIC-001 - 无痛记忆单词神器APP  
 **Feature ID**：FEAT-003  
 **Feature Version**：v0.1.0（来自 `spec.md`）  
-**Plan Version**：v0.1.0  
+**Plan Version**：v0.2.0  
 **当前工作分支**：`epic/EPIC-001-word-memory-app`  
 **Feature 目录**：`specs/epics/EPIC-001-word-memory-app/features/FEAT-003-learning-ui/`  
 **日期**：2026-01-19  
@@ -18,6 +18,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-01-19 | Feature | 初始版本：创建 Plan 工程级蓝图，完成架构设计、关键流程、量化指标与 Story 拆分 | 学习 UI、会话状态、可观测性 | 否 |
+| v0.2.0 | 2026-01-19 | Feature | 按新规范补齐模块级 UML：为 A3.2 的 7 个模块（UI/ViewModel/UseCase/StudyTaskRepository/WordRepository/MediaRepository/EventRepository）补齐 UML 类图 + 成功/异常时序图 + 异常清单表 | A3.4 所有模块 | 否 |
 
 ## 概述
 
@@ -190,37 +191,847 @@ flowchart LR
 
 #### A3.4 关键模块设计（详细设计 + 取舍，必须）
 
-##### 模块：LearningSessionViewModel（会话状态机）
+> **重要（模块级 UML 规范）**：
+> - 以 `A3.2 模块拆分与职责` 为准：每个模块必须在本节拥有一个对应小节。
+> - 每个模块小节必须包含：
+>   - **UML 类图（1 张）**：描述模块内部关键类/接口/数据结构，以及依赖方向
+>   - **UML 时序图（成功，1 张）**：描述主调用链路（包含线程/协程边界点、关键状态更新点）
+>   - **UML 时序图（异常，1 张）**：用 `alt/else` 覆盖关键异常（超时/IO失败/权限/并发重入/取消/数据损坏等）
+>   - **异常清单表**：列出异常 → 对策（可重试/不可重试、回滚、一致性、用户提示、可观测性）
+
+##### 模块：UI（Compose）
+
+- **模块定位**：学习界面的 UI 展示层，包括入口页、会话页（卡片）、完成页；位于 UI 层（Jetpack Compose）
+- **设计目标**：流畅的交互体验、可访问性、状态响应式更新
+- **核心数据结构/状态**：
+  - `LearningUiState`：从 ViewModel 观察的状态（`StateFlow`）
+  - `CardDisplayState`：卡片展示状态（答案显示/隐藏、加载中）
+- **对外接口（协议）**：通过 Compose 事件回调传递给 ViewModel
+- **策略与算法**：响应式 UI（状态驱动）、手势检测（`Modifier.pointerInput`）
+- **失败与降级**：UI 层不处理业务失败，仅展示 ViewModel 提供的错误状态
+- **安全与隐私**：不在 UI 层记录日志，仅展示内容
+- **可观测性**：无（由 ViewModel 层统一记录）
+- **优缺点**：
+  - **优点**：声明式 UI，状态驱动，易于测试
+  - **缺点/代价**：需要理解 Compose 重组机制，避免过度重组
+  - **替代方案与否决理由**：XML Layout 不符合 EPIC 技术约束（必须使用 Compose）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class LearningEntryScreen {
+        +onStartLearning()
+        +onStartReview()
+    }
+    class LearningSessionScreen {
+        +onRevealAnswer()
+        +onRate(rating: UserRating)
+        +onSwipeGesture(action)
+        +onPlayPronunciation()
+        +onExitRequest()
+    }
+    class LearningDoneScreen {
+        +onBackToHome()
+        +onStudyMore()
+    }
+    class CardComposable {
+        -word: String
+        -phonetic: String
+        -isAnswerRevealed: Boolean
+        +render()
+    }
+    class GestureHandler {
+        +detectSwipe()
+        +detectTap()
+    }
+    
+    LearningEntryScreen --> LearningSessionViewModel : observes state
+    LearningSessionScreen --> LearningSessionViewModel : observes state + events
+    LearningDoneScreen --> LearningSessionViewModel : observes state
+    LearningSessionScreen --> CardComposable : contains
+    LearningSessionScreen --> GestureHandler : uses
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as LearningSessionScreen
+    participant VM as LearningSessionViewModel
+    participant State as UiState
+    
+    User->>UI: 点击显示答案
+    UI->>VM: onRevealAnswer()
+    VM->>State: update(isAnswerRevealed = true)
+    State-->>UI: StateFlow emits
+    UI->>UI: Recomposition: 显示答案区域
+    
+    User->>UI: 点击"认识"按钮
+    UI->>VM: onRate(UserRating.KNOWN)
+    VM->>VM: [IO Thread] submit rating
+    VM->>State: update(submitState = Loading)
+    State-->>UI: StateFlow emits
+    UI->>UI: Recomposition: 按钮禁用
+    
+    VM->>State: update(submitState = Success, nextTask)
+    State-->>UI: StateFlow emits
+    UI->>UI: Recomposition: 切换到下一题
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant UI as LearningSessionScreen
+    participant VM as LearningSessionViewModel
+    participant UseCase
+    participant Error
+    
+    User->>UI: 快速连点"认识"按钮
+    UI->>VM: onRate(rating) #1
+    UI->>VM: onRate(rating) #2
+    
+    alt 第一次提交已开始
+        VM->>VM: Mutex.lock()
+        VM->>UseCase: submitRating()
+        VM->>VM: Mutex.unlock()
+    else 第二次提交被拒绝（并发保护）
+        VM->>Error: ignore duplicate submit
+        Note over VM: 不触发 UseCase
+    end
+    
+    alt 提交失败（网络/超时）
+        UseCase-->>VM: Result.failure(RetryableError)
+        VM->>VM: update(submitState = Failed(retryable))
+        VM-->>UI: StateFlow emits error state
+        UI->>UI: 显示重试按钮
+        User->>UI: 点击重试
+        UI->>VM: onRetrySubmit()
+        VM->>UseCase: submitRating() [retry]
+    else 提交失败（不可重试）
+        UseCase-->>VM: Result.failure(NonRetryableError)
+        VM->>VM: update(submitState = Failed(notRetryable))
+        VM-->>UI: StateFlow emits error state
+        UI->>UI: 显示错误提示，不允许重试
+    end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-UI-001 | UI 点击事件处理 | 快速连点/手势重复触发 | 重复事件 | 否 | ViewModel 层并发保护，忽略重复 | 无（按钮已禁用） | event: duplicate_submit | NFR-REL-001 |
+| EX-UI-002 | Compose 重组 | 状态更新导致过度重组 | 性能问题 | 否 | 优化状态粒度，使用 `remember` 缓存 | 无（用户体验卡顿） | performance: jank_detected | NFR-PERF-002 |
+
+##### 模块：ViewModel
 
 - **模块定位**：学习会话的“唯一 UI 状态源”，维护当前任务、是否显示答案、提交状态与错误提示；位于 ViewModel 层
 - **设计目标**：一致性（不跳题/不丢进度）、并发安全（防重复提交）、可恢复（旋转/进程回收）、可观测（事件口径统一）
-- **核心状态（建议 UiState）**：
-  - `sessionType`：学习/复习
-  - `progress`：done/total/remaining（从引擎或会话上下文）
-  - `currentTask`：taskId、wordId、taskKind、排序信息（可选）
-  - `card`：WordCardModel（拼写/音标/释义/例句/图片引用/是否有发音）
-  - `isAnswerRevealed`：Boolean（由 `SavedStateHandle` 保存）
-  - `submitState`：Idle/Loading/Failed(retryable)/Success
-- **对外事件**：
-  - `onRevealAnswer()`
-  - `onRate(rating: UserRating)`
-  - `onSwipeGesture(action)`
-  - `onPlayPronunciation()`
-  - `onExitRequest()`（返回确认）
+- **核心数据结构/状态**：
+  - `LearningUiState`：sealed class 包含所有 UI 状态（Loading/Content/Error/Empty/Done）
+  - `submitMutex`：`Mutex` 用于并发保护提交操作
+  - `SavedStateHandle`：保存 `isAnswerRevealed`、`currentTaskId` 等恢复所需状态
+- **对外接口（协议）**：
+  - `val uiState: StateFlow<LearningUiState>`
+  - `fun onRevealAnswer()`
+  - `fun onRate(rating: UserRating)`
+  - `fun onRetrySubmit()`
+- **策略与算法**：状态机管理（Loading → Content → Submit → Next），并发保护（`Mutex`），状态恢复（`SavedStateHandle`）
 - **失败与降级**：
   - 取题失败：显示错误 + 重试按钮；允许退出
   - 提交失败：停留当前题 + 重试；不改变进度
   - 空任务：空状态（今日已完成）
-- **替代方案与否决理由**：不把会话状态分散到多个 `remember`（难以保证并发与恢复一致性）
+- **安全与隐私**：不记录内容文本，仅记录 wordId/枚举
+- **可观测性**：记录进入/退出、显示答案、提交（成功/失败）事件
+- **优缺点**：
+  - **优点**：集中状态管理，可测试，支持恢复
+  - **缺点/代价**：状态类可能较大，需要合理拆分
+  - **替代方案与否决理由**：不把会话状态分散到多个 `remember`（难以保证并发与恢复一致性）
 
-##### 模块：StudyTaskRepository（算法引擎适配层）
+###### UML 类图（静态，必须）
 
-- **模块定位**：将 FEAT-002 的引擎接口适配为 UI 可用的会话语义（Start/Next/Submit），并统一超时/重试/幂等
+```mermaid
+classDiagram
+    class LearningSessionViewModel {
+        -uiState: StateFlow~LearningUiState~
+        -savedStateHandle: SavedStateHandle
+        -submitMutex: Mutex
+        +onRevealAnswer()
+        +onRate(rating: UserRating)
+        +onRetrySubmit()
+        +onExitRequest()
+        -handleSubmit(rating: UserRating)
+        -loadNextTask()
+    }
+    class LearningUiState {
+        <<sealed>>
+    }
+    class UiStateLoading {
+        +message: String
+    }
+    class UiStateContent {
+        +currentTask: StudyTask
+        +card: WordCardModel
+        +isAnswerRevealed: Boolean
+        +submitState: SubmitState
+        +progress: Progress
+    }
+    class UiStateError {
+        +message: String
+        +retryable: Boolean
+        +onRetry: () -> Unit
+    }
+    class SubmitState {
+        <<sealed>>
+    }
+    class StartSessionUseCase
+    class SubmitRatingUseCase
+    class GetNextTaskUseCase
+    class EventRepository
+    
+    LearningSessionViewModel --> LearningUiState
+    LearningUiState <|-- UiStateLoading
+    LearningUiState <|-- UiStateContent
+    LearningUiState <|-- UiStateError
+    UiStateContent --> SubmitState
+    LearningSessionViewModel --> StartSessionUseCase
+    LearningSessionViewModel --> SubmitRatingUseCase
+    LearningSessionViewModel --> GetNextTaskUseCase
+    LearningSessionViewModel --> EventRepository
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UI
+    participant VM as LearningSessionViewModel
+    participant SavedState as SavedStateHandle
+    participant UseCase as StartSessionUseCase
+    participant TaskRepo as StudyTaskRepository
+    participant WordRepo as WordRepository
+    participant EventRepo as EventRepository
+    
+    UI->>VM: 进入学习会话
+    VM->>EventRepo: log(ENTER_SESSION)
+    VM->>UseCase: startSession(type, limit)
+    
+    Note over VM,TaskRepo: [IO Thread]
+    UseCase->>TaskRepo: getTasks(sessionType, limit)
+    TaskRepo-->>UseCase: Result.success(tasks)
+    UseCase->>TaskRepo: getCurrentTask()
+    TaskRepo-->>UseCase: Result.success(task)
+    UseCase->>WordRepo: getWordCard(task.wordId)
+    WordRepo-->>UseCase: Result.success(card)
+    
+    UseCase-->>VM: Result.success(sessionData)
+    VM->>VM: update(uiState = Content)
+    VM->>SavedState: save("currentTaskId", task.id)
+    VM-->>UI: StateFlow emits Content
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UI
+    participant VM as LearningSessionViewModel
+    participant Mutex
+    participant UseCase as SubmitRatingUseCase
+    participant TaskRepo
+    participant Error
+    
+    UI->>VM: onRate(rating) #1
+    UI->>VM: onRate(rating) #2 [快速连点]
+    
+    VM->>Mutex: lock()
+    alt 第一次提交
+        Mutex-->>VM: acquired
+        VM->>VM: update(submitState = Loading)
+        VM->>UseCase: submitRating(taskId, rating)
+        
+        alt 提交成功
+            UseCase->>TaskRepo: submit(...)
+            TaskRepo-->>UseCase: Result.success(nextTask)
+            UseCase-->>VM: Result.success(nextTask)
+            VM->>VM: loadNextTask()
+            VM->>VM: update(uiState = Content(nextTask))
+        else 提交失败（可重试）
+            TaskRepo-->>UseCase: Result.failure(TimeoutError)
+            UseCase-->>VM: Result.failure(RetryableError)
+            VM->>VM: update(submitState = Failed(retryable=true))
+            Note over VM: 停留在当前题
+        else 提交失败（不可重试）
+            TaskRepo-->>UseCase: Result.failure(DataError)
+            UseCase-->>VM: Result.failure(NonRetryableError)
+            VM->>VM: update(submitState = Failed(retryable=false))
+        end
+        VM->>Mutex: unlock()
+    else 第二次提交（被拒绝）
+        Mutex-->>VM: lock failed (already locked)
+        Note over VM: ignore duplicate submit
+    end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-VM-001 | 提交反馈 | 快速连点导致重复提交 | 并发重入 | 否 | Mutex 保护，忽略重复请求 | 按钮已禁用，无提示 | event: duplicate_submit, wordId | NFR-REL-001 |
+| EX-VM-002 | 提交反馈 | 算法引擎超时（3s） | TimeoutError | 是 | 停留当前题，允许重试 | "提交失败，请重试" | event: submit_failed, errorType: timeout, wordId | NFR-REL-001 |
+| EX-VM-003 | 提交反馈 | 算法引擎数据错误 | DataError | 否 | 停留当前题，不允许重试，记录错误 | "提交失败，请稍后再试" | event: submit_failed, errorType: data_error, wordId | NFR-OBS-002 |
+| EX-VM-004 | 获取任务 | 算法引擎返回空任务 | EmptyTasks | 否 | 显示空状态 | "今日已完成" | event: empty_tasks | NFR-OBS-001 |
+| EX-VM-005 | 获取任务 | 算法引擎不可用 | EngineUnavailable | 是 | 显示错误，允许重试 | "获取任务失败，请重试" | event: get_task_failed, errorType: unavailable | NFR-REL-001 |
+| EX-VM-006 | 状态恢复 | SavedStateHandle 数据损坏 | CorruptedState | 否 | 从算法引擎重新获取当前任务 | 静默恢复，无提示 | event: state_recovery_failed | NFR-REL-002 |
+
+##### 模块：UseCase
+
+- **模块定位**：业务流程编排层，封装“开始会话/取题/提交/恢复/播放发音”等用例；位于领域层
+- **设计目标**：业务逻辑集中、可测试、错误语义清晰（可重试/不可重试）
+- **核心数据结构/状态**：
+  - `StartSessionUseCase`：输入 `SessionType, Int`，输出 `Result<SessionData>`
+  - `SubmitRatingUseCase`：输入 `sessionId, taskId, UserRating`，输出 `Result<StudyTask?>`
+  - `GetNextTaskUseCase`：输入 `sessionId`，输出 `Result<StudyTask?>`
+- **对外接口（协议）**：suspend 函数，返回 `Result<T>` 或 sealed class
+- **策略与算法**：错误分类（retryable vs non-retryable），超时处理（协程超时）
+- **失败与降级**：错误封装为 `Failure` sealed class，包含 `retryable` 标志
+- **安全与隐私**：不记录内容文本，UseCase 层仅传递 wordId
+- **可观测性**：不直接记录，由 ViewModel 统一记录
+- **优缺点**：
+  - **优点**：业务逻辑集中，易于测试和复用
+  - **缺点/代价**：增加一层抽象，可能过度设计
+  - **替代方案与否决理由**：将业务逻辑放在 ViewModel 中会导致 ViewModel 臃肿且难以测试
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class StartSessionUseCase {
+        -taskRepo: StudyTaskRepository
+        -wordRepo: WordRepository
+        +invoke(type: SessionType, limit: Int): Result~SessionData~
+    }
+    class SubmitRatingUseCase {
+        -taskRepo: StudyTaskRepository
+        +invoke(sessionId: String, taskId: String, rating: UserRating): Result~StudyTask?~
+    }
+    class GetNextTaskUseCase {
+        -taskRepo: StudyTaskRepository
+        -wordRepo: WordRepository
+        +invoke(sessionId: String): Result~StudyTask?~
+    }
+    class PlayPronunciationUseCase {
+        -mediaRepo: MediaRepository
+        +invoke(wordId: String): Result~Unit~
+    }
+    class Result~T~ {
+        <<sealed>>
+    }
+    class Success~T~ {
+        +value: T
+    }
+    class Failure {
+        <<sealed>>
+    }
+    class RetryableFailure {
+        +reason: String
+        +cause: Throwable?
+    }
+    class NonRetryableFailure {
+        +reason: String
+        +cause: Throwable?
+    }
+    class StudyTaskRepository
+    class WordRepository
+    class MediaRepository
+    
+    StartSessionUseCase --> StudyTaskRepository
+    StartSessionUseCase --> WordRepository
+    SubmitRatingUseCase --> StudyTaskRepository
+    GetNextTaskUseCase --> StudyTaskRepository
+    GetNextTaskUseCase --> WordRepository
+    PlayPronunciationUseCase --> MediaRepository
+    Result~T~ <|-- Success~T~
+    Result~T~ <|-- Failure
+    Failure <|-- RetryableFailure
+    Failure <|-- NonRetryableFailure
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant VM as ViewModel
+    participant UC as SubmitRatingUseCase
+    participant Repo as StudyTaskRepository
+    participant Engine as AlgorithmEngine
+    
+    Note over VM,Engine: [IO Thread]
+    VM->>UC: invoke(sessionId, taskId, rating)
+    UC->>Repo: submitRating(sessionId, taskId, rating)
+    Repo->>Engine: submit(sessionId, taskId, rating)
+    Engine-->>Repo: Result.success(nextTask)
+    Repo-->>UC: Result.success(nextTask)
+    UC->>UC: map to domain model
+    UC-->>VM: Result.success(nextTask)
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant VM as ViewModel
+    participant UC as SubmitRatingUseCase
+    participant Repo as StudyTaskRepository
+    participant Engine as AlgorithmEngine
+    participant Timeout
+    
+    VM->>UC: invoke(sessionId, taskId, rating)
+    UC->>Repo: submitRating(sessionId, taskId, rating)
+    Repo->>Engine: submit(sessionId, taskId, rating)
+    
+    alt 超时（可重试）
+        Engine-->>Timeout: timeout after 3s
+        Timeout-->>Repo: Result.failure(TimeoutException)
+        Repo-->>UC: Result.failure(TimeoutException)
+        UC->>UC: wrap as RetryableFailure
+        UC-->>VM: Result.failure(RetryableFailure("提交超时"))
+    else 数据错误（不可重试）
+        Engine-->>Repo: Result.failure(DataError("Invalid taskId"))
+        Repo-->>UC: Result.failure(DataError)
+        UC->>UC: wrap as NonRetryableFailure
+        UC-->>VM: Result.failure(NonRetryableFailure("任务不存在"))
+    else 网络/IO 错误（可重试）
+        Engine-->>Repo: Result.failure(IOException)
+        Repo-->>UC: Result.failure(IOException)
+        UC->>UC: wrap as RetryableFailure
+        UC-->>VM: Result.failure(RetryableFailure("网络错误"))
+    end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-UC-001 | 提交反馈 | 算法引擎超时（3s） | TimeoutException | 是 | 封装为 RetryableFailure | 由 ViewModel 提供 | errorType: timeout | NFR-REL-001 |
+| EX-UC-002 | 提交反馈 | 算法引擎数据错误 | DataError | 否 | 封装为 NonRetryableFailure | 由 ViewModel 提供 | errorType: data_error | NFR-OBS-002 |
+| EX-UC-003 | 获取任务 | 算法引擎不可用 | EngineUnavailable | 是 | 封装为 RetryableFailure | 由 ViewModel 提供 | errorType: unavailable | NFR-REL-001 |
+| EX-UC-004 | 获取单词卡片 | 词库数据缺失 | WordNotFound | 否 | 封装为 NonRetryableFailure，使用最小字段降级 | 由 ViewModel 提供 | errorType: word_not_found | NFR-REL-001 |
+
+##### 模块：StudyTaskRepository
+
+- **模块定位**：将 FEAT-002 的引擎接口适配为 UI 可用的会话语义（Start/Next/Submit），并统一超时/重试/幂等；位于数据层
 - **设计目标**：口径统一、错误语义清晰（可重试/不可重试）、幂等提交、防重复
-- **幂等与并发策略**：
-  - 同一 `taskId` 在一次 `submit` 完成前拒绝新提交
-  - 若引擎支持幂等键：使用 `sessionId+taskId`；否则在 repo 内做去重缓存（短期）
+- **核心数据结构/状态**：
+  - `pendingSubmits: MutableMap<String, Job>`：正在提交的任务 ID 映射，用于去重
+  - `timeoutDuration: Duration = 3.seconds`：提交超时时间
+- **对外接口（协议）**：
+  - `suspend fun startSession(type: SessionType, limit: Int): Result<SessionContext>`
+  - `suspend fun getCurrentTask(sessionId: String): Result<StudyTask>`
+  - `suspend fun submitRating(sessionId: String, taskId: String, rating: UserRating): Result<StudyTask?>`
+- **策略与算法**：幂等与并发策略（同一 `taskId` 在一次 `submit` 完成前拒绝新提交）
+- **失败与降级**：超时使用协程 `withTimeout`，失败返回 `Result.failure`
+- **安全与隐私**：不记录内容文本，仅记录 wordId/taskId
 - **可观测性**：记录 submit 耗时、失败类型、重试次数（脱敏）
+- **优缺点**：
+  - **优点**：统一接口，错误处理集中，幂等保证
+  - **缺点/代价**：增加一层抽象，需要维护去重缓存
+  - **替代方案与否决理由**：直接调用算法引擎会导致错误处理和超时逻辑分散，难以保证一致性
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class StudyTaskRepository {
+        -engine: SpacedRepetitionEngine
+        -pendingSubmits: MutableMap~String, Job~
+        -timeoutDuration: Duration
+        +startSession(type: SessionType, limit: Int): Result~SessionContext~
+        +getCurrentTask(sessionId: String): Result~StudyTask~
+        +submitRating(sessionId: String, taskId: String, rating: UserRating): Result~StudyTask?~
+        -checkAndLockTask(taskId: String): Boolean
+        -unlockTask(taskId: String)
+    }
+    class SpacedRepetitionEngine {
+        <<interface from FEAT-002>>
+        +startSession(type: SessionType, limit: Int): Result~SessionContext~
+        +getCurrentTask(sessionId: String): Result~StudyTask~
+        +submit(sessionId: String, taskId: String, rating: UserRating): Result~StudyTask?~
+    }
+    class Result~T~
+    class SessionContext
+    class StudyTask
+    class UserRating
+    
+    StudyTaskRepository --> SpacedRepetitionEngine
+    StudyTaskRepository --> Result~T~
+    StudyTaskRepository ..> SessionContext
+    StudyTaskRepository ..> StudyTask
+    StudyTaskRepository ..> UserRating
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant Repo as StudyTaskRepository
+    participant Engine as SpacedRepetitionEngine
+    participant Lock as PendingSubmits
+    
+    UC->>Repo: submitRating(sessionId, taskId, rating)
+    Repo->>Lock: checkAndLockTask(taskId)
+    alt taskId not in pendingSubmits
+        Lock-->>Repo: true (locked)
+        Note over Repo,Engine: [IO Thread with timeout]
+        Repo->>Engine: submit(sessionId, taskId, rating)
+        Engine-->>Repo: Result.success(nextTask)
+        Repo->>Lock: unlockTask(taskId)
+        Repo-->>UC: Result.success(nextTask)
+    end
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant Repo as StudyTaskRepository
+    participant Engine as SpacedRepetitionEngine
+    participant Lock as PendingSubmits
+    participant Timeout
+    
+    UC->>Repo: submitRating(sessionId, taskId, rating) #1
+    Repo->>Lock: checkAndLockTask(taskId)
+    Lock-->>Repo: true
+    
+    UC->>Repo: submitRating(sessionId, taskId, rating) #2 [重复]
+    Repo->>Lock: checkAndLockTask(taskId)
+    alt taskId already in pendingSubmits
+        Lock-->>Repo: false (already locked)
+        Repo-->>UC: Result.failure(DuplicateSubmitError)
+    end
+    
+    Repo->>Engine: submit(sessionId, taskId, rating)
+    alt 超时
+        Engine-->>Timeout: timeout after 3s
+        Timeout-->>Repo: TimeoutCancellationException
+        Repo->>Lock: unlockTask(taskId)
+        Repo-->>UC: Result.failure(RetryableError("提交超时"))
+    else 引擎返回错误
+        Engine-->>Repo: Result.failure(EngineError("Invalid state"))
+        Repo->>Lock: unlockTask(taskId)
+        alt 可重试错误
+            Repo-->>UC: Result.failure(RetryableError("引擎错误"))
+        else 不可重试错误
+            Repo-->>UC: Result.failure(NonRetryableError("数据错误"))
+        end
+    end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-REPO-001 | 提交反馈 | 同一 taskId 重复提交 | DuplicateSubmitError | 否 | 拒绝重复提交，返回错误 | 由 ViewModel 处理 | event: duplicate_submit, taskId | NFR-REL-001 |
+| EX-REPO-002 | 提交反馈 | 算法引擎超时（3s） | TimeoutError | 是 | 解锁 taskId，返回可重试错误 | 由 ViewModel 提供 | event: submit_timeout, elapsedMs, taskId | NFR-REL-001 |
+| EX-REPO-003 | 提交反馈 | 算法引擎返回错误（可重试） | RetryableError | 是 | 解锁 taskId，返回可重试错误 | 由 ViewModel 提供 | event: submit_failed, errorType, taskId | NFR-REL-001 |
+| EX-REPO-004 | 提交反馈 | 算法引擎返回错误（不可重试） | NonRetryableError | 否 | 解锁 taskId，返回不可重试错误 | 由 ViewModel 提供 | event: submit_failed, errorType, taskId | NFR-REL-001 |
+| EX-REPO-005 | 获取任务 | 算法引擎不可用 | EngineUnavailable | 是 | 返回可重试错误 | 由 ViewModel 提供 | event: get_task_failed, errorType | NFR-REL-001 |
+
+##### 模块：WordRepository
+
+- **模块定位**：将 wordId 映射为展示字段（拼写/释义/音标/例句/图片引用）；位于数据层
+- **设计目标**：提供单词卡片数据，不记录内容文本到日志
+- **核心数据结构/状态**：
+  - `WordCardModel`：包含 wordId、word、phonetic、definition、examples、imageRef、hasPronunciation
+- **对外接口（协议）**：
+  - `suspend fun getWordCard(wordId: String): Result<WordCardModel>`
+- **策略与算法**：从 FEAT-001 获取词库数据，转换为核心模型
+- **失败与降级**：单词不存在时返回错误，由 UseCase 处理降级（最小字段展示）
+- **安全与隐私**：不在日志中输出完整内容文本，仅记录 wordId
+- **可观测性**：不记录（由上层统一记录）
+- **优缺点**：
+  - **优点**：封装词库访问，便于替换实现
+  - **缺点/代价**：增加一层抽象
+  - **替代方案与否决理由**：直接访问 FEAT-001 会导致耦合，且难以保证隐私约束
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class WordRepository {
+        -wordLibraryRepo: WordLibraryRepository
+        +getWordCard(wordId: String): Result~WordCardModel~
+    }
+    class WordLibraryRepository {
+        <<interface from FEAT-001>>
+        +getWord(wordId: String): Result~Word~
+    }
+    class WordCardModel {
+        +wordId: String
+        +word: String
+        +phonetic: String
+        +definition: String
+        +examples: List~String~
+        +imageRef: String?
+        +hasPronunciation: Boolean
+    }
+    class Result~T~
+    
+    WordRepository --> WordLibraryRepository
+    WordRepository --> WordCardModel
+    WordRepository --> Result~T~
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant Repo as WordRepository
+    participant LibRepo as WordLibraryRepository
+    
+    Note over UC,LibRepo: [IO Thread]
+    UC->>Repo: getWordCard(wordId)
+    Repo->>LibRepo: getWord(wordId)
+    LibRepo-->>Repo: Result.success(Word)
+    Repo->>Repo: map to WordCardModel
+    Repo-->>UC: Result.success(WordCardModel)
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant Repo as WordRepository
+    participant LibRepo as WordLibraryRepository
+    
+    UC->>Repo: getWordCard(wordId)
+    Repo->>LibRepo: getWord(wordId)
+    
+    alt 单词不存在
+        LibRepo-->>Repo: Result.failure(WordNotFound)
+        Repo-->>UC: Result.failure(WordNotFound)
+    else 词库未选择
+        LibRepo-->>Repo: Result.failure(LibraryNotSelected)
+        Repo-->>UC: Result.failure(LibraryNotSelected)
+    else IO 错误
+        LibRepo-->>Repo: Result.failure(IOException)
+        Repo-->>UC: Result.failure(IOException)
+    end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-WORD-001 | 获取单词卡片 | 单词不存在 | WordNotFound | 否 | 由 UseCase 处理降级（最小字段） | 由 ViewModel 提供 | errorType: word_not_found, wordId | NFR-REL-001 |
+| EX-WORD-002 | 获取单词卡片 | 词库未选择 | LibraryNotSelected | 否 | 引导用户选择词库 | 由 ViewModel 提供 | errorType: library_not_selected | NFR-REL-001 |
+| EX-WORD-003 | 获取单词卡片 | IO 错误 | IOException | 是 | 返回可重试错误 | 由 ViewModel 提供 | errorType: io_error, wordId | NFR-REL-001 |
+
+##### 模块：MediaRepository
+
+- **模块定位**：播放/加载多媒体资源；位于数据层
+- **设计目标**：失败不阻断学习主流程，正确释放资源
+- **核心数据结构/状态**：
+  - `hasPronunciation(wordId: String): Boolean`：检查是否有发音资源
+  - `suspend fun playPronunciation(wordId: String): Result<Unit>`：播放发音
+- **对外接口（协议）**：
+  - `fun hasPronunciation(wordId: String): Boolean`
+  - `suspend fun playPronunciation(wordId: String): Result<Unit>`
+- **策略与算法**：通过 FEAT-006 接口播放，失败不抛出异常（返回 Result）
+- **失败与降级**：资源缺失/播放失败返回 `Result.failure`，不影响学习流程
+- **安全与隐私**：不记录资源内容
+- **可观测性**：可选记录播放成功/失败（不影响主流程）
+- **优缺点**：
+  - **优点**：封装多媒体访问，便于替换实现
+  - **缺点/代价**：增加一层抽象
+  - **替代方案与否决理由**：直接访问 FEAT-006 会导致耦合，且难以保证资源释放和降级策略
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class MediaRepository {
+        -pronunciationPlayer: PronunciationPlayer
+        +hasPronunciation(wordId: String): Boolean
+        +playPronunciation(wordId: String): Result~Unit~
+    }
+    class PronunciationPlayer {
+        <<interface from FEAT-006>>
+        +hasPronunciation(wordId: String): Boolean
+        +play(wordId: String): Result~Unit~
+        +stop()
+    }
+    class Result~T~
+    
+    MediaRepository --> PronunciationPlayer
+    MediaRepository --> Result~T~
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant Repo as MediaRepository
+    participant Player as PronunciationPlayer
+    
+    UC->>Repo: playPronunciation(wordId)
+    Repo->>Player: play(wordId)
+    Player-->>Repo: Result.success(Unit)
+    Repo-->>UC: Result.success(Unit)
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant Repo as MediaRepository
+    participant Player as PronunciationPlayer
+    
+    UC->>Repo: playPronunciation(wordId)
+    
+    alt 资源不存在
+        Repo->>Player: hasPronunciation(wordId)
+        Player-->>Repo: false
+        Repo-->>UC: Result.failure(ResourceNotFound)
+    else 播放失败
+        Repo->>Player: play(wordId)
+        Player-->>Repo: Result.failure(PlaybackError)
+        Repo-->>UC: Result.failure(PlaybackError)
+        Note over UC: 不影响学习流程，静默失败
+    else 播放超时
+        Repo->>Player: play(wordId)
+        Player-->>Timeout: timeout after 1s
+        Timeout-->>Repo: TimeoutException
+        Repo->>Player: stop()
+        Repo-->>UC: Result.failure(TimeoutError)
+    end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-MEDIA-001 | 播放发音 | 资源不存在 | ResourceNotFound | 否 | 隐藏/置灰入口，不提示 | 入口已隐藏/置灰 | event: pronunciation_not_found, wordId | NFR-POWER-001 |
+| EX-MEDIA-002 | 播放发音 | 播放失败 | PlaybackError | 否 | 静默失败，不影响学习 | 可选：Toast "播放失败" | event: playback_failed, wordId | NFR-POWER-001 |
+| EX-MEDIA-003 | 播放发音 | 播放超时（1s） | TimeoutError | 否 | 停止播放，静默失败 | 无 | event: playback_timeout, wordId | NFR-POWER-001 |
+
+##### 模块：EventRepository
+
+- **模块定位**：记录可观测事件（脱敏）；位于数据层
+- **设计目标**：统一事件口径，保证隐私合规（不记录内容文本）
+- **核心数据结构/状态**：
+  - `LearningEvent`：sealed class 包含所有事件类型
+  - 事件字段白名单：`sessionType`、`wordId`、`taskId`、`rating`、`elapsedMs`、`errorType`、`retryCount`
+- **对外接口（协议）**：
+  - `fun logEvent(event: LearningEvent)`
+- **策略与算法**：事件采样（可选），字段白名单校验
+- **失败与降级**：事件记录失败不应影响业务逻辑（静默失败或使用本地缓存）
+- **安全与隐私**：字段白名单，禁止记录释义/例句正文
+- **可观测性**：本模块即为可观测性实现
+- **优缺点**：
+  - **优点**：集中事件管理，便于统一口径和隐私合规
+  - **缺点/代价**：增加一层抽象
+  - **替代方案与否决理由**：分散记录事件会导致口径不一致，难以保证隐私合规
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class EventRepository {
+        -eventLogger: EventLogger
+        +logEvent(event: LearningEvent)
+        -validateEvent(event: LearningEvent): Boolean
+    }
+    class LearningEvent {
+        <<sealed>>
+    }
+    class EnterSessionEvent {
+        +sessionType: SessionType
+        +timestamp: Long
+    }
+    class ExitSessionEvent {
+        +sessionType: SessionType
+        +elapsedMs: Long
+    }
+    class RevealAnswerEvent {
+        +wordId: String
+        +taskId: String
+    }
+    class SubmitRatingEvent {
+        +wordId: String
+        +taskId: String
+        +rating: UserRating
+        +elapsedMs: Long
+        +success: Boolean
+    }
+    class EventLogger {
+        <<interface>>
+        +log(event: Map~String, Any~)
+    }
+    
+    EventRepository --> LearningEvent
+    LearningEvent <|-- EnterSessionEvent
+    LearningEvent <|-- ExitSessionEvent
+    LearningEvent <|-- RevealAnswerEvent
+    LearningEvent <|-- SubmitRatingEvent
+    EventRepository --> EventLogger
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant VM as ViewModel
+    participant Repo as EventRepository
+    participant Logger as EventLogger
+    
+    VM->>Repo: logEvent(SubmitRatingEvent(...))
+    Repo->>Repo: validateEvent(event)
+    alt 事件字段合法
+        Repo->>Repo: serialize to map (only whitelist fields)
+        Repo->>Logger: log(eventMap)
+        Logger-->>Repo: success
+    end
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant VM as ViewModel
+    participant Repo as EventRepository
+    participant Logger as EventLogger
+    
+    VM->>Repo: logEvent(event)
+    Repo->>Repo: validateEvent(event)
+    
+    alt 事件包含禁止字段（如释义正文）
+        Repo->>Repo: validation failed
+        Note over Repo: 移除禁止字段或拒绝记录
+        Repo-->>VM: validation error (静默处理，不抛异常)
+    else 日志记录失败
+        Repo->>Logger: log(eventMap)
+        Logger-->>Repo: IOException
+        Note over Repo: 静默失败，不影响业务
+        Repo-->>VM: success (业务不受影响)
+    end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-EVENT-001 | 记录事件 | 事件包含禁止字段（如释义正文） | ValidationError | 否 | 移除禁止字段或拒绝记录，不抛异常 | 无（静默处理） | N/A（事件被拒绝） | NFR-SEC-001 |
+| EX-EVENT-002 | 记录事件 | 日志记录失败（IO 错误） | IOException | 否 | 静默失败，不影响业务逻辑 | 无 | N/A | NFR-OBS-001 |
 
 ### A4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）
 

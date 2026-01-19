@@ -5,7 +5,7 @@
 **Feature Version**：v0.1.0
 **Plan Version**：v0.1.0
 **Tasks Version**：v0.1.0
-**Full Design Version**：v0.1.0
+**Full Design Version**：v0.1.1
 
 **分支**：`epic/EPIC-001-word-memory-app`
 **日期**：2026-01-19
@@ -25,6 +25,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-01-19 | Feature | 初始版本：整合 spec.md、plan.md、tasks.md 生成 Full Design 文档 |  | 否 |
+| v0.1.1 | 2026-01-19 | Feature | 更新 Story 列表和追溯矩阵，与 plan.md 保持一致（5个 Story：ST-001 到 ST-005） | Story 列表、追溯矩阵 | 否 |
 
 ## 1. 背景与范围（来自 spec.md）
 
@@ -89,7 +90,7 @@ flowchart LR
   subgraph System["本系统（System Boundary）<br/>游戏化与激励机制（FEAT-004）"]
     UI["Compose UI<br/>成就列表/积分等级/进度可视化"]
     VM["ViewModel<br/>AchievementViewModel/PointsViewModel"]
-    Engine["游戏化引擎<br/>AchievementEngine/PointsEngine/LevelEngine"]
+    Calculator["计算层<br/>AchievementCalculator/PointsCalculator/LevelCalculator"]
     Repo["Repository<br/>GamificationRepository"]
     DB[(Room 数据库<br/>游戏化数据)]
   end
@@ -102,10 +103,10 @@ flowchart LR
   end
 
   UI --> VM
-  VM --> Engine
-  Engine --> Repo
+  VM --> Calculator
+  Calculator --> Repo
   Repo --> DB
-  Engine --> Stats
+  Calculator --> Stats
   Repo --> DataMgr
   Learning -->|学习事件| Engine
   VM --> OS
@@ -160,10 +161,15 @@ flowchart LR
     LevelVM["LevelViewModel"]
   end
 
-  subgraph Domain["领域层（Engine）"]
-    AchievementEngine["AchievementEngine<br/>成就计算引擎"]
-    PointsEngine["PointsEngine<br/>积分计算引擎"]
-    LevelEngine["LevelEngine<br/>等级计算引擎"]
+  subgraph Domain["领域层（UseCase）"]
+    CheckAchievementUseCase["CheckAchievementUseCase<br/>检查成就用例"]
+    CalculatePointsUseCase["CalculatePointsUseCase<br/>计算积分用例"]
+    CalculateLevelUseCase["CalculateLevelUseCase<br/>计算等级用例"]
+  end
+  subgraph Calculator["计算层"]
+    AchievementCalculator["AchievementCalculator<br/>成就计算器"]
+    PointsCalculator["PointsCalculator<br/>积分计算器"]
+    LevelCalculator["LevelCalculator<br/>等级计算器"]
   end
 
   subgraph Data["数据层（Repository）"]
@@ -179,16 +185,20 @@ flowchart LR
   PointsLevel --> PointsVM
   Progress --> LevelVM
 
-  AchievementVM --> AchievementEngine
-  PointsVM --> PointsEngine
-  LevelVM --> LevelEngine
+  AchievementVM --> CheckAchievementUseCase
+  PointsVM --> CalculatePointsUseCase
+  LevelVM --> CalculateLevelUseCase
 
-  AchievementEngine --> GamificationRepo
-  PointsEngine --> GamificationRepo
-  LevelEngine --> GamificationRepo
+  CheckAchievementUseCase --> AchievementCalculator
+  CheckAchievementUseCase --> GamificationRepo
+  CalculatePointsUseCase --> PointsCalculator
+  CalculatePointsUseCase --> GamificationRepo
+  CalculateLevelUseCase --> LevelCalculator
+  CalculateLevelUseCase --> GamificationRepo
 
-  AchievementEngine --> StatsRepo
-  PointsEngine --> StatsRepo
+  AchievementCalculator --> StatsRepo
+  PointsCalculator --> StatsRepo
+  LevelCalculator --> GamificationRepo
 
   GamificationRepo --> RoomDB
 ```
@@ -197,37 +207,49 @@ flowchart LR
 
 | 模块 | 职责 | 输入/输出 | 依赖 | 约束 |
 |---|---|---|---|---|
-| AchievementViewModel | 管理成就列表 UI 状态、处理用户交互 | 输入：用户查看成就列表；输出：成就列表 UI 状态 | AchievementEngine, GamificationRepository | 主线程更新 UI，后台线程处理数据 |
-| PointsViewModel | 管理积分等级 UI 状态、处理积分变化 | 输入：学习事件；输出：积分等级 UI 状态 | PointsEngine, LevelEngine, GamificationRepository | 主线程更新 UI，实时更新积分 |
-| LevelViewModel | 管理等级 UI 状态、处理等级提升 | 输入：积分变化；输出：等级 UI 状态 | LevelEngine, GamificationRepository | 主线程更新 UI，等级提升时显示动画 |
-| AchievementEngine | 成就计算逻辑、成就检查、成就解锁 | 输入：学习数据统计；输出：成就解锁事件 | StatisticsRepository, GamificationRepository | 成就检查 ≤ 100ms，准确率 100% |
-| PointsEngine | 积分计算逻辑、积分累计、积分历史 | 输入：学习行为事件；输出：积分变化事件 | GamificationRepository | 积分计算 ≤ 50ms，准确率 100% |
-| LevelEngine | 等级计算逻辑、等级提升判断 | 输入：积分数据；输出：等级提升事件 | GamificationRepository | 等级计算 ≤ 50ms，准确率 100% |
+| UI 层（Jetpack Compose） | 成就列表展示、积分等级展示、进度可视化、动画播放 | 输入：用户操作事件<br>输出：UI 状态展示、动画效果 | ViewModel | 仅负责 UI 展示和动画，不包含业务逻辑 |
+| ViewModel 层 | 管理 UI 状态、处理用户事件、调用 UseCase、管理动画状态 | 输入：用户事件、UseCase 结果<br>输出：UI 状态（State）、动画触发器 | Domain 层（UseCase） | 不直接访问数据层，动画状态管理 |
+| Domain 层（UseCase） | 业务逻辑封装、流程编排、成就检查、积分计算、等级计算 | 输入：业务请求（学习事件、查询请求）<br>输出：业务结果（成就列表、积分等级、进度） | Calculator 层、Data 层（Repository） | 不依赖 UI 层，可测试性，异步执行 |
+| Calculator 层 | 成就条件检查、积分计算逻辑、等级计算逻辑 | 输入：学习数据、当前游戏化数据<br>输出：计算结果（成就解锁、积分增量、等级） | LearningStatsRepo（FEAT-005） | 纯计算逻辑，无副作用，可测试性 |
+| Repository 层 | 数据访问抽象、多数据源协调、事务管理 | 输入：数据请求<br>输出：数据实体 | DataSource | 统一数据访问接口，事务保证一致性 |
+| DataSource 层 | 底层数据访问、Room 数据库操作 | 输入：数据操作（增删改查）<br>输出：原始数据 | Storage（RoomDB） | 仅负责数据读写，无业务逻辑 |
 | GamificationRepository | 游戏化数据访问、数据持久化、数据查询 | 输入：成就/积分/等级数据；输出：数据查询结果 | Room 数据库 | 事务保证数据一致性，数据持久化成功率 100% |
 | StatisticsRepository | 学习数据统计查询（FEAT-005 接口） | 输入：查询条件；输出：学习统计数据 | FEAT-005 | 数据查询超时 1s，失败降级 |
 
 ### 3.3 模块协作与通信方式（来自 plan.md）
 
-- **调用关系**：[UI → ViewModel → Engine → Repository → Database]
-- **通信方式**：Kotlin 函数调用（suspend/Flow）、StateFlow（UI 状态）、Event Bus（学习事件）
+- **调用关系**：
+  - UI → ViewModel → UseCase → Calculator/Repository → DataSource → Storage
+  - UI → ViewModel（用户事件、状态观察、动画触发器）
+  - ViewModel → UseCase（业务调用，suspend 函数）
+  - UseCase → Calculator（计算请求）
+  - UseCase → Repository（数据请求）
+  - Repository → DataSource（数据访问）
+  - Calculator → LearningStatsRepo（学习数据查询）
+- **通信方式**：
+  - 函数调用：Kotlin 函数调用，使用协程处理异步操作
+  - 状态管理：ViewModel 使用 StateFlow/Flow 暴露状态，UI 使用 collectAsState 观察
+  - 事件驱动：学习操作事件通过 UseCase 触发成就检查和积分计算
+  - 错误处理：使用 Result/Sealed Class 封装成功/失败状态
 - **接口协议**：
-  - Engine 接口：`suspend fun checkAchievements(stats: LearningStats): List<AchievementUnlocked>`
-  - Repository 接口：`suspend fun saveAchievement(achievement: Achievement): Result<Unit>`
-  - 错误处理：`Result<T>` + `sealed class GamificationError`
+  - 数据结构：使用 Kotlin data class 定义实体（Achievement, Points, Level, Progress）
+  - 错误码：使用 Sealed Class 定义错误类型（AchievementError, PointsError, LevelError）
+  - 版本策略：数据结构向后兼容，新增字段使用默认值
+  - 幂等约束：学习事件基于学习数据 ID+时间戳去重
 - **并发与线程模型**：
-  - UI 更新：主线程（Dispatchers.Main）
-  - 数据计算：IO 线程（Dispatchers.IO）
-  - 数据库操作：IO 线程（Room 自动处理）
-  - 并发保护：使用 Mutex 保护共享状态（积分累计、成就检查）
+  - 主线程：UI 更新、动画播放、状态观察
+  - IO 线程：数据库操作、网络请求（如有）、文件读写
+  - 协程：所有异步操作使用 Kotlin Coroutines（suspend 函数）
+  - 锁策略：数据库事务保证数据一致性，ViewModel StateFlow 线程安全（无需额外锁）
 
 ### 3.4 关键模块设计（详细设计 + 取舍）（来自 plan.md）
 
 > 说明：本节用于整合 plan 中"关键模块/高风险模块/承载 NFR 的模块"的详细设计与取舍。
 > 若 plan 未提供详细设计，标注 `TODO(Clarify)` 并指回 plan 补齐。
 
-#### 模块：AchievementEngine（成就计算引擎）
+#### 模块：AchievementCalculator（成就计算器）
 
-- **模块定位**：负责成就计算逻辑，根据学习数据自动检查并解锁成就，位于 Domain 层，为 ViewModel 提供成就计算服务
+- **模块定位**：纯计算逻辑层，负责成就条件检查，无副作用，位于 Calculator 层，为 UseCase 提供成就计算服务
 - **设计目标**：性能（检查 ≤ 100ms）、准确性（100% 准确率）、可扩展性（支持新增成就类型）、可观测性（记录成就解锁事件）
 - **核心数据结构/状态**：
   - 成就定义：`AchievementDefinition`（成就ID、名称、描述、解锁条件、图标）
@@ -259,9 +281,9 @@ flowchart LR
   - **缺点/代价**：需要维护成就定义列表、成就检查逻辑复杂度较高
   - **替代方案与否决理由**：不使用定时轮询（性能差、实时性差）；不使用用户主动触发（实时性差）
 
-#### 模块：PointsEngine（积分计算引擎）
+#### 模块：PointsCalculator（积分计算器）
 
-- **模块定位**：负责积分计算逻辑，根据学习行为计算积分并累计，位于 Domain 层，为 ViewModel 提供积分计算服务
+- **模块定位**：纯计算逻辑层，负责积分计算，无副作用，位于 Calculator 层，为 UseCase 提供积分计算服务
 - **设计目标**：性能（计算 ≤ 50ms）、准确性（100% 准确率）、实时性（积分实时更新）、可追溯性（积分历史记录）
 - **核心数据结构/状态**：
   - 积分规则：`PointsRule`（行为类型、积分值、条件）
@@ -293,9 +315,9 @@ flowchart LR
   - **缺点/代价**：需要维护积分规则配置、积分历史记录占用存储空间
   - **替代方案与否决理由**：不使用批量计算（实时性差）；不使用定时计算（实时性差）
 
-#### 模块：LevelEngine（等级计算引擎）
+#### 模块：LevelCalculator（等级计算器）
 
-- **模块定位**：负责等级计算逻辑，根据积分计算用户等级，判断等级提升，位于 Domain 层，为 ViewModel 提供等级计算服务
+- **模块定位**：纯计算逻辑层，负责等级计算，无副作用，位于 Calculator 层，为 UseCase 提供等级计算服务
 - **设计目标**：性能（计算 ≤ 50ms）、准确性（100% 准确率）、可配置性（等级规则可配置）、可扩展性（支持新增等级）
 - **核心数据结构/状态**：
   - 等级定义：`LevelDefinition`（等级ID、等级名称、所需积分、等级图标）
@@ -513,40 +535,37 @@ flowchart TD
 
 ### 5.1 Story 列表（来自 plan.md）
 
-| Story ID | 类型 | 目标 | 覆盖 FR/NFR | 依赖 | 关键风险 |
-|---|---|---|---|---|---|
-| ST-001 | Functional | 用户完成学习任务后，系统能够自动检查并解锁符合条件的成就，显示解锁动画 | FR-001；NFR-PERF-001（成就检查 ≤ 100ms）；NFR-REL-001（准确率 100%） | FEAT-005（学习进度与统计）、FEAT-007（数据管理） | 是（关联 RISK-001、RISK-002） |
-| ST-002 | Functional | 用户学习行为产生积分，积分实时累计和更新，支持积分历史记录 | FR-002；NFR-PERF-001（积分计算 ≤ 50ms）；NFR-REL-001（准确率 100%） | FEAT-007（数据管理） | 是（关联 RISK-002、RISK-005） |
-| ST-003 | Functional | 用户积分达到等级提升条件时，系统显示等级提升动画和奖励提示 | FR-003；NFR-PERF-001（等级计算 ≤ 50ms）；NFR-REL-001（准确率 100%） | ST-002（积分系统） | 否 |
-| ST-004 | Functional | 用户能够查看已解锁的成就列表，列表显示成就名称、解锁时间、描述 | FR-004；NFR-PERF-002（列表加载 ≤ 300ms） | ST-001（成就系统） | 否 |
-| ST-005 | Functional | 用户能够查看当前积分、等级和距离下一等级的进度条，进度条实时更新 | FR-005；NFR-PERF-002（进度可视化渲染 ≤ 200ms）；NFR-MEM-001（内存 ≤ 10MB） | ST-002（积分系统）、ST-003（等级系统） | 是（关联 RISK-004） |
-| ST-006 | Infrastructure | 游戏化数据正确持久化，应用重启后恢复，数据与学习数据保持一致 | FR-007；NFR-REL-002（数据持久化 100%）；NFR-SEC-001（数据安全） | FEAT-007（数据管理） | 是（关联 RISK-002、RISK-003） |
-| ST-007 | Functional | 用户达成学习里程碑时，系统显示庆祝动画 | FR-006；NFR-PERF-001（动画 60fps）；NFR-MEM-001（动画资源及时释放） | ST-001（成就系统）、FEAT-003（学习界面） | 是（关联 RISK-004） |
-| ST-008 | Infrastructure | 记录关键事件（成就解锁、积分变化、等级提升），错误处理完善，降级策略有效 | NFR-OBS-001（关键事件记录）；NFR-OBS-002（错误日志）；NFR-PERF-003（降级策略） | 无（可独立实现） | 否 |
+| Story ID | 类型 | 目标 | 覆盖 FR/NFR | 依赖 | 关键风险 | Story 详细设计入口（来自 plan.md） |
+|---|---|---|---|---|---|---|
+| ST-001 | Functional | 用户完成学习任务后，系统自动检查并解锁符合条件的成就，显示解锁动画和提示 | FR-001、FR-004、FR-007；NFR-PERF-001、NFR-REL-001、NFR-OBS-001 | FEAT-005（学习进度与统计） | 是（关联 RISK-001、RISK-002） | plan.md:Story Detailed Design:ST-001 |
+| ST-002 | Functional | 用户学习行为产生积分，积分实时累计和更新，显示积分变化 | FR-002、FR-005、FR-007；NFR-PERF-001、NFR-REL-001、NFR-OBS-001 | FEAT-005（学习进度与统计）；ST-001（数据模型和 Repository） | 是（关联 RISK-003） | plan.md:Story Detailed Design:ST-002 |
+| ST-003 | Functional | 用户积分达到等级提升条件时，系统显示等级提升动画和奖励提示 | FR-003、FR-005、FR-007；NFR-PERF-001、NFR-REL-001、NFR-OBS-001 | ST-002（积分系统） | 是（关联 RISK-004） | plan.md:Story Detailed Design:ST-003 |
+| ST-004 | Functional | 用户能够查看当前积分、等级和距离下一等级的进度条，达成里程碑时显示庆祝动画 | FR-005、FR-006；NFR-PERF-002、NFR-POWER-001、NFR-MEM-001 | ST-002（积分系统）、ST-003（等级系统） | 是（关联 RISK-005） | plan.md:Story Detailed Design:ST-004 |
+| ST-005 | Infrastructure | 建立完整的数据存储和访问基础设施，支持成就、积分、等级数据的持久化 | FR-007；NFR-MEM-001、NFR-REL-002、NFR-SEC-001 | 无（基础设施，其他 Story 依赖本 Story） | 是（关联 RISK-004、RISK-006） | plan.md:Story Detailed Design:ST-005 |
 
 ### 5.2 追溯矩阵（FR/NFR → Story → Task）
 
 | FR/NFR ID | Story ID | Task ID | 验证方式（来自 tasks.md） | 备注 |
 |---|---|---|---|---|
-| FR-001 | ST-001 | T100, T101, T102, T103 | 单元测试验证成就检查逻辑、性能测试验证检查耗时（p95 ≤ 100ms）、集成测试验证成就解锁流程 | 成就系统核心功能 |
-| FR-002 | ST-002 | T200, T201, T202, T203 | 单元测试验证积分计算逻辑、性能测试验证计算耗时（p95 ≤ 50ms）、集成测试验证积分累计流程 | 积分系统核心功能 |
-| FR-003 | ST-003 | T300, T301, T302, T303 | 单元测试验证等级计算逻辑、性能测试验证计算耗时（p95 ≤ 50ms）、集成测试验证等级提升流程 | 等级系统核心功能 |
-| FR-004 | ST-004 | T400, T401, T402 | UI 测试验证列表展示、性能测试验证加载耗时（p95 ≤ 300ms）、集成测试验证列表交互 | 成就列表 UI |
-| FR-005 | ST-005 | T500, T501, T502 | UI 测试验证积分等级展示、性能测试验证渲染耗时（p95 ≤ 200ms）、内存测试验证内存占用（≤ 10MB） | 积分等级 UI 和进度可视化 |
-| FR-006 | ST-007 | T700, T701, T702 | UI 测试验证里程碑展示、性能测试验证动画帧率（60fps）、内存测试验证资源释放 | 学习里程碑和庆祝动画 |
-| FR-007 | ST-006 | T600, T601, T602, T603 | 集成测试验证数据持久化、数据一致性测试验证数据修复、压力测试验证并发写入 | 数据持久化和一致性保障 |
-| NFR-PERF-001 | ST-001, ST-002, ST-003 | T100, T200, T300, T900, T901 | 性能测试验证成就检查 p95 ≤ 100ms、积分计算 p95 ≤ 50ms、动画 60fps | 性能要求（成就检查、积分计算、动画） |
-| NFR-PERF-002 | ST-004, ST-005 | T400, T500 | 性能测试验证列表加载 p95 ≤ 300ms、进度可视化渲染 p95 ≤ 200ms | 性能要求（列表加载、进度可视化） |
-| NFR-PERF-003 | ST-008 | T801 | 降级测试验证降级策略有效性 | 降级策略 |
-| NFR-POWER-001 | ST-001, ST-002, ST-003, ST-007 | T903 | 功耗测试验证功耗增量 ≤ 5mAh/天 | 功耗要求（计算和动画） |
-| NFR-MEM-001 | ST-005, ST-007 | T500, T701, T902 | 内存测试验证内存占用 ≤ 10MB、动画资源及时释放 | 内存要求（UI 和动画） |
-| NFR-MEM-002 | ST-006 | T602 | 数据生命周期测试验证应用退出时保存、启动时加载 | 数据生命周期 |
-| NFR-SEC-001 | ST-006 | T600, T601 | 数据安全测试验证数据存储在私有目录、不上传云端 | 数据安全 |
-| NFR-SEC-002 | ST-002, ST-003 | T201, T301 | 数据防篡改测试验证数据存储使用事务保证一致性 | 数据防篡改 |
-| NFR-OBS-001 | ST-008 | T800, T802 | 日志测试验证事件记录正确性（成就解锁、积分变化、等级提升） | 关键事件记录 |
-| NFR-OBS-002 | ST-008 | T801, T802 | 错误处理测试验证错误场景处理正确性、错误日志记录 | 错误日志 |
-| NFR-REL-001 | ST-001, ST-002, ST-003 | T100, T200, T300 | 准确率测试验证成就检查 100%、积分计算 100%、等级计算 100% | 准确率要求 |
-| NFR-REL-002 | ST-006 | T600, T601, T602 | 数据持久化测试验证应用崩溃或退出时数据保存、重启后恢复 | 数据持久化 |
+| FR-001 | ST-001 | [待 tasks.md] | 功能验收：用户完成学习后看到成就解锁提示；性能验收：成就检查 ≤ 100ms（p95）；可靠性验收：成就检查准确率 100% | 成就检查和解锁 |
+| FR-002 | ST-002 | [待 tasks.md] | 功能验收：用户学习后积分增加；性能验收：积分计算 ≤ 50ms（p95）；可靠性验收：积分计算准确率 100% | 积分计算和累计 |
+| FR-003 | ST-003 | [待 tasks.md] | 功能验收：用户积分达到等级提升条件时显示等级提升动画；性能验收：等级计算 ≤ 20ms（p95）；可靠性验收：等级计算准确率 100% | 等级计算和提升 |
+| FR-004 | ST-001 | [待 tasks.md] | 功能验收：成就列表显示已解锁成就；性能验收：成就列表加载 ≤ 300ms（p95） | 成就列表展示 |
+| FR-005 | ST-002、ST-003、ST-004 | [待 tasks.md] | 功能验收：用户能够查看积分、等级和进度条；性能验收：进度可视化渲染 ≤ 200ms（p95） | 积分等级展示、进度条 |
+| FR-006 | ST-004 | [待 tasks.md] | 功能验收：达成里程碑时显示庆祝动画；性能验收：动画播放流畅（60fps）；内存验收：动画资源及时释放 | 里程碑展示和庆祝动画 |
+| FR-007 | ST-001、ST-002、ST-003、ST-005 | [待 tasks.md] | 功能验收：学习数据变化时游戏化数据自动重新计算；可靠性验收：数据持久化正常 | 数据自动重新计算、数据持久化 |
+| NFR-PERF-001 | ST-001、ST-002、ST-003 | [待 tasks.md] | 性能测试：成就检查 p95 ≤ 100ms、积分计算 p95 ≤ 50ms、等级计算 p95 ≤ 20ms | 成就检查、积分计算、等级计算性能 |
+| NFR-PERF-002 | ST-001、ST-004 | [待 tasks.md] | 性能测试：成就列表加载 p95 ≤ 300ms、进度可视化渲染 p95 ≤ 200ms | 成就列表加载、进度可视化渲染 |
+| NFR-PERF-003 | ST-001、ST-002、ST-003 | [待 tasks.md] | 降级测试：学习数据不可用时降级为仅展示基础进度 | 学习数据不可用降级策略 |
+| NFR-POWER-001 | ST-004 | [待 tasks.md] | 功耗测试：动画播放功耗增量 ≤ 3mAh/天 | 动画播放功耗 |
+| NFR-MEM-001 | ST-004、ST-005 | [待 tasks.md] | 内存测试：动画资源内存、游戏化数据内存峰值 ≤ 10MB | 动画资源内存、游戏化数据内存 |
+| NFR-MEM-002 | ST-005 | [待 tasks.md] | 数据生命周期测试：应用退出时保存、启动时加载 | 数据生命周期管理 |
+| NFR-SEC-001 | ST-005 | [待 tasks.md] | 数据安全测试：数据存储在应用私有目录，不上传云端 | 数据存储隐私 |
+| NFR-SEC-002 | ST-002、ST-003 | [待 tasks.md] | 数据防篡改测试：积分等级计算逻辑不可被用户篡改 | 积分等级计算逻辑不可篡改 |
+| NFR-OBS-001 | ST-001、ST-002、ST-003 | [待 tasks.md] | 日志测试：记录成就解锁、积分变化、等级提升事件 | 成就解锁、积分变化、等级提升事件 |
+| NFR-OBS-002 | ST-001、ST-002、ST-003 | [待 tasks.md] | 错误处理测试：记录计算失败错误日志 | 计算失败错误日志 |
+| NFR-REL-001 | ST-001、ST-002、ST-003 | [待 tasks.md] | 准确率测试：成就检查 100%、积分计算 100%、等级计算 100% | 计算准确率 100% |
+| NFR-REL-002 | ST-005 | [待 tasks.md] | 数据持久化测试：应用崩溃或退出时数据保存、重启后恢复 | 数据持久化和恢复 |
 
 ## 6. 技术风险与消解策略（来自 plan.md）
 
@@ -764,14 +783,14 @@ MVP 完成后可独立验证成就检查、解锁和数据持久化功能。
 #### 本 Feature 对外提供的接口
 
 - **接口清单**：
-  - `AchievementEngine`：成就计算引擎接口
-  - `PointsEngine`：积分计算引擎接口
-  - `LevelEngine`：等级计算引擎接口
-  - `GamificationRepository`：游戏化数据访问接口
+  - `AchievementCalculator`：成就计算器接口（可复用）
+  - `PointsCalculator`：积分计算器接口（可复用）
+  - `LevelCalculator`：等级计算器接口（可复用）
+  - `GamificationRepository`：游戏化数据访问接口（本 Feature 内部使用）
 - **输入/输出**：
-  - `suspend fun checkAchievements(stats: LearningStats): List<AchievementUnlocked>`
-  - `suspend fun calculatePoints(event: LearningEvent): PointsChange`
-  - `suspend fun calculateLevel(totalPoints: Int): Level`
+  - `AchievementCalculator.checkAchievementConditions(statistics: LearningStatistics, currentAchievements: List<Achievement>): List<Achievement>`
+  - `PointsCalculator.calculatePoints(learningData: LearningData): Int`
+  - `LevelCalculator.calculateLevel(points: Int): Level`
 - **错误语义**：
   - `AchievementError.CalculationError`：成就计算失败，可重试
   - `PointsError.StorageError`：积分存储失败，可重试
@@ -816,10 +835,17 @@ app/src/main/java/com/jacky/verity/
 │   │   ├── AchievementViewModel.kt
 │   │   ├── PointsViewModel.kt
 │   │   └── LevelViewModel.kt
-│   ├── domain/                  # 领域层（Engine）
-│   │   ├── AchievementEngine.kt
-│   │   ├── PointsEngine.kt
-│   │   └── LevelEngine.kt
+│   ├── domain/                  # 领域层（UseCase）
+│   │   ├── CheckAchievementUseCase.kt
+│   │   ├── CalculatePointsUseCase.kt
+│   │   ├── CalculateLevelUseCase.kt
+│   │   ├── GetAchievementsUseCase.kt
+│   │   ├── GetPointsLevelUseCase.kt
+│   │   └── GetProgressUseCase.kt
+│   ├── calculator/             # 计算层
+│   │   ├── AchievementCalculator.kt
+│   │   ├── PointsCalculator.kt
+│   │   └── LevelCalculator.kt
 │   ├── data/                    # 数据层
 │   │   ├── repository/          # Repository
 │   │   │   └── GamificationRepository.kt

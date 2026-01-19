@@ -3,7 +3,7 @@
 **Epic**：EPIC-001 - 无痛记忆单词神器APP
 **Feature ID**：FEAT-001
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.0
+**Plan Version**：v0.2.0
 **当前工作分支**：`epic/EPIC-001-word-memory-app`
 **Feature 目录**：`specs/epics/EPIC-001-word-memory-app/features/FEAT-001-word-library-management/`
 **日期**：2026-01-18
@@ -18,6 +18,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-01-18 | Feature | 初始版本：创建 Plan 工程级蓝图，完成技术选型、架构设计和 Story 拆分 |  | 否 |
+| v0.2.0 | 2026-01-19 | Feature | 按新规范补齐模块级 UML：为 A3.2 的 6 个模块（UI/ViewModel/Domain/Repository/Parser/DataSource）补齐 UML 类图 + 成功/异常时序图 + 异常清单表 | A3.4 所有模块 | 否 |
 
 ## 概述
 
@@ -163,6 +164,11 @@ flowchart LR
 
 #### A3.2 模块拆分与职责（必须）
 
+> **重要（模块级 UML 规范）**：
+> - 本表是本 Feature 的**模块清单（Module Catalog）**，用于驱动后续“模块级详细设计”章节。
+> - `A3.4 关键模块设计` 必须 **1:1 覆盖**本表的每个模块（模块名称必须一致；不得遗漏/不得新增幽灵模块）。
+> - 对每个模块，必须产出：**1 张 UML 类图（静态） + 2 张 UML 时序图（动态：成功/异常分开）**，并补齐关键异常清单与对策，确保开发可按图落码。
+
 | 模块 | 职责 | 输入/输出 | 依赖 | 约束 |
 |---|---|---|---|---|
 | UI 层（Jetpack Compose） | 词库列表展示、导入界面、用户交互 | 输入：用户操作事件<br>输出：UI 状态展示 | LibraryViewModel | 仅负责 UI 展示，不包含业务逻辑 |
@@ -201,6 +207,526 @@ flowchart LR
 #### A3.4 关键模块设计（详细设计 + 取舍，必须）
 
 > 要求：对“关键模块/高风险模块/承载 NFR 的模块”做细化。若包含多个模块，则分模块说明。
+>
+> **强制（模块级 UML 输出）**：
+> - 以 `A3.2 模块拆分与职责` 为准：每个模块必须在本节拥有一个对应小节。
+> - 每个模块小节必须包含：
+>   - **UML 类图（1 张）**：描述模块内部关键类/接口/数据结构，以及依赖方向（仅画关键点，避免过度细节）
+>   - **UML 时序图（成功，1 张）**：描述主调用链路（包含线程/协程边界点、关键状态更新点）
+>   - **UML 时序图（异常，1 张）**：用 `alt/else` 覆盖关键异常（超时/IO失败/权限/并发重入/取消/数据损坏等，按模块实际选择）
+>   - **异常清单表**：列出异常 → 对策（可重试/不可重试、回滚、一致性、用户提示、可观测性），并与“异常时序图”互相校验，避免遗漏。
+
+##### 模块：UI 层（Jetpack Compose）
+
+- **模块定位**：负责词库列表和导入界面的 UI 展示与用户交互，位于表现层，使用 Jetpack Compose 声明式 UI
+- **设计目标**：响应式 UI、状态驱动、性能（60fps）、可测试性（Compose 预览）
+- **核心数据结构/状态**：
+  - UI 状态：`LibraryUiState`（词库列表、加载状态、错误状态、搜索关键词）
+  - 组件：`LibraryListScreen`、`ImportLibraryScreen`、`LibraryItem`、`EmptyState`
+- **对外接口（协议）**：
+  - 输入：用户事件（点击导入、选择词库、搜索输入）
+  - 输出：UI 状态展示（通过 `collectAsState` 观察 ViewModel 的 StateFlow）
+  - 错误处理：通过 UI 状态中的 `error: String?` 显示错误提示
+- **策略与算法**：
+  - 状态管理：使用 Compose State + ViewModel StateFlow 双向绑定
+  - 搜索防抖：使用 `LaunchedEffect` + `debounce`（300ms）优化搜索输入
+  - 列表优化：使用 `LazyColumn` 虚拟化，支持大量词库展示
+- **失败与降级**：
+  - 加载失败：显示错误提示和重试按钮
+  - 空状态：显示引导用户导入的提示
+  - 网络/权限错误：通过 ViewModel 状态传递，UI 显示对应提示
+- **安全与隐私**：
+  - 不显示敏感信息（文件完整路径、词库内容）
+  - 权限提示：引导用户到系统设置授权
+- **可观测性**：
+  - UI 交互事件通过 ViewModel 记录（点击、搜索、选择）
+  - 错误展示事件记录（错误类型、用户操作）
+- **优缺点**：
+  - **优点**：声明式 UI、状态驱动、易于测试和预览
+  - **缺点/代价**：Compose 学习曲线，需要适配现有代码库
+  - **替代方案与否决理由**：不使用 XML Layout（不符合 EPIC 技术约束）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class LibraryListScreen {
+    +LibraryViewModel viewModel
+    +LibraryUiState uiState
+    +onImportClick()
+    +onLibrarySelect(String libraryId)
+    +onSearchQueryChange(String query)
+  }
+  class ImportLibraryScreen {
+    +LibraryViewModel viewModel
+    +ImportUiState uiState
+    +onFileSelected(Uri uri)
+    +onCancel()
+  }
+  class LibraryItem {
+    +WordLibrary library
+    +Boolean isSelected
+    +onClick()
+  }
+  class EmptyState {
+    +onImportClick()
+  }
+  class LibraryUiState {
+    +List<WordLibrary> libraries
+    +Boolean isLoading
+    +String? error
+    +String searchQuery
+  }
+  class ImportUiState {
+    +Boolean isImporting
+    +Int importProgress
+    +String? error
+  }
+  LibraryListScreen --> LibraryViewModel : observes
+  ImportLibraryScreen --> LibraryViewModel : observes
+  LibraryListScreen --> LibraryItem
+  LibraryListScreen --> EmptyState
+  LibraryListScreen --> LibraryUiState : uses
+  ImportLibraryScreen --> ImportUiState : uses
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant User as 用户
+  participant UI as LibraryListScreen
+  participant VM as LibraryViewModel
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepository
+  participant DS as LibraryLocalDataSource
+  participant SP as SharedPreferences
+  participant FS as FileStorage
+
+  User->>UI: 点击导入按钮
+  UI->>VM: onImportClick()
+  VM->>UI: 更新状态(isImporting=true)
+  UI->>User: 显示文件选择器(SAF)
+  User->>UI: 选择文件(URI)
+  UI->>VM: onFileSelected(uri)
+  VM->>UC: invoke(uri)
+  activate UC
+  UC->>Repo: importLibrary(uri)
+  activate Repo
+  Repo->>DS: saveLibraryMetadata(metadata)
+  DS->>SP: 写入 SharedPreferences
+  SP-->>DS: 成功
+  DS-->>Repo: 成功
+  Repo->>FS: 保存词库文件
+  FS-->>Repo: 成功
+  Repo-->>UC: Result<WordLibrary>
+  deactivate Repo
+  UC-->>VM: Result<WordLibrary>
+  deactivate UC
+  VM->>VM: 更新 StateFlow(libraries)
+  VM->>UI: 状态更新(isImporting=false, libraries更新)
+  UI->>User: 显示导入成功，更新列表
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant User as 用户
+  participant UI as LibraryListScreen
+  participant VM as LibraryViewModel
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepository
+  participant DS as LibraryLocalDataSource
+  participant SP as SharedPreferences
+  participant FS as FileStorage
+
+  User->>UI: 点击导入按钮
+  UI->>VM: onImportClick()
+  VM->>UI: 更新状态(isImporting=true)
+  UI->>User: 显示文件选择器(SAF)
+  
+  alt 用户取消选择
+    User->>UI: 取消选择
+    UI->>VM: onCancel()
+    VM->>VM: 更新状态(isImporting=false)
+    VM->>UI: 状态更新
+    UI->>User: 隐藏文件选择器
+  else 用户选择文件但权限被拒绝
+    User->>UI: 选择文件(URI)
+    UI->>VM: onFileSelected(uri)
+    VM->>UC: invoke(uri)
+    UC->>Repo: importLibrary(uri)
+    Repo->>FS: 读取文件
+    FS-->>Repo: 权限错误(StorageError)
+    Repo-->>UC: Result.Failure(StorageError)
+    UC-->>VM: Result.Failure(StorageError)
+    VM->>VM: 更新状态(error="权限被拒绝")
+    VM->>UI: 状态更新
+    UI->>User: 显示错误提示，引导到设置
+  else 文件格式不支持
+    User->>UI: 选择文件(URI)
+    UI->>VM: onFileSelected(uri)
+    VM->>UC: invoke(uri)
+    UC->>Repo: importLibrary(uri)
+    Repo->>Parser: parseLibrary(uri)
+    Parser-->>Repo: FormatError
+    Repo-->>UC: Result.Failure(ParseError.FormatError)
+    UC-->>VM: Result.Failure(ParseError.FormatError)
+    VM->>VM: 更新状态(error="格式不支持")
+    VM->>UI: 状态更新
+    UI->>User: 显示格式错误提示
+  else 存储空间不足
+    User->>UI: 选择文件(URI)
+    UI->>VM: onFileSelected(uri)
+    VM->>UC: invoke(uri)
+    UC->>Repo: importLibrary(uri)
+    Repo->>FS: 保存词库文件
+    FS-->>Repo: 存储空间不足(StorageError)
+    Repo-->>UC: Result.Failure(StorageError)
+    UC-->>VM: Result.Failure(StorageError)
+    VM->>VM: 更新状态(error="存储空间不足")
+    VM->>UI: 状态更新
+    UI->>User: 显示空间不足提示，引导清理
+  else SharedPreferences 写入失败
+    User->>UI: 选择文件(URI)
+    UI->>VM: onFileSelected(uri)
+    VM->>UC: invoke(uri)
+    UC->>Repo: importLibrary(uri)
+    Repo->>FS: 保存词库文件
+    FS-->>Repo: 成功
+    Repo->>DS: saveLibraryMetadata(metadata)
+    DS->>SP: 写入 SharedPreferences
+    SP-->>DS: 写入失败
+    DS-->>Repo: 异常
+    Repo->>FS: 回滚：删除已保存文件
+    Repo-->>UC: Result.Failure(StorageError)
+    UC-->>VM: Result.Failure(StorageError)
+    VM->>VM: 更新状态(error="保存失败")
+    VM->>UI: 状态更新
+    UI->>User: 显示保存失败提示
+  end
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-UI-001 | 文件选择器 | 用户取消选择 | 无错误（正常取消） | 否 | 不执行导入，恢复初始状态 | 无提示 | 记录取消事件 | NFR-OBS-001 |
+| EX-UI-002 | 文件读取 | 权限被拒绝 | StorageError.PermissionDenied | 是 | 引导用户到系统设置授权 | "需要文件访问权限，请到设置中授权" | 错误类型、URI（脱敏） | NFR-SEC-002, NFR-OBS-002 |
+| EX-UI-003 | 文件解析 | 格式不支持 | ParseError.FormatError | 否 | 不执行导入，显示格式说明 | "不支持此格式，请选择 JSON/CSV/TXT 格式文件" | 文件扩展名、URI（脱敏） | NFR-OBS-002 |
+| EX-UI-004 | 文件保存 | 存储空间不足 | StorageError.InsufficientSpace | 否 | 阻止导入，提示清理空间 | "存储空间不足，请清理空间后重试" | 可用空间、文件大小 | NFR-OBS-002 |
+| EX-UI-005 | 元数据保存 | SharedPreferences 写入失败 | StorageError.WriteFailed | 是 | 回滚文件保存，允许重试 | "保存失败，请重试" | 错误详情 | NFR-REL-001, NFR-OBS-002 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在“异常时序图”中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策（不要只写“记录日志”）。
+
+##### 模块：ViewModel 层
+
+- **模块定位**：管理 UI 状态、处理用户事件、协调 UseCase 调用，位于表现层与领域层之间，使用 AndroidX ViewModel + StateFlow
+- **设计目标**：状态一致性、生命周期感知、可测试性、性能（状态更新不阻塞主线程）
+- **核心数据结构/状态**：
+  - `LibraryUiState`：词库列表、加载状态、错误状态、搜索关键词
+  - `ImportUiState`：导入进度、导入状态、错误信息
+  - 状态容器：`StateFlow<LibraryUiState>`（线程安全）
+- **对外接口（协议）**：
+  - `fun onImportClick()`：触发导入流程
+  - `fun onFileSelected(uri: Uri)`：处理文件选择
+  - `fun onLibrarySelect(libraryId: String)`：处理词库选择
+  - `fun onSearchQueryChange(query: String)`：处理搜索输入（防抖）
+  - 状态暴露：`val uiState: StateFlow<LibraryUiState>`
+- **策略与算法**：
+  - 状态管理：使用 StateFlow 确保线程安全，UI 通过 `collectAsState` 观察
+  - 搜索防抖：使用 `debounce`（300ms）减少 UseCase 调用频率
+  - 错误处理：将 UseCase 的 Result 转换为 UI 状态中的 error 字段
+- **失败与降级**：
+  - UseCase 返回错误：更新 UI 状态中的 error，UI 显示错误提示
+  - 协程取消：ViewModelScope 自动管理，取消时清理资源
+  - 状态不一致：以 StateFlow 为准，确保 UI 与状态同步
+- **安全与隐私**：
+  - 不缓存敏感数据（文件内容）
+  - 状态清理：ViewModel 销毁时清理状态
+- **可观测性**：
+  - 记录用户操作事件（导入、选择、搜索）
+  - 记录错误事件（UseCase 返回错误）
+- **优缺点**：
+  - **优点**：生命周期感知、状态管理统一、易于测试
+  - **缺点/代价**：ViewModel 需要管理多个 UseCase，可能变得复杂
+  - **替代方案与否决理由**：不使用 LiveData（StateFlow 更现代，支持协程）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class LibraryViewModel {
+    -ImportLibraryUseCase importUseCase
+    -GetLibrariesUseCase getLibrariesUseCase
+    -SelectLibraryUseCase selectUseCase
+    -SearchLibrariesUseCase searchUseCase
+    -MutableStateFlow<LibraryUiState> _uiState
+    +StateFlow<LibraryUiState> uiState
+    +fun onImportClick()
+    +fun onFileSelected(Uri uri)
+    +fun onLibrarySelect(String libraryId)
+    +fun onSearchQueryChange(String query)
+  }
+  class LibraryUiState {
+    +List<WordLibrary> libraries
+    +Boolean isLoading
+    +String? error
+    +String searchQuery
+  }
+  class ImportLibraryUseCase {
+    +suspend operator fun invoke(Uri uri) Result<WordLibrary>
+  }
+  class GetLibrariesUseCase {
+    +suspend operator fun invoke() Flow<List<WordLibrary>>
+  }
+  class SelectLibraryUseCase {
+    +suspend operator fun invoke(String libraryId) Result<Unit>
+  }
+  class SearchLibrariesUseCase {
+    +suspend operator fun invoke(String query) List<WordLibrary>
+  }
+  LibraryViewModel --> ImportLibraryUseCase : uses
+  LibraryViewModel --> GetLibrariesUseCase : uses
+  LibraryViewModel --> SelectLibraryUseCase : uses
+  LibraryViewModel --> SearchLibrariesUseCase : uses
+  LibraryViewModel --> LibraryUiState : manages
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UI as LibraryListScreen
+  participant VM as LibraryViewModel
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepository
+  participant DS as LibraryLocalDataSource
+
+  UI->>VM: onFileSelected(uri)
+  activate VM
+  VM->>VM: 更新状态(isImporting=true)
+  VM->>UI: StateFlow 更新
+  VM->>UC: invoke(uri) [Dispatchers.IO]
+  activate UC
+  UC->>Repo: importLibrary(uri)
+  activate Repo
+  Repo->>DS: saveLibraryMetadata(metadata)
+  DS-->>Repo: 成功
+  Repo->>DS: saveLibraryFile(uri)
+  DS-->>Repo: 成功
+  Repo-->>UC: Result.Success(WordLibrary)
+  deactivate Repo
+  UC-->>VM: Result.Success(WordLibrary)
+  deactivate UC
+  VM->>VM: 更新状态(libraries添加新词库, isImporting=false)
+  VM->>UI: StateFlow 更新 [主线程]
+  UI->>UI: 刷新列表显示
+  deactivate VM
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UI as LibraryListScreen
+  participant VM as LibraryViewModel
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepository
+
+  UI->>VM: onFileSelected(uri)
+  activate VM
+  VM->>VM: 更新状态(isImporting=true)
+  VM->>UC: invoke(uri) [Dispatchers.IO]
+  activate UC
+  
+  alt UseCase 返回错误
+    UC->>Repo: importLibrary(uri)
+    Repo-->>UC: Result.Failure(StorageError)
+    UC-->>VM: Result.Failure(StorageError)
+    VM->>VM: 更新状态(error="导入失败", isImporting=false)
+    VM->>UI: StateFlow 更新 [主线程]
+    UI->>UI: 显示错误提示
+  else 协程被取消
+    UI->>VM: 用户取消/Activity 销毁
+    VM->>VM: ViewModelScope 取消
+    VM->>UC: 协程取消
+    UC->>UC: 清理资源
+    UC-->>VM: CancellationException
+    VM->>VM: 更新状态(isImporting=false)
+    VM->>UI: StateFlow 更新
+    UI->>UI: 恢复初始状态
+  else 状态更新失败
+    VM->>VM: 更新 StateFlow
+    Note over VM: StateFlow 更新失败（极罕见）
+    VM->>VM: 记录错误日志
+    VM->>UI: 尝试重新更新状态
+  end
+  
+  deactivate UC
+  deactivate VM
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-VM-001 | UseCase 调用 | UseCase 返回错误 Result | LibraryError/ParseError/StorageError | 是（部分错误可重试） | 更新 UI 状态 error 字段，UI 显示错误提示 | 通过 UI 状态传递错误信息 | 错误类型、URI（脱敏）、操作类型 | NFR-OBS-002 |
+| EX-VM-002 | 协程执行 | ViewModelScope 被取消 | CancellationException | 否 | 清理资源，更新状态为初始状态 | 无提示（用户主动取消或 Activity 销毁） | 取消原因、操作类型 | NFR-OBS-001 |
+| EX-VM-003 | 状态更新 | StateFlow 更新失败（极罕见） | 内部错误 | 是 | 记录日志，尝试重新更新状态 | 无直接提示（内部错误） | 错误详情 | NFR-OBS-002 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在“异常时序图”中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策。
+
+##### 模块：Domain 层（UseCase）
+
+- **模块定位**：封装业务逻辑、流程编排、数据转换，位于领域层，为 ViewModel 提供业务用例服务，不依赖 UI 层
+- **设计目标**：业务逻辑封装、可测试性、可复用性、单一职责
+- **核心数据结构/状态**：
+  - UseCase 类：`ImportLibraryUseCase`、`GetLibrariesUseCase`、`SelectLibraryUseCase`、`SearchLibrariesUseCase`
+  - 输入/输出：使用 Kotlin 函数参数和返回值，错误通过 `Result<T>` 封装
+- **对外接口（协议）**：
+  - `suspend operator fun invoke(...): Result<T>` 或 `Flow<T>`
+  - 错误语义：通过 Result 的 Failure 分支传递领域错误（LibraryError）
+- **策略与算法**：
+  - 业务规则：导入前校验（格式、大小、重复）、选择词库时更新其他词库状态
+  - 数据转换：Repository 实体 → 领域模型（如需要）
+- **失败与降级**：
+  - Repository 返回错误：直接向上传递 Result.Failure
+  - 业务规则校验失败：返回 Result.Failure(InvalidInputError)
+- **安全与隐私**：
+  - 不处理敏感数据（文件内容）
+  - 业务规则校验：输入参数校验
+- **可观测性**：
+  - 记录 UseCase 调用（操作类型、参数、结果）
+- **优缺点**：
+  - **优点**：业务逻辑集中、易于测试、可复用
+  - **缺点/代价**：UseCase 数量可能较多，需要合理组织
+  - **替代方案与否决理由**：不使用 Service 模式（UseCase 更符合 Clean Architecture）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class ImportLibraryUseCase {
+    -LibraryRepository repository
+    -LibraryParser parser
+    +suspend operator fun invoke(Uri uri) Result<WordLibrary>
+  }
+  class GetLibrariesUseCase {
+    -LibraryRepository repository
+    +suspend operator fun invoke() Flow<List<WordLibrary>>
+  }
+  class SelectLibraryUseCase {
+    -LibraryRepository repository
+    +suspend operator fun invoke(String libraryId) Result<Unit>
+  }
+  class SearchLibrariesUseCase {
+    -LibraryRepository repository
+    +suspend operator fun invoke(String query) List<WordLibrary>
+  }
+  class LibraryRepository {
+    <<interface>>
+    +suspend fun importLibrary(Uri uri) Result<WordLibrary>
+    +suspend fun getLibraries() Flow<List<WordLibrary>>
+    +suspend fun selectLibrary(String libraryId) Result<Unit>
+    +suspend fun searchLibraries(String query) List<WordLibrary>
+  }
+  class LibraryParser {
+    <<interface>>
+    +suspend fun parseLibrary(Uri uri, onProgress: (Int) -> Unit) Result<WordLibrary>
+  }
+  ImportLibraryUseCase --> LibraryRepository : depends on
+  ImportLibraryUseCase --> LibraryParser : depends on
+  GetLibrariesUseCase --> LibraryRepository : depends on
+  SelectLibraryUseCase --> LibraryRepository : depends on
+  SearchLibrariesUseCase --> LibraryRepository : depends on
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant VM as LibraryViewModel
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepository
+  participant Parser as LibraryParser
+  participant DS as LibraryLocalDataSource
+
+  VM->>UC: invoke(uri) [Dispatchers.IO]
+  activate UC
+  UC->>UC: 业务规则校验(格式/大小)
+  UC->>Repo: importLibrary(uri)
+  activate Repo
+  Repo->>Parser: parseLibrary(uri, onProgress)
+  activate Parser
+  Parser-->>Repo: Result.Success(WordLibrary)
+  deactivate Parser
+  Repo->>DS: saveLibraryMetadata(metadata)
+  DS-->>Repo: 成功
+  Repo->>DS: saveLibraryFile(uri)
+  DS-->>Repo: 成功
+  Repo-->>UC: Result.Success(WordLibrary)
+  deactivate Repo
+  UC-->>VM: Result.Success(WordLibrary)
+  deactivate UC
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant VM as LibraryViewModel
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepository
+  participant Parser as LibraryParser
+
+  VM->>UC: invoke(uri) [Dispatchers.IO]
+  activate UC
+  
+  alt 业务规则校验失败
+    UC->>UC: 校验格式/大小
+    UC-->>VM: Result.Failure(InvalidInputError)
+  else Parser 解析失败
+    UC->>Repo: importLibrary(uri)
+    Repo->>Parser: parseLibrary(uri)
+    Parser-->>Repo: Result.Failure(ParseError.FormatError)
+    Repo-->>UC: Result.Failure(ParseError.FormatError)
+    UC-->>VM: Result.Failure(ParseError.FormatError)
+  else Repository 保存失败
+    UC->>Repo: importLibrary(uri)
+    Repo->>Parser: parseLibrary(uri)
+    Parser-->>Repo: Result.Success(WordLibrary)
+    Repo->>DS: saveLibraryMetadata(metadata)
+    DS-->>Repo: 保存失败(StorageError)
+    Repo->>DS: 回滚：删除已保存文件
+    Repo-->>UC: Result.Failure(StorageError)
+    UC-->>VM: Result.Failure(StorageError)
+  else 协程被取消
+    VM->>UC: ViewModelScope 取消
+    UC->>UC: 清理资源
+    UC-->>VM: CancellationException
+  end
+  
+  deactivate UC
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-UC-001 | 业务规则校验 | 输入参数无效（格式不支持/大小超限） | InvalidInputError | 否 | 不执行后续操作，直接返回错误 | 通过 ViewModel 传递错误信息 | 输入参数、校验失败原因 | NFR-OBS-002 |
+| EX-UC-002 | Parser 调用 | 解析失败 | ParseError | 否 | 不保存数据，返回错误 | 通过 ViewModel 传递错误信息 | 错误类型、文件信息（脱敏） | NFR-OBS-002 |
+| EX-UC-003 | Repository 调用 | 保存失败 | StorageError | 是 | Repository 层负责回滚，UseCase 直接传递错误 | 通过 ViewModel 传递错误信息 | 错误类型、操作类型 | NFR-REL-001, NFR-OBS-002 |
+| EX-UC-004 | 协程执行 | 协程被取消 | CancellationException | 否 | 清理资源，向上抛出取消异常 | 无提示（正常取消） | 取消原因 | NFR-OBS-001 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在“异常时序图”中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策。
 
 ##### 模块：LibraryRepository（词库仓库层）
 
@@ -235,6 +761,165 @@ flowchart LR
   - **缺点/代价**：内存缓存占用少量内存（约 10-20MB）
   - **替代方案与否决理由**：不使用 Room 数据库（数据简单，SharedPreferences 足够）；不使用 DataStore（API 较新，SharedPreferences 成熟稳定）
 
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class LibraryRepository {
+    <<interface>>
+    +suspend fun importLibrary(Uri uri) Result<WordLibrary>
+    +suspend fun getLibraries() Flow<List<WordLibrary>>
+    +suspend fun selectLibrary(String libraryId) Result<Unit>
+    +suspend fun searchLibraries(String query) List<WordLibrary>
+  }
+  class LibraryRepositoryImpl {
+    -LibraryLocalDataSource dataSource
+    -LibraryParser parser
+    -MutableStateFlow<List<WordLibrary>> _librariesCache
+    +StateFlow<List<WordLibrary>> librariesFlow
+    +suspend fun importLibrary(Uri uri) Result<WordLibrary>
+    +suspend fun getLibraries() Flow<List<WordLibrary>>
+    +suspend fun selectLibrary(String libraryId) Result<Unit>
+    +suspend fun searchLibraries(String query) List<WordLibrary>
+    -fun generateFileFingerprint(Uri uri) String
+    -fun checkDuplicate(String fingerprint) Boolean
+  }
+  class LibraryLocalDataSource {
+    <<interface>>
+    +suspend fun saveLibraryMetadata(LibraryMetadata metadata) Result<Unit>
+    +suspend fun getLibraryMetadataList() Result<List<LibraryMetadata>>
+    +suspend fun updateSelectedLibraryId(String libraryId) Result<Unit>
+    +suspend fun getSelectedLibraryId() Result<String?>
+  }
+  class LibraryParser {
+    <<interface>>
+    +suspend fun parseLibrary(Uri uri, onProgress: (Int) -> Unit) Result<WordLibrary>
+  }
+  class WordLibrary {
+    +String id
+    +String name
+    +Int wordCount
+    +Long createdAt
+    +String filePath
+    +Long fileSize
+    +LibraryFormat format
+    +Boolean isSelected
+  }
+  class LibraryError {
+    <<sealed>>
+    ImportError
+    NotFoundError
+    StorageError
+  }
+  LibraryRepositoryImpl ..|> LibraryRepository : implements
+  LibraryRepositoryImpl --> LibraryLocalDataSource : depends on
+  LibraryRepositoryImpl --> LibraryParser : depends on
+  LibraryRepositoryImpl --> WordLibrary : returns
+  LibraryRepositoryImpl --> LibraryError : returns
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepositoryImpl
+  participant Parser as LibraryParser
+  participant DS as LibraryLocalDataSource
+  participant SP as SharedPreferences
+  participant FS as FileStorage
+
+  UC->>Repo: importLibrary(uri) [Dispatchers.IO]
+  activate Repo
+  Repo->>Repo: 生成文件指纹
+  Repo->>Repo: 检查重复(指纹)
+  Repo->>Parser: parseLibrary(uri, onProgress)
+  activate Parser
+  Parser->>FS: 读取文件流
+  FS-->>Parser: 文件流
+  Parser->>Parser: 流式解析(JSON/CSV/TXT)
+  Parser-->>Repo: Result.Success(WordLibrary)
+  deactivate Parser
+  Repo->>FS: 保存词库文件到私有目录
+  FS-->>Repo: 成功
+  Repo->>DS: saveLibraryMetadata(metadata)
+  activate DS
+  DS->>SP: 写入 SharedPreferences
+  SP-->>DS: 成功
+  DS-->>Repo: Result.Success(Unit)
+  deactivate DS
+  Repo->>Repo: 更新内存缓存
+  Repo->>Repo: 更新 StateFlow(libraries)
+  Repo-->>UC: Result.Success(WordLibrary)
+  deactivate Repo
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UC as ImportLibraryUseCase
+  participant Repo as LibraryRepositoryImpl
+  participant Parser as LibraryParser
+  participant DS as LibraryLocalDataSource
+  participant SP as SharedPreferences
+  participant FS as FileStorage
+
+  UC->>Repo: importLibrary(uri) [Dispatchers.IO]
+  activate Repo
+  Repo->>Repo: 生成文件指纹
+  Repo->>Repo: 检查重复(指纹)
+  
+  alt 文件已存在（重复导入）
+    Repo-->>UC: Result.Failure(ImportError.Duplicate)
+  else Parser 解析失败
+    Repo->>Parser: parseLibrary(uri)
+    Parser->>FS: 读取文件流
+    FS-->>Parser: IO错误/格式错误
+    Parser-->>Repo: Result.Failure(ParseError.FormatError)
+    Repo-->>UC: Result.Failure(ParseError.FormatError)
+  else 文件保存失败
+    Repo->>Parser: parseLibrary(uri)
+    Parser-->>Repo: Result.Success(WordLibrary)
+    Repo->>FS: 保存词库文件
+    FS-->>Repo: 存储空间不足/写入失败
+    Repo-->>UC: Result.Failure(StorageError.InsufficientSpace)
+  else SharedPreferences 写入失败
+    Repo->>Parser: parseLibrary(uri)
+    Parser-->>Repo: Result.Success(WordLibrary)
+    Repo->>FS: 保存词库文件
+    FS-->>Repo: 成功
+    Repo->>DS: saveLibraryMetadata(metadata)
+    DS->>SP: 写入 SharedPreferences
+    SP-->>DS: 写入失败
+    DS-->>Repo: Result.Failure(StorageError.WriteFailed)
+    Repo->>FS: 回滚：删除已保存文件
+    Repo-->>UC: Result.Failure(StorageError.WriteFailed)
+  else 数据损坏（读取时）
+    Repo->>DS: getLibraryMetadataList()
+    DS->>SP: 读取 SharedPreferences
+    SP-->>DS: 数据损坏/格式错误
+    DS-->>Repo: Result.Failure(StorageError.DataCorrupted)
+    Repo-->>UC: Result.Failure(StorageError.DataCorrupted)
+  end
+  
+  deactivate Repo
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-REPO-001 | 去重检查 | 文件指纹已存在 | ImportError.Duplicate | 否 | 不执行导入，返回重复错误 | "词库已存在，是否覆盖？" | 文件指纹、URI（脱敏） | NFR-OBS-002 |
+| EX-REPO-002 | Parser 调用 | 解析失败（格式/编码/IO） | ParseError | 否 | 不保存数据，返回解析错误 | 通过 UseCase 传递错误信息 | 错误类型、文件信息（脱敏） | NFR-OBS-002 |
+| EX-REPO-003 | 文件保存 | 存储空间不足/写入失败 | StorageError.InsufficientSpace / WriteFailed | 是（空间不足需用户清理） | 不保存元数据，返回错误 | "存储空间不足，请清理空间" | 可用空间、文件大小 | NFR-REL-001, NFR-OBS-002 |
+| EX-REPO-004 | 元数据保存 | SharedPreferences 写入失败 | StorageError.WriteFailed | 是 | 回滚文件保存，返回错误 | "保存失败，请重试" | 错误详情 | NFR-REL-001, NFR-OBS-002 |
+| EX-REPO-005 | 数据读取 | SharedPreferences 数据损坏 | StorageError.DataCorrupted | 否 | 使用默认值或重建数据，记录错误日志 | 无直接提示（内部错误，尝试恢复） | 数据损坏详情 | NFR-REL-002, NFR-OBS-002 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在“异常时序图”中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策。
+
 ##### 模块：LibraryParser（文件解析器）
 
 - **模块定位**：负责词库文件的解析，支持多种格式（JSON/CSV/TXT），流式处理大文件，位于 Data 层
@@ -266,6 +951,322 @@ flowchart LR
   - **优点**：流式处理支持大文件、异步解析不阻塞主线程、支持进度反馈
   - **缺点/代价**：实现复杂度较高（需要处理多种格式和错误场景）
   - **替代方案与否决理由**：不使用同步解析（会阻塞主线程）；不使用一次性加载（内存溢出风险）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class LibraryParser {
+    <<interface>>
+    +suspend fun parseLibrary(Uri uri, onProgress: (Int) -> Unit) Result<WordLibrary>
+  }
+  class JsonLibraryParser {
+    -Gson gson
+    -JsonReader jsonReader
+    +suspend fun parseLibrary(Uri uri, onProgress: (Int) -> Unit) Result<WordLibrary>
+    -fun parseJsonStream(InputStream stream) List<Word>
+  }
+  class CsvLibraryParser {
+    -BufferedReader reader
+    +suspend fun parseLibrary(Uri uri, onProgress: (Int) -> Unit) Result<WordLibrary>
+    -fun parseCsvLine(String line) Word
+  }
+  class TxtLibraryParser {
+    -BufferedReader reader
+    +suspend fun parseLibrary(Uri uri, onProgress: (Int) -> Unit) Result<WordLibrary>
+    -fun parseTxtLine(String line) Word
+  }
+  class ParseError {
+    <<sealed>>
+    FormatError
+    EncodingError
+    SizeError
+    IOError
+  }
+  class WordLibrary {
+    +String id
+    +String name
+    +List<Word> words
+    +Int wordCount
+    +LibraryFormat format
+  }
+  JsonLibraryParser ..|> LibraryParser : implements
+  CsvLibraryParser ..|> LibraryParser : implements
+  TxtLibraryParser ..|> LibraryParser : implements
+  LibraryParser --> ParseError : returns
+  LibraryParser --> WordLibrary : returns
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant Repo as LibraryRepository
+  participant Parser as JsonLibraryParser
+  participant CR as ContentResolver
+  participant FS as FileStorage
+
+  Repo->>Parser: parseLibrary(uri, onProgress) [Dispatchers.IO]
+  activate Parser
+  Parser->>CR: openInputStream(uri)
+  CR-->>Parser: InputStream
+  Parser->>Parser: 检测文件格式(JSON/CSV/TXT)
+  Parser->>Parser: 创建对应解析器(JsonReader/CsvReader/TxtReader)
+  loop 流式读取
+    Parser->>FS: 读取文件块(分批，每批 1000 行/项)
+    FS-->>Parser: 数据块
+    Parser->>Parser: 解析数据块(提取单词)
+    Parser->>Parser: 更新进度(onProgress(percent))
+    Parser->>Parser: 累积单词列表
+  end
+  Parser->>Parser: 构建 WordLibrary 实体
+  Parser->>FS: 关闭文件流
+  Parser-->>Repo: Result.Success(WordLibrary)
+  deactivate Parser
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant Repo as LibraryRepository
+  participant Parser as JsonLibraryParser
+  participant CR as ContentResolver
+  participant FS as FileStorage
+
+  Repo->>Parser: parseLibrary(uri, onProgress) [Dispatchers.IO]
+  activate Parser
+  
+  alt 文件格式不支持
+    Parser->>Parser: 检测文件格式
+    Parser-->>Repo: Result.Failure(ParseError.FormatError)
+  else 文件读取失败（权限/IO）
+    Parser->>CR: openInputStream(uri)
+    CR-->>Parser: 权限错误/IO错误
+    Parser-->>Repo: Result.Failure(ParseError.IOError)
+  else 编码错误
+    Parser->>CR: openInputStream(uri)
+    CR-->>Parser: InputStream
+    Parser->>Parser: 尝试检测编码(UTF-8/GBK)
+    Parser->>Parser: 解析失败(编码不匹配)
+    Parser-->>Repo: Result.Failure(ParseError.EncodingError)
+  else 文件过大警告
+    Parser->>Parser: 检测文件大小
+    alt 文件 > 50MB
+      Parser->>Parser: 警告但继续解析(流式处理)
+      Note over Parser: 继续解析，但记录警告日志
+    end
+  else 解析超时
+    Parser->>Parser: 开始解析
+    Note over Parser: 解析时间 > 30秒
+    Parser->>Parser: 取消任务
+    Parser-->>Repo: Result.Failure(ParseError.TimeoutError)
+  else 数据格式不规范
+    Parser->>Parser: 解析过程中
+    Parser->>Parser: JSON 缺少必要字段/CSV 列不匹配
+    Parser-->>Repo: Result.Failure(ParseError.FormatError)
+  end
+  
+  deactivate Parser
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-PARSE-001 | 格式检测 | 文件扩展名/内容格式不支持 | ParseError.FormatError | 否 | 不执行解析，返回格式错误 | "不支持此格式，请选择 JSON/CSV/TXT" | 文件扩展名、URI（脱敏） | NFR-OBS-002 |
+| EX-PARSE-002 | 文件读取 | ContentResolver 读取失败/权限错误 | ParseError.IOError | 是（权限错误可引导授权） | 不执行解析，返回 IO 错误 | "文件读取失败，请检查权限" | 错误类型、URI（脱敏） | NFR-SEC-002, NFR-OBS-002 |
+| EX-PARSE-003 | 编码检测 | 文件编码不支持/检测失败 | ParseError.EncodingError | 否 | 不执行解析，返回编码错误 | "文件编码不支持，请使用 UTF-8 编码" | 尝试的编码、URI（脱敏） | NFR-OBS-002 |
+| EX-PARSE-004 | 文件大小检查 | 文件 > 50MB | ParseError.SizeError（警告） | 是（警告但继续） | 继续解析（流式处理），记录警告 | "文件较大，解析可能需要较长时间" | 文件大小 | NFR-MEM-001, NFR-OBS-001 |
+| EX-PARSE-005 | 解析超时 | 解析时间 > 30秒 | ParseError.TimeoutError | 是 | 取消任务，返回超时错误 | "解析超时，请选择较小的文件或重试" | 解析耗时、文件大小 | NFR-PERF-001, NFR-OBS-002 |
+| EX-PARSE-006 | 数据格式校验 | JSON 缺少字段/CSV 列不匹配 | ParseError.FormatError | 否 | 不保存数据，返回格式错误 | "文件格式不规范，请检查文件格式" | 格式错误详情、URI（脱敏） | NFR-OBS-002 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在“异常时序图”中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策。
+
+##### 模块：DataSource 层
+
+- **模块定位**：提供底层数据访问，封装 SharedPreferences 和文件系统操作，位于数据层最底层，为 Repository 提供数据源抽象
+- **设计目标**：数据持久化可靠性、性能（批量操作）、可测试性、错误处理
+- **核心数据结构/状态**：
+  - SharedPreferences 键：`library_metadata_list`、`selected_library_id`
+  - 文件存储：应用私有目录 `word_libraries/`，文件名 `<libraryId>.<ext>`
+- **对外接口（协议）**：
+  - `suspend fun saveLibraryMetadata(metadata: LibraryMetadata): Result<Unit>`：保存词库元数据
+  - `suspend fun getLibraryMetadataList(): Result<List<LibraryMetadata>>`：获取词库元数据列表
+  - `suspend fun updateSelectedLibraryId(libraryId: String): Result<Unit>`：更新当前选择词库 ID
+  - `suspend fun getSelectedLibraryId(): Result<String?>`：获取当前选择词库 ID
+  - `suspend fun saveLibraryFile(uri: Uri, libraryId: String): Result<Unit>`：保存词库文件到私有目录
+  - 错误码：`StorageError`（Sealed Class：WriteFailed, ReadFailed, InsufficientSpace, DataCorrupted）
+- **策略与算法**：
+  - SharedPreferences 写入：使用 `apply()` + `commit()` 组合确保同步写入
+  - 文件保存：先写临时文件 → 校验 → 原子替换（避免半写入）
+  - 批量操作：列表更新批量序列化后一次性写入
+- **失败与降级**：
+  - SharedPreferences 写入失败：返回 StorageError.WriteFailed，不执行后续操作
+  - 文件写入失败：返回 StorageError.WriteFailed，清理临时文件
+  - 存储空间不足：检测可用空间，返回 StorageError.InsufficientSpace
+  - 数据读取失败：返回 StorageError.ReadFailed 或 DataCorrupted
+- **安全与隐私**：
+  - 文件存储在应用私有目录，不共享
+  - 不记录文件内容到日志
+- **可观测性**：
+  - 记录数据操作（保存/读取）的成功/失败
+  - 记录存储空间使用情况
+- **优缺点**：
+  - **优点**：数据访问抽象、易于测试（可 Mock）、支持批量操作
+  - **缺点/代价**：SharedPreferences 类型安全性较低，需要手动序列化
+  - **替代方案与否决理由**：不使用 Room（数据简单，SharedPreferences 足够）；不使用 DataStore（API 较新）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class LibraryLocalDataSource {
+    <<interface>>
+    +suspend fun saveLibraryMetadata(LibraryMetadata metadata) Result<Unit>
+    +suspend fun getLibraryMetadataList() Result<List<LibraryMetadata>>
+    +suspend fun updateSelectedLibraryId(String libraryId) Result<Unit>
+    +suspend fun getSelectedLibraryId() Result<String?>
+    +suspend fun saveLibraryFile(Uri uri, String libraryId) Result<Unit>
+  }
+  class LibraryLocalDataSourceImpl {
+    -SharedPreferences sharedPrefs
+    -Context context
+    -Gson gson
+    +suspend fun saveLibraryMetadata(LibraryMetadata metadata) Result<Unit>
+    +suspend fun getLibraryMetadataList() Result<List<LibraryMetadata>>
+    +suspend fun updateSelectedLibraryId(String libraryId) Result<Unit>
+    +suspend fun getSelectedLibraryId() Result<String?>
+    +suspend fun saveLibraryFile(Uri uri, String libraryId) Result<Unit>
+    -fun getLibraryFilesDir() File
+    -fun checkStorageSpace(Long requiredBytes) Boolean
+  }
+  class SharedPreferences {
+    +fun edit() Editor
+    +fun getString(String key, String? defValue) String?
+  }
+  class FileStorage {
+    +fun saveFile(InputStream input, File target) Result<Unit>
+    +fun readFile(File file) Result<InputStream>
+  }
+  class StorageError {
+    <<sealed>>
+    WriteFailed
+    ReadFailed
+    InsufficientSpace
+    DataCorrupted
+  }
+  LibraryLocalDataSourceImpl ..|> LibraryLocalDataSource : implements
+  LibraryLocalDataSourceImpl --> SharedPreferences : uses
+  LibraryLocalDataSourceImpl --> FileStorage : uses
+  LibraryLocalDataSourceImpl --> StorageError : returns
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant Repo as LibraryRepository
+  participant DS as LibraryLocalDataSourceImpl
+  participant SP as SharedPreferences
+  participant FS as FileStorage
+  participant CR as ContentResolver
+
+  Repo->>DS: saveLibraryMetadata(metadata) [Dispatchers.IO]
+  activate DS
+  DS->>DS: 序列化 metadata 为 JSON
+  DS->>SP: edit().putString("library_metadata_list", json).apply().commit()
+  SP-->>DS: 成功
+  DS-->>Repo: Result.Success(Unit)
+  deactivate DS
+  
+  Repo->>DS: saveLibraryFile(uri, libraryId) [Dispatchers.IO]
+  activate DS
+  DS->>DS: 检查存储空间
+  DS->>CR: openInputStream(uri)
+  CR-->>DS: InputStream
+  DS->>DS: 创建临时文件
+  DS->>FS: 复制文件流到临时文件
+  FS-->>DS: 成功
+  DS->>DS: 校验文件完整性
+  DS->>FS: 原子替换(临时文件 → 目标文件)
+  FS-->>DS: 成功
+  DS-->>Repo: Result.Success(Unit)
+  deactivate DS
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant Repo as LibraryRepository
+  participant DS as LibraryLocalDataSourceImpl
+  participant SP as SharedPreferences
+  participant FS as FileStorage
+  participant CR as ContentResolver
+
+  Repo->>DS: saveLibraryMetadata(metadata) [Dispatchers.IO]
+  activate DS
+  
+  alt SharedPreferences 写入失败
+    DS->>DS: 序列化 metadata
+    DS->>SP: edit().putString(...).commit()
+    SP-->>DS: 写入失败(异常)
+    DS-->>Repo: Result.Failure(StorageError.WriteFailed)
+  else 数据序列化失败
+    DS->>DS: 序列化 metadata 为 JSON
+    DS->>DS: JSON 序列化异常
+    DS-->>Repo: Result.Failure(StorageError.DataCorrupted)
+  else 存储空间不足
+    Repo->>DS: saveLibraryFile(uri, libraryId)
+    DS->>DS: 检查存储空间
+    DS-->>Repo: Result.Failure(StorageError.InsufficientSpace)
+  else 文件读取失败
+    Repo->>DS: saveLibraryFile(uri, libraryId)
+    DS->>CR: openInputStream(uri)
+    CR-->>DS: 权限错误/IO错误
+    DS-->>Repo: Result.Failure(StorageError.ReadFailed)
+  else 文件写入失败
+    Repo->>DS: saveLibraryFile(uri, libraryId)
+    DS->>FS: 复制文件流到临时文件
+    FS-->>DS: 写入失败(磁盘满/权限)
+    DS->>FS: 清理临时文件
+    DS-->>Repo: Result.Failure(StorageError.WriteFailed)
+  else 文件校验失败
+    Repo->>DS: saveLibraryFile(uri, libraryId)
+    DS->>FS: 复制文件流
+    FS-->>DS: 成功
+    DS->>DS: 校验文件完整性
+    DS->>DS: 校验失败(文件损坏)
+    DS->>FS: 删除临时文件
+    DS-->>Repo: Result.Failure(StorageError.DataCorrupted)
+  else 数据读取失败（读取元数据时）
+    Repo->>DS: getLibraryMetadataList()
+    DS->>SP: getString("library_metadata_list")
+    SP-->>DS: 数据损坏/格式错误
+    DS-->>Repo: Result.Failure(StorageError.DataCorrupted)
+  end
+  
+  deactivate DS
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-DS-001 | SharedPreferences 写入 | commit() 失败 | StorageError.WriteFailed | 是 | 不更新内存缓存，返回错误 | "保存失败，请重试" | 错误详情、键名 | NFR-REL-001, NFR-OBS-002 |
+| EX-DS-002 | 数据序列化 | JSON 序列化异常 | StorageError.DataCorrupted | 否 | 不写入，返回错误 | "数据格式错误" | 序列化异常详情 | NFR-OBS-002 |
+| EX-DS-003 | 存储空间检查 | 可用空间 < 文件大小 | StorageError.InsufficientSpace | 否 | 不执行写入，返回错误 | "存储空间不足，请清理空间" | 可用空间、所需空间 | NFR-REL-001, NFR-OBS-002 |
+| EX-DS-004 | 文件读取 | ContentResolver 读取失败 | StorageError.ReadFailed | 是（权限错误可引导授权） | 不执行写入，返回错误 | "文件读取失败，请检查权限" | 错误类型、URI（脱敏） | NFR-SEC-002, NFR-OBS-002 |
+| EX-DS-005 | 文件写入 | 磁盘写入失败/权限错误 | StorageError.WriteFailed | 是 | 清理临时文件，返回错误 | "文件保存失败，请重试" | 错误详情、文件路径（脱敏） | NFR-REL-001, NFR-OBS-002 |
+| EX-DS-006 | 文件校验 | 文件完整性校验失败 | StorageError.DataCorrupted | 否 | 删除临时文件，返回错误 | "文件损坏，请重新选择" | 校验失败详情 | NFR-REL-001, NFR-OBS-002 |
+| EX-DS-007 | 数据读取 | SharedPreferences 数据损坏 | StorageError.DataCorrupted | 否 | 使用默认值或重建，记录错误日志 | 无直接提示（内部错误，尝试恢复） | 数据损坏详情 | NFR-REL-002, NFR-OBS-002 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在“异常时序图”中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策。
 
 #####（Capability Feature 场景）交付物与接入契约（若适用则必填）
 
@@ -336,10 +1337,6 @@ flowchart TD
   UpdateCache --> UpdateUI[更新 UI<br/>显示导入成功]
   UpdateUI --> LogSuccess[记录导入成功事件<br/>词库名称/大小/格式/耗时]
   LogSuccess --> End
-```
-
-  Retry -->|是| Backoff[退避] --> CallExt
-  Retry -->|否| Degrade[降级/兜底/告警] --> End
 ```
 
 #### 流程 2：词库列表加载流程

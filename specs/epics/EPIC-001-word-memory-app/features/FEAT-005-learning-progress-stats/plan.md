@@ -208,6 +208,167 @@ flowchart LR
   - **缺点/代价**：内存缓存占用少量内存（约 10MB）
   - **替代方案与否决理由**：不使用持久化缓存（数据实时性要求不高，内存缓存足够）；不使用同步查询（会阻塞主线程）
 
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class StatisticsRepository {
+    -UserDataRepository userDataRepo
+    -AlgorithmRepository algorithmRepo
+    -StatisticsCache cache
+    +suspend getStatistics(TimeRange) Result~LearningStatistics~
+    +suspend getTrendData(TimeRange, TrendMetric) Flow~List~LearningTrendData~~
+    +suspend getMemoryCurve(String?, TimeRange) Result~List~MemoryCurveData~~
+    -calculateStatistics(List~LearningRecord~) LearningStatistics
+    -sampleData(List~LearningTrendData~) List~LearningTrendData~
+  }
+  class StatisticsCache {
+    -Map~String, CacheEntry~ cache
+    -Long cacheExpiryMs
+    +get(String): CacheEntry?
+    +put(String, CacheEntry)
+    +clear()
+    -isExpired(CacheEntry): Boolean
+  }
+  class CacheEntry {
+    +Any data
+    +Long timestamp
+  }
+  class LearningStatistics {
+    +Int learningDays
+    +Int totalWordsLearned
+    +Int totalWordsReviewed
+    +Float averageAccuracy
+    +Long totalLearningTime
+    +TimeRange timeRange
+  }
+  class LearningTrendData {
+    +Long date
+    +Long learningTime
+    +Int wordsLearned
+    +Float accuracy
+  }
+  class MemoryCurveData {
+    +String wordId
+    +Long timestamp
+    +Float memoryStrength
+  }
+  class StatisticsError {
+    <<sealed>>
+    QueryError
+    CalculationError
+    CacheError
+  }
+  StatisticsRepository --> UserDataRepository : uses
+  StatisticsRepository --> AlgorithmRepository : uses
+  StatisticsRepository --> StatisticsCache : uses
+  StatisticsRepository --> LearningStatistics : returns
+  StatisticsRepository --> LearningTrendData : returns
+  StatisticsRepository --> MemoryCurveData : returns
+  StatisticsRepository --> StatisticsError : throws
+  StatisticsCache --> CacheEntry : contains
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant Repo as StatisticsRepository
+  participant Cache as StatisticsCache
+  participant UDR as UserDataRepository
+  participant ADB as Room Database
+  participant Algo as AlgorithmRepository
+
+  Note over UC,Algo: 获取统计数据（成功流程）
+  UC->>Repo: getStatistics(timeRange)
+  activate Repo
+  Repo->>Cache: get(cacheKey)
+  Cache-->>Repo: CacheEntry (命中)
+  
+  alt 缓存未过期
+    Repo->>Repo: isExpired(cacheEntry) == false
+    Repo-->>UC: Result.Success(statistics)
+    Note over Repo: 记录缓存命中日志
+  else 缓存过期或未命中
+    Repo->>UDR: getLearningRecords(timeRange)
+    activate UDR
+    UDR->>ADB: query (SUM/COUNT/AVG)
+    activate ADB
+    ADB-->>UDR: List~LearningRecord~
+    deactivate ADB
+    UDR-->>Repo: Result.Success(records)
+    deactivate UDR
+    
+    Repo->>Repo: calculateStatistics(records)
+    Repo->>Cache: put(cacheKey, statistics)
+    activate Cache
+    Cache-->>Repo: updated
+    deactivate Cache
+    Repo-->>UC: Result.Success(statistics)
+    Note over Repo: 记录查询成功日志（耗时/数据量）
+  end
+  deactivate Repo
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant Repo as StatisticsRepository
+  participant Cache as StatisticsCache
+  participant UDR as UserDataRepository
+  participant ADB as Room Database
+
+  Note over UC,ADB: 获取统计数据（异常流程）
+  UC->>Repo: getStatistics(timeRange)
+  activate Repo
+  Repo->>Cache: get(cacheKey)
+  Cache-->>Repo: null (未命中)
+  
+  Repo->>UDR: getLearningRecords(timeRange)
+  activate UDR
+  UDR->>ADB: query (超时/失败)
+  activate ADB
+    
+  alt 查询超时（>5秒）
+    ADB-->>UDR: TimeoutException
+    deactivate ADB
+    UDR-->>Repo: Result.Error(QueryTimeout)
+    deactivate UDR
+    Repo-->>UC: Result.Error(StatisticsError.QueryError)
+    Note over Repo: 记录查询超时日志
+  else 查询失败
+    ADB-->>UDR: SQLException
+    deactivate ADB
+    UDR-->>Repo: Result.Error(QueryFailed)
+    deactivate UDR
+    Repo-->>UC: Result.Error(StatisticsError.QueryError)
+    Note over Repo: 记录查询失败日志
+  else 数据计算失败
+    ADB-->>UDR: List~LearningRecord~
+    deactivate ADB
+    UDR-->>Repo: Result.Success(records)
+    deactivate UDR
+    Repo->>Repo: calculateStatistics(records)
+    Note over Repo: 计算异常（如除零错误）
+    Repo-->>UC: Result.Error(StatisticsError.CalculationError)
+    Note over Repo: 记录计算失败日志
+  end
+  deactivate Repo
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-001 | StatisticsRepository.getStatistics | 数据库查询超时（>5秒） | StatisticsError.QueryError (Timeout) | 是 | 返回错误 Result，提示用户重试 | "查询超时，请重试" | query_timeout, time_range | NFR-OBS-002 |
+| EX-002 | StatisticsRepository.getStatistics | 数据库查询失败（SQLException） | StatisticsError.QueryError (Failed) | 是 | 返回错误 Result，提示用户重试 | "查询失败，请重试" | query_failed, error_message | NFR-OBS-002 |
+| EX-003 | StatisticsRepository.calculateStatistics | 统计数据计算失败（如除零错误） | StatisticsError.CalculationError | 否 | 返回错误 Result，记录日志 | "数据计算失败，请稍后再试" | calculation_error, error_message | NFR-OBS-002 |
+| EX-004 | StatisticsRepository.getMemoryCurve | 算法引擎不可用 | StatisticsError.QueryError (AlgorithmUnavailable) | 是 | 使用默认值（记忆强度 0），记录日志 | "记忆强度数据暂不可用" | algorithm_unavailable | NFR-OBS-002 |
+| EX-005 | StatisticsCache.put | 缓存写入失败（内存不足） | StatisticsError.CacheError | 否 | 忽略缓存，直接返回数据，记录日志 | 无（不影响用户体验） | cache_write_failed | NFR-MEM-001 |
+
 ##### 模块：ReportGenerator（报告生成器）
 
 - **模块定位**：负责学习报告的生成，支持日报/周报/月报三种类型，位于 Domain 层
@@ -237,6 +398,154 @@ flowchart LR
   - **缺点/代价**：生成耗时（2 秒内），需要进度反馈
   - **替代方案与否决理由**：不使用预生成（占用资源、数据可能过期）；不使用同步生成（会阻塞主线程）
 
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class ReportGenerator {
+    -StatisticsRepository statisticsRepo
+    +suspend generateReport(ReportType, TimeRange, onProgress) Result~LearningReport~
+    -aggregateData(List~LearningRecord~) LearningStatistics
+    -calculateTrend(List~LearningRecord~) List~LearningTrendData~
+    -validateTimeRange(TimeRange) Boolean
+  }
+  class LearningReport {
+    +ReportType type
+    +TimeRange timeRange
+    +LearningStatistics statistics
+    +List~LearningTrendData~ trendData
+    +Long generatedAt
+  }
+  class ReportType {
+    <<enumeration>>
+    Daily
+    Weekly
+    Monthly
+  }
+  class LearningStatistics {
+    +Int learningDays
+    +Int totalWordsLearned
+    +Int totalWordsReviewed
+    +Float averageAccuracy
+    +Long totalLearningTime
+  }
+  class LearningTrendData {
+    +Long date
+    +Long learningTime
+    +Int wordsLearned
+    +Float accuracy
+  }
+  class ReportError {
+    <<sealed>>
+    GenerationError
+    DataError
+    TimeoutError
+  }
+  ReportGenerator --> StatisticsRepository : uses
+  ReportGenerator --> LearningReport : creates
+  ReportGenerator --> ReportType : uses
+  ReportGenerator --> LearningStatistics : creates
+  ReportGenerator --> LearningTrendData : creates
+  ReportGenerator --> ReportError : throws
+  LearningReport --> ReportType : contains
+  LearningReport --> LearningStatistics : contains
+  LearningReport --> LearningTrendData : contains
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant RG as ReportGenerator
+  participant SR as StatisticsRepository
+  participant UDR as UserDataRepository
+
+  Note over UC,UDR: 生成报告（成功流程）
+  UC->>RG: generateReport(type, timeRange, onProgress)
+  activate RG
+  RG->>RG: validateTimeRange(timeRange)
+  RG->>RG: onProgress(0%)
+  
+  RG->>SR: getStatistics(timeRange)
+  activate SR
+  SR-->>RG: Result.Success(statistics)
+  deactivate SR
+  RG->>RG: onProgress(30%)
+  
+  RG->>SR: getTrendData(timeRange, metric)
+  activate SR
+  SR-->>RG: Flow~List~LearningTrendData~~
+  deactivate SR
+  RG->>RG: onProgress(60%)
+  
+  RG->>RG: aggregateData(records)
+  RG->>RG: calculateTrend(records)
+  RG->>RG: onProgress(80%)
+  
+  RG->>RG: LearningReport(type, timeRange, statistics, trendData)
+  RG->>RG: onProgress(100%)
+  RG-->>UC: Result.Success(report)
+  Note over RG: 记录报告生成成功日志（类型/时间范围/耗时）
+  deactivate RG
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant RG as ReportGenerator
+  participant SR as StatisticsRepository
+
+  Note over UC,SR: 生成报告（异常流程）
+  UC->>RG: generateReport(type, timeRange, onProgress)
+  activate RG
+  RG->>RG: validateTimeRange(timeRange)
+  
+  alt 时间范围无效
+    RG->>RG: validateTimeRange() == false
+    RG-->>UC: Result.Error(ReportError.DataError(InvalidTimeRange))
+    Note over RG: 记录时间范围无效日志
+  else 统计数据查询失败
+    RG->>SR: getStatistics(timeRange)
+    activate SR
+    SR-->>RG: Result.Error(QueryError)
+    deactivate SR
+    RG-->>UC: Result.Error(ReportError.DataError(QueryFailed))
+    Note over RG: 记录统计数据查询失败日志
+  else 生成超时（>10秒）
+    RG->>SR: getStatistics(timeRange)
+    activate SR
+    Note over RG,SR: 查询耗时 >10秒
+    RG->>RG: cancel()
+    SR-->>RG: CancellationException
+    deactivate SR
+    RG-->>UC: Result.Error(ReportError.TimeoutError)
+    Note over RG: 记录生成超时日志
+  else 数据缺失
+    RG->>SR: getStatistics(timeRange)
+    activate SR
+    SR-->>RG: Result.Success(statistics) (空数据)
+    deactivate SR
+    RG->>RG: statistics.isEmpty() == true
+    RG->>RG: LearningReport(空数据)
+    RG-->>UC: Result.Success(emptyReport)
+    Note over RG: 返回空报告，提示用户无数据
+  end
+  deactivate RG
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-006 | ReportGenerator.generateReport | 时间范围无效 | ReportError.DataError(InvalidTimeRange) | 否 | 返回错误 Result，提示用户重新选择 | "时间范围无效，请重新选择" | invalid_time_range | NFR-OBS-002 |
+| EX-007 | ReportGenerator.generateReport | 统计数据查询失败 | ReportError.DataError(QueryFailed) | 是 | 返回错误 Result，提示用户重试 | "数据查询失败，请重试" | query_failed | NFR-OBS-002 |
+| EX-008 | ReportGenerator.generateReport | 生成超时（>10秒） | ReportError.TimeoutError | 是 | 取消生成，返回超时错误，提示用户重试 | "报告生成超时，请重试" | generation_timeout | NFR-PERF-001 |
+| EX-009 | ReportGenerator.generateReport | 数据缺失（无学习记录） | 返回空报告 | 否 | 返回空报告，提示用户无数据 | "该时间段内无学习数据" | no_data | NFR-REL-001 |
+| EX-010 | ReportGenerator.calculateTrend | 趋势计算失败 | ReportError.GenerationError | 否 | 返回错误 Result，记录日志 | "报告生成失败，请稍后再试" | trend_calculation_error | NFR-OBS-002 |
+
 ##### 模块：ChartRenderer（图表渲染封装层）
 
 - **模块定位**：封装 Vico 图表库，提供统一的图表渲染接口，位于 UI 层
@@ -263,6 +572,144 @@ flowchart LR
   - **优点**：封装 Vico 库，提供统一接口，支持数据采样和性能优化
   - **缺点/代价**：数据采样可能丢失细节
   - **替代方案与否决理由**：不使用自研图表（开发成本高）；不使用 MPAndroidChart（不符合 Compose 规范）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+  class ChartRenderer {
+    <<composable>>
+    +@Composable LineChart(List~DataPoint~, Modifier) Unit
+    +@Composable BarChart(List~DataPoint~, Modifier) Unit
+    -sampleData(List~DataPoint~) List~DataPoint~
+    -createChartModel(List~DataPoint~) ChartModel
+    -checkMemory() Boolean
+  }
+  class DataPoint {
+    +Long timestamp
+    +Float value
+    +String? label
+  }
+  class ChartModel {
+    +List~DataPoint~ dataPoints
+    +ChartType type
+    +Boolean isDegraded
+  }
+  class ChartType {
+    <<enumeration>>
+    Line
+    Bar
+  }
+  class ChartState {
+    +Boolean isLoading
+    +Boolean isError
+    +String? errorMessage
+    +Boolean isDegraded
+  }
+  class VicoChartLibrary {
+    <<external>>
+    +ChartComponent
+    +ChartConfig
+  }
+  ChartRenderer --> DataPoint : uses
+  ChartRenderer --> ChartModel : creates
+  ChartRenderer --> ChartType : uses
+  ChartRenderer --> ChartState : manages
+  ChartRenderer --> VicoChartLibrary : wraps
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UI as UI Component
+  participant CR as ChartRenderer
+  participant Vico as Vico Library
+  participant Memory as System Memory
+
+  Note over UI,Memory: 渲染图表（成功流程）
+  UI->>CR: @Composable LineChart(data, modifier)
+  activate CR
+  CR->>CR: remember { data } (缓存数据)
+  
+  CR->>CR: checkDataSize(data)
+  alt 数据点数量 <= 100
+    CR->>CR: data (不采样)
+  else 数据点数量 > 100
+    CR->>CR: sampleData(data) (每10个点取1个)
+    Note over CR: 记录数据采样日志
+  end
+  
+  CR->>CR: createChartModel(data)
+  CR->>Memory: checkMemory()
+  Memory-->>CR: true (内存充足)
+  
+  CR->>Vico: ChartComponent(model)
+  activate Vico
+  Vico-->>CR: Chart (渲染完成)
+  deactivate Vico
+  
+  CR-->>UI: Chart Composable
+  Note over CR: 记录渲染成功日志（耗时/数据点数）
+  deactivate CR
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+  participant UI as UI Component
+  participant CR as ChartRenderer
+  participant Vico as Vico Library
+  participant Memory as System Memory
+
+  Note over UI,Memory: 渲染图表（异常流程）
+  UI->>CR: @Composable LineChart(data, modifier)
+  activate CR
+  CR->>CR: remember { data } (缓存数据)
+  CR->>CR: createChartModel(data)
+  
+  CR->>Memory: checkMemory()
+  Memory-->>CR: false (内存不足)
+  
+  alt 内存不足
+    CR->>CR: isDegraded = true
+    CR->>CR: sampleData(data, factor=20) (更激进采样)
+    CR->>Vico: ChartComponent(model, simplified=true)
+    activate Vico
+    alt 渲染成功（简化版）
+      Vico-->>CR: Chart (简化版)
+      deactivate Vico
+      CR-->>UI: SimplifiedChart
+      Note over CR: 记录降级日志（内存不足/简化版）
+    else 渲染失败
+      Vico-->>CR: RenderingException
+      deactivate Vico
+      CR->>CR: TextList(data) (降级为文本列表)
+      CR-->>UI: TextList (文本列表)
+      Note over CR: 记录渲染失败日志（降级为文本）
+    end
+  else 渲染异常
+    CR->>Vico: ChartComponent(model)
+    activate Vico
+    Vico-->>CR: RenderingException
+    deactivate Vico
+    CR->>CR: TextList(data) (降级为文本列表)
+    CR-->>UI: TextList (文本列表)
+    Note over CR: 记录渲染异常日志（异常类型）
+  end
+  deactivate CR
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-011 | ChartRenderer.LineChart | 内存不足 | 降级为简化图表 | 否 | 更激进数据采样（factor=20），使用简化图表 | 无（自动降级，不影响用户体验） | memory_insufficient, degraded | NFR-MEM-001 |
+| EX-012 | ChartRenderer.LineChart | 图表渲染失败（RenderingException） | 降级为文本列表 | 否 | 降级为文本列表，显示数据点 | "图表渲染失败，已显示为列表" | rendering_failed, error_type | NFR-OBS-003 |
+| EX-013 | ChartRenderer.sampleData | 数据采样后仍超过限制 | 强制限制数据点数量 | 否 | 限制为最多 100 个数据点 | 无（自动处理） | data_sampling_forced | NFR-PERF-003 |
+| EX-014 | ChartRenderer.createChartModel | 数据为空或无效 | 返回空图表 | 否 | 显示空状态提示 | "暂无数据" | empty_data | NFR-REL-001 |
+| EX-015 | VicoChartLibrary.ChartComponent | Vico 库初始化失败 | 降级为文本列表 | 否 | 降级为文本列表，记录错误日志 | "图表组件暂不可用，已显示为列表" | vico_init_failed | NFR-OBS-003 |
 
 ### A4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）
 
@@ -796,6 +1243,318 @@ app/src/main/java/com/jacky/verity/
 | NFR-REL-001 | ST-001、ST-005、ST-006 | 可靠性要求 |
 | NFR-REL-002 | ST-001 | 数据准确性 |
 | NFR-REL-003 | ST-002 | 缓存策略 |
+
+## Story Detailed Design（L2 二层详细设计：面向开发落码，强烈建议）
+
+> 目标：把每个 Story 的"实现方法"写清楚，做到**不写每行代码**也能明确指导开发如何落地。
+>
+> 规则：
+> - 本节内容属于 Plan 的一部分，视为**权威技术决策输入**（必须纳入版本管理与变更记录）。
+> - tasks.md 的每个 Task 应明确引用对应 Story 的详细设计入口（例如：`plan.md:ST-001:4.2 时序图`）。
+> - 对每个 Story，必须同时覆盖：**静态结构（类/接口/数据）**、**动态交互（时序）**、**异常矩阵（无遗漏）**、**并发/取消语义**、**验证方式**。
+
+### ST-001 Detailed Design：实现统计数据查询功能
+
+#### 1) 目标 & Done 定义（DoD）
+
+- **目标**：实现统计数据查询功能，支持查询学习天数、学习单词数量、复习单词数量、平均正确率等基础统计数据，支持选择时间范围查询
+- **DoD（可验证）**：
+  - [ ] 功能验收：用户能够查看基础统计数据（FR-001），支持选择时间范围查询（FR-005），数据准确可靠（NFR-REL-002）
+  - [ ] 性能阈值：统计数据页面加载时间 p95 ≤ 1 秒（NFR-PERF-001），使用性能分析工具测量
+  - [ ] 可靠性：统计数据查询成功率 ≥ 99.5%（NFR-REL-001），统计数据准确性误差 ≤ 0.1%（NFR-REL-002）
+  - [ ] 可观测性：记录统计数据查询事件（时间范围、查询耗时、结果数量）（NFR-OBS-001），记录错误日志（NFR-OBS-002）
+
+#### 2) 代码落点与边界（开发导航）
+
+- **新增/修改目录与文件（建议到包/文件级）**：
+  - `app/src/main/java/com/jacky/verity/statistics/domain/usecase/GetStatisticsUseCase.kt`：获取统计数据用例
+  - `app/src/main/java/com/jacky/verity/statistics/data/repository/StatisticsRepository.kt`：统计数据仓库接口
+  - `app/src/main/java/com/jacky/verity/statistics/data/repository/StatisticsRepositoryImpl.kt`：统计数据仓库实现
+  - `app/src/main/java/com/jacky/verity/statistics/ui/StatisticsScreen.kt`：统计数据页面 UI
+  - `app/src/main/java/com/jacky/verity/statistics/ui/viewmodel/StatisticsViewModel.kt`：统计数据 ViewModel
+  - `app/src/main/java/com/jacky/verity/statistics/domain/model/LearningStatistics.kt`：学习统计数据模型
+- **分层与依赖约束**：复用 Plan-B:B2（UI → ViewModel → UseCase → Repository → 外部 Repository → 数据库）
+- **对外暴露点**：
+  - `StatisticsRepository.getStatistics(timeRange: TimeRange): Result<LearningStatistics>`
+  - `GetStatisticsUseCase.invoke(timeRange: TimeRange): Flow<LearningStatistics>`
+  - `StatisticsViewModel.statistics: StateFlow<StatisticsUiState>`
+
+#### 3) 核心接口与数据契约（签名级别 + 错误语义）
+
+- **接口清单**：
+  ```kotlin
+  interface StatisticsRepository {
+    suspend fun getStatistics(timeRange: TimeRange): Result<LearningStatistics>
+  }
+  
+  class GetStatisticsUseCase(
+    private val repository: StatisticsRepository
+  ) {
+    operator fun invoke(timeRange: TimeRange): Flow<LearningStatistics>
+  }
+  
+  class StatisticsViewModel(
+    private val getStatisticsUseCase: GetStatisticsUseCase
+  ) : ViewModel() {
+    val statistics: StateFlow<StatisticsUiState>
+    fun loadStatistics(timeRange: TimeRange)
+  }
+  ```
+- **输入/输出约束**：
+  - 输入：`TimeRange`（开始时间、结束时间，必须有效，结束时间 > 开始时间）
+  - 输出：`LearningStatistics`（学习天数、学习单词数量、复习单词数量、平均正确率、总学习时长、时间范围）
+  - 错误：`StatisticsError`（Sealed Class：QueryError, CalculationError, CacheError）
+- **错误语义**：
+  - `StatisticsError.QueryError`：可重试，显示错误提示，允许用户重试
+  - `StatisticsError.CalculationError`：不可重试，显示错误提示，记录错误日志
+  - `StatisticsError.CacheError`：不可重试，忽略缓存，直接查询
+- **取消语义**：协程取消时，取消数据库查询，释放资源，不更新 UI 状态
+
+#### 4) 静态结构设计（类图/关系图）
+
+```mermaid
+classDiagram
+  class StatisticsScreen {
+    +StatisticsViewModel viewModel
+    +StatisticsUiState uiState
+    +onTimeRangeSelected(TimeRange)
+    +onRetry()
+  }
+  class StatisticsViewModel {
+    -GetStatisticsUseCase useCase
+    -StateFlow~StatisticsUiState~ statistics
+    +loadStatistics(TimeRange)
+    +retry()
+  }
+  class GetStatisticsUseCase {
+    -StatisticsRepository repository
+    +invoke(TimeRange) Flow~LearningStatistics~
+  }
+  class StatisticsRepository {
+    <<interface>>
+    +suspend getStatistics(TimeRange) Result~LearningStatistics~
+  }
+  class StatisticsRepositoryImpl {
+    -UserDataRepository userDataRepo
+    -StatisticsCache cache
+    +suspend getStatistics(TimeRange) Result~LearningStatistics~
+    -calculateStatistics(List~LearningRecord~) LearningStatistics
+  }
+  class LearningStatistics {
+    +Int learningDays
+    +Int totalWordsLearned
+    +Int totalWordsReviewed
+    +Float averageAccuracy
+    +Long totalLearningTime
+    +TimeRange timeRange
+  }
+  class StatisticsError {
+    <<sealed>>
+    QueryError
+    CalculationError
+    CacheError
+  }
+  class StatisticsUiState {
+    +Boolean isLoading
+    +LearningStatistics? data
+    +String? error
+    +Boolean isEmpty
+  }
+  StatisticsScreen --> StatisticsViewModel : observes
+  StatisticsViewModel --> GetStatisticsUseCase : uses
+  GetStatisticsUseCase --> StatisticsRepository : uses
+  StatisticsRepositoryImpl ..|> StatisticsRepository : implements
+  StatisticsRepositoryImpl --> UserDataRepository : uses
+  StatisticsRepositoryImpl --> StatisticsCache : uses
+  GetStatisticsUseCase --> LearningStatistics : returns
+  StatisticsRepositoryImpl --> StatisticsError : throws
+  StatisticsViewModel --> StatisticsUiState : manages
+```
+
+#### 5) 动态交互设计（时序图）
+
+##### 5.1 主成功链路（Happy Path）
+
+```mermaid
+sequenceDiagram
+  participant User as 用户
+  participant UI as StatisticsScreen
+  participant VM as StatisticsViewModel
+  participant UC as GetStatisticsUseCase
+  participant Repo as StatisticsRepository
+  participant Cache as StatisticsCache
+  participant UDR as UserDataRepository
+  participant DB as Room Database
+
+  Note over User,DB: 获取统计数据（成功流程）
+  User->>UI: 选择时间范围
+  UI->>VM: loadStatistics(timeRange)
+  activate VM
+  VM->>VM: updateState(isLoading = true)
+  VM->>UC: invoke(timeRange)
+  activate UC
+  UC->>Repo: getStatistics(timeRange)
+  activate Repo
+  Repo->>Cache: get(cacheKey)
+  Cache-->>Repo: CacheEntry (命中，未过期)
+  Repo->>Repo: isExpired(cacheEntry) == false
+  Repo-->>UC: Result.Success(statistics)
+  deactivate Repo
+  UC-->>VM: Flow~LearningStatistics~ (emit statistics)
+  deactivate UC
+  VM->>VM: updateState(data = statistics, isLoading = false)
+  VM-->>UI: statistics.value = UiState(data, isLoading=false)
+  UI->>UI: 更新 UI 显示统计数据
+  Note over Repo: 记录查询成功日志（时间范围/耗时/缓存命中）
+  deactivate VM
+```
+
+##### 5.2 关键异常链路（Failure Paths，必须覆盖全部关键异常）
+
+```mermaid
+sequenceDiagram
+  participant User as 用户
+  participant UI as StatisticsScreen
+  participant VM as StatisticsViewModel
+  participant UC as GetStatisticsUseCase
+  participant Repo as StatisticsRepository
+  participant Cache as StatisticsCache
+  participant UDR as UserDataRepository
+  participant DB as Room Database
+
+  Note over User,DB: 获取统计数据（异常流程）
+  User->>UI: 选择时间范围
+  UI->>VM: loadStatistics(timeRange)
+  activate VM
+  VM->>VM: updateState(isLoading = true)
+  VM->>UC: invoke(timeRange)
+  activate UC
+  UC->>Repo: getStatistics(timeRange)
+  activate Repo
+  Repo->>Cache: get(cacheKey)
+  Cache-->>Repo: null (未命中)
+  
+  alt 缓存未命中，查询数据库
+    Repo->>UDR: getLearningRecords(timeRange)
+    activate UDR
+    UDR->>DB: query (SUM/COUNT/AVG)
+    activate DB
+        
+    alt 查询超时（>5秒）
+      DB-->>UDR: TimeoutException
+      deactivate DB
+      UDR-->>Repo: Result.Error(QueryTimeout)
+      deactivate UDR
+      Repo-->>UC: Result.Error(StatisticsError.QueryError(Timeout))
+      UC-->>VM: Flow (emit error)
+      VM->>VM: updateState(error = "查询超时，请重试", isLoading = false)
+      VM-->>UI: statistics.value = UiState(error, isLoading=false)
+      UI->>UI: 显示错误提示和重试按钮
+      Note over Repo: 记录查询超时日志
+    else 查询失败
+      DB-->>UDR: SQLException
+      deactivate DB
+      UDR-->>Repo: Result.Error(QueryFailed)
+      deactivate UDR
+      Repo-->>UC: Result.Error(StatisticsError.QueryError(Failed))
+      UC-->>VM: Flow (emit error)
+      VM->>VM: updateState(error = "查询失败，请重试", isLoading = false)
+      VM-->>UI: statistics.value = UiState(error, isLoading=false)
+      UI->>UI: 显示错误提示和重试按钮
+      Note over Repo: 记录查询失败日志
+    else 数据计算失败
+      DB-->>UDR: List~LearningRecord~
+      deactivate DB
+      UDR-->>Repo: Result.Success(records)
+      deactivate UDR
+      Repo->>Repo: calculateStatistics(records)
+      Note over Repo: 计算异常（如除零错误）
+      Repo-->>UC: Result.Error(StatisticsError.CalculationError)
+      UC-->>VM: Flow (emit error)
+      VM->>VM: updateState(error = "数据计算失败，请稍后再试", isLoading = false)
+      VM-->>UI: statistics.value = UiState(error, isLoading=false)
+      UI->>UI: 显示错误提示
+      Note over Repo: 记录计算失败日志
+    else 无数据
+      DB-->>UDR: List~LearningRecord~ (空列表)
+      deactivate DB
+      UDR-->>Repo: Result.Success(emptyList)
+      deactivate UDR
+      Repo->>Repo: calculateStatistics(emptyList)
+      Repo-->>UC: Result.Success(statistics) (空统计数据)
+      UC-->>VM: Flow (emit statistics)
+      VM->>VM: updateState(data = statistics, isEmpty = true, isLoading = false)
+      VM-->>UI: statistics.value = UiState(isEmpty=true, isLoading=false)
+      UI->>UI: 显示空状态提示
+      Note over Repo: 记录空数据日志
+    end
+  end
+  
+  deactivate Repo
+  deactivate UC
+  deactivate VM
+```
+
+#### 6) 异常场景矩阵（无遗漏清单）
+
+| 场景ID | 触发点（组件/步骤） | 触发条件 | 错误类型/错误码 | 是否可重试 | 用户提示/引导 | 回滚与一致性策略 | 日志/埋点字段 | 覆盖 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-ST001-001 | StatisticsRepository.getStatistics | 数据库查询超时（>5秒） | StatisticsError.QueryError(Timeout) | 是 | "查询超时，请重试" | 取消查询，不更新状态，允许重试 | query_timeout, time_range, duration_ms | NFR-OBS-002 |
+| EX-ST001-002 | StatisticsRepository.getStatistics | 数据库查询失败（SQLException） | StatisticsError.QueryError(Failed) | 是 | "查询失败，请重试" | 不更新状态，允许重试 | query_failed, error_message | NFR-OBS-002 |
+| EX-ST001-003 | StatisticsRepository.calculateStatistics | 统计数据计算失败（如除零错误） | StatisticsError.CalculationError | 否 | "数据计算失败，请稍后再试" | 不更新状态，记录错误日志 | calculation_error, error_message | NFR-OBS-002 |
+| EX-ST001-004 | StatisticsRepository.getStatistics | 无学习数据（空列表） | 返回空统计数据 | 否 | 显示空状态提示："暂无学习数据" | 更新状态为 isEmpty=true | no_data, time_range | NFR-REL-001 |
+| EX-ST001-005 | GetStatisticsUseCase.invoke | 协程取消（用户退出页面） | CancellationException | 否 | 无（静默取消） | 取消查询，释放资源，不更新状态 | cancellation, time_range | NFR-OBS-001 |
+| EX-ST001-006 | StatisticsViewModel.loadStatistics | 时间范围无效（结束时间 <= 开始时间） | IllegalArgumentException | 否 | "时间范围无效，请重新选择" | 不发起查询，显示错误提示 | invalid_time_range | NFR-OBS-002 |
+
+> 校验规则（必须通过）：
+> - 上表每一条异常都能在"时序图-异常链路"中找到对应分支；
+> - "时序图-异常链路"中的每个失败分支也必须在上表中有明确对策。
+
+#### 7) 并发 / 生命周期 / 资源管理
+
+- **并发策略**：
+  - 统计查询使用协程异步执行，通过 `viewModelScope.launch(Dispatchers.IO)` 在 IO 线程执行
+  - 并发查询限制：最多 3 个并发查询，使用 `Semaphore(3)` 控制
+  - 共享状态保护：`StatisticsUiState` 使用 `StateFlow`，线程安全
+- **线程/协程模型**：
+  - UI 层：主线程（Compose）
+  - ViewModel：主线程（状态更新），使用 `viewModelScope` 启动协程
+  - UseCase：IO 线程（数据查询和计算），使用 `Dispatchers.IO`
+  - Repository：IO 线程（数据库查询），使用 `Dispatchers.IO`
+- **生命周期**：
+  - 页面旋转：使用 `SavedStateHandle` 保存时间范围选择，旋转后恢复
+  - 前后台切换：页面进入后台时，如果查询正在进行，继续执行（后台查询）；返回前台时，更新 UI 状态
+  - 进程被杀：统计数据不持久化，下次进入时重新查询
+  - 应用退出：清理 `viewModelScope`，取消所有协程，释放资源
+- **资源释放**：
+  - 协程取消：取消数据库查询，释放游标，不更新 UI 状态
+  - 缓存清理：页面退出时清理统计数据缓存（仅当前页面使用的缓存）
+
+#### 8) 验证与测试设计（可执行）
+
+- **单元测试**：
+  - `StatisticsRepositoryTest`：测试统计数据查询（成功、失败、超时）、缓存命中/未命中、数据计算
+  - `GetStatisticsUseCaseTest`：测试用例调用 Repository、错误处理、Flow 发射
+  - `StatisticsViewModelTest`：测试 ViewModel 状态管理、用户交互、错误处理
+- **集成测试**：
+  - `StatisticsIntegrationTest`：测试 UI → ViewModel → UseCase → Repository → 数据库完整链路
+  - 测试场景：查询成功、查询失败、无数据、超时、并发查询
+- **NFR 验证**：
+  - 性能测试：使用性能分析工具测量统计数据页面加载时间，p95 ≤ 1 秒
+  - 可靠性测试：自动化测试统计数据查询成功率，≥ 99.5%
+  - 准确性测试：验证统计数据计算结果与预期一致，误差 ≤ 0.1%
+
+#### 9) 与 Tasks 的映射（可选但推荐）
+
+| 设计要点 | 建议 Task | 备注 |
+|---|---|---|
+| StatisticsRepository 接口和实现 | T??? | 数据访问层 |
+| GetStatisticsUseCase 实现 | T??? | 用例层 |
+| StatisticsViewModel 实现 | T??? | ViewModel 层 |
+| StatisticsScreen UI 实现 | T??? | UI 层 |
+| 缓存机制实现 | T??? | 性能优化 |
+| 错误处理和空状态 | T??? | 用户体验 |
+| 单元测试和集成测试 | T??? | 测试 |
 
 ## 复杂度跟踪（仅当合规性检查存在需说明理由的违规项时填写）
 

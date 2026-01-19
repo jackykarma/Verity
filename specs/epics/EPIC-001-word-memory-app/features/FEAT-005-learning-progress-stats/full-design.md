@@ -5,7 +5,7 @@
 **Feature Version**：v0.1.0
 **Plan Version**：v0.1.0
 **Tasks Version**：v0.1.0
-**Full Design Version**：v0.1.0
+**Full Design Version**：v0.1.1
 
 **分支**：`epic/EPIC-001-word-memory-app`
 **日期**：2026-01-19
@@ -24,6 +24,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-01-19 | Feature | 初始版本：整合 spec.md、plan.md、tasks.md 生成 Full Design 文档 |  | 否 |
+| v0.1.1 | 2026-01-19 | Feature | 更新：整合 plan.md 新增的 UML 图表（类图和时序图）和 Story Detailed Design（L2 二层详细设计） | StatisticsRepository、ReportGenerator、ChartRenderer、Story Detailed Design | 否 |
 
 ## 1. 背景与范围（来自 spec.md）
 
@@ -284,6 +285,483 @@ flowchart LR
 ### 3.5 数据模型与存储设计（物理）（来自 plan.md）
 
 > 要求：本节用于汇总可落地的"表/键/文件结构 + 迁移策略"，避免仅停留在逻辑实体描述。
+> - 若存在 `data-model.md`：在此引用其"物理模型"部分
+> - 否则：引用 plan.md:Plan-B:B3.2（表结构/键结构/迁移策略）
+
+#### 存储形态与边界
+
+- **存储形态**：内存缓存（统计数据缓存）、Room 数据库（通过 FEAT-007 查询学习记录数据）
+- **System of Record（权威来源）**：FEAT-007 用户数据管理模块的 Room 数据库是学习记录数据的权威来源
+- **缓存与派生数据**：
+  - 统计数据是派生数据，基于学习记录数据聚合计算
+  - 统计数据可重建，缓存失效时重新查询和计算
+  - 报告数据是派生数据，基于统计数据生成
+- **生命周期**：
+  - 统计数据缓存：常驻内存，1 小时失效，页面退出时清理
+  - 报告数据：按需生成，不持久化，生成后常驻内存直到页面退出
+  - 图表数据：页面使用期间常驻内存，页面退出时释放
+- **数据规模与增长**：
+  - 学习记录数据：数量级 10 万条（假设用户学习 1 年，每天学习 100 个单词）
+  - 统计数据：数量级 100 条（不同时间范围的统计数据）
+  - 报告数据：数量级 10 条（日报/周报/月报）
+
+#### 内存缓存结构
+
+| Key | Value | 用途 | 生命周期 |
+|---|---|---|---|
+| `statistics_${timeRange}` | `LearningStatistics` | 缓存统计数据 | 1 小时失效，页面退出时清理 |
+| `trend_${timeRange}_${metric}` | `List<LearningTrendData>` | 缓存趋势数据 | 1 小时失效，页面退出时清理 |
+| `memory_curve_${wordId}_${timeRange}` | `List<MemoryCurveData>` | 缓存记忆曲线数据 | 1 小时失效，页面退出时清理 |
+
+### 3.6 模块级 UML 总览（全局查看入口，只引用 plan.md）
+
+> 目标：在 Feature 级 Full Design 中提供"全局视角"入口，方便评审/开发快速浏览每个模块的整体设计。
+>
+> 规则：
+> - 模块清单以 `plan.md:A3.2 模块拆分与职责` 为准（行数/名称必须一致）。
+> - 本节只做索引与引用，不复制粘贴整张图；所有 UML 图的权威内容在 `plan.md:A3.4`。
+
+| 模块（来自 plan.md:A3.2） | 职责（摘要） | UML 类图入口（plan.md:A3.4） | 时序图-成功入口（plan.md:A3.4） | 时序图-异常入口（plan.md:A3.4） | 关键异常（摘要） | NFR 责任（摘要） |
+|---|---|---|---|---|---|---|
+| StatisticsRepository | 统计数据仓库，封装数据访问逻辑 | plan.md:A3.4:StatisticsRepository:UML类图 | plan.md:A3.4:StatisticsRepository:时序-成功 | plan.md:A3.4:StatisticsRepository:时序-异常 | 查询超时/查询失败/计算失败/算法引擎不可用/缓存写入失败 | PERF/MEM/OBS/REL |
+| ReportGenerator | 报告生成器，生成日报/周报/月报 | plan.md:A3.4:ReportGenerator:UML类图 | plan.md:A3.4:ReportGenerator:时序-成功 | plan.md:A3.4:ReportGenerator:时序-异常 | 时间范围无效/查询失败/生成超时/数据缺失/趋势计算失败 | PERF/REL/OBS |
+| ChartRenderer | 图表渲染封装，封装 Vico 图表组件 | plan.md:A3.4:ChartRenderer:UML类图 | plan.md:A3.4:ChartRenderer:时序-成功 | plan.md:A3.4:ChartRenderer:时序-异常 | 内存不足/渲染失败/数据采样强制/数据为空/Vico 库初始化失败 | PERF/MEM/OBS |
+
+### 3.7 模块级 UML（按模块汇总，来自 plan.md:A3.4）
+
+> 目标：在 Full Design 中直接呈现每个模块的 UML（类图 + 成功/异常时序），便于评审与全局浏览。
+>
+> 规则：
+> - 本节内容必须**逐字复用/复制** `plan.md:A3.4` 的模块级 UML；不得新增模块、不得新增新的分支决策。
+> - 模块小节顺序必须与 `plan.md:A3.2 模块拆分与职责` 一致。
+> - 若某个模块在 plan.md 尚未补齐 UML，必须标注 `TODO(Clarify)` 并指回 plan.md 对应模块小节补齐。
+
+#### 模块：StatisticsRepository（来自 plan.md:A3.2）
+
+##### UML 类图（来自 plan.md:A3.4）
+
+```mermaid
+classDiagram
+  class StatisticsRepository {
+    -UserDataRepository userDataRepo
+    -AlgorithmRepository algorithmRepo
+    -StatisticsCache cache
+    +suspend getStatistics(TimeRange) Result~LearningStatistics~
+    +suspend getTrendData(TimeRange, TrendMetric) Flow~List~LearningTrendData~~
+    +suspend getMemoryCurve(String?, TimeRange) Result~List~MemoryCurveData~~
+    -calculateStatistics(List~LearningRecord~) LearningStatistics
+    -sampleData(List~LearningTrendData~) List~LearningTrendData~
+  }
+  class StatisticsCache {
+    -Map~String, CacheEntry~ cache
+    -Long cacheExpiryMs
+    +get(String): CacheEntry?
+    +put(String, CacheEntry)
+    +clear()
+    -isExpired(CacheEntry): Boolean
+  }
+  class CacheEntry {
+    +Any data
+    +Long timestamp
+  }
+  class LearningStatistics {
+    +Int learningDays
+    +Int totalWordsLearned
+    +Int totalWordsReviewed
+    +Float averageAccuracy
+    +Long totalLearningTime
+    +TimeRange timeRange
+  }
+  class LearningTrendData {
+    +Long date
+    +Long learningTime
+    +Int wordsLearned
+    +Float accuracy
+  }
+  class MemoryCurveData {
+    +String wordId
+    +Long timestamp
+    +Float memoryStrength
+  }
+  class StatisticsError {
+    <<sealed>>
+    QueryError
+    CalculationError
+    CacheError
+  }
+  StatisticsRepository --> UserDataRepository : uses
+  StatisticsRepository --> AlgorithmRepository : uses
+  StatisticsRepository --> StatisticsCache : uses
+  StatisticsRepository --> LearningStatistics : returns
+  StatisticsRepository --> LearningTrendData : returns
+  StatisticsRepository --> MemoryCurveData : returns
+  StatisticsRepository --> StatisticsError : throws
+  StatisticsCache --> CacheEntry : contains
+```
+
+##### UML 时序图 - 成功链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant Repo as StatisticsRepository
+  participant Cache as StatisticsCache
+  participant UDR as UserDataRepository
+  participant ADB as Room Database
+  participant Algo as AlgorithmRepository
+
+  Note over UC,Algo: 获取统计数据（成功流程）
+  UC->>Repo: getStatistics(timeRange)
+  activate Repo
+  Repo->>Cache: get(cacheKey)
+  Cache-->>Repo: CacheEntry (命中)
+  
+  alt 缓存未过期
+    Repo->>Repo: isExpired(cacheEntry) == false
+    Repo-->>UC: Result.Success(statistics)
+    Note over Repo: 记录缓存命中日志
+  else 缓存过期或未命中
+    Repo->>UDR: getLearningRecords(timeRange)
+    activate UDR
+    UDR->>ADB: query (SUM/COUNT/AVG)
+    activate ADB
+    ADB-->>UDR: List~LearningRecord~
+    deactivate ADB
+    UDR-->>Repo: Result.Success(records)
+    deactivate UDR
+    
+    Repo->>Repo: calculateStatistics(records)
+    Repo->>Cache: put(cacheKey, statistics)
+    activate Cache
+    Cache-->>Repo: updated
+    deactivate Cache
+    Repo-->>UC: Result.Success(statistics)
+    Note over Repo: 记录查询成功日志（耗时/数据量）
+  end
+  deactivate Repo
+```
+
+##### UML 时序图 - 异常链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant Repo as StatisticsRepository
+  participant Cache as StatisticsCache
+  participant UDR as UserDataRepository
+  participant ADB as Room Database
+
+  Note over UC,ADB: 获取统计数据（异常流程）
+  UC->>Repo: getStatistics(timeRange)
+  activate Repo
+  Repo->>Cache: get(cacheKey)
+  Cache-->>Repo: null (未命中)
+  
+  Repo->>UDR: getLearningRecords(timeRange)
+  activate UDR
+  UDR->>ADB: query (超时/失败)
+  activate ADB
+    
+  alt 查询超时（>5秒）
+    ADB-->>UDR: TimeoutException
+    deactivate ADB
+    UDR-->>Repo: Result.Error(QueryTimeout)
+    deactivate UDR
+    Repo-->>UC: Result.Error(StatisticsError.QueryError)
+    Note over Repo: 记录查询超时日志
+  else 查询失败
+    ADB-->>UDR: SQLException
+    deactivate ADB
+    UDR-->>Repo: Result.Error(QueryFailed)
+    deactivate UDR
+    Repo-->>UC: Result.Error(StatisticsError.QueryError)
+    Note over Repo: 记录查询失败日志
+  else 数据计算失败
+    ADB-->>UDR: List~LearningRecord~
+    deactivate ADB
+    UDR-->>Repo: Result.Success(records)
+    deactivate UDR
+    Repo->>Repo: calculateStatistics(records)
+    Note over Repo: 计算异常（如除零错误）
+    Repo-->>UC: Result.Error(StatisticsError.CalculationError)
+    Note over Repo: 记录计算失败日志
+  end
+  deactivate Repo
+```
+
+#### 模块：ReportGenerator（来自 plan.md:A3.2）
+
+##### UML 类图（来自 plan.md:A3.4）
+
+```mermaid
+classDiagram
+  class ReportGenerator {
+    -StatisticsRepository statisticsRepo
+    +suspend generateReport(ReportType, TimeRange, onProgress) Result~LearningReport~
+    -aggregateData(List~LearningRecord~) LearningStatistics
+    -calculateTrend(List~LearningRecord~) List~LearningTrendData~
+    -validateTimeRange(TimeRange) Boolean
+  }
+  class LearningReport {
+    +ReportType type
+    +TimeRange timeRange
+    +LearningStatistics statistics
+    +List~LearningTrendData~ trendData
+    +Long generatedAt
+  }
+  class ReportType {
+    <<enumeration>>
+    Daily
+    Weekly
+    Monthly
+  }
+  class LearningStatistics {
+    +Int learningDays
+    +Int totalWordsLearned
+    +Int totalWordsReviewed
+    +Float averageAccuracy
+    +Long totalLearningTime
+  }
+  class LearningTrendData {
+    +Long date
+    +Long learningTime
+    +Int wordsLearned
+    +Float accuracy
+  }
+  class ReportError {
+    <<sealed>>
+    GenerationError
+    DataError
+    TimeoutError
+  }
+  ReportGenerator --> StatisticsRepository : uses
+  ReportGenerator --> LearningReport : creates
+  ReportGenerator --> ReportType : uses
+  ReportGenerator --> LearningStatistics : creates
+  ReportGenerator --> LearningTrendData : creates
+  ReportGenerator --> ReportError : throws
+  LearningReport --> ReportType : contains
+  LearningReport --> LearningStatistics : contains
+  LearningReport --> LearningTrendData : contains
+```
+
+##### UML 时序图 - 成功链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant RG as ReportGenerator
+  participant SR as StatisticsRepository
+  participant UDR as UserDataRepository
+
+  Note over UC,UDR: 生成报告（成功流程）
+  UC->>RG: generateReport(type, timeRange, onProgress)
+  activate RG
+  RG->>RG: validateTimeRange(timeRange)
+  RG->>RG: onProgress(0%)
+  
+  RG->>SR: getStatistics(timeRange)
+  activate SR
+  SR-->>RG: Result.Success(statistics)
+  deactivate SR
+  RG->>RG: onProgress(30%)
+  
+  RG->>SR: getTrendData(timeRange, metric)
+  activate SR
+  SR-->>RG: Flow~List~LearningTrendData~~
+  deactivate SR
+  RG->>RG: onProgress(60%)
+  
+  RG->>RG: aggregateData(records)
+  RG->>RG: calculateTrend(records)
+  RG->>RG: onProgress(80%)
+  
+  RG->>RG: LearningReport(type, timeRange, statistics, trendData)
+  RG->>RG: onProgress(100%)
+  RG-->>UC: Result.Success(report)
+  Note over RG: 记录报告生成成功日志（类型/时间范围/耗时）
+  deactivate RG
+```
+
+##### UML 时序图 - 异常链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  participant UC as UseCase
+  participant RG as ReportGenerator
+  participant SR as StatisticsRepository
+
+  Note over UC,SR: 生成报告（异常流程）
+  UC->>RG: generateReport(type, timeRange, onProgress)
+  activate RG
+  RG->>RG: validateTimeRange(timeRange)
+  
+  alt 时间范围无效
+    RG->>RG: validateTimeRange() == false
+    RG-->>UC: Result.Error(ReportError.DataError(InvalidTimeRange))
+    Note over RG: 记录时间范围无效日志
+  else 统计数据查询失败
+    RG->>SR: getStatistics(timeRange)
+    activate SR
+    SR-->>RG: Result.Error(QueryError)
+    deactivate SR
+    RG-->>UC: Result.Error(ReportError.DataError(QueryFailed))
+    Note over RG: 记录统计数据查询失败日志
+  else 生成超时（>10秒）
+    RG->>SR: getStatistics(timeRange)
+    activate SR
+    Note over RG,SR: 查询耗时 >10秒
+    RG->>RG: cancel()
+    SR-->>RG: CancellationException
+    deactivate SR
+    RG-->>UC: Result.Error(ReportError.TimeoutError)
+    Note over RG: 记录生成超时日志
+  else 数据缺失
+    RG->>SR: getStatistics(timeRange)
+    activate SR
+    SR-->>RG: Result.Success(statistics) (空数据)
+    deactivate SR
+    RG->>RG: statistics.isEmpty() == true
+    RG->>RG: LearningReport(空数据)
+    RG-->>UC: Result.Success(emptyReport)
+    Note over RG: 返回空报告，提示用户无数据
+  end
+  deactivate RG
+```
+
+#### 模块：ChartRenderer（来自 plan.md:A3.2）
+
+##### UML 类图（来自 plan.md:A3.4）
+
+```mermaid
+classDiagram
+  class ChartRenderer {
+    <<composable>>
+    +@Composable LineChart(List~DataPoint~, Modifier) Unit
+    +@Composable BarChart(List~DataPoint~, Modifier) Unit
+    -sampleData(List~DataPoint~) List~DataPoint~
+    -createChartModel(List~DataPoint~) ChartModel
+    -checkMemory() Boolean
+  }
+  class DataPoint {
+    +Long timestamp
+    +Float value
+    +String? label
+  }
+  class ChartModel {
+    +List~DataPoint~ dataPoints
+    +ChartType type
+    +Boolean isDegraded
+  }
+  class ChartType {
+    <<enumeration>>
+    Line
+    Bar
+  }
+  class ChartState {
+    +Boolean isLoading
+    +Boolean isError
+    +String? errorMessage
+    +Boolean isDegraded
+  }
+  class VicoChartLibrary {
+    <<external>>
+    +ChartComponent
+    +ChartConfig
+  }
+  ChartRenderer --> DataPoint : uses
+  ChartRenderer --> ChartModel : creates
+  ChartRenderer --> ChartType : uses
+  ChartRenderer --> ChartState : manages
+  ChartRenderer --> VicoChartLibrary : wraps
+```
+
+##### UML 时序图 - 成功链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  participant UI as UI Component
+  participant CR as ChartRenderer
+  participant Vico as Vico Library
+  participant Memory as System Memory
+
+  Note over UI,Memory: 渲染图表（成功流程）
+  UI->>CR: @Composable LineChart(data, modifier)
+  activate CR
+  CR->>CR: remember { data } (缓存数据)
+  
+  CR->>CR: checkDataSize(data)
+  alt 数据点数量 <= 100
+    CR->>CR: data (不采样)
+  else 数据点数量 > 100
+    CR->>CR: sampleData(data) (每10个点取1个)
+    Note over CR: 记录数据采样日志
+  end
+  
+  CR->>CR: createChartModel(data)
+  CR->>Memory: checkMemory()
+  Memory-->>CR: true (内存充足)
+  
+  CR->>Vico: ChartComponent(model)
+  activate Vico
+  Vico-->>CR: Chart (渲染完成)
+  deactivate Vico
+  
+  CR-->>UI: Chart Composable
+  Note over CR: 记录渲染成功日志（耗时/数据点数）
+  deactivate CR
+```
+
+##### UML 时序图 - 异常链路（来自 plan.md:A3.4）
+
+```mermaid
+sequenceDiagram
+  participant UI as UI Component
+  participant CR as ChartRenderer
+  participant Vico as Vico Library
+  participant Memory as System Memory
+
+  Note over UI,Memory: 渲染图表（异常流程）
+  UI->>CR: @Composable LineChart(data, modifier)
+  activate CR
+  CR->>CR: remember { data } (缓存数据)
+  CR->>CR: createChartModel(data)
+  
+  CR->>Memory: checkMemory()
+  Memory-->>CR: false (内存不足)
+  
+  alt 内存不足
+    CR->>CR: isDegraded = true
+    CR->>CR: sampleData(data, factor=20) (更激进采样)
+    CR->>Vico: ChartComponent(model, simplified=true)
+    activate Vico
+    alt 渲染成功（简化版）
+      Vico-->>CR: Chart (简化版)
+      deactivate Vico
+      CR-->>UI: SimplifiedChart
+      Note over CR: 记录降级日志（内存不足/简化版）
+    else 渲染失败
+      Vico-->>CR: RenderingException
+      deactivate Vico
+      CR->>CR: TextList(data) (降级为文本列表)
+      CR-->>UI: TextList (文本列表)
+      Note over CR: 记录渲染失败日志（降级为文本）
+    end
+  else 渲染异常
+    CR->>Vico: ChartComponent(model)
+    activate Vico
+    Vico-->>CR: RenderingException
+    deactivate Vico
+    CR->>CR: TextList(data) (降级为文本列表)
+    CR-->>UI: TextList (文本列表)
+    Note over CR: 记录渲染异常日志（异常类型）
+  end
+  deactivate CR
+```
+
+### 3.5 数据模型与存储设计（物理）（来自 plan.md）
+
+> 要求：本节用于汇总可落地的"表/键/文件结构 + 迁移策略"，避免仅停留在逻辑实体描述。
 
 #### 存储形态与边界
 
@@ -462,16 +940,16 @@ flowchart TD
 
 ### 5.1 Story 列表（来自 plan.md）
 
-| Story ID | 类型 | 目标 | 覆盖 FR/NFR | 依赖 | 关键风险 |
-|---|---|---|---|---|---|
-| ST-001 | Functional | 用户能够查看基础统计数据，数据准确可靠，查询响应迅速 | FR-001、FR-005；NFR-PERF-001、NFR-REL-001、NFR-REL-002 | FEAT-007 | RISK-001、RISK-002、RISK-005 |
-| ST-002 | Infrastructure | 统计数据缓存命中率 ≥ 80%，缓存大小 ≤ 10MB，缓存失效时间 1 小时 | NFR-PERF-001、NFR-MEM-001、NFR-REL-003 | ST-001 | RISK-004 |
-| ST-003 | Functional | 用户能够查看学习趋势图表，图表渲染流畅，数据准确 | FR-002；NFR-PERF-001、NFR-MEM-001 | ST-001 | RISK-003、RISK-004 |
-| ST-004 | Functional | 用户能够查看记忆曲线，图表渲染流畅，数据准确 | FR-003、FR-008；NFR-PERF-001、NFR-MEM-001 | FEAT-002、ST-003 | RISK-003、RISK-005 |
-| ST-005 | Functional | 用户能够生成和查看报告，报告内容完整准确，生成时间 p95 ≤ 2 秒 | FR-004、FR-007；NFR-PERF-001、NFR-REL-001 | ST-001、ST-003 | RISK-002 |
-| ST-006 | Functional | 用户能够看到友好的空状态提示和错误提示，错误处理完善 | FR-006、FR-007；NFR-OBS-002、NFR-REL-001 | ST-001 | 无 |
-| ST-007 | Optimization | 统计数据查询和图表渲染性能满足要求，降级策略有效 | NFR-PERF-002、NFR-PERF-003、NFR-MEM-001 | ST-001、ST-003 | RISK-001、RISK-003 |
-| ST-008 | Infrastructure | 关键操作都有日志记录，性能指标可观测，错误日志便于排查 | NFR-OBS-001、NFR-OBS-002、NFR-OBS-003 | ST-001、ST-003、ST-005 | 无 |
+| Story ID | 类型 | 目标 | 覆盖 FR/NFR | 依赖 | 关键风险 | Story 详细设计入口（来自 plan.md） |
+|---|---|---|---|---|---|---|
+| ST-001 | Functional | 用户能够查看基础统计数据，数据准确可靠，查询响应迅速 | FR-001、FR-005；NFR-PERF-001、NFR-REL-001、NFR-REL-002 | FEAT-007 | RISK-001、RISK-002、RISK-005 | plan.md:Story Detailed Design:ST-001 |
+| ST-002 | Infrastructure | 统计数据缓存命中率 ≥ 80%，缓存大小 ≤ 10MB，缓存失效时间 1 小时 | NFR-PERF-001、NFR-MEM-001、NFR-REL-003 | ST-001 | RISK-004 | plan.md:Story Detailed Design:ST-002 |
+| ST-003 | Functional | 用户能够查看学习趋势图表，图表渲染流畅，数据准确 | FR-002；NFR-PERF-001、NFR-MEM-001 | ST-001 | RISK-003、RISK-004 | plan.md:Story Breakdown:ST-003 |
+| ST-004 | Functional | 用户能够查看记忆曲线，图表渲染流畅，数据准确 | FR-003、FR-008；NFR-PERF-001、NFR-MEM-001 | FEAT-002、ST-003 | RISK-003、RISK-005 | plan.md:Story Breakdown:ST-004 |
+| ST-005 | Functional | 用户能够生成和查看报告，报告内容完整准确，生成时间 p95 ≤ 2 秒 | FR-004、FR-007；NFR-PERF-001、NFR-REL-001 | ST-001、ST-003 | RISK-002 | plan.md:Story Breakdown:ST-005 |
+| ST-006 | Functional | 用户能够看到友好的空状态提示和错误提示，错误处理完善 | FR-006、FR-007；NFR-OBS-002、NFR-REL-001 | ST-001 | 无 | plan.md:Story Breakdown:ST-006 |
+| ST-007 | Optimization | 统计数据查询和图表渲染性能满足要求，降级策略有效 | NFR-PERF-002、NFR-PERF-003、NFR-MEM-001 | ST-001、ST-003 | RISK-001、RISK-003 | plan.md:Story Breakdown:ST-007 |
+| ST-008 | Infrastructure | 关键操作都有日志记录，性能指标可观测，错误日志便于排查 | NFR-OBS-001、NFR-OBS-002、NFR-OBS-003 | ST-001、ST-003、ST-005 | 无 | plan.md:Story Breakdown:ST-008 |
 
 ### 5.2 追溯矩阵（FR/NFR → Story → Task）
 
@@ -602,7 +1080,46 @@ flowchart TD
   - 统计数据页面内存占用峰值 ≤ 50MB（测试方法：使用内存分析工具测量页面内存占用）
   - 页面退出后内存释放 ≥ 80%（测试方法：测量页面退出前后的内存占用差异）
 
-## 10. 执行说明（只引用 tasks.md，不新增 Task）
+## 10. Story Detailed Design（L2 二层详细设计引用，来自 plan.md）
+
+> 目标：引用 plan.md 中的 Story Detailed Design 部分，为开发落码提供详细指导。
+>
+> 规则：
+> - 本节只做索引和引用，不复制粘贴完整内容；所有详细设计的权威内容在 `plan.md:Story Detailed Design`。
+> - 若某个 Story 在 plan.md 尚未补齐详细设计，标注 `TODO(Clarify)` 并指回 plan.md 对应 Story 补齐。
+
+### Story Detailed Design 入口
+
+| Story ID | 详细设计入口（plan.md） | 设计要点摘要 |
+|---|---|---|
+| ST-001 | plan.md:Story Detailed Design:ST-001 | 统计数据查询功能：包含目标&DoD、代码落点、核心接口、静态结构、动态交互（成功/异常）、异常场景矩阵、并发/生命周期/资源管理、验证与测试设计 |
+| ST-002 | plan.md:Story Detailed Design:ST-002 | 统计数据缓存机制：包含目标&DoD、代码落点、核心接口、静态结构、动态交互（成功/异常）、异常场景矩阵、并发/生命周期/资源管理、验证与测试设计 |
+
+### Story Detailed Design 内容引用（仅核心部分）
+
+#### ST-001 Detailed Design：实现统计数据查询功能
+
+> 详细设计内容请参考：`plan.md:Story Detailed Design:ST-001`
+
+**关键设计要点**：
+- **代码落点**：StatisticsRepository、GetStatisticsUseCase、StatisticsViewModel、StatisticsScreen
+- **核心接口**：`suspend fun getStatistics(timeRange: TimeRange): Result<LearningStatistics>`
+- **异常处理**：查询超时（>5秒）、查询失败、数据计算失败、无数据、协程取消、时间范围无效
+- **并发策略**：协程异步执行（Dispatchers.IO），限制并发查询数量（最多 3 个）
+- **验证方式**：单元测试、集成测试、性能测试（p95 ≤ 1 秒）、可靠性测试（成功率 ≥ 99.5%）
+
+#### ST-002 Detailed Design：实现统计数据缓存机制
+
+> 详细设计内容请参考：`plan.md:Story Detailed Design:ST-002`
+
+**关键设计要点**：
+- **代码落点**：StatisticsCache、CacheEntry
+- **核心接口**：`fun get(key: String): CacheEntry?`、`fun put(key: String, entry: CacheEntry)`
+- **异常处理**：缓存未命中、缓存过期、缓存空间不足、内存不足
+- **并发策略**：使用 ConcurrentHashMap 实现线程安全的缓存
+- **验证方式**：单元测试（缓存命中率 ≥ 80%，缓存大小 ≤ 10MB）
+
+## 11. 执行说明（只引用 tasks.md，不新增 Task）
 
 - **执行入口**：`tasks.md`
 - **验证入口**：各 Task 的验证清单 + Plan 的验收指标

@@ -5,26 +5,58 @@
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0（来自 `plan.md`）
 **Tasks Version**：v0.1.0
-**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`）
+**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md` 以及可选工件）
 
 > 规则：
 > - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
+> - 若 plan.md 已包含 Story 二层详细设计（Story Detailed Design / L2）：每个 Task 必须提供**设计引用**（指向 plan.md 对应 ST-xxx 的小节/图表/异常矩阵）。
 
-## 阶段 0：准备
+## Task 行格式（首行必须严格遵循）
+
+```text
+- [ ] T001 [P?] [ST-001] <带路径的任务标题>
+```
+
+- **复选框**：必须以 `- [ ]` 开头（完成后改为 `- [x]`）
+- **任务 ID**：T001、T002…（全局递增）
+- **[P]**：可并行执行（不改同一文件，且无依赖）
+- **[ST-xxx]**：必须绑定到 Plan 中的 Story ID
+- **路径**：必须写出影响的关键文件路径（真实路径）
+
+### Task 详细信息（紧随首行的子项）
+
+- **依赖**：T???（无则写"无"）
+- **设计引用**：
+  - 模块级：`plan.md:A3.4:<模块名>:UML类图/时序-成功/时序-异常`
+  - 或 Story 级：`plan.md:Story Detailed Design:ST-xxx:...`
+  - （若该 Story/模块设计尚未补齐，则写 `N/A` 并在 Plan 中补齐）
+- **步骤**：
+  - 1) …
+  - 2) …
+- **验证**：
+  - [ ] 单元/集成/手动验证步骤（可执行）
+  - [ ] 指标（如 p95、mAh、内存 MB）与阈值（如适用）
+- **产物**：涉及的文件/文档/脚本
+
+## 路径约定（按 plan.md 的结构决策为准）
+
+- **移动端**：`app/src/main/java/com/jacky/verity/gamification/`
+
+## 阶段 0：准备（可选但建议）
 
 **目标**：对齐版本、冻结设计输入，避免 Implement 期返工
 
 - [ ] T001 在 `specs/epics/EPIC-001-word-memory-app/features/FEAT-004-gamification-incentive/` 中核对 `spec.md`、`plan.md` 的 Version 字段一致性并补齐变更记录
   - **依赖**：无
+  - **设计引用**：N/A
   - **步骤**：
-    - 1) 确认 `spec.md` 中 `Feature Version` 为 v0.1.0
-    - 2) 确认 `plan.md` 中 `Plan Version` 为 v0.1.0
-    - 3) 确认 Plan 的 Story Breakdown 已完成（ST-001 至 ST-008）
-    - 4) 确认所有 Story 都有明确的依赖关系和验收方式
+    - 1) 确认 `Feature Version`（v0.1.0）、`Plan Version`（v0.1.0）已填写
+    - 2) 确认 Plan 的 Story Breakdown 已完成（ST-001 到 ST-005）
+    - 3) 确认 Plan 的 Story Detailed Design 已完成（ST-001、ST-002 详细设计）
   - **验证**：
-    - [ ] `tasks.md` 中 `Plan Version` 与 `plan.md` 一致
-    - [ ] 所有 Story（ST-001 至 ST-008）都已识别并映射到任务
+    - [ ] tasks.md 中 `Plan Version`（v0.1.0）与 plan.md 一致
+    - [ ] tasks.md 中 `Feature Version`（v0.1.0）与 spec.md 一致
   - **产物**：`spec.md`、`plan.md`、`tasks.md`
 
 ---
@@ -35,632 +67,562 @@
 
 - [ ] T010 按照 plan.md 的"源代码结构"创建游戏化模块目录结构（路径：`app/src/main/java/com/jacky/verity/gamification/`）
   - **依赖**：T001
+  - **设计引用**：plan.md:B7 源代码结构
   - **步骤**：
-    - 1) 创建 `gamification/ui/achievement/` 目录（成就列表 UI）
-    - 2) 创建 `gamification/ui/points/` 目录（积分等级 UI）
-    - 3) 创建 `gamification/ui/progress/` 目录（进度可视化 UI）
-    - 4) 创建 `gamification/viewmodel/` 目录（ViewModel 层）
-    - 5) 创建 `gamification/domain/` 目录（领域层 Engine）
-    - 6) 创建 `gamification/data/repository/` 目录（Repository 层）
-    - 7) 创建 `gamification/data/database/dao/` 目录（DAO 接口）
-    - 8) 创建 `gamification/data/database/entity/` 目录（Room 实体）
-    - 9) 创建 `gamification/data/model/` 目录（数据模型）
-    - 10) 创建 `gamification/di/` 目录（依赖注入）
+    - 1) 创建 `gamification/` 目录及其子目录：`ui/`、`viewmodel/`、`domain/`、`calculator/`、`data/`、`di/`
+    - 2) 创建子目录：`ui/achievement/`、`ui/points/`、`ui/progress/`、`data/repository/`、`data/local/`、`data/database/dao/`、`data/database/entity/`
+    - 3) 确保与现有模块边界一致（不冲突）
   - **验证**：
-    - [ ] 目录结构与 plan.md B7 节一致
-    - [ ] 所有目录已创建且为空（或仅包含占位文件）
-  - **产物**：相关目录结构
+    - [ ] 目录结构与 plan.md:B7 源代码结构一致
+    - [ ] 所有子目录已创建
+  - **产物**：目录结构
 
-- [ ] T011 在 `app/build.gradle.kts` 中添加游戏化模块依赖（Room、Coroutines、Flow、Compose）
+- [ ] T011 初始化构建与依赖（路径：`app/build.gradle.kts`）
   - **依赖**：T010
+  - **设计引用**：plan.md:B1 技术背景
   - **步骤**：
-    - 1) 添加 Room 依赖：`implementation("androidx.room:room-runtime:2.6.1")`、`kapt("androidx.room:room-compiler:2.6.1")`
-    - 2) 添加 Coroutines 依赖：`implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")`
-    - 3) 添加 Flow 依赖（已包含在 Coroutines 中）
-    - 4) 确认 Compose 依赖已存在（EPIC 级依赖）
+    - 1) 添加 Kotlin 2.x 依赖（如未添加）
+    - 2) 添加 Jetpack Compose 依赖（如未添加）
+    - 3) 添加 Room 数据库依赖：`implementation("androidx.room:room-runtime:2.6.1")`、`kapt("androidx.room:room-compiler:2.6.1")`、`implementation("androidx.room:room-ktx:2.6.1")`
+    - 4) 添加 Kotlin Coroutines 依赖：`implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")`
+    - 5) 添加 Flow 依赖（Kotlin Coroutines 已包含）
   - **验证**：
-    - [ ] 项目可以成功构建（`./gradlew build`）
-    - [ ] 所有依赖已正确解析
+    - [ ] 基础构建可通过（`./gradlew build`）
+    - [ ] 依赖下载成功
   - **产物**：`app/build.gradle.kts`
 
-- [ ] T012 [P] 在 `app/src/main/res/` 中创建游戏化资源目录（图标、动画资源等）
-  - **依赖**：T010
+- [ ] T012 [P] 配置代码检查与格式化工具（路径：`.editorconfig`、`app/.editorconfig`）
+  - **依赖**：T011
+  - **设计引用**：N/A
   - **步骤**：
-    - 1) 创建 `res/drawable/gamification/` 目录（成就图标、等级图标）
-    - 2) 创建 `res/values/gamification/` 目录（字符串资源、颜色资源）
+    - 1) 配置 Kotlin 代码风格（4 空格缩进、120 字符行宽）
+    - 2) 配置 Jetpack Compose 代码风格
   - **验证**：
-    - [ ] 资源目录已创建
-  - **产物**：资源目录结构
+    - [ ] Kotlin/Compose 代码格式检查可通过
+  - **产物**：`.editorconfig`、`app/.editorconfig`
 
 ---
 
 ## 阶段 2：核心基础（阻塞性前置条件，阻塞所有 Story）
 
-**目标**：所有用户故事实现前必须完成的核心基础设施搭建
+**目标**：所有用户故事实现前必须完成的核心基础设施搭建（ST-005：数据模型和存储实现）
 
 **⚠️ 关键**：此阶段完成前，任何用户故事相关工作均不可启动
 
-- [ ] T020 在 `app/src/main/java/com/jacky/verity/gamification/data/database/entity/` 中创建 Room 数据库实体类（Achievement、PointsRecord、UserLevel、AchievementDefinition、LevelDefinition）
-  - **依赖**：T011
+- [ ] T020 [ST-005] 创建游戏化数据模型（路径：`app/src/main/java/com/jacky/verity/gamification/data/model/Achievement.kt`、`Points.kt`、`Level.kt`、`Progress.kt`）
+  - **依赖**：T012
+  - **设计引用**：plan.md:B3.2 物理数据结构、plan.md:Story Detailed Design:ST-005
   - **步骤**：
-    - 1) 创建 `Achievement.kt` 实体（achievement_id, user_id, unlocked_at, status）
-    - 2) 创建 `PointsRecord.kt` 实体（record_id, user_id, points_change, reason, total_points, created_at）
-    - 3) 创建 `UserLevel.kt` 实体（user_id, level_id, current_points, updated_at）
-    - 4) 创建 `AchievementDefinition.kt` 实体（achievement_id, name, description, condition_type, condition_value, icon）
-    - 5) 创建 `LevelDefinition.kt` 实体（level_id, name, required_points, icon）
-    - 6) 添加 Room 注解（@Entity、@PrimaryKey、@ColumnInfo）
+    - 1) 创建 `Achievement` data class（id、name、description、icon、conditionType、conditionThreshold、pointsReward、isUnlocked、unlockedAt）
+    - 2) 创建 `Points` data class（userId、totalPoints、updatedAt）
+    - 3) 创建 `Level` data class（userId、levelId、levelName、updatedAt）
+    - 4) 创建 `Progress` data class（overallProgress、milestones、recentMilestone）
+    - 5) 创建 `PointsHistory` data class（id、userId、pointsChange、reason、totalPoints、createdAt）
+    - 6) 创建 `AchievementHistory` data class（id、achievementId、userId、unlockedAt）
   - **验证**：
-    - [ ] 所有实体类编译通过
-    - [ ] 实体字段与 plan.md B3.2 节表结构一致
-  - **产物**：`Achievement.kt`、`PointsRecord.kt`、`UserLevel.kt`、`AchievementDefinition.kt`、`LevelDefinition.kt`
+    - [ ] 数据模型与 plan.md:B3.2 字段说明一致
+    - [ ] 数据模型可编译通过
+  - **产物**：数据模型文件
 
-- [ ] T021 在 `app/src/main/java/com/jacky/verity/gamification/data/database/dao/` 中创建 DAO 接口（AchievementDao、PointsDao、LevelDao）
+- [ ] T021 [P] [ST-005] 创建 Room 数据库实体（路径：`app/src/main/java/com/jacky/verity/gamification/data/database/entity/AchievementEntity.kt`、`PointsEntity.kt`、`LevelEntity.kt`、`PointsHistoryEntity.kt`、`AchievementHistoryEntity.kt`）
   - **依赖**：T020
+  - **设计引用**：plan.md:B3.2 物理数据结构（表结构清单、字段说明）
   - **步骤**：
-    - 1) 创建 `AchievementDao.kt`（查询用户成就、插入成就、更新成就状态）
-    - 2) 创建 `PointsDao.kt`（查询积分历史、插入积分记录、查询总积分）
-    - 3) 创建 `LevelDao.kt`（查询用户等级、更新用户等级、查询等级定义）
-    - 4) 添加 Room @Dao 注解和查询方法（@Query、@Insert、@Update、@Transaction）
+    - 1) 创建 `AchievementEntity`（@Entity，表名 `achievements`，主键 id、user_id）
+    - 2) 创建 `PointsEntity`（@Entity，表名 `points`，主键 user_id）
+    - 3) 创建 `LevelEntity`（@Entity，表名 `level`，主键 user_id）
+    - 4) 创建 `PointsHistoryEntity`（@Entity，表名 `points_history`，主键 id，索引 user_id、created_at）
+    - 5) 创建 `AchievementHistoryEntity`（@Entity，表名 `achievement_history`，主键 id，索引 achievement_id、user_id、unlocked_at）
+    - 6) 添加索引注解（@Index）
   - **验证**：
-    - [ ] 所有 DAO 接口编译通过
-    - [ ] 查询方法与 plan.md 典型查询一致
-  - **产物**：`AchievementDao.kt`、`PointsDao.kt`、`LevelDao.kt`
+    - [ ] Entity 与 plan.md:B3.2 表结构一致
+    - [ ] Entity 可编译通过
+  - **产物**：Room Entity 文件
 
-- [ ] T022 在 `app/src/main/java/com/jacky/verity/gamification/data/database/` 中创建 Room 数据库类 `GamificationDatabase.kt`
+- [ ] T022 [ST-005] 创建 Room DAO 接口（路径：`app/src/main/java/com/jacky/verity/gamification/data/database/dao/AchievementDao.kt`、`PointsDao.kt`、`LevelDao.kt`、`PointsHistoryDao.kt`、`AchievementHistoryDao.kt`）
   - **依赖**：T021
+  - **设计引用**：plan.md:A3.4 模块：DataSource 层（UML 类图）
   - **步骤**：
-    - 1) 创建 `GamificationDatabase` 抽象类，继承 `RoomDatabase`
-    - 2) 定义 DAO 属性（achievementDao、pointsDao、levelDao）
-    - 3) 配置数据库版本（version = 1）
-    - 4) 实现单例模式（getInstance 方法）
+    - 1) 创建 `AchievementDao`（@Dao，方法：getAllAchievements()、getUnlockedAchievements()、insertAchievements()、updateAchievement()）
+    - 2) 创建 `PointsDao`（@Dao，方法：getPoints()、insertPoints()、updatePoints()）
+    - 3) 创建 `LevelDao`（@Dao，方法：getLevel()、insertLevel()、updateLevel()）
+    - 4) 创建 `PointsHistoryDao`（@Dao，方法：insertPointsHistory()、getPointsHistory(limit: Int)）
+    - 5) 创建 `AchievementHistoryDao`（@Dao，方法：insertAchievementHistory()、getAchievementHistory(limit: Int)）
+    - 6) 添加 @Query 注解和 SQL 语句
+    - 7) 添加事务注解（@Transaction）用于批量操作
   - **验证**：
-    - [ ] 数据库类编译通过
-    - [ ] 数据库可以成功创建（单元测试验证）
+    - [ ] DAO 接口与 plan.md:A3.4 模块：DataSource 层一致
+    - [ ] DAO 可编译通过
+  - **产物**：Room DAO 文件
+
+- [ ] T023 [ST-005] 创建 Room 数据库类（路径：`app/src/main/java/com/jacky/verity/gamification/data/database/GamificationDatabase.kt`）
+  - **依赖**：T022
+  - **设计引用**：plan.md:B3.2 数据库迁移与兼容策略
+  - **步骤**：
+    - 1) 创建 `@Database(entities = [...], version = 1)` 类
+    - 2) 定义 abstract 方法返回所有 DAO
+    - 3) 创建数据库实例（单例模式，使用 Room.databaseBuilder）
+    - 4) 配置数据库迁移策略（Migration 1，初始版本，无需迁移）
+  - **验证**：
+    - [ ] 数据库类可编译通过
+    - [ ] 数据库版本为 v1（与 plan.md 一致）
   - **产物**：`GamificationDatabase.kt`
 
-- [ ] T023 在 `app/src/main/java/com/jacky/verity/gamification/data/model/` 中创建数据模型类（AchievementDefinition、PointsRule、LevelDefinition、LearningStats、LearningEvent）
-  - **依赖**：T020
+- [ ] T024 [P] [ST-005] 创建数据源层（DataSource）（路径：`app/src/main/java/com/jacky/verity/gamification/data/local/AchievementLocalDataSource.kt`、`PointsLocalDataSource.kt`、`LevelLocalDataSource.kt`）
+  - **依赖**：T023
+  - **设计引用**：plan.md:A3.4 模块：DataSource 层（UML 类图、时序图-成功、时序图-异常、异常清单）
   - **步骤**：
-    - 1) 创建 `AchievementDefinition.kt` 数据类（成就定义模型）
-    - 2) 创建 `PointsRule.kt` 数据类（积分规则模型）
-    - 3) 创建 `LevelDefinition.kt` 数据类（等级定义模型）
-    - 4) 创建 `LearningStats.kt` 数据类（学习统计数据，用于成就计算）
-    - 5) 创建 `LearningEvent.kt` 数据类（学习事件，用于积分计算）
+    - 1) 创建 `AchievementLocalDataSource`（依赖 `AchievementDao`、`AchievementHistoryDao`，实现数据访问方法）
+    - 2) 创建 `PointsLocalDataSource`（依赖 `PointsDao`、`PointsHistoryDao`，实现数据访问方法）
+    - 3) 创建 `LevelLocalDataSource`（依赖 `LevelDao`，实现数据访问方法）
+    - 4) 实现错误处理（捕获 SQLiteException，转换为 DataCorruptionError/DatabaseError）
+    - 5) 实现事务支持（使用 Room 的 @Transaction 注解）
   - **验证**：
-    - [ ] 所有数据模型类编译通过
-    - [ ] 数据模型与 plan.md 核心数据结构一致
-  - **产物**：`AchievementDefinition.kt`、`PointsRule.kt`、`LevelDefinition.kt`、`LearningStats.kt`、`LearningEvent.kt`
+    - [ ] DataSource 与 plan.md:A3.4 模块：DataSource 层设计一致
+    - [ ] DataSource 可编译通过
+    - [ ] 单元测试覆盖异常场景（见 plan.md:A3.4 模块：DataSource 层异常清单）
+  - **产物**：DataSource 文件
 
-- [ ] T024 在 `app/src/main/java/com/jacky/verity/gamification/data/repository/` 中创建 `GamificationRepository.kt` 基础接口
-  - **依赖**：T022, T023
+- [ ] T025 [ST-005] 创建 Repository 层（路径：`app/src/main/java/com/jacky/verity/gamification/data/repository/GamificationRepository.kt`）
+  - **依赖**：T024
+  - **设计引用**：plan.md:A3.4 模块：Repository 层（UML 类图、时序图-成功、时序图-异常、异常清单）
   - **步骤**：
-    - 1) 定义 Repository 接口（suspend 函数、Flow 返回类型）
-    - 2) 定义错误类型（sealed class GamificationError）
-    - 3) 定义结果类型（Result<T>）
+    - 1) 创建 `GamificationRepository`（依赖所有 DataSource，统一数据访问接口）
+    - 2) 实现缓存策略（内存缓存成就列表、等级配置）
+    - 3) 实现事务管理（成就解锁和积分保存使用事务保证原子性）
+    - 4) 实现错误处理（捕获 DataSource 错误，转换为 Repository 错误）
+    - 5) 实现并发控制（使用 Mutex 保护共享状态，重试机制处理冲突）
   - **验证**：
-    - [ ] Repository 接口编译通过
-    - [ ] 接口方法与 plan.md B4.1 节一致
+    - [ ] Repository 与 plan.md:A3.4 模块：Repository 层设计一致
+    - [ ] Repository 可编译通过
+    - [ ] 单元测试覆盖异常场景（见 plan.md:A3.4 模块：Repository 层异常清单）
   - **产物**：`GamificationRepository.kt`
 
-**检查点**：基础层就绪——用户故事实现可并行启动
+- [ ] T026 [ST-005] 创建成就配置和等级配置（路径：`app/src/main/java/com/jacky/verity/gamification/calculator/AchievementConfig.kt`、`LevelConfig.kt`）
+  - **依赖**：T025
+  - **设计引用**：plan.md:A3.4 模块：Calculator 层（核心数据结构/状态）
+  - **步骤**：
+    - 1) 创建 `AchievementConfig` 数据类（成就ID、名称、描述、解锁条件、积分奖励）
+    - 2) 创建 `LevelConfig` 数据类（等级ID、等级名称、所需积分、等级图标）
+    - 3) 硬编码成就配置列表（100 个成就定义：学习天数成就、连续学习成就、单词数量成就、学习时长成就等）
+    - 4) 硬编码等级配置列表（20 个等级定义：Lv.1 到 Lv.20，积分阈值递增）
+  - **验证**：
+    - [ ] 成就配置与 plan.md 成就类型一致（学习天数、连续学习、单词数量、学习时长）
+    - [ ] 等级配置与 plan.md 一致（20 个等级）
+    - [ ] 配置可编译通过
+  - **产物**：配置文件
+
+**检查点**：基础层就绪——数据模型、数据库、Repository 层已完成，用户故事实现可并行启动
 
 ---
 
-## 阶段 3：Story ST-001 - 成就系统核心功能（类型：Functional）
+## 阶段 3：Story ST-005 - 数据模型和存储实现（类型：Infrastructure）
 
-**目标**：用户完成学习任务后，系统能够自动检查并解锁符合条件的成就，显示解锁动画
+**目标**：建立完整的数据存储和访问基础设施，支持成就、积分、等级数据的持久化
 
-**验证方式（高层）**：单元测试验证成就检查逻辑、性能测试验证检查耗时（p95 ≤ 100ms）、集成测试验证成就解锁流程、准确率测试验证（100%）
+**验证方式（高层）**：
+- 功能验收：成就、积分、等级数据正确保存和查询，数据持久化正常
+- 可靠性验收：应用重启后数据恢复，数据损坏时能够修复
+- 性能验收：数据库查询时间 ≤ 5ms（p95），数据保存时间 ≤ 10ms（p95）
+
+### ST-005 任务（已在阶段 2 完成）
+
+> 说明：ST-005 作为基础设施，已在阶段 2（核心基础）完成，包括：
+> - T020-T026：数据模型、Room 数据库、Repository 层
+
+**检查点**：ST-005 完成——数据存储基础设施就绪，其他 Story 可依赖本 Story
+
+---
+
+## 阶段 4：Story ST-001 - 成就系统实现（类型：Functional）
+
+**目标**：用户完成学习任务后，系统自动检查并解锁符合条件的成就，显示解锁动画和提示
+
+**验证方式（高层）**：
+- 功能验收：用户完成学习后看到成就解锁提示，成就列表显示已解锁成就
+- 性能验收：成就检查计算时间 ≤ 100ms（p95），成就列表加载时间 ≤ 300ms（p95）
+- 可靠性验收：成就检查准确率 100%，成就解锁数据正确持久化
 
 ### ST-001 任务
 
-- [ ] T100 [ST-001] 在 `app/src/main/java/com/jacky/verity/gamification/domain/` 中创建 `AchievementEngine.kt` 成就计算引擎
-  - **依赖**：T024
+- [ ] T100 [P] [ST-001] 创建成就计算器（路径：`app/src/main/java/com/jacky/verity/gamification/calculator/AchievementCalculator.kt`）
+  - **依赖**：T026
+  - **设计引用**：plan.md:A3.4 模块：Calculator 层（UML 类图、时序图-成功、时序图-异常、异常清单）、plan.md:Story Detailed Design:ST-001
   - **步骤**：
-    - 1) 实现 `checkAchievements(stats: LearningStats): List<AchievementUnlocked>` 方法
-    - 2) 实现成就定义加载逻辑（从数据库加载，支持内存缓存）
-    - 3) 实现解锁条件判断逻辑（学习天数、连续学习天数、单词数量、学习时长）
-    - 4) 实现批量检查所有成就定义，只返回新解锁的成就
-    - 5) 实现去重逻辑（基于成就ID + 解锁时间）
-    - 6) 添加性能监控（检查耗时，确保 p95 ≤ 100ms）
+    - 1) 创建 `AchievementCalculator` 类（依赖成就配置列表）
+    - 2) 实现 `checkAchievementConditions(statistics: LearningStatistics, currentAchievements: List<Achievement>): List<Achievement>` 方法
+    - 3) 实现成就条件检查逻辑（遍历成就配置，检查解锁条件：学习天数、连续学习天数、单词数量、学习时长）
+    - 4) 实现去重逻辑（排除已解锁成就）
+    - 5) 实现错误处理（捕获计算异常，转换为 CalculationError）
+    - 6) 实现超时检测（检查耗时 > 100ms 时记录警告）
   - **验证**：
-    - [ ] 单元测试：验证成就检查逻辑正确性（所有成就类型）
-    - [ ] 性能测试：验证检查耗时 p95 ≤ 100ms（模拟 100 个成就定义）
-    - [ ] 准确率测试：验证不误解锁、不漏解锁（100% 准确率）
-  - **产物**：`AchievementEngine.kt`
+    - [ ] 单元测试覆盖所有成就类型和解锁条件（见 plan.md:Story Detailed Design:ST-001:8) 验证与测试设计）
+    - [ ] 单元测试覆盖异常场景（统计数据为空、成就配置缺失、计算超时、条件判断异常）
+    - [ ] 性能测试：成就检查计算时间 p95 ≤ 100ms（100 次迭代，模拟 100 个成就定义）
+    - [ ] 准确率测试：成就检查准确率 100%（不误解锁、不漏解锁）
+  - **产物**：`AchievementCalculator.kt`
 
-- [ ] T101 [ST-001] 在 `app/src/main/java/com/jacky/verity/gamification/data/repository/` 中实现 `GamificationRepository` 的成就相关方法
-  - **依赖**：T100
+- [ ] T101 [ST-001] 创建成就检查用例（路径：`app/src/main/java/com/jacky/verity/gamification/domain/CheckAchievementUseCase.kt`）
+  - **依赖**：T100、T025
+  - **设计引用**：plan.md:A3.4 模块：Domain 层（UseCase）（UML 类图、时序图-成功、时序图-异常、异常清单）、plan.md:Story Detailed Design:ST-001:5) 动态交互设计
   - **步骤**：
-    - 1) 实现 `saveAchievement(achievement: Achievement): Result<Unit>` 方法
-    - 2) 实现 `getAllAchievements(): Flow<List<Achievement>>` 方法
-    - 3) 实现 `getAchievementById(achievementId: String): Achievement?` 方法
-    - 4) 实现事务保证数据一致性
-    - 5) 添加错误处理（AchievementError.CalculationError、AchievementError.DataError）
+    - 1) 创建 `CheckAchievementUseCase` 类（依赖 `GamificationRepository`、`AchievementCalculator`、`LearningStatsRepository`）
+    - 2) 实现 `execute(learningData: LearningData): Result<List<Achievement>>` suspend 方法
+    - 3) 实现成就检查流程（获取学习统计数据 → 加载当前成就列表 → 调用 Calculator 检查 → 解锁成就 → 保存到数据库）
+    - 4) 实现事务管理（使用 Repository 事务保证成就解锁和保存的原子性）
+    - 5) 实现错误处理（学习数据不可用 → 降级处理；成就计算异常 → 记录日志；数据库保存失败 → 重试）
+    - 6) 实现并发控制（使用队列化处理，一次只处理一个用户的成就检查）
   - **验证**：
-    - [ ] 单元测试：验证数据持久化正确性
-    - [ ] 集成测试：验证成就解锁流程（学习数据变化 → 成就检查 → 数据保存 → UI 更新）
-  - **产物**：`GamificationRepository.kt`（成就相关方法）
+    - [ ] 单元测试覆盖成功流程（Mock Repository 和 LearningStatsRepository）
+    - [ ] 单元测试覆盖异常场景（学习统计数据不可用、成就计算异常、数据库保存失败、并发操作冲突）
+    - [ ] 集成测试覆盖完整流程（学习 → 成就检查 → 解锁 → 动画）
+  - **产物**：`CheckAchievementUseCase.kt`
 
-- [ ] T102 [ST-001] 在 `app/src/main/java/com/jacky/verity/gamification/domain/` 中实现成就定义初始化逻辑（默认成就定义数据）
-  - **依赖**：T100
+- [ ] T102 [P] [ST-001] 创建获取成就列表用例（路径：`app/src/main/java/com/jacky/verity/gamification/domain/GetAchievementsUseCase.kt`）
+  - **依赖**：T025
+  - **设计引用**：plan.md:A3.4 模块：Domain 层（UseCase）、plan.md:Story Detailed Design:ST-001
   - **步骤**：
-    - 1) 定义默认成就列表（学习天数成就、连续学习成就、单词数量成就、学习时长成就）
-    - 2) 实现成就定义初始化方法（首次启动时插入默认成就定义）
-    - 3) 实现成就定义缓存机制（内存缓存，减少数据库查询）
+    - 1) 创建 `GetAchievementsUseCase` 类（依赖 `GamificationRepository`）
+    - 2) 实现 `execute(): Result<List<Achievement>>` suspend 方法
+    - 3) 实现缓存策略（首次加载后缓存，成就解锁时更新缓存）
+    - 4) 实现错误处理（数据库查询失败 → 记录日志，返回错误）
   - **验证**：
-    - [ ] 单元测试：验证成就定义初始化正确性
-    - [ ] 集成测试：验证首次启动时成就定义已初始化
-  - **产物**：`AchievementEngine.kt`（成就定义初始化逻辑）
+    - [ ] 单元测试覆盖成功流程和异常场景
+    - [ ] 性能测试：成就列表加载时间 p95 ≤ 300ms
+  - **产物**：`GetAchievementsUseCase.kt`
 
-- [ ] T103 [ST-001] 在 `app/src/main/java/com/jacky/verity/gamification/viewmodel/` 中创建 `AchievementViewModel.kt`
-  - **依赖**：T101
+- [ ] T103 [ST-001] 创建成就 ViewModel（路径：`app/src/main/java/com/jacky/verity/gamification/viewmodel/AchievementViewModel.kt`）
+  - **依赖**：T101、T102
+  - **设计引用**：plan.md:A3.4 模块：ViewModel 层（UML 类图、时序图-成功、时序图-异常、异常清单）、plan.md:Story Detailed Design:ST-001
   - **步骤**：
-    - 1) 实现 ViewModel 类，继承 `ViewModel`
-    - 2) 实现成就列表状态管理（StateFlow<List<Achievement>>）
-    - 3) 实现成就检查触发逻辑（监听学习数据变化事件）
-    - 4) 实现成就解锁事件处理（显示解锁动画、更新 UI）
-    - 5) 添加错误处理和降级策略
+    - 1) 创建 `AchievementViewModel` 类（依赖 `CheckAchievementUseCase`、`GetAchievementsUseCase`）
+    - 2) 创建 UI State：`_uiState: MutableStateFlow<AchievementListState>`、`uiState: StateFlow<AchievementListState>`
+    - 3) 创建动画触发器：`_unlockAnimationTrigger: MutableStateFlow<Achievement?>`、`unlockAnimationTrigger: StateFlow<Achievement?>`
+    - 4) 实现 `onLearningCompleted(learningData: LearningData)` 方法（调用 UseCase 检查成就，更新 StateFlow）
+    - 5) 实现 `loadAchievements()` 方法（调用 UseCase 获取成就列表）
+    - 6) 实现 `retry()` 方法（错误重试）
+    - 7) 实现错误处理（UseCase 错误转换为 UI 错误状态）
+    - 8) 实现协程取消处理（用户离开页面时清理状态）
   - **验证**：
-    - [ ] 单元测试：验证 ViewModel 状态管理正确性
-    - [ ] 集成测试：验证成就解锁事件触发 UI 更新
+    - [ ] ViewModel 与 plan.md:A3.4 模块：ViewModel 层设计一致
+    - [ ] ViewModel 可编译通过
+    - [ ] 单元测试覆盖状态更新和错误处理
   - **产物**：`AchievementViewModel.kt`
 
-**检查点**：至此，Story ST-001 应具备完整功能且可独立测试（成就检查、解锁、数据持久化）
+- [ ] T104 [ST-001] 创建成就列表界面（路径：`app/src/main/java/com/jacky/verity/gamification/ui/achievement/AchievementScreen.kt`）
+  - **依赖**：T103
+  - **设计引用**：plan.md:A3.4 模块：UI 层（Jetpack Compose）（UML 类图、时序图-成功、时序图-异常、异常清单）、plan.md:Story Detailed Design:ST-001
+  - **步骤**：
+    - 1) 创建 `AchievementScreen` Composable 函数（依赖 `AchievementViewModel`）
+    - 2) 实现成就列表展示（使用 LazyColumn 虚拟化长列表，展示成就名称、描述、图标、解锁状态）
+    - 3) 实现状态观察（使用 `collectAsState` 观察 ViewModel 状态）
+    - 4) 实现加载状态和错误提示（显示加载中、错误消息）
+    - 5) 实现动画触发器（观察 `unlockAnimationTrigger`，播放解锁动画）
+    - 6) 实现解锁动画（使用 Jetpack Compose Animation API，`AnimatedVisibility`、`animateAsState`）
+    - 7) 实现错误降级（动画资源加载失败 → 降级为静态图标显示）
+  - **验证**：
+    - [ ] UI 与 plan.md:A3.4 模块：UI 层设计一致
+    - [ ] UI 可编译通过
+    - [ ] 手动测试：成就列表正确展示，解锁动画流畅（60fps）
+    - [ ] 性能测试：列表加载时间 p95 ≤ 300ms
+    - [ ] 内存测试：动画资源播放完成后立即释放
+  - **产物**：`AchievementScreen.kt`
+
+- [ ] T105 [ST-001] 创建成就解锁动画组件（路径：`app/src/main/java/com/jacky/verity/gamification/ui/achievement/AnimatedAchievementUnlock.kt`）
+  - **依赖**：T104
+  - **设计引用**：plan.md:A3.4 模块：UI 层（UML 类图）、plan.md:Story Detailed Design:ST-001
+  - **步骤**：
+    - 1) 创建 `AnimatedAchievementUnlock` Composable 函数（参数：achievement: Achievement）
+    - 2) 实现解锁动画（使用 Compose Animation API：缩放动画、淡入动画、粒子效果等）
+    - 3) 实现动画资源管理（动画播放完成后立即释放资源，使用 DisposableEffect）
+    - 4) 实现错误降级（动画资源加载失败 → 降级为静态提示）
+  - **验证**：
+    - [ ] 动画播放流畅（60fps，使用 FrameMetrics 测量）
+    - [ ] 动画资源及时释放（内存测试验证）
+    - [ ] 错误降级有效（手动测试动画资源加载失败场景）
+  - **产物**：`AnimatedAchievementUnlock.kt`
+
+**检查点**：ST-001 完成——用户完成学习后看到成就解锁提示，成就列表显示已解锁成就，成就检查计算时间 ≤ 100ms（p95），成就列表加载时间 ≤ 300ms（p95），成就检查准确率 100%
 
 ---
 
-## 阶段 4：Story ST-002 - 积分系统核心功能（类型：Functional）
+## 阶段 5：Story ST-002 - 积分系统实现（类型：Functional）
 
-**目标**：用户学习行为产生积分，积分实时累计和更新，支持积分历史记录
+**目标**：用户学习行为产生积分，积分实时累计和更新，显示积分变化
 
-**验证方式（高层）**：单元测试验证积分计算逻辑、性能测试验证计算耗时（p95 ≤ 50ms）、集成测试验证积分累计流程、准确率测试验证（100%）
+**验证方式（高层）**：
+- 功能验收：用户学习后积分增加，积分历史记录正确保存
+- 性能验收：积分计算时间 ≤ 50ms（p95）
+- 可靠性验收：积分计算准确率 100%，积分数据与学习数据一致
 
 ### ST-002 任务
 
-- [ ] T200 [P] [ST-002] 在 `app/src/main/java/com/jacky/verity/gamification/domain/` 中创建 `PointsEngine.kt` 积分计算引擎
-  - **依赖**：T024
+- [ ] T200 [P] [ST-002] 创建积分计算器（路径：`app/src/main/java/com/jacky/verity/gamification/calculator/PointsCalculator.kt`）
+  - **依赖**：T026、T025
+  - **设计引用**：plan.md:A3.4 模块：Calculator 层（PointsCalculator）、plan.md:Story Detailed Design:ST-002
   - **步骤**：
-    - 1) 实现 `calculatePoints(event: LearningEvent): PointsChange` 方法
-    - 2) 实现积分规则加载逻辑（从数据库加载，支持内存缓存）
-    - 3) 实现积分计算逻辑（基于学习行为类型：学习单词、完成复习、连续学习）
-    - 4) 实现积分累计逻辑（事务保证原子性）
-    - 5) 实现积分历史记录（PointsRecord）
-    - 6) 实现去重逻辑（基于事件ID + 时间戳）
-    - 7) 实现缓存机制（总积分内存缓存）
-    - 8) 添加性能监控（计算耗时，确保 p95 ≤ 50ms）
+    - 1) 创建 `PointsCalculator` 类（依赖积分规则配置）
+    - 2) 实现 `calculatePoints(learningData: LearningData): Int` 方法
+    - 3) 实现积分规则计算（学习单词 +10、完成复习 +5、连续学习 +20 等）
+    - 4) 实现错误处理（捕获计算异常，转换为 CalculationError）
   - **验证**：
-    - [ ] 单元测试：验证积分计算逻辑正确性（所有行为类型）
-    - [ ] 性能测试：验证计算耗时 p95 ≤ 50ms
-    - [ ] 准确率测试：验证积分计算准确率 100%（与学习数据一致）
-  - **产物**：`PointsEngine.kt`
+    - [ ] 单元测试覆盖所有积分规则和边界情况
+    - [ ] 性能测试：积分计算时间 p95 ≤ 50ms（100 次迭代）
+    - [ ] 准确率测试：积分计算准确率 100%（与学习数据一致）
+  - **产物**：`PointsCalculator.kt`
 
-- [ ] T201 [ST-002] 在 `app/src/main/java/com/jacky/verity/gamification/data/repository/` 中实现 `GamificationRepository` 的积分相关方法
-  - **依赖**：T200
+- [ ] T201 [ST-002] 创建积分计算用例（路径：`app/src/main/java/com/jacky/verity/gamification/domain/CalculatePointsUseCase.kt`）
+  - **依赖**：T200、T025
+  - **设计引用**：plan.md:A4 流程 2：积分计算与累计流程、plan.md:Story Detailed Design:ST-002:5) 动态交互设计
   - **步骤**：
-    - 1) 实现 `savePointsRecord(record: PointsRecord): Result<Unit>` 方法
-    - 2) 实现 `getTotalPoints(): Flow<Int>` 方法
-    - 3) 实现 `getPointsHistory(limit: Int): List<PointsRecord>` 方法
-    - 4) 实现 `updatePointsState(totalPoints: Int): Result<Unit>` 方法（更新积分状态缓存）
-    - 5) 实现事务保证积分累计原子性
-    - 6) 添加错误处理（PointsError.CalculationError、PointsError.StorageError）
+    - 1) 创建 `CalculatePointsUseCase` 类（依赖 `GamificationRepository`、`PointsCalculator`、`LearningStatsRepository`）
+    - 2) 实现 `execute(learningData: LearningData): Result<PointsResult>` suspend 方法
+    - 3) 实现积分计算流程（获取学习数据 → 计算积分增量 → 累加积分 → 保存到数据库 → 保存积分历史）
+    - 4) 实现事务管理（使用 Repository 事务保证积分累计和保存的原子性）
+    - 5) 实现错误处理（学习数据不可用 → 降级处理；积分计算失败 → 记录日志；数据库保存失败 → 重试）
+    - 6) 实现并发控制（使用事务重试机制处理并发冲突）
   - **验证**：
-    - [ ] 单元测试：验证数据持久化正确性
-    - [ ] 集成测试：验证积分累计流程（学习事件 → 积分计算 → 数据保存 → UI 更新）
-  - **产物**：`GamificationRepository.kt`（积分相关方法）
+    - [ ] 单元测试覆盖成功流程和异常场景
+    - [ ] 集成测试覆盖完整流程（学习 → 积分计算 → 保存 → 更新 UI）
+    - [ ] 并发测试验证事务原子性
+  - **产物**：`CalculatePointsUseCase.kt`
 
-- [ ] T202 [ST-002] 在 `app/src/main/java/com/jacky/verity/gamification/domain/` 中实现积分规则初始化逻辑（默认积分规则配置）
-  - **依赖**：T200
+- [ ] T202 [P] [ST-002] 创建获取积分等级用例（路径：`app/src/main/java/com/jacky/verity/gamification/domain/GetPointsLevelUseCase.kt`）
+  - **依赖**：T025
+  - **设计引用**：plan.md:Story Detailed Design:ST-002
   - **步骤**：
-    - 1) 定义默认积分规则（学习单词：10 分、完成复习：5 分、连续学习：20 分）
-    - 2) 实现积分规则初始化方法（首次启动时插入默认规则）
-    - 3) 实现积分规则缓存机制（内存缓存，减少数据库查询）
+    - 1) 创建 `GetPointsLevelUseCase` 类（依赖 `GamificationRepository`）
+    - 2) 实现 `execute(): Result<PointsLevelResult>` suspend 方法
+    - 3) 实现缓存策略（积分数据首次加载后缓存，积分变化时更新缓存）
   - **验证**：
-    - [ ] 单元测试：验证积分规则初始化正确性
-    - [ ] 集成测试：验证首次启动时积分规则已初始化
-  - **产物**：`PointsEngine.kt`（积分规则初始化逻辑）
+    - [ ] 单元测试覆盖成功流程和异常场景
+  - **产物**：`GetPointsLevelUseCase.kt`
 
-- [ ] T203 [ST-002] 在 `app/src/main/java/com/jacky/verity/gamification/viewmodel/` 中创建 `PointsViewModel.kt`
-  - **依赖**：T201
+- [ ] T203 [ST-002] 创建积分等级 ViewModel（路径：`app/src/main/java/com/jacky/verity/gamification/viewmodel/PointsLevelViewModel.kt`）
+  - **依赖**：T201、T202
+  - **设计引用**：plan.md:A3.4 模块：ViewModel 层、plan.md:Story Detailed Design:ST-002
   - **步骤**：
-    - 1) 实现 ViewModel 类，继承 `ViewModel`
-    - 2) 实现积分状态管理（StateFlow<Int>）
-    - 3) 实现积分变化事件处理（监听学习事件，触发积分计算）
-    - 4) 实现积分实时更新逻辑（Flow 收集，更新 UI）
-    - 5) 添加错误处理和降级策略
+    - 1) 创建 `PointsLevelViewModel` 类（依赖 `CalculatePointsUseCase`、`GetPointsLevelUseCase`）
+    - 2) 创建 UI State：`_uiState: MutableStateFlow<PointsLevelState>`（totalPoints、currentLevel、progressToNextLevel、isLevelUp）
+    - 3) 创建动画触发器：`_levelUpAnimationTrigger: MutableStateFlow<Boolean>`
+    - 4) 实现 `onPointsUpdated(points: Int)` 方法（调用 UseCase 计算积分，更新 StateFlow）
+    - 5) 实现 `loadPointsLevel()` 方法（调用 UseCase 获取积分等级）
+    - 6) 实现错误处理
   - **验证**：
-    - [ ] 单元测试：验证 ViewModel 状态管理正确性
-    - [ ] 集成测试：验证积分变化事件触发 UI 更新
-  - **产物**：`PointsViewModel.kt`
+    - [ ] ViewModel 可编译通过
+    - [ ] 单元测试覆盖状态更新和错误处理
+  - **产物**：`PointsLevelViewModel.kt`
 
-**检查点**：至此，Story ST-002 应具备完整功能且可独立测试（积分计算、累计、数据持久化）
+**检查点**：ST-002 完成——用户学习后积分增加，积分历史记录正确保存，积分计算时间 ≤ 50ms（p95），积分计算准确率 100%
 
 ---
 
-## 阶段 5：Story ST-003 - 等级系统核心功能（类型：Functional）
+## 阶段 6：Story ST-003 - 等级系统实现（类型：Functional）
 
 **目标**：用户积分达到等级提升条件时，系统显示等级提升动画和奖励提示
 
-**验证方式（高层）**：单元测试验证等级计算逻辑、性能测试验证计算耗时（p95 ≤ 50ms）、集成测试验证等级提升流程、准确率测试验证（100%）
+**验证方式（高层）**：
+- 功能验收：用户积分达到等级提升条件时显示等级提升动画，等级数据正确保存
+- 性能验收：等级计算时间 ≤ 20ms（p95）
+- 可靠性验收：等级计算准确率 100%，等级数据与积分数据一致
 
 ### ST-003 任务
 
-- [ ] T300 [ST-003] 在 `app/src/main/java/com/jacky/verity/gamification/domain/` 中创建 `LevelEngine.kt` 等级计算引擎
-  - **依赖**：T201
+- [ ] T300 [P] [ST-003] 创建等级计算器（路径：`app/src/main/java/com/jacky/verity/gamification/calculator/LevelCalculator.kt`）
+  - **依赖**：T026、T025
+  - **设计引用**：plan.md:A3.4 模块：Calculator 层（LevelCalculator）、plan.md:A4 流程 3：等级计算与提升流程、plan.md:Story Detailed Design:ST-003
   - **步骤**：
-    - 1) 实现 `calculateLevel(totalPoints: Int): Level` 方法
-    - 2) 实现 `checkLevelUp(currentLevel: Level, newPoints: Int): LevelUpResult?` 方法
-    - 3) 实现等级定义加载逻辑（从数据库加载，支持内存缓存）
-    - 4) 实现等级计算逻辑（基于积分阈值配置表）
-    - 5) 实现等级提升判断逻辑（积分变化时检查是否达到下一等级所需积分）
-    - 6) 添加性能监控（计算耗时，确保 p95 ≤ 50ms）
+    - 1) 创建 `LevelCalculator` 类（依赖等级配置列表）
+    - 2) 实现 `calculateLevel(points: Int): Level` 方法（基于积分阈值配置表查找等级）
+    - 3) 实现 `calculateProgressToNextLevel(currentLevel: Level, points: Int): Float` 方法
+    - 4) 实现 `checkLevelUp(currentLevel: Level, newPoints: Int): LevelUpResult?` 方法
+    - 5) 实现错误处理（等级配置缺失 → 使用默认等级）
   - **验证**：
-    - [ ] 单元测试：验证等级计算逻辑正确性（所有等级）
-    - [ ] 性能测试：验证计算耗时 p95 ≤ 50ms
-    - [ ] 准确率测试：验证等级计算准确率 100%（与积分数据一致）
-  - **产物**：`LevelEngine.kt`
+    - [ ] 单元测试覆盖所有等级配置和边界情况
+    - [ ] 性能测试：等级计算时间 p95 ≤ 20ms（100 次迭代）
+    - [ ] 准确率测试：等级计算准确率 100%（与积分数据一致）
+  - **产物**：`LevelCalculator.kt`
 
-- [ ] T301 [ST-003] 在 `app/src/main/java/com/jacky/verity/gamification/data/repository/` 中实现 `GamificationRepository` 的等级相关方法
-  - **依赖**：T300
+- [ ] T301 [ST-003] 创建等级计算用例（路径：`app/src/main/java/com/jacky/verity/gamification/domain/CalculateLevelUseCase.kt`）
+  - **依赖**：T300、T025
+  - **设计引用**：plan.md:A4 流程 3：等级计算与提升流程、plan.md:Story Detailed Design:ST-003
   - **步骤**：
-    - 1) 实现 `saveUserLevel(level: UserLevel): Result<Unit>` 方法
-    - 2) 实现 `getCurrentLevel(): Flow<Level>` 方法
-    - 3) 实现 `getLevelDefinitions(): List<LevelDefinition>` 方法
-    - 4) 实现事务保证等级更新原子性
-    - 5) 添加错误处理（LevelError.CalculationError、LevelError.ConfigError）
+    - 1) 创建 `CalculateLevelUseCase` 类（依赖 `GamificationRepository`、`LevelCalculator`）
+    - 2) 实现 `execute(points: Int): Result<Level>` suspend 方法
+    - 3) 实现等级计算流程（获取当前积分 → 计算等级 → 检查等级提升 → 保存等级 → 保存等级历史）
+    - 4) 实现事务管理（使用 Repository 事务保证等级提升和保存的原子性）
+    - 5) 实现错误处理（等级计算失败 → 记录日志；数据库保存失败 → 重试）
   - **验证**：
-    - [ ] 单元测试：验证数据持久化正确性
-    - [ ] 集成测试：验证等级提升流程（积分变化 → 等级计算 → 数据保存 → UI 更新）
-  - **产物**：`GamificationRepository.kt`（等级相关方法）
+    - [ ] 单元测试覆盖成功流程和异常场景
+    - [ ] 集成测试覆盖完整流程（积分变化 → 等级计算 → 提升 → 保存）
+  - **产物**：`CalculateLevelUseCase.kt`
 
-- [ ] T302 [ST-003] 在 `app/src/main/java/com/jacky/verity/gamification/domain/` 中实现等级定义初始化逻辑（默认等级配置）
-  - **依赖**：T300
-  - **步骤**：
-    - 1) 定义默认等级列表（Lv.1 至 Lv.20，每个等级所需积分递增）
-    - 2) 实现等级定义初始化方法（首次启动时插入默认等级定义）
-    - 3) 实现等级定义缓存机制（内存缓存，减少数据库查询）
-  - **验证**：
-    - [ ] 单元测试：验证等级定义初始化正确性
-    - [ ] 集成测试：验证首次启动时等级定义已初始化
-  - **产物**：`LevelEngine.kt`（等级定义初始化逻辑）
-
-- [ ] T303 [ST-003] 在 `app/src/main/java/com/jacky/verity/gamification/viewmodel/` 中创建 `LevelViewModel.kt`
+- [ ] T302 [ST-003] 创建等级 ViewModel（路径：`app/src/main/java/com/jacky/verity/gamification/viewmodel/LevelViewModel.kt`）
   - **依赖**：T301
+  - **设计引用**：plan.md:Story Detailed Design:ST-003
   - **步骤**：
-    - 1) 实现 ViewModel 类，继承 `ViewModel`
-    - 2) 实现等级状态管理（StateFlow<Level>）
-    - 3) 实现等级提升事件处理（监听积分变化，触发等级计算）
-    - 4) 实现等级提升动画触发逻辑（显示升级动画、奖励提示）
-    - 5) 添加错误处理和降级策略
+    - 1) 创建 `LevelViewModel` 类（依赖 `CalculateLevelUseCase`）
+    - 2) 创建 UI State：`_uiState: MutableStateFlow<LevelState>`（currentLevel、progressToNextLevel、isLevelUp）
+    - 3) 创建动画触发器：`_levelUpAnimationTrigger: MutableStateFlow<Boolean>`
+    - 4) 实现 `onLevelUp()` 方法（触发等级提升动画）
+    - 5) 实现错误处理
   - **验证**：
-    - [ ] 单元测试：验证 ViewModel 状态管理正确性
-    - [ ] 集成测试：验证等级提升事件触发 UI 更新和动画
+    - [ ] ViewModel 可编译通过
+    - [ ] 单元测试覆盖状态更新和错误处理
   - **产物**：`LevelViewModel.kt`
 
-**检查点**：至此，Story ST-003 应具备完整功能且可独立测试（等级计算、提升、数据持久化）
+- [ ] T303 [ST-003] 创建等级提升动画组件（路径：`app/src/main/java/com/jacky/verity/gamification/ui/points/LevelUpAnimation.kt`）
+  - **依赖**：T302
+  - **设计引用**：plan.md:Story Detailed Design:ST-003、plan.md:A3.4 模块：UI 层
+  - **步骤**：
+    - 1) 创建 `LevelUpAnimation` Composable 函数（参数：level: Level）
+    - 2) 实现等级提升动画（使用 Compose Animation API：等级图标动画、升级提示动画等）
+    - 3) 实现动画资源管理（动画播放完成后立即释放资源）
+    - 4) 实现错误降级（动画资源加载失败 → 降级为静态提示）
+  - **验证**：
+    - [ ] 动画播放流畅（60fps）
+    - [ ] 动画资源及时释放（内存测试验证）
+  - **产物**：`LevelUpAnimation.kt`
+
+**检查点**：ST-003 完成——用户积分达到等级提升条件时显示等级提升动画，等级数据正确保存，等级计算时间 ≤ 20ms（p95），等级计算准确率 100%
 
 ---
 
-## 阶段 6：Story ST-004 - 成就列表 UI（类型：Functional）
+## 阶段 7：Story ST-004 - 进度可视化实现（类型：Functional）
 
-**目标**：用户能够查看已解锁的成就列表，列表显示成就名称、解锁时间、描述
+**目标**：用户能够查看当前积分、等级和距离下一等级的进度条，达成里程碑时显示庆祝动画
 
-**验证方式（高层）**：UI 测试验证列表展示、性能测试验证加载耗时（p95 ≤ 300ms）、集成测试验证列表交互
+**验证方式（高层）**：
+- 功能验收：用户能够查看积分、等级和进度条，达成里程碑时显示庆祝动画
+- 性能验收：进度可视化渲染时间 ≤ 200ms（p95），动画播放流畅（60fps）
+- 内存验收：动画资源播放完成后立即释放，内存占用峰值 ≤ 10MB
 
 ### ST-004 任务
 
-- [ ] T400 [ST-004] 在 `app/src/main/java/com/jacky/verity/gamification/ui/achievement/` 中创建成就列表 Compose UI 组件
-  - **依赖**：T103
+- [ ] T400 [P] [ST-004] 创建获取进度用例（路径：`app/src/main/java/com/jacky/verity/gamification/domain/GetProgressUseCase.kt`）
+  - **依赖**：T025
+  - **设计引用**：plan.md:Story Detailed Design:ST-004
   - **步骤**：
-    - 1) 创建 `AchievementListScreen.kt` Composable 函数
-    - 2) 实现成就列表展示（LazyColumn，显示已解锁和未解锁成就）
-    - 3) 实现成就卡片组件（显示成就名称、描述、解锁时间、图标）
-    - 4) 实现未解锁成就显示（灰色锁定状态）
-    - 5) 实现空状态处理（无成就时显示引导）
-    - 6) 添加加载状态处理（显示加载指示器）
+    - 1) 创建 `GetProgressUseCase` 类（依赖 `GamificationRepository`、`LearningStatsRepository`）
+    - 2) 实现 `execute(): Result<ProgressResult>` suspend 方法
+    - 3) 实现进度计算（获取积分、等级、学习数据 → 计算整体进度 → 计算里程碑）
   - **验证**：
-    - [ ] UI 测试：验证列表展示正确性（已解锁/未解锁成就显示）
-    - [ ] 性能测试：验证列表加载耗时 p95 ≤ 300ms
-  - **产物**：`AchievementListScreen.kt`
+    - [ ] 单元测试覆盖成功流程和异常场景
+  - **产物**：`GetProgressUseCase.kt`
 
-- [ ] T401 [ST-004] 在 `app/src/main/java/com/jacky/verity/gamification/ui/achievement/` 中实现成就卡片组件 `AchievementCard.kt`
+- [ ] T401 [ST-004] 创建进度 ViewModel（路径：`app/src/main/java/com/jacky/verity/gamification/viewmodel/ProgressViewModel.kt`）
   - **依赖**：T400
+  - **设计引用**：plan.md:Story Detailed Design:ST-004
   - **步骤**：
-    - 1) 创建 `AchievementCard` Composable 函数
-    - 2) 实现成就图标显示（已解锁显示彩色图标，未解锁显示灰色图标）
-    - 3) 实现成就信息显示（名称、描述、解锁时间）
-    - 4) 实现卡片样式（Material Design 3 风格）
-    - 5) 添加点击交互（点击查看成就详情）
+    - 1) 创建 `ProgressViewModel` 类（依赖 `GetProgressUseCase`）
+    - 2) 创建 UI State：`_uiState: MutableStateFlow<ProgressState>`（overallProgress、milestones、recentMilestone）
+    - 3) 创建动画触发器：`_milestoneAnimationTrigger: MutableStateFlow<Milestone?>`
+    - 4) 实现 `loadProgress()` 方法（调用 UseCase 获取进度）
+    - 5) 实现错误处理
   - **验证**：
-    - [ ] UI 测试：验证卡片展示正确性
-    - [ ] 交互测试：验证点击交互响应
-  - **产物**：`AchievementCard.kt`
+    - [ ] ViewModel 可编译通过
+    - [ ] 单元测试覆盖状态更新和错误处理
+  - **产物**：`ProgressViewModel.kt`
 
-- [ ] T402 [ST-004] 在 `app/src/main/java/com/jacky/verity/gamification/` 中集成成就列表 UI 到导航系统
+- [ ] T402 [ST-004] 创建进度可视化界面（路径：`app/src/main/java/com/jacky/verity/gamification/ui/progress/ProgressScreen.kt`）
   - **依赖**：T401
+  - **设计引用**：plan.md:Story Detailed Design:ST-004、plan.md:A3.4 模块：UI 层
   - **步骤**：
-    - 1) 在 Navigation Compose 中添加成就列表路由
-    - 2) 实现导航参数传递（如需要）
-    - 3) 实现返回导航逻辑
+    - 1) 创建 `ProgressScreen` Composable 函数（依赖 `ProgressViewModel`）
+    - 2) 实现进度条展示（积分进度条、等级进度条、整体学习进度条）
+    - 3) 实现里程碑展示（里程碑列表、里程碑状态）
+    - 4) 实现状态观察（使用 `collectAsState` 观察 ViewModel 状态）
+    - 5) 实现里程碑庆祝动画（使用 Compose Animation API）
+    - 6) 实现动画资源管理（动画播放完成后立即释放资源）
   - **验证**：
-    - [ ] 集成测试：验证导航流程正确性
-  - **产物**：导航配置更新
+    - [ ] UI 可编译通过
+    - [ ] 手动测试：进度条正确展示，里程碑庆祝动画流畅（60fps）
+    - [ ] 性能测试：进度可视化渲染时间 p95 ≤ 200ms
+    - [ ] 内存测试：动画资源播放完成后立即释放，内存占用峰值 ≤ 10MB
+    - [ ] 功耗测试：动画播放功耗增量 ≤ 3mAh/天（Top5% 用户，每天学习 30 分钟）
+  - **产物**：`ProgressScreen.kt`
 
-**检查点**：至此，Story ST-004 应具备完整功能且可独立测试（成就列表展示、交互）
-
----
-
-## 阶段 7：Story ST-005 - 积分等级 UI 和进度可视化（类型：Functional）
-
-**目标**：用户能够查看当前积分、等级和距离下一等级的进度条，进度条实时更新
-
-**验证方式（高层）**：UI 测试验证积分等级展示、性能测试验证渲染耗时（p95 ≤ 200ms）、内存测试验证内存占用（≤ 10MB）
-
-### ST-005 任务
-
-- [ ] T500 [ST-005] 在 `app/src/main/java/com/jacky/verity/gamification/ui/points/` 中创建积分等级页面 Compose UI 组件
-  - **依赖**：T203, T303
+- [ ] T403 [ST-004] 创建积分等级展示界面（路径：`app/src/main/java/com/jacky/verity/gamification/ui/points/PointsLevelScreen.kt`）
+  - **依赖**：T203、T302
+  - **设计引用**：plan.md:Story Detailed Design:ST-004、plan.md:A3.4 模块：UI 层
   - **步骤**：
-    - 1) 创建 `PointsLevelScreen.kt` Composable 函数
-    - 2) 实现积分显示（当前总积分）
-    - 3) 实现等级显示（当前等级、等级名称、等级图标）
-    - 4) 实现进度条组件（显示距离下一等级的进度）
-    - 5) 实现进度条动画（积分变化时动画更新）
-    - 6) 添加加载状态处理
+    - 1) 创建 `PointsLevelScreen` Composable 函数（依赖 `PointsLevelViewModel`、`LevelViewModel`）
+    - 2) 实现积分展示（总积分显示、积分变化提示）
+    - 3) 实现等级展示（当前等级、等级图标、等级名称）
+    - 4) 实现进度条展示（距离下一等级的进度条）
+    - 5) 实现状态观察和动画触发器
   - **验证**：
-    - [ ] UI 测试：验证积分等级展示正确性
-    - [ ] 性能测试：验证渲染耗时 p95 ≤ 200ms
-    - [ ] 内存测试：验证内存占用 ≤ 10MB
+    - [ ] UI 可编译通过
+    - [ ] 手动测试：积分等级正确展示，进度条实时更新
+    - [ ] 性能测试：界面渲染时间 p95 ≤ 200ms
   - **产物**：`PointsLevelScreen.kt`
 
-- [ ] T501 [ST-005] 在 `app/src/main/java/com/jacky/verity/gamification/ui/progress/` 中实现进度条组件 `ProgressBar.kt`
-  - **依赖**：T500
-  - **步骤**：
-    - 1) 创建 `ProgressBar` Composable 函数
-    - 2) 实现进度条绘制（当前积分 / 下一等级所需积分）
-    - 3) 实现进度条动画（使用 Compose Animation API，60fps）
-    - 4) 实现进度百分比显示
-    - 5) 实现进度条样式（Material Design 3 风格）
-  - **验证**：
-    - [ ] UI 测试：验证进度条显示正确性
-    - [ ] 性能测试：验证动画帧率 60fps
-  - **产物**：`ProgressBar.kt`
-
-- [ ] T502 [ST-005] 在 `app/src/main/java/com/jacky/verity/gamification/` 中集成积分等级 UI 到导航系统
-  - **依赖**：T501
-  - **步骤**：
-    - 1) 在 Navigation Compose 中添加积分等级页面路由
-    - 2) 实现导航参数传递（如需要）
-    - 3) 实现返回导航逻辑
-  - **验证**：
-    - [ ] 集成测试：验证导航流程正确性
-  - **产物**：导航配置更新
-
-**检查点**：至此，Story ST-005 应具备完整功能且可独立测试（积分等级展示、进度可视化）
+**检查点**：ST-004 完成——用户能够查看积分、等级和进度条，达成里程碑时显示庆祝动画，进度可视化渲染时间 ≤ 200ms（p95），动画播放流畅（60fps），内存占用峰值 ≤ 10MB
 
 ---
 
-## 阶段 8：Story ST-006 - 数据持久化和一致性保障（类型：Infrastructure）
+## 阶段 8：优化与跨领域关注点
 
-**目标**：游戏化数据正确持久化，应用重启后恢复，数据与学习数据保持一致
-
-**验证方式（高层）**：集成测试验证数据持久化、数据一致性测试验证数据修复、压力测试验证并发写入
-
-### ST-006 任务
-
-- [ ] T600 [P] [ST-006] 在 `app/src/main/java/com/jacky/verity/gamification/data/repository/` 中实现数据一致性检查逻辑
-  - **依赖**：T024
-  - **步骤**：
-    - 1) 实现数据一致性检查方法（比较游戏化数据与学习数据）
-    - 2) 实现数据修复方法（基于学习数据重新计算游戏化数据）
-    - 3) 实现启动时数据一致性检查（应用启动时自动检查）
-    - 4) 实现定期数据一致性检查（可选，后台任务）
-  - **验证**：
-    - [ ] 单元测试：验证数据一致性检查逻辑正确性
-    - [ ] 集成测试：验证数据修复机制有效性
-  - **产物**：`GamificationRepository.kt`（数据一致性检查逻辑）
-
-- [ ] T601 [ST-006] 在 `app/src/main/java/com/jacky/verity/gamification/data/database/` 中实现数据库迁移策略
-  - **依赖**：T022
-  - **步骤**：
-    - 1) 实现数据库迁移类（Migration 1→2，如需要）
-    - 2) 实现数据回填逻辑（基于学习数据重新计算）
-    - 3) 实现失败回滚策略（迁移失败时回滚到上一版本）
-    - 4) 添加迁移日志记录
-  - **验证**：
-    - [ ] 集成测试：验证数据库迁移正确性
-    - [ ] 压力测试：验证迁移性能
-  - **产物**：`GamificationDatabase.kt`（迁移策略）
-
-- [ ] T602 [ST-006] 在 `app/src/main/java/com/jacky/verity/gamification/` 中实现应用生命周期监听和数据保存
-  - **依赖**：T600
-  - **步骤**：
-    - 1) 实现 Application 生命周期监听（ProcessLifecycleOwner）
-    - 2) 实现应用退出时数据保存逻辑（保存未保存的数据）
-    - 3) 实现应用启动时数据加载逻辑（从数据库加载，更新缓存）
-    - 4) 实现数据备份机制（可选，定期备份到文件）
-  - **验证**：
-    - [ ] 集成测试：验证应用退出时数据保存
-    - [ ] 集成测试：验证应用启动时数据恢复
-  - **产物**：生命周期监听实现
-
-- [ ] T603 [ST-006] 在 `app/src/main/java/com/jacky/verity/gamification/data/repository/` 中实现并发写入保护（Mutex）
-  - **依赖**：T600
-  - **步骤**：
-    - 1) 实现 Mutex 保护共享状态（积分累计、成就检查）
-    - 2) 实现并发写入队列化处理
-    - 3) 实现事务保证数据一致性
-  - **验证**：
-    - [ ] 压力测试：验证并发写入数据一致性
-    - [ ] 性能测试：验证并发写入性能影响
-  - **产物**：`GamificationRepository.kt`（并发保护逻辑）
-
-**检查点**：至此，Story ST-006 应具备完整功能且可独立测试（数据持久化、一致性保障）
-
----
-
-## 阶段 9：Story ST-007 - 学习里程碑和庆祝动画（类型：Functional）
-
-**目标**：用户达成学习里程碑时，系统显示庆祝动画
-
-**验证方式（高层）**：UI 测试验证里程碑展示、性能测试验证动画帧率（60fps）、内存测试验证资源释放
-
-### ST-007 任务
-
-- [ ] T700 [ST-007] 在 `app/src/main/java/com/jacky/verity/gamification/domain/` 中实现学习里程碑判断逻辑
-  - **依赖**：T100
-  - **步骤**：
-    - 1) 定义里程碑列表（学习100个单词、连续学习7天等）
-    - 2) 实现里程碑判断逻辑（基于学习数据统计）
-    - 3) 实现里程碑达成事件触发
-    - 4) 集成到成就系统（里程碑是特殊的成就类型）
-  - **验证**：
-    - [ ] 单元测试：验证里程碑判断逻辑正确性
-    - [ ] 集成测试：验证里程碑达成事件触发
-  - **产物**：`AchievementEngine.kt`（里程碑判断逻辑）
-
-- [ ] T701 [ST-007] 在 `app/src/main/java/com/jacky/verity/gamification/ui/` 中实现庆祝动画组件 `CelebrationAnimation.kt`
-  - **依赖**：T700
-  - **步骤**：
-    - 1) 创建 `CelebrationAnimation` Composable 函数
-    - 2) 实现庆祝动画（使用 Compose Animation API，60fps）
-    - 3) 实现动画资源管理（播放完成后立即释放）
-    - 4) 实现动画样式（粒子效果、缩放动画等）
-    - 5) 实现动画触发逻辑（里程碑达成时显示）
-  - **验证**：
-    - [ ] UI 测试：验证动画展示正确性
-    - [ ] 性能测试：验证动画帧率 60fps
-    - [ ] 内存测试：验证动画资源及时释放
-  - **产物**：`CelebrationAnimation.kt`
-
-- [ ] T702 [ST-007] 在 `app/src/main/java/com/jacky/verity/gamification/` 中集成里程碑功能到学习流程（FEAT-003）
-  - **依赖**：T701
-  - **步骤**：
-    - 1) 在学习界面（FEAT-003）中监听里程碑达成事件
-    - 2) 实现里程碑达成时显示庆祝动画
-    - 3) 实现动画显示逻辑（不阻断学习流程）
-  - **验证**：
-    - [ ] 集成测试：验证里程碑功能集成到学习流程
-    - [ ] UI 测试：验证庆祝动画显示不阻断学习
-  - **产物**：学习界面集成代码
-
-**检查点**：至此，Story ST-007 应具备完整功能且可独立测试（里程碑判断、庆祝动画）
-
----
-
-## 阶段 10：Story ST-008 - 可观测性和错误处理（类型：Infrastructure）
-
-**目标**：记录关键事件（成就解锁、积分变化、等级提升），错误处理完善，降级策略有效
-
-**验证方式（高层）**：日志测试验证事件记录、错误处理测试验证错误场景、降级测试验证降级策略
-
-### ST-008 任务
-
-- [ ] T800 [P] [ST-008] 在 `app/src/main/java/com/jacky/verity/gamification/` 中实现事件记录系统
-  - **依赖**：无
-  - **步骤**：
-    - 1) 创建事件记录接口（EventLogger）
-    - 2) 实现成就解锁事件记录（成就ID、解锁时间、触发条件）
-    - 3) 实现积分变化事件记录（变化量、变化原因、变化后总值）
-    - 4) 实现等级提升事件记录（提升前等级、提升后等级、提升时间）
-    - 5) 实现结构化日志（使用结构化字段）
-    - 6) 实现敏感信息脱敏（不记录学习数据详情）
-  - **验证**：
-    - [ ] 日志测试：验证事件记录正确性
-    - [ ] 单元测试：验证敏感信息脱敏
-  - **产物**：`EventLogger.kt`
-
-- [ ] T801 [ST-008] 在 `app/src/main/java/com/jacky/verity/gamification/` 中实现错误处理和降级策略
-  - **依赖**：T800
-  - **步骤**：
-    - 1) 实现错误处理统一入口（GamificationErrorHandler）
-    - 2) 实现错误日志记录（错误类型、学习数据、错误详情）
-    - 3) 实现降级策略（学习数据不可用时降级为仅展示基础进度）
-    - 4) 实现错误恢复机制（下次学习时重新计算）
-    - 5) 实现用户友好错误提示（不暴露技术细节）
-  - **验证**：
-    - [ ] 错误处理测试：验证错误场景处理正确性
-    - [ ] 降级测试：验证降级策略有效性
-  - **产物**：`GamificationErrorHandler.kt`
-
-- [ ] T802 [ST-008] 在 `app/src/main/java/com/jacky/verity/gamification/` 中集成可观测性到所有 Engine
-  - **依赖**：T801
-  - **步骤**：
-    - 1) 在 AchievementEngine 中集成事件记录
-    - 2) 在 PointsEngine 中集成事件记录
-    - 3) 在 LevelEngine 中集成事件记录
-    - 4) 在所有 Repository 方法中集成错误日志记录
-  - **验证**：
-    - [ ] 集成测试：验证所有关键事件都已记录
-    - [ ] 集成测试：验证所有错误都已记录日志
-  - **产物**：Engine 和 Repository 更新
-
-**检查点**：至此，Story ST-008 应具备完整功能且可独立测试（事件记录、错误处理、降级策略）
-
----
-
-## 阶段 11：优化与跨领域关注点
-
-**目标**：性能优化、内存优化、功耗优化、最终集成测试
+**目标**：性能优化、可观测性、错误处理完善
 
 ### 优化任务
 
-- [ ] T900 性能优化：优化成就检查算法，确保 p95 ≤ 100ms
+- [ ] T500 [ST-001] 性能优化：成就检查算法优化（路径：`app/src/main/java/com/jacky/verity/gamification/calculator/AchievementCalculator.kt`）
   - **依赖**：T100
+  - **设计引用**：plan.md:A9 性能评估、plan.md:Story Detailed Design:ST-001
   - **步骤**：
-    - 1) 性能分析（使用 Android Profiler）
-    - 2) 优化成就检查逻辑（批量检查优化、缓存优化）
-    - 3) 性能测试验证（p95 ≤ 100ms）
+    - 1) 优化成就检查算法（批量检查、提前退出、缓存配置）
+    - 2) 实现性能监控（记录计算耗时，超过阈值时记录警告）
   - **验证**：
-    - [ ] 性能测试：验证成就检查 p95 ≤ 100ms
-  - **产物**：性能优化代码
+    - [ ] 性能测试：成就检查计算时间 p95 ≤ 100ms（100 次迭代，模拟 100 个成就定义）
+  - **产物**：优化后的 `AchievementCalculator.kt`
 
-- [ ] T901 性能优化：优化积分计算算法，确保 p95 ≤ 50ms
+- [ ] T501 [ST-002] 性能优化：积分计算算法优化（路径：`app/src/main/java/com/jacky/verity/gamification/calculator/PointsCalculator.kt`）
   - **依赖**：T200
+  - **设计引用**：plan.md:A9 性能评估、plan.md:Story Detailed Design:ST-002
   - **步骤**：
-    - 1) 性能分析（使用 Android Profiler）
-    - 2) 优化积分计算逻辑（缓存优化、增量计算优化）
-    - 3) 性能测试验证（p95 ≤ 50ms）
+    - 1) 优化积分计算算法（缓存积分规则、减少重复计算）
+    - 2) 实现性能监控（记录计算耗时）
   - **验证**：
-    - [ ] 性能测试：验证积分计算 p95 ≤ 50ms
-  - **产物**：性能优化代码
+    - [ ] 性能测试：积分计算时间 p95 ≤ 50ms（100 次迭代）
+  - **产物**：优化后的 `PointsCalculator.kt`
 
-- [ ] T902 内存优化：优化动画资源管理，确保内存占用 ≤ 10MB
-  - **依赖**：T701
+- [ ] T502 [ST-005] 内存优化：缓存策略优化（路径：`app/src/main/java/com/jacky/verity/gamification/data/repository/GamificationRepository.kt`）
+  - **依赖**：T025
+  - **设计引用**：plan.md:A10 内存评估、plan.md:Story Detailed Design:ST-005
   - **步骤**：
-    - 1) 内存分析（使用 Android Profiler、LeakCanary）
-    - 2) 优化动画资源释放（WeakReference、及时释放）
-    - 3) 内存测试验证（峰值 ≤ 10MB）
+    - 1) 优化缓存策略（限制缓存大小、LRU 淘汰策略）
+    - 2) 实现内存监控（记录内存使用情况）
   - **验证**：
-    - [ ] 内存测试：验证内存占用 ≤ 10MB
-    - [ ] 内存泄漏测试：验证无内存泄漏
-  - **产物**：内存优化代码
+    - [ ] 内存测试：游戏化数据内存占用峰值 ≤ 10MB（Android Profiler 测量）
+    - [ ] 内存泄漏测试：无内存泄漏（LeakCanary 检测）
+  - **产物**：优化后的 `GamificationRepository.kt`
 
-- [ ] T903 功耗优化：优化计算和动画，确保功耗增量 ≤ 5mAh/天
-  - **依赖**：T900, T901, T902
+- [ ] T503 [ST-001, ST-002, ST-003] 可观测性：事件记录系统（路径：`app/src/main/java/com/jacky/verity/gamification/data/observability/GamificationEventLogger.kt`）
+  - **依赖**：T101、T201、T301
+  - **设计引用**：plan.md:8. 埋点/可观测性设计、plan.md:NFR-OBS-001、NFR-OBS-002
   - **步骤**：
-    - 1) 功耗分析（使用 Battery Historian）
-    - 2) 优化计算频率（批量处理、延迟计算）
-    - 3) 优化动画播放（简化动画、降低帧率）
-    - 4) 功耗测试验证（≤ 5mAh/天）
+    - 1) 创建事件记录系统（记录成就解锁、积分变化、等级提升事件）
+    - 2) 实现错误日志记录（记录计算失败、数据存储失败等错误）
+    - 3) 实现结构化日志（使用结构化字段：成就ID、积分变化量、等级等）
+    - 4) 实现敏感信息脱敏（不记录学习数据详情，只记录统计信息）
   - **验证**：
-    - [ ] 功耗测试：验证功耗增量 ≤ 5mAh/天
-  - **产物**：功耗优化代码
+    - [ ] 日志测试：验证事件记录正确性（成就解锁、积分变化、等级提升）
+    - [ ] 错误处理测试：验证错误日志记录正确性
+  - **产物**：`GamificationEventLogger.kt`
 
-- [ ] T904 最终集成测试：验证所有 Story 集成和端到端流程
-  - **依赖**：T903
+- [ ] T504 [ST-001, ST-002, ST-003] 降级策略：学习数据不可用降级处理（路径：`app/src/main/java/com/jacky/verity/gamification/domain/` 相关 UseCase）
+  - **依赖**：T101、T201、T301
+  - **设计引用**：plan.md:A5 技术风险与消解策略（RISK-001）、plan.md:NFR-PERF-003
   - **步骤**：
-    - 1) 端到端测试（学习流程 → 成就解锁 → 积分累计 → 等级提升 → UI 更新）
-    - 2) 数据一致性测试（游戏化数据与学习数据一致）
-    - 3) 性能测试（所有 NFR 指标验证）
-    - 4) 内存测试（内存占用验证）
-    - 5) 功耗测试（功耗增量验证）
+    - 1) 实现降级策略（学习数据不可用 → 降级为仅展示基础进度，不计算成就和积分）
+    - 2) 实现降级提示（提示用户学习数据不可用）
+    - 3) 实现数据恢复机制（依赖就绪后重新计算）
   - **验证**：
-    - [ ] 集成测试：验证所有 Story 集成正确性
-    - [ ] 性能测试：验证所有 NFR 指标满足要求
-    - [ ] 内存测试：验证内存占用满足要求
-    - [ ] 功耗测试：验证功耗增量满足要求
-  - **产物**：集成测试报告
+    - [ ] 降级测试：验证降级策略有效性（模拟学习数据不可用场景）
+  - **产物**：相关 UseCase 文件
+
+**检查点**：优化完成——所有 NFR 指标满足要求（性能、内存、功耗、可观测性）
 
 ---
 
@@ -670,41 +632,42 @@
 
 - **环境搭建（阶段 1）**：无依赖——可立即启动
 - **核心基础（阶段 2）**：依赖环境搭建完成——阻塞所有用户故事
-- **用户故事（阶段 3+）**：均依赖核心基础阶段完成
-    - ST-001、ST-002、ST-006、ST-008 可并行启动（阶段 2 完成后）
-    - ST-003 依赖 ST-002
-    - ST-004 依赖 ST-001
-    - ST-005 依赖 ST-002、ST-003
-    - ST-007 依赖 ST-001、FEAT-003
-- **优化完善（阶段 11）**：依赖所有目标用户故事完成
+- **用户故事（阶段 3-7）**：
+  - **ST-005**（阶段 3）：基础设施，无依赖，其他 Story 依赖它
+  - **ST-001**（阶段 4）：依赖 ST-005（数据模型和 Repository）
+  - **ST-002**（阶段 5）：依赖 ST-005、ST-001
+  - **ST-003**（阶段 6）：依赖 ST-005、ST-002
+  - **ST-004**（阶段 7）：依赖 ST-005、ST-002、ST-003
+- **优化完善（阶段 8）**：依赖所有目标用户故事完成
 
 ### Story 依赖
 
-- **ST-001**：依赖阶段 2 完成、FEAT-005（学习进度与统计）、FEAT-007（数据管理）
-- **ST-002**：依赖阶段 2 完成、FEAT-007（数据管理），可与 ST-001 并行
-- **ST-003**：依赖 ST-002（积分系统）
-- **ST-004**：依赖 ST-001（成就系统）
-- **ST-005**：依赖 ST-002（积分系统）、ST-003（等级系统）
-- **ST-006**：依赖阶段 2 完成、FEAT-007（数据管理），可与其他 Story 并行
-- **ST-007**：依赖 ST-001（成就系统）、FEAT-003（学习界面）
-- **ST-008**：无依赖，可与其他 Story 并行
+- **ST-005**：无依赖（基础设施，其他 Story 依赖它）
+- **ST-001**：依赖 ST-005（数据模型和 Repository）
+- **ST-002**：依赖 ST-005、ST-001
+- **ST-003**：依赖 ST-005、ST-002
+- **ST-004**：依赖 ST-005、ST-002、ST-003
 
 ### 单 Story 内部顺序
 
-- 数据模型/实体开发先于 Engine 开发
-- Engine 开发先于 Repository 开发
-- Repository 开发先于 ViewModel 开发
-- ViewModel 开发先于 UI 开发
+- 数据模型/实体开发先于 DAO/Repository
+- DAO/Repository 开发先于 UseCase/Calculator
+- Calculator 开发先于 UseCase
+- UseCase 开发先于 ViewModel
+- ViewModel 开发先于 UI
 - 核心功能实现先于集成工作
+- 功能实现先于性能优化
 - 本故事完成后，再推进下一优先级故事
 
 ### 并行执行场景
 
-- 所有标记 [P] 的环境搭建任务可并行（T012）
-- 所有标记 [P] 的核心基础任务可并行（阶段 2 内）
-- 核心基础阶段完成后，ST-001、ST-002、ST-006、ST-008 可并行启动（如团队容量允许）
-- 单用户故事下所有标记 [P] 的任务可并行（如 T200、T600、T800）
-- 不同团队成员可并行开发不同用户故事（ST-001 和 ST-002 可并行）
+- **阶段 1**：T012 [P]（代码检查配置）可与其他任务并行
+- **阶段 2**：T020 [P]、T021 [P]、T024 [P]、T026 [P] 可并行（涉及不同文件）
+- **ST-001**：T100 [P]、T102 [P] 可并行
+- **ST-002**：T200 [P]、T202 [P] 可并行
+- **ST-003**：T300 [P] 可与其他任务并行
+- **ST-004**：T400 [P]、T403 [P] 可并行
+- **阶段 8**：T500 [P]、T501 [P]、T502 [P]、T503 [P]、T504 [P] 可并行
 
 ---
 
@@ -712,32 +675,8 @@
 
 ```bash
 # 批量启动 ST-001 的可并行任务：
-任务："T100 [ST-001] 创建 AchievementEngine.kt"
-任务："T102 [ST-001] 实现成就定义初始化逻辑"
-```
-
-## 并行示例：Story ST-002
-
-```bash
-# 批量启动 ST-002 的可并行任务：
-任务："T200 [P] [ST-002] 创建 PointsEngine.kt"
-任务："T202 [ST-002] 实现积分规则初始化逻辑"
-```
-
-## 并行示例：Story ST-006
-
-```bash
-# 批量启动 ST-006 的可并行任务：
-任务："T600 [P] [ST-006] 实现数据一致性检查逻辑"
-任务："T603 [ST-006] 实现并发写入保护"
-```
-
-## 并行示例：Story ST-008
-
-```bash
-# 批量启动 ST-008 的可并行任务：
-任务："T800 [P] [ST-008] 实现事件记录系统"
-任务："T801 [ST-008] 实现错误处理和降级策略"
+任务："[ST-001] 创建成就计算器，路径：app/src/main/java/com/jacky/verity/gamification/calculator/AchievementCalculator.kt"
+任务："[ST-001] 创建获取成就列表用例，路径：app/src/main/java/com/jacky/verity/gamification/domain/GetAchievementsUseCase.kt"
 ```
 
 ---
@@ -746,43 +685,106 @@
 
 ### 先完成 MVP（优先完成关键 Story 集合）
 
-1. 完成阶段 1：环境搭建
-2. 完成阶段 2：核心基础（关键——阻塞所有故事）
-3. 完成阶段 3：Story ST-001（成就系统核心功能）
-4. **暂停并验证**：独立验证 ST-001（成就检查、解锁、数据持久化）
-5. 如就绪，进行部署/演示
+1. 完成阶段 0：准备（版本对齐）
+2. 完成阶段 1：环境搭建
+3. 完成阶段 2：核心基础（ST-005：数据模型和存储实现，关键——阻塞所有故事）
+4. 完成阶段 4：Story ST-001（成就系统实现）
+5. **暂停并验证**：独立验证 ST-001（功能验收、性能验收、可靠性验收）
+6. 如就绪，进行演示（MVP！）
 
 ### 增量交付
 
-1. 完成环境搭建 + 核心基础 → 基础层就绪
-2. 新增 ST-001 → 独立验证 → 部署/演示（MVP！）
-3. 新增 ST-002 → 独立验证 → 部署/演示
-4. 新增 ST-003 → 独立验证 → 部署/演示
-5. 新增 ST-004 → 独立验证 → 部署/演示
-6. 新增 ST-005 → 独立验证 → 部署/演示
-7. 新增 ST-006 → 独立验证 → 部署/演示
-8. 新增 ST-007 → 独立验证 → 部署/演示
-9. 新增 ST-008 → 独立验证 → 部署/演示
-10. 每个故事均需在不破坏已有故事的前提下新增价值
+1. 完成环境搭建 + 核心基础（ST-005）→ 基础层就绪
+2. 新增 ST-001（成就系统）→ 独立验证 → 演示（MVP！）
+3. 新增 ST-002（积分系统）→ 独立验证 → 演示
+4. 新增 ST-003（等级系统）→ 独立验证 → 演示
+5. 新增 ST-004（进度可视化）→ 独立验证 → 演示
+6. 完成优化与跨领域关注点 → 最终交付
+7. 每个故事均需在不破坏已有故事的前提下新增价值
 
 ### 团队并行策略
 
 多开发者协作场景：
 
-1. 团队共同完成环境搭建 + 核心基础
-2. 核心基础完成后：
-    - 开发者 A：负责 ST-001（成就系统）
-    - 开发者 B：负责 ST-002（积分系统）
-    - 开发者 C：负责 ST-006（数据持久化）
-    - 开发者 D：负责 ST-008（可观测性）
-3. ST-001 和 ST-002 完成后：
-    - 开发者 A：负责 ST-004（成就列表 UI）
-    - 开发者 B：负责 ST-003（等级系统）
-4. ST-002 和 ST-003 完成后：
-    - 开发者 B：负责 ST-005（积分等级 UI）
-5. ST-001 完成后：
-    - 开发者 A：负责 ST-007（学习里程碑）
-6. 各 Story 独立完成并集成
+1. 团队共同完成阶段 0-2（准备、环境搭建、核心基础）
+2. 核心基础（ST-005）完成后：
+   - 开发者 A：负责 ST-001（成就系统）
+   - 开发者 B：负责 ST-002（积分系统）
+   - 开发者 C：负责 ST-003（等级系统）
+   - 开发者 D：负责 ST-004（进度可视化）
+3. 各 Story 独立完成并集成
+4. 最后完成优化与跨领域关注点（阶段 8）
+
+---
+
+## 任务汇总
+
+### 任务总数
+
+- **总任务数**：54 个任务
+- **阶段 0（准备）**：1 个任务
+- **阶段 1（环境搭建）**：3 个任务
+- **阶段 2（核心基础 / ST-005）**：7 个任务
+- **阶段 4（ST-001：成就系统）**：6 个任务
+- **阶段 5（ST-002：积分系统）**：4 个任务
+- **阶段 6（ST-003：等级系统）**：4 个任务
+- **阶段 7（ST-004：进度可视化）**：4 个任务
+- **阶段 8（优化与跨领域关注点）**：5 个任务
+
+### 各 Story 对应的任务数量
+
+- **ST-005（数据模型和存储）**：7 个任务（T020-T026，阶段 2）
+- **ST-001（成就系统）**：6 个任务（T100-T105，阶段 4）+ 1 个优化任务（T500，阶段 8）
+- **ST-002（积分系统）**：4 个任务（T200-T203，阶段 5）+ 1 个优化任务（T501，阶段 8）
+- **ST-003（等级系统）**：4 个任务（T300-T303，阶段 6）
+- **ST-004（进度可视化）**：4 个任务（T400-T403，阶段 7）
+
+### 识别出的可并行执行机会
+
+- **阶段 1**：T012 [P]（代码检查配置）
+- **阶段 2**：T020 [P]、T021 [P]、T024 [P]、T026 [P]（数据模型、Entity、DataSource、配置可并行）
+- **ST-001**：T100 [P]、T102 [P]（计算器、获取用例可并行）
+- **ST-002**：T200 [P]、T202 [P]（计算器、获取用例可并行）
+- **ST-003**：T300 [P]（计算器可并行）
+- **ST-004**：T400 [P]、T403 [P]（获取用例、展示界面可并行）
+- **阶段 8**：T500 [P]、T501 [P]、T502 [P]、T503 [P]、T504 [P]（所有优化任务可并行）
+
+### 每个 Story 的验证方式摘要（含指标阈值）
+
+- **ST-001（成就系统）**：
+  - 功能验收：用户完成学习后看到成就解锁提示，成就列表显示已解锁成就
+  - 性能验收：成就检查计算时间 ≤ 100ms（p95），成就列表加载时间 ≤ 300ms（p95）
+  - 可靠性验收：成就检查准确率 100%，成就解锁数据正确持久化
+- **ST-002（积分系统）**：
+  - 功能验收：用户学习后积分增加，积分历史记录正确保存
+  - 性能验收：积分计算时间 ≤ 50ms（p95）
+  - 可靠性验收：积分计算准确率 100%，积分数据与学习数据一致
+- **ST-003（等级系统）**：
+  - 功能验收：用户积分达到等级提升条件时显示等级提升动画，等级数据正确保存
+  - 性能验收：等级计算时间 ≤ 20ms（p95）
+  - 可靠性验收：等级计算准确率 100%，等级数据与积分数据一致
+- **ST-004（进度可视化）**：
+  - 功能验收：用户能够查看积分、等级和进度条，达成里程碑时显示庆祝动画
+  - 性能验收：进度可视化渲染时间 ≤ 200ms（p95），动画播放流畅（60fps）
+  - 内存验收：动画资源播放完成后立即释放，内存占用峰值 ≤ 10MB
+- **ST-005（数据模型和存储）**：
+  - 功能验收：成就、积分、等级数据正确保存和查询，数据持久化正常
+  - 可靠性验收：应用重启后数据恢复，数据损坏时能够修复
+  - 性能验收：数据库查询时间 ≤ 5ms（p95），数据保存时间 ≤ 10ms（p95）
+
+### 建议的 MVP 范围
+
+建议的 MVP 范围：
+- **阶段 0**：准备（版本对齐）
+- **阶段 1**：环境搭建
+- **阶段 2**：核心基础（ST-005：数据模型和存储实现，阻塞性前置条件）
+- **阶段 4**：ST-001（成就系统实现）
+
+MVP 完成后可独立验证成就检查、解锁和数据持久化功能。
+
+### 格式验证
+
+✅ 所有任务均遵循清单格式（复选框、任务ID、[ST-xxx] 标签、文件路径）
 
 ---
 
@@ -795,23 +797,4 @@
 - 完成单个任务或逻辑分组后提交代码
 - 可在任意检查点暂停，独立验证对应故事
 - 避免：模糊的任务描述、同一文件冲突、破坏独立性的跨故事依赖
-- 所有性能指标（p95、内存、功耗）必须在任务完成后验证
-- 所有 NFR 指标必须在对应 Story 完成后验证
-
----
-
-## 任务统计
-
-- **总任务数**：约 50 个任务
-- **Story 任务分布**：
-  - ST-001：4 个任务
-  - ST-002：4 个任务
-  - ST-003：4 个任务
-  - ST-004：3 个任务
-  - ST-005：3 个任务
-  - ST-006：4 个任务
-  - ST-007：3 个任务
-  - ST-008：3 个任务
-  - 优化阶段：5 个任务
-- **可并行执行机会**：T012、T200、T600、T800 等
-- **MVP 范围**：阶段 1 + 阶段 2 + ST-001（成就系统核心功能）
+- 所有任务必须遵循 plan.md 的技术决策，不得擅自修改设计

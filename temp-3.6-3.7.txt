@@ -1,0 +1,31 @@
+### 3.6 模块�?UML 总览（全局查看入口，只引用 plan.md�?
+
+> 目标：在 Feature �?Full Design 中提�?全局视角"入口，方便评�?开发快速浏览每个模块的整体设计�?
+>
+> 规则�?
+> - 模块清单�?`plan.md:A3.2 模块拆分与职责` 为准（行�?名称必须一致）�?
+> - 本节只做索引与引用，不复制粘贴整张图；所�?UML 图的权威内容�?`plan.md:A3.4`�?
+
+| 模块（来�?plan.md:A3.2�?| 职责（摘要） | UML 类图入口（plan.md:A3.4�?| 时序�?成功入口（plan.md:A3.4�?| 时序�?异常入口（plan.md:A3.4�?| 关键异常（摘要） | NFR 责任（摘要） |
+|---|---|---|---|---|---|---|
+| UI 层（Jetpack Compose�?| 词库列表展示、导入界面、用户交�?| plan.md:A3.4:UI�?UML类图 | plan.md:A3.4:UI�?时序-成功 | plan.md:A3.4:UI�?时序-异常 | 权限错误、格式错误、存储空间不足、保存失�?| PERF/OBS |
+| ViewModel �?| 管理 UI 状态、处理用户事件、调�?UseCase | plan.md:A3.4:ViewModel�?UML类图 | plan.md:A3.4:ViewModel�?时序-成功 | plan.md:A3.4:ViewModel�?时序-异常 | UseCase 错误、协程取消、状态更新失�?| PERF/OBS |
+| Domain 层（UseCase�?| 业务逻辑封装、流程编排、数据转�?| plan.md:A3.4:Domain�?UML类图 | plan.md:A3.4:Domain�?时序-成功 | plan.md:A3.4:Domain�?时序-异常 | 业务规则校验失败、Parser 错误、Repository 保存失败 | PERF/OBS |
+| Repository �?| 数据访问抽象、多数据源协�?| plan.md:A3.4:Repository�?UML类图 | plan.md:A3.4:Repository�?时序-成功 | plan.md:A3.4:Repository�?时序-异常 | 重复导入、Parser 解析失败、文件保存失败、元数据保存失败、数据损�?| PERF/MEM/REL/OBS |
+| Parser �?| 文件解析、格式转换、数据校�?| plan.md:A3.4:Parser�?UML类图 | plan.md:A3.4:Parser�?时序-成功 | plan.md:A3.4:Parser�?时序-异常 | 格式不支持、文件读取失败、编码错误、文件过大、解析超时、数据格式不规范 | PERF/MEM/REL/OBS |
+| DataSource �?| 底层数据访问、SharedPreferences/文件操作 | plan.md:A3.4:DataSource�?UML类图 | plan.md:A3.4:DataSource�?时序-成功 | plan.md:A3.4:DataSource�?时序-异常 | SharedPreferences 写入失败、数据序列化失败、存储空间不足、文件读写失败、文件校验失败、数据损�?| MEM/REL/OBS |
+
+> 说明：详细的模块�?UML 图请参见下面 3.7 节（直接复制�?plan.md:A3.4）或直接查看 plan.md 对应章节�?
+
+### 3.7 模块�?UML（按模块汇总，来自 plan.md:A3.4�?
+
+> 目标：在 Full Design 中直接呈现每个模块的 UML（类�?+ 成功/异常时序），便于评审与全局浏览�?
+>
+> 规则�?
+> - 本节内容必须**逐字复用/复制** `plan.md:A3.4` 的模块级 UML；不得新增模块、不得新增新的分支决策�?
+> - 模块小节顺序必须�?`plan.md:A3.2 模块拆分与职责` 一致�?
+> - 若某个模块在 plan.md 尚未补齐 UML，必须标�?`TODO(Clarify)` 并指�?plan.md 对应模块小节补齐�?
+>
+> **注意**：由于内容较多，本节仅展�?UML 图（类图 + 时序图）。详细的模块设计说明（模块定位、设计目标、接口协议、策略算法、失败降级等）请参见 `plan.md:A3.4` 对应模块小节�?
+
+> **完整内容**：所�?6 个模块的详细 UML 图（类图 + 成功/异常时序图）已完整包含在 `plan.md:A3.4` 中。为节省空间，本节仅展示索引，详�?UML 图请直接查看 `plan.md:A3.4:模块名` 对应小节�?

@@ -3,7 +3,7 @@
 **Epic**：EPIC-001 - 无痛记忆单词神器APP
 **Feature ID**：FEAT-002
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.0
+**Plan Version**：v0.2.0
 **当前工作分支**：`epic/EPIC-001-word-memory-app`
 **Feature 目录**：`specs/epics/EPIC-001-word-memory-app/features/FEAT-002-spaced-repetition-algorithm/`
 **日期**：2026-01-18
@@ -18,6 +18,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-01-18 | Feature | 初始版本：创建 Plan 工程级蓝图，完成技术选型、架构设计和 Story 拆分 |  | 否 |
+| v0.2.0 | 2026-01-19 | Feature | 按新规范补齐模块级 UML：为 A3.2 的所有模块补齐 UML 类图 + 成功/异常时序图 + 异常清单表 | A3.4 所有模块 | 否 |
 
 ## 概述
 
@@ -111,12 +112,19 @@ flowchart TB
 
 #### A2.4 通信与交互说明（必须）
 
-- **协议**：REST / gRPC / WebSocket / MQ / 文件 / 设备能力（按实际选择）
-- **鉴权**：OAuth2 / JWT / mTLS / API Key（按实际选择）
-- **超时与重试**：超时阈值、最大重试次数、退避策略、重试白名单接口
-- **幂等**：哪些请求必须幂等、幂等键策略
-- **限流**：外部限流策略与我方退避/降级
-- **数据一致性**：强一致/最终一致、补偿策略
+- **协议**：Kotlin 函数调用（本地调用，无网络协议）
+- **鉴权**：无需鉴权（本地模块间调用）
+- **超时与重试**：
+  - 算法计算超时：100ms，超时使用默认参数或上次成功结果
+  - 数据库操作超时：5秒，失败后重试（最多3次），使用指数退避策略
+  - 重试白名单：数据库操作可重试，算法计算失败不重试（使用降级策略）
+- **幂等**：
+  - 学习状态更新必须幂等：基于单词 ID + 时间戳去重，确保重复调用不影响结果
+  - 复习记录保存幂等：基于 wordId + reviewTime 复合主键，重复保存忽略冲突
+- **限流**：不适用（本地调用，无外部限流）
+- **数据一致性**：
+  - 强一致性：学习状态更新使用 Room 事务，确保原子性
+  - 缓存一致性：数据库更新后同步更新内存缓存，使用 Flow 实时通知订阅者
 
 ### A3. 1 层架构设计（系统内部框架图 + 模块拆分 + 接口协议）
 
@@ -256,6 +264,115 @@ flowchart LR
   - **缺点/代价**：算法精度相对较低，不支持个性化调优
   - **替代方案与否决理由**：不使用 SM-4/SM-5（实现复杂、参数多）；不使用机器学习模型（需要训练数据，第一阶段不适用）
 
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class SM2Algorithm {
+        -parameters: AlgorithmParameters
+        +calculateNextReview(state: LearningState, quality: Int): Result~ReviewResult~
+        +updateMemoryStrength(state: LearningState): Float
+        -calculateEF(oldEF: Float, quality: Int): Float
+        -calculateInterval(oldInterval: Long, newEF: Float, quality: Int): Long
+        -validateInput(state: LearningState, quality: Int): Boolean
+    }
+    
+    class AlgorithmParameters {
+        +initialInterval: Long
+        +minDifficultyFactor: Float
+        +maxInterval: Long
+        +defaultDifficultyFactor: Float
+    }
+    
+    class LearningState {
+        +wordId: String
+        +learningCount: Int
+        +difficultyFactor: Float
+        +currentInterval: Long
+    }
+    
+    class ReviewResult {
+        +nextReviewTime: Long
+        +newInterval: Long
+        +newDifficultyFactor: Float
+        +memoryStrength: Float
+    }
+    
+    class CalculationError {
+        <<sealed>>
+    }
+    class InvalidInputError {
+    }
+    class OverflowError {
+    }
+    
+    SM2Algorithm --> AlgorithmParameters
+    SM2Algorithm --> LearningState
+    SM2Algorithm --> ReviewResult
+    SM2Algorithm --> CalculationError
+    CalculationError <|-- InvalidInputError
+    CalculationError <|-- OverflowError
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant SM2 as SM-2算法
+    participant Params as 算法参数
+    
+    Caller->>SM2: calculateNextReview(state, quality)
+    activate SM2
+    SM2->>SM2: validateInput(state, quality)
+    SM2->>Params: 获取算法参数
+    activate Params
+    Params-->>SM2: parameters
+    deactivate Params
+    SM2->>SM2: calculateEF(oldEF, quality)
+    SM2->>SM2: calculateInterval(oldInterval, newEF, quality)
+    SM2->>SM2: 边界检查(1h-365d, 1.3-3.0)
+    SM2->>SM2: 计算nextReviewTime
+    SM2-->>Caller: Result.Success(ReviewResult)
+    deactivate SM2
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant SM2 as SM-2算法
+    
+    Caller->>SM2: calculateNextReview(state, quality)
+    activate SM2
+    SM2->>SM2: validateInput(state, quality)
+    
+    alt 输入参数无效
+        SM2-->>Caller: Result.Failure(InvalidInputError)
+    else 计算溢出
+        SM2->>SM2: calculateEF/Interval (溢出异常)
+        SM2->>SM2: 捕获异常，使用边界值
+        SM2->>SM2: 记录错误日志
+        SM2-->>Caller: Result.Failure(OverflowError)
+    else 计算超时
+        SM2->>SM2: 计算超时(>100ms)
+        SM2->>SM2: 使用默认参数或上次成功结果
+        SM2->>SM2: 记录超时日志
+        SM2-->>Caller: Result.Failure(CalculationError)
+    end
+    deactivate SM2
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-004 | 输入校验 | state 为 null 或 quality 超出 0-5 | InvalidInputError | 否 | 直接返回错误，不进行计算 | 不提示（内部错误） | algorithm=SM2, error=InvalidInputError | NFR-OBS-001 |
+| EX-005 | EF 计算 | EF 计算结果超出 1.3-3.0 范围或溢出 | OverflowError | 是 | 截断到边界值（1.3 或 3.0），记录日志 | 不提示（内部降级） | algorithm=SM2, error=OverflowError, wordId | NFR-PERF-002 |
+| EX-006 | Interval 计算 | Interval 计算结果超出 1h-365d 或溢出 | OverflowError | 是 | 截断到边界值（1h 或 365d），记录日志 | 不提示（内部降级） | algorithm=SM2, error=OverflowError, wordId | NFR-PERF-002 |
+| EX-007 | 计算超时 | 计算耗时超过 100ms | CalculationError | 是 | 使用默认参数或上次成功结果，记录超时日志 | 不提示（内部降级） | algorithm=SM2, error=Timeout, duration=xxxms | NFR-PERF-001 |
+
 ##### 模块：学习状态管理器
 
 - **模块定位**：管理单词学习状态的完整生命周期，跟踪学习进度，位于领域层
@@ -285,6 +402,140 @@ flowchart LR
   - **优点**：状态管理统一、易于测试和扩展、支持实时更新（Flow）
   - **缺点/代价**：内存缓存占用内存（约 20-30MB）
   - **替代方案与否决理由**：不使用 SharedPreferences（数据量大，查询能力弱）；不使用文件存储（查询性能差）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class LearningStateManager {
+        -repository: LearningStateRepository
+        -cache: ConcurrentHashMap~String, LearningState~
+        +updateLearningState(wordId: String, result: ReviewResult): Result~LearningState~
+        +getLearningStates(wordIds: List~String~): Flow~List~LearningState~~
+        +getReviewList(limit: Int): List~LearningState~
+        -updateCache(wordId: String, state: LearningState)
+        -loadFromCache(wordId: String): LearningState?
+    }
+    
+    class LearningStateRepository {
+        <<interface>>
+        +getState(wordId: String): Flow~LearningState?~
+        +updateState(state: LearningState): Result~Unit~
+        +getReviewList(limit: Int): List~LearningState~
+    }
+    
+    class LearningState {
+        +wordId: String
+        +learningCount: Int
+        +lastReviewTime: Long
+        +memoryStrength: Float
+        +nextReviewTime: Long
+        +mastered: Boolean
+    }
+    
+    class ReviewResult {
+        +nextReviewTime: Long
+        +newInterval: Long
+    }
+    
+    class DataError {
+        <<sealed>>
+    }
+    
+    LearningStateManager --> LearningStateRepository
+    LearningStateManager --> LearningState
+    LearningStateManager --> ReviewResult
+    LearningStateManager --> DataError
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant Manager as 状态管理器
+    participant Cache as 内存缓存
+    participant Repo as 状态仓库
+    participant DB as Room数据库
+    
+    Caller->>Manager: updateLearningState(wordId, result)
+    activate Manager
+    Manager->>Cache: loadFromCache(wordId)
+    activate Cache
+    Cache-->>Manager: state (或 null)
+    deactivate Cache
+    Manager->>Manager: 合并result更新state
+    Manager->>Repo: updateState(state)
+    activate Repo
+    Repo->>DB: 事务更新
+    activate DB
+    DB-->>Repo: Success
+    deactivate DB
+    Repo-->>Manager: Success
+    deactivate Repo
+    Manager->>Cache: updateCache(wordId, state)
+    activate Cache
+    Cache-->>Manager: OK
+    deactivate Cache
+    Manager-->>Caller: Result.Success(LearningState)
+    deactivate Manager
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant Caller as 调用方
+    participant Manager as 状态管理器
+    participant Repo as 状态仓库
+    participant DB as Room数据库
+    
+    Caller->>Manager: updateLearningState(wordId, result)
+    activate Manager
+    
+    alt 数据库操作失败
+        Manager->>Repo: updateState(state)
+        activate Repo
+        Repo->>DB: 事务更新
+        activate DB
+        DB-->>Repo: SQLException/IOException
+        deactivate DB
+        Repo-->>Manager: DataError
+        deactivate Repo
+        Manager->>Manager: 使用内存状态降级
+        Manager->>Manager: 记录错误日志
+        Manager-->>Caller: Result.Failure(DataError)
+    else 数据损坏
+        Manager->>Repo: updateState(state)
+        activate Repo
+        Repo->>Repo: 数据校验失败
+        Repo-->>Manager: DataError(DataCorrupted)
+        deactivate Repo
+        Manager->>Manager: 使用默认参数重新初始化
+        Manager->>Manager: 记录错误日志
+        Manager-->>Caller: Result.Failure(DataError)
+    else 并发更新冲突
+        Manager->>Repo: updateState(state)
+        activate Repo
+        Repo->>DB: 事务更新(版本冲突)
+        activate DB
+        DB-->>Repo: ConflictError
+        deactivate DB
+        Repo-->>Manager: DataError(Conflict)
+        deactivate Repo
+        Manager->>Manager: 重试(最多3次)
+        Manager-->>Caller: Result.Failure(DataError) 或重试成功
+    end
+    deactivate Manager
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-008 | 数据库更新 | SQLException、IOException、存储空间不足 | DataError | 是 | 使用内存状态降级，记录日志，下次启动时重试 | 不提示（内部处理） | method=updateLearningState, error=DataError, wordId | NFR-REL-001 |
+| EX-009 | 数据校验 | 数据格式错误、字段缺失、值超出范围 | DataError(DataCorrupted) | 是 | 使用默认参数重新初始化，记录日志 | 不提示（内部处理） | method=updateLearningState, error=DataCorrupted, wordId | NFR-REL-001 |
+| EX-010 | 并发更新 | 多个操作同时更新同一单词状态，版本冲突 | DataError(Conflict) | 是 | 重试（最多3次），使用最新状态合并 | 不提示（内部处理） | method=updateLearningState, error=Conflict, wordId | NFR-REL-001 |
 
 #####（算法 Capability Feature 场景）算法交付与工程化清单（若适用则必填）
 

@@ -216,6 +216,168 @@ flowchart LR
   - **缺点/代价**：实现复杂度较高（需要处理多种资源类型和降级场景）
   - **替代方案与否决理由**：不使用单一资源加载器（难以扩展）；不使用同步加载（会阻塞主线程）
 
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class ResourceLoader {
+        <<interface>>
+        +loadResource(ResourceType, String?) Result~Resource~
+        +preloadResources(List~Pair~) Result~Unit~
+    }
+    class ResourceLoaderImpl {
+        -audioPlayer: AudioPlayer
+        -imageLoader: ImageLoader
+        -textRenderer: TextRenderer
+        -cacheManager: CacheManager
+        -semaphore: Semaphore
+        +loadResource(ResourceType, String?) Result~Resource~
+        +preloadResources(List~Pair~) Result~Unit~
+        -loadAudio(String?) Result~Resource~
+        -loadImage(String?) Result~Resource~
+        -loadText(String?) Result~Resource~
+        -executeDegradeStrategy(ResourceType, ResourceError) Result~Resource~
+    }
+    class ResourceType {
+        <<sealed>>
+        Audio
+        Image
+        Example
+        Phonetic
+    }
+    class Resource {
+        <<sealed>>
+        AudioResource(uri, duration)
+        ImageResource(bitmap)
+        TextResource(text, format)
+    }
+    class ResourceError {
+        <<sealed>>
+        FileNotFound
+        FormatError
+        LoadTimeout
+        CacheError
+    }
+    class AudioPlayer {
+        <<interface>>
+    }
+    class ImageLoader {
+        <<interface>>
+    }
+    class TextRenderer {
+        <<interface>>
+    }
+    class CacheManager {
+        <<interface>>
+    }
+    ResourceLoader <|.. ResourceLoaderImpl
+    ResourceLoaderImpl --> AudioPlayer
+    ResourceLoaderImpl --> ImageLoader
+    ResourceLoaderImpl --> TextRenderer
+    ResourceLoaderImpl --> CacheManager
+    ResourceLoaderImpl ..> ResourceType
+    ResourceLoaderImpl ..> Resource
+    ResourceLoaderImpl ..> ResourceError
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant RL as ResourceLoaderImpl
+    participant CM as CacheManager
+    participant AP as AudioPlayer
+    participant IL as ImageLoader
+    participant TR as TextRenderer
+    
+    UC->>RL: loadResource(Audio, path)
+    activate RL
+    RL->>CM: getCached(resourceId)
+    activate CM
+    CM-->>RL: null (缓存未命中)
+    deactivate CM
+    RL->>AP: loadAudio(path)
+    activate AP
+    AP-->>RL: Success(AudioResource)
+    deactivate AP
+    RL->>CM: cache(resourceId, resource)
+    activate CM
+    CM-->>RL: Success
+    deactivate CM
+    RL-->>UC: Success(Resource)
+    deactivate RL
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant UC as UseCase
+    participant RL as ResourceLoaderImpl
+    participant CM as CacheManager
+    participant AP as AudioPlayer
+    participant IL as ImageLoader
+    
+    UC->>RL: loadResource(Audio, path)
+    activate RL
+    RL->>CM: getCached(resourceId)
+    activate CM
+    CM-->>RL: null (缓存未命中)
+    deactivate CM
+    
+    alt 音频文件不存在
+        RL->>AP: loadAudio(path)
+        activate AP
+        AP-->>RL: Failure(FileNotFound)
+        deactivate AP
+        RL->>AP: playTTS(text)
+        activate AP
+        alt TTS 成功
+            AP-->>RL: Success
+            RL-->>UC: Success(Resource)
+        else TTS 失败
+            AP-->>RL: Failure
+            RL-->>UC: Success(EmptyResource)
+        end
+        deactivate AP
+    else 图片加载失败
+        RL->>IL: loadImage(path)
+        activate IL
+        IL-->>RL: Failure(LoadTimeout)
+        deactivate IL
+        RL->>IL: loadPlaceholder()
+        activate IL
+        IL-->>RL: Success(Placeholder)
+        RL-->>UC: Success(Resource)
+        deactivate IL
+    else 加载超时
+        RL->>AP: loadAudio(path)
+        activate AP
+        Note over RL,AP: 超时 5 秒
+        AP-->>RL: Failure(LoadTimeout)
+        deactivate AP
+        RL->>RL: executeDegradeStrategy()
+        RL-->>UC: Failure(LoadTimeout)
+    end
+    deactivate RL
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-001 | ResourceLoader.loadResource | 音频文件不存在 | ResourceError.FileNotFound | 否 | 降级到 TTS，TTS 失败则返回空资源 | 无提示（静默降级） | resource_load_failed, type=Audio, error=FileNotFound | NFR-REL-003 |
+| EX-002 | ResourceLoader.loadResource | 图片文件不存在或加载失败 | ResourceError.FileNotFound / LoadTimeout | 否 | 返回占位图资源 | 无提示（显示占位图） | resource_load_failed, type=Image, error=FileNotFound | NFR-REL-003 |
+| EX-003 | ResourceLoader.loadResource | 资源加载超时（5秒） | ResourceError.LoadTimeout | 否 | 取消加载任务，执行降级策略 | 无提示（执行降级） | resource_load_failed, type=*, error=LoadTimeout, duration=5000 | NFR-PERF-001 |
+| EX-004 | ResourceLoader.loadResource | 缓存查询失败 | ResourceError.CacheError | 是 | 跳过缓存，直接加载资源 | 无提示（跳过缓存） | cache_error, operation=getCached, error=* | NFR-PERF-002 |
+| EX-005 | ResourceLoader.loadResource | 并发加载数量超过限制（5个） | - | 否 | 等待队列空闲后再加载 | 无提示（排队等待） | concurrent_load_limit, current=6, max=5 | NFR-PERF-003 |
+| EX-006 | AudioPlayer.playTTS | TTS 引擎初始化失败 | - | 否 | 返回空资源，静默跳过 | 无提示（静默跳过） | tts_init_failed | NFR-REL-003 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在"异常时序图"中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策（不要只写"记录日志"）。
+
 ##### 模块：CacheManager（缓存管理器）
 
 - **模块定位**：资源缓存管理，实现两级缓存（内存缓存 + 磁盘缓存），优化资源加载性能，位于 Data 层
@@ -248,6 +410,777 @@ flowchart LR
   - **优点**：两级缓存提供最佳性能，LRU 策略符合访问模式，磁盘缓存持久化
   - **缺点/代价**：实现复杂度较高（需要管理两级缓存和清理策略），磁盘缓存占用存储空间
   - **替代方案与否决理由**：不使用仅内存缓存（应用重启后失效）；不使用仅磁盘缓存（首次加载慢）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class CacheManager {
+        <<interface>>
+        +getCached(String) Resource?
+        +cache(String, Resource) Result~Unit~
+        +clearCache() Result~Unit~
+        +getCacheSize() Long
+    }
+    class CacheManagerImpl {
+        -memoryCache: MemoryCache
+        -diskCache: DiskCache
+        -mutex: Mutex
+        +getCached(String) Resource?
+        +cache(String, Resource) Result~Unit~
+        +clearCache() Result~Unit~
+        +getCacheSize() Long
+        -checkDiskCacheSize() Result~Unit~
+    }
+    class MemoryCache {
+        -cache: LruCache~String, Resource~
+        -maxSize: Long
+        +get(String) Resource?
+        +put(String, Resource) Boolean
+        +clear()
+        +size() Long
+    }
+    class DiskCache {
+        -cacheDir: File
+        -metadataFile: File
+        +get(String) Resource?
+        +put(String, Resource) Result~Unit~
+        +clear() Result~Unit~
+        +getSize() Long
+        -loadMetadata() CacheMetadata
+        -saveMetadata(CacheMetadata) Result~Unit~
+        -evictOldest() Result~Unit~
+    }
+    class Resource {
+        <<sealed>>
+        AudioResource
+        ImageResource
+        TextResource
+    }
+    class CacheMetadata {
+        +version: Int
+        +caches: List~CacheEntry~
+        +totalSize: Long
+    }
+    CacheManager <|.. CacheManagerImpl
+    CacheManagerImpl --> MemoryCache
+    CacheManagerImpl --> DiskCache
+    CacheManagerImpl ..> Resource
+    DiskCache ..> CacheMetadata
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant CM as CacheManagerImpl
+    participant MC as MemoryCache
+    participant DC as DiskCache
+    
+    RL->>CM: getCached(resourceId)
+    activate CM
+    CM->>MC: get(resourceId)
+    activate MC
+    alt 内存缓存命中
+        MC-->>CM: Resource (命中)
+        deactivate MC
+        CM-->>RL: Resource
+    else 内存缓存未命中
+        MC-->>CM: null
+        deactivate MC
+        CM->>DC: get(resourceId)
+        activate DC
+        DC-->>CM: Resource (磁盘缓存命中)
+        deactivate DC
+        CM->>MC: put(resourceId, resource)
+        activate MC
+        MC-->>CM: true
+        deactivate MC
+        CM-->>RL: Resource
+    end
+    deactivate CM
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant CM as CacheManagerImpl
+    participant MC as MemoryCache
+    participant DC as DiskCache
+    
+    RL->>CM: cache(resourceId, resource)
+    activate CM
+    CM->>MC: put(resourceId, resource)
+    activate MC
+    alt 内存缓存写入失败（容量满）
+        MC-->>CM: false (容量满，已淘汰旧资源)
+        Note over CM,MC: LRU 淘汰策略已执行
+        CM->>DC: put(resourceId, resource)
+        activate DC
+        alt 磁盘缓存成功
+            DC-->>CM: Success
+            CM-->>RL: Success
+        else 磁盘缓存失败（空间不足）
+            DC->>DC: evictOldest()
+            DC->>DC: put(resourceId, resource)
+            alt 清理后成功
+                DC-->>CM: Success
+                CM-->>RL: Success
+            else 清理后仍失败
+                DC-->>CM: Failure(CacheError)
+                CM-->>RL: Success (至少内存缓存成功)
+            end
+        end
+        deactivate DC
+    else 磁盘缓存写入失败
+        MC-->>CM: true
+        deactivate MC
+        CM->>DC: put(resourceId, resource)
+        activate DC
+        DC-->>CM: Failure(CacheError)
+        deactivate DC
+        CM-->>RL: Success (至少内存缓存成功)
+    end
+    deactivate CM
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-007 | MemoryCache.put | 内存缓存容量满（50MB） | - | 否 | LRU 自动淘汰最久未使用资源，继续写入 | 无提示（自动处理） | cache_evict, type=Memory, size=*, evicted=* | NFR-MEM-001 |
+| EX-008 | DiskCache.put | 磁盘缓存空间不足（100MB） | ResourceError.CacheError | 否 | 清理最久未访问的缓存文件，然后重试写入 | 无提示（自动清理） | cache_evict, type=Disk, size=*, evicted=* | NFR-MEM-001 |
+| EX-009 | DiskCache.put | 磁盘 I/O 写入失败 | ResourceError.CacheError | 是 | 跳过磁盘缓存，只保留内存缓存 | 无提示（降级到仅内存缓存） | cache_write_failed, type=Disk, error=* | NFR-REL-002 |
+| EX-010 | CacheManager.getCached | 缓存元数据文件损坏 | - | 否 | 返回 null，由调用方直接加载资源，重建缓存 | 无提示（跳过缓存） | cache_metadata_corrupted | NFR-REL-002 |
+| EX-011 | DiskCache.get | 缓存文件不存在或损坏 | - | 否 | 返回 null，从内存缓存或重新加载 | 无提示（跳过磁盘缓存） | cache_file_missing, id=* | NFR-REL-002 |
+
+> 互校规则（必须通过）：
+> - 异常清单表每一行都能在"异常时序图"中找到对应 `alt/else` 分支；
+> - 异常时序图中的每个失败分支，也必须在异常清单表中有明确对策（不要只写"记录日志"）。
+
+##### 模块：AudioPlayer（音频播放器）
+
+- **模块定位**：音频播放功能，支持音频文件播放（MediaPlayer）和 TTS 文本转语音（TextToSpeech），提供播放控制接口，位于 Data 层
+- **设计目标**：音频播放启动延迟 ≤ 500ms（p95）、降级策略（TTS）、功耗优化
+- **核心数据结构/状态**：
+  - 播放状态：`PlaybackState`（Idle、Loading、Playing、Paused、Error）
+  - MediaPlayer 实例：单个实例，播放新音频时停止上一个
+  - TTS 引擎：系统 TextToSpeech 实例，初始化后复用
+- **对外接口（协议）**：
+  - `suspend fun playAudio(path: String?): Result<Unit>`：播放音频文件
+  - `suspend fun playTTS(text: String): Result<Unit>`：播放 TTS
+  - `fun stopAudio()`：停止播放
+  - `fun isPlaying(): Boolean`：是否正在播放
+- **策略与算法**：
+  - 播放切换：播放新音频时自动停止上一个，确保同时只有一个音频播放
+  - TTS 初始化：延迟初始化，首次使用时初始化，超时 3 秒
+- **失败与降级**：
+  - 音频文件不存在：返回失败，由 ResourceLoader 降级到 TTS
+  - MediaPlayer 播放失败：返回失败，由 ResourceLoader 降级到 TTS
+  - TTS 初始化失败：返回失败，由 ResourceLoader 静默跳过
+- **安全与隐私**：
+  - TTS 使用本地引擎，数据不上传云端
+- **可观测性**：
+  - 记录音频播放成功/失败事件（播放时长、文件大小）
+  - 记录 TTS 使用情况
+- **优缺点**：
+  - **优点**：系统 API，无需额外依赖，满足播放需求
+  - **缺点/代价**：MediaPlayer 功能相对基础，不支持高级播放控制
+  - **替代方案与否决理由**：不使用 ExoPlayer（体积大，功能过度）；不使用 SoundPool（不适合长音频）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class AudioPlayer {
+        <<interface>>
+        +playAudio(String?) Result~Unit~
+        +playTTS(String) Result~Unit~
+        +stopAudio()
+        +isPlaying() Boolean
+    }
+    class AudioPlayerImpl {
+        -mediaPlayer: MediaPlayer?
+        -tts: TextToSpeech?
+        -playbackState: PlaybackState
+        -mutex: Mutex
+        +playAudio(String?) Result~Unit~
+        +playTTS(String) Result~Unit~
+        +stopAudio()
+        +isPlaying() Boolean
+        -initTTS() Result~TextToSpeech~
+        -releaseMediaPlayer()
+        -releaseTTS()
+    }
+    class PlaybackState {
+        <<enum>>
+        Idle
+        Loading
+        Playing
+        Paused
+        Error
+    }
+    class MediaPlayer {
+        <<Android API>>
+    }
+    class TextToSpeech {
+        <<Android API>>
+    }
+    AudioPlayer <|.. AudioPlayerImpl
+    AudioPlayerImpl ..> PlaybackState
+    AudioPlayerImpl ..> MediaPlayer
+    AudioPlayerImpl ..> TextToSpeech
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant AP as AudioPlayerImpl
+    participant MP as MediaPlayer
+    participant TTS as TextToSpeech
+    
+    RL->>AP: playAudio(path)
+    activate AP
+    AP->>AP: stopAudio() (停止上一个)
+    AP->>MP: MediaPlayer.create()
+    activate MP
+    MP-->>AP: MediaPlayer instance
+    AP->>MP: setDataSource(path)
+    AP->>MP: prepareAsync()
+    MP-->>AP: onPrepared()
+    AP->>MP: start()
+    MP-->>AP: onCompletion()
+    AP->>AP: releaseMediaPlayer()
+    deactivate MP
+    AP-->>RL: Success
+    deactivate AP
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant AP as AudioPlayerImpl
+    participant MP as MediaPlayer
+    participant TTS as TextToSpeech
+    
+    RL->>AP: playAudio(path)
+    activate AP
+    alt 音频文件不存在
+        AP->>MP: MediaPlayer.create()
+        activate MP
+        MP->>MP: setDataSource(path)
+        MP-->>AP: IOException(FileNotFound)
+        deactivate MP
+        AP-->>RL: Failure(FileNotFound)
+    else MediaPlayer 播放失败
+        AP->>MP: MediaPlayer.create()
+        activate MP
+        MP-->>AP: MediaPlayer instance
+        AP->>MP: setDataSource(path)
+        AP->>MP: prepareAsync()
+        MP-->>AP: onError(ERROR_UNSUPPORTED)
+        AP->>AP: releaseMediaPlayer()
+        AP-->>RL: Failure(FormatError)
+        deactivate MP
+    else TTS 初始化失败
+        RL->>AP: playTTS(text)
+        activate AP
+        AP->>AP: initTTS()
+        activate TTS
+        Note over AP,TTS: 超时 3 秒
+        TTS-->>AP: null (初始化超时)
+        deactivate TTS
+        AP-->>RL: Failure(TTSInitFailed)
+        deactivate AP
+    end
+    deactivate AP
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-012 | AudioPlayerImpl.playAudio | 音频文件不存在 | ResourceError.FileNotFound | 否 | 返回失败，由 ResourceLoader 降级到 TTS | 无提示（降级） | audio_play_failed, error=FileNotFound, path=* | NFR-REL-001 |
+| EX-013 | AudioPlayerImpl.playAudio | 音频格式不支持 | ResourceError.FormatError | 否 | 返回失败，由 ResourceLoader 降级到 TTS | 无提示（降级） | audio_play_failed, error=FormatError | NFR-REL-001 |
+| EX-014 | AudioPlayerImpl.initTTS | TTS 引擎初始化超时（3秒） | - | 否 | 返回失败，由 ResourceLoader 静默跳过 | 无提示（静默跳过） | tts_init_failed, error=Timeout | NFR-REL-003 |
+| EX-015 | AudioPlayerImpl.playAudio | 上一个音频正在播放 | - | 否 | 自动停止上一个，播放新音频 | 无提示（自动处理） | audio_switch, previous=*, new=* | NFR-PERF-001 |
+
+##### 模块：ImageLoader（图片加载器）
+
+- **模块定位**：图片加载功能，封装 Coil 库，提供图片加载接口，位于 Data 层
+- **设计目标**：图片加载时间 ≤ 1 秒（p95）、内存占用控制、降级策略（占位图）
+- **核心数据结构/状态**：
+  - Coil ImageLoader：单例实例，全局复用
+  - 占位图：默认占位图资源
+- **对外接口（协议）**：
+  - `suspend fun loadImage(path: String): Result<ImageBitmap>`：加载图片
+  - `suspend fun loadImageWithPlaceholder(path: String, placeholder: ImageBitmap?): Result<ImageBitmap>`：加载图片（带占位图）
+- **策略与算法**：
+  - 图片加载：使用 Coil 异步加载，支持内存缓存和磁盘缓存（Coil 自动管理）
+  - 占位图：加载失败时返回占位图
+- **失败与降级**：
+  - 图片文件不存在：返回占位图资源
+  - 图片格式不支持：返回占位图资源
+  - 加载超时：返回占位图资源
+- **安全与隐私**：
+  - 图片文件存储在应用私有目录，不共享
+- **可观测性**：
+  - 记录图片加载成功/失败事件（文件大小、加载耗时）
+- **优缺点**：
+  - **优点**：Coil 专为 Kotlin 协程设计，API 简洁，性能优异，自动内存管理
+  - **缺点/代价**：增加库依赖（~200KB）
+  - **替代方案与否决理由**：不使用 Glide（体积大）；不使用 Picasso（功能较少）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class ImageLoader {
+        <<interface>>
+        +loadImage(String) Result~ImageBitmap~
+        +loadImageWithPlaceholder(String, ImageBitmap?) Result~ImageBitmap~
+    }
+    class ImageLoaderImpl {
+        -coilLoader: ImageLoader
+        -defaultPlaceholder: ImageBitmap
+        +loadImage(String) Result~ImageBitmap~
+        +loadImageWithPlaceholder(String, ImageBitmap?) Result~ImageBitmap~
+        -loadWithCoil(String) Result~ImageBitmap~
+        -getPlaceholder() ImageBitmap
+    }
+    class ImageBitmap {
+        <<Coil/Android>>
+    }
+    class CoilImageLoader {
+        <<Coil Library>>
+    }
+    ImageLoader <|.. ImageLoaderImpl
+    ImageLoaderImpl --> CoilImageLoader
+    ImageLoaderImpl ..> ImageBitmap
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant IL as ImageLoaderImpl
+    participant Coil as CoilImageLoader
+    
+    RL->>IL: loadImage(path)
+    activate IL
+    IL->>Coil: load(path).image()
+    activate Coil
+    Coil->>Coil: 异步加载（内存/磁盘缓存）
+    Coil-->>IL: ImageBitmap
+    deactivate Coil
+    IL-->>RL: Success(ImageBitmap)
+    deactivate IL
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant IL as ImageLoaderImpl
+    participant Coil as CoilImageLoader
+    
+    RL->>IL: loadImage(path)
+    activate IL
+    IL->>Coil: load(path).image()
+    activate Coil
+    alt 图片文件不存在
+        Coil-->>IL: ImageLoadException(FileNotFound)
+        deactivate Coil
+        IL->>IL: getPlaceholder()
+        IL-->>RL: Success(Placeholder)
+    else 图片格式不支持
+        Coil-->>IL: ImageLoadException(UnsupportedFormat)
+        deactivate Coil
+        IL->>IL: getPlaceholder()
+        IL-->>RL: Success(Placeholder)
+    else 加载超时（5秒）
+        Note over IL,Coil: 超时 5 秒
+        Coil-->>IL: TimeoutException
+        deactivate Coil
+        IL->>IL: getPlaceholder()
+        IL-->>RL: Success(Placeholder)
+    end
+    deactivate IL
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-016 | ImageLoaderImpl.loadImage | 图片文件不存在 | - | 否 | 返回占位图资源 | 无提示（显示占位图） | image_load_failed, error=FileNotFound, path=* | NFR-REL-001 |
+| EX-017 | ImageLoaderImpl.loadImage | 图片格式不支持 | - | 否 | 返回占位图资源 | 无提示（显示占位图） | image_load_failed, error=UnsupportedFormat | NFR-REL-001 |
+| EX-018 | ImageLoaderImpl.loadImage | 图片加载超时（5秒） | ResourceError.LoadTimeout | 否 | 返回占位图资源 | 无提示（显示占位图） | image_load_failed, error=Timeout, duration=5000 | NFR-PERF-001 |
+
+##### 模块：TextRenderer（文本渲染器）
+
+- **模块定位**：文本渲染功能，支持例句和音标显示，提供文本格式化接口，位于 Data 层
+- **设计目标**：文本渲染时间 ≤ 100ms（p95）、格式正确清晰
+- **核心数据结构/状态**：
+  - 文本格式：`TextFormat`（Plain、IPA、HTML）
+  - 格式化参数：字体大小、颜色、对齐方式
+- **对外接口（协议）**：
+  - `suspend fun renderText(text: String, format: TextFormat?): Result<String>`：渲染文本
+- **策略与算法**：
+  - 文本渲染：同步处理，简单格式化（换行、标点）
+  - 音标格式化：支持 IPA 格式显示
+- **失败与降级**：
+  - 文本为空：返回空字符串
+  - 格式化失败：返回原始文本
+- **安全与隐私**：
+  - 无敏感信息处理
+- **可观测性**：
+  - 无需记录（文本渲染操作简单，失败率低）
+- **优缺点**：
+  - **优点**：实现简单，性能优异，无外部依赖
+  - **缺点/代价**：功能相对基础，不支持复杂格式化
+  - **替代方案与否决理由**：不使用 HTML 渲染引擎（功能过度，体积大）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class TextRenderer {
+        <<interface>>
+        +renderText(String, TextFormat?) Result~String~
+    }
+    class TextRendererImpl {
+        +renderText(String, TextFormat?) Result~String~
+        -formatIPAPhonetic(String) String
+        -formatPlainText(String) String
+    }
+    class TextFormat {
+        <<enum>>
+        Plain
+        IPA
+        HTML
+    }
+    TextRenderer <|.. TextRendererImpl
+    TextRendererImpl ..> TextFormat
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant TR as TextRendererImpl
+    
+    RL->>TR: renderText(text, IPA)
+    activate TR
+    TR->>TR: formatIPAPhonetic(text)
+    TR-->>RL: Success(formattedText)
+    deactivate TR
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant RL as ResourceLoader
+    participant TR as TextRendererImpl
+    
+    RL->>TR: renderText(text, format)
+    activate TR
+    alt 文本为空
+        TR-->>RL: Success("")
+    else 格式化失败
+        TR->>TR: formatIPAPhonetic(text)
+        Note over TR: 格式化异常
+        TR-->>RL: Success(originalText) (返回原始文本)
+    end
+    deactivate TR
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-019 | TextRendererImpl.renderText | 文本为空 | - | 否 | 返回空字符串 | 无提示（显示空文本） | - | - |
+| EX-020 | TextRendererImpl.renderText | 格式化失败（格式错误） | - | 否 | 返回原始文本 | 无提示（显示原始文本） | text_format_failed, format=* | - |
+
+##### 模块：MemoryCache（内存缓存）
+
+- **模块定位**：内存缓存实现，使用 LRU 策略，管理内存中的资源对象，位于 Data 层
+- **设计目标**：内存占用 ≤ 50MB、LRU 淘汰策略、快速查询
+- **核心数据结构/状态**：
+  - LRU Cache：`LruCache<String, Resource>`（Android 系统类）
+  - 最大容量：50MB（按资源大小计算）
+- **对外接口（协议）**：
+  - `fun get(key: String): Resource?`：查询缓存
+  - `fun put(key: String, resource: Resource): Boolean`：缓存资源
+  - `fun clear()`：清空缓存
+  - `fun size(): Long`：获取缓存大小
+- **策略与算法**：
+  - LRU 淘汰：容量满时自动淘汰最久未使用的资源
+- **失败与降级**：
+  - 容量满：自动淘汰旧资源，继续写入
+- **安全与隐私**：
+  - 无敏感信息（只缓存资源对象）
+- **可观测性**：
+  - 记录淘汰事件（淘汰的资源 ID、大小）
+- **优缺点**：
+  - **优点**：Android 系统 LRU 实现，性能优异，自动淘汰
+  - **缺点/代价**：内存占用，应用退出后失效
+  - **替代方案与否决理由**：不使用自定义 LRU（系统实现更优）；不使用 SoftReference（GC 不可控）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class MemoryCache {
+        <<interface>>
+        +get(String) Resource?
+        +put(String, Resource) Boolean
+        +clear()
+        +size() Long
+    }
+    class MemoryCacheImpl {
+        -cache: LruCache~String, Resource~
+        -maxSize: Long
+        +get(String) Resource?
+        +put(String, Resource) Boolean
+        +clear()
+        +size() Long
+        -sizeOf(String, Resource) Int
+        -entryRemoved(Boolean, String, Resource, Resource?)
+    }
+    class LruCache {
+        <<Android>>
+        +get(K) V?
+        +put(K, V) V?
+        +remove(K) V?
+        +evictAll()
+    }
+    class Resource {
+        <<sealed>>
+        AudioResource
+        ImageResource
+        TextResource
+    }
+    MemoryCache <|.. MemoryCacheImpl
+    MemoryCacheImpl --> LruCache
+    MemoryCacheImpl ..> Resource
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant CM as CacheManager
+    participant MC as MemoryCacheImpl
+    participant LRU as LruCache
+    
+    CM->>MC: get(resourceId)
+    activate MC
+    MC->>LRU: get(resourceId)
+    activate LRU
+    LRU-->>MC: Resource
+    deactivate LRU
+    MC-->>CM: Resource
+    deactivate MC
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant CM as CacheManager
+    participant MC as MemoryCacheImpl
+    participant LRU as LruCache
+    
+    CM->>MC: put(resourceId, resource)
+    activate MC
+    MC->>MC: sizeOf(resourceId, resource)
+    MC->>LRU: put(resourceId, resource)
+    activate LRU
+    alt 容量满（需要淘汰）
+        LRU->>LRU: entryRemoved(true, oldKey, oldValue, null)
+        LRU->>MC: entryRemoved(true, oldKey, oldValue, null)
+        MC->>MC: 记录淘汰事件
+        LRU-->>MC: oldValue (已淘汰)
+        MC-->>CM: true (写入成功，已淘汰旧资源)
+    else 写入失败（异常）
+        LRU-->>MC: null (写入失败)
+        MC-->>CM: false (写入失败)
+    end
+    deactivate LRU
+    deactivate MC
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-021 | MemoryCacheImpl.put | 容量满（50MB） | - | 否 | LRU 自动淘汰最久未使用的资源，继续写入 | 无提示（自动处理） | cache_evict, type=Memory, evicted=* | NFR-MEM-001 |
+| EX-022 | MemoryCacheImpl.put | 写入失败（异常） | - | 是 | 返回 false，由调用方跳过内存缓存 | 无提示（降级到仅磁盘缓存） | cache_write_failed, type=Memory | NFR-MEM-001 |
+
+##### 模块：DiskCache（磁盘缓存）
+
+- **模块定位**：磁盘缓存实现，管理应用私有目录中的缓存文件，位于 Data 层
+- **设计目标**：缓存总大小 ≤ 100MB、持久化、自动清理
+- **核心数据结构/状态**：
+  - 缓存目录：应用私有目录 `cache/multimedia/`
+  - 缓存元数据：JSON 文件存储缓存信息
+- **对外接口（协议）**：
+  - `suspend fun get(id: String): Resource?`：查询缓存
+  - `suspend fun put(id: String, resource: Resource): Result<Unit>`：缓存资源
+  - `suspend fun clear(): Result<Unit>`：清空缓存
+  - `suspend fun getSize(): Long`：获取缓存大小
+- **策略与算法**：
+  - 缓存清理：缓存总大小超过 100MB 时，清理最久未访问的缓存文件
+- **失败与降级**：
+  - 空间不足：清理旧缓存后重试
+  - 写入失败：返回失败，由调用方跳过磁盘缓存
+- **安全与隐私**：
+  - 缓存文件存储在应用私有目录，不共享
+- **可观测性**：
+  - 记录缓存清理事件（清理大小、清理原因）
+- **优缺点**：
+  - **优点**：持久化，应用重启后恢复，容量大（100MB）
+  - **缺点/代价**：磁盘 I/O 操作，首次加载慢
+  - **替代方案与否决理由**：不使用数据库存储（文件存储更简单，适合资源缓存）
+
+###### UML 类图（静态，必须）
+
+```mermaid
+classDiagram
+    class DiskCache {
+        <<interface>>
+        +get(String) Resource?
+        +put(String, Resource) Result~Unit~
+        +clear() Result~Unit~
+        +getSize() Long
+    }
+    class DiskCacheImpl {
+        -cacheDir: File
+        -metadataFile: File
+        -metadata: CacheMetadata
+        -mutex: Mutex
+        +get(String) Resource?
+        +put(String, Resource) Result~Unit~
+        +clear() Result~Unit~
+        +getSize() Long
+        -loadMetadata() CacheMetadata
+        -saveMetadata(CacheMetadata) Result~Unit~
+        -evictOldest() Result~Unit~
+        -getCacheFilePath(String) File
+    }
+    class CacheMetadata {
+        +version: Int
+        +caches: List~CacheEntry~
+        +totalSize: Long
+    }
+    class CacheEntry {
+        +id: String
+        +type: ResourceType
+        +cachedPath: String
+        +cachedAt: Long
+        +accessCount: Int
+        +size: Long
+    }
+    class File {
+        <<Java>>
+    }
+    DiskCache <|.. DiskCacheImpl
+    DiskCacheImpl --> CacheMetadata
+    DiskCacheImpl --> CacheEntry
+    DiskCacheImpl --> File
+```
+
+###### UML 时序图 - 成功链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant CM as CacheManager
+    participant DC as DiskCacheImpl
+    participant FS as FileSystem
+    participant Meta as CacheMetadata
+    
+    CM->>DC: get(resourceId)
+    activate DC
+    DC->>DC: loadMetadata()
+    DC->>Meta: getCacheEntry(resourceId)
+    Meta-->>DC: CacheEntry
+    DC->>FS: File(cachedPath).readBytes()
+    activate FS
+    FS-->>DC: ByteArray
+    deactivate FS
+    DC->>DC: deserialize(ByteArray)
+    DC-->>CM: Resource
+    deactivate DC
+```
+
+###### UML 时序图 - 异常链路（动态，必须）
+
+```mermaid
+sequenceDiagram
+    participant CM as CacheManager
+    participant DC as DiskCacheImpl
+    participant FS as FileSystem
+    participant Meta as CacheMetadata
+    
+    CM->>DC: put(resourceId, resource)
+    activate DC
+    DC->>DC: loadMetadata()
+    DC->>DC: checkDiskCacheSize()
+    alt 缓存大小超过 100MB
+        DC->>DC: evictOldest()
+        DC->>Meta: 清理最久未访问的缓存
+        DC->>FS: delete(oldCacheFile)
+        activate FS
+        FS-->>DC: true
+        deactivate FS
+    end
+    DC->>DC: serialize(resource)
+    DC->>FS: File(cachePath).writeBytes(data)
+    activate FS
+    alt 空间不足
+        FS-->>DC: IOException(No space)
+        deactivate FS
+        DC->>DC: evictOldest()
+        DC->>FS: File(cachePath).writeBytes(data)
+        activate FS
+        alt 清理后成功
+            FS-->>DC: Success
+            deactivate FS
+            DC->>DC: saveMetadata()
+            DC-->>CM: Success
+        else 清理后仍失败
+            FS-->>DC: IOException(No space)
+            deactivate FS
+            DC-->>CM: Failure(CacheError)
+        end
+    else 写入成功
+        FS-->>DC: Success
+        deactivate FS
+        DC->>DC: saveMetadata()
+        DC-->>CM: Success
+    end
+    deactivate DC
+```
+
+###### 关键异常清单（必须，且与异常时序图互校）
+
+| 异常ID | 触发点（步骤/组件） | 触发条件 | 错误类型/错误码 | 可重试 | 对策（降级/回滚/一致性） | 用户提示 | 日志/埋点字段 | 关联 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-023 | DiskCacheImpl.put | 磁盘空间不足 | ResourceError.CacheError | 是 | 清理最久未访问的缓存文件，然后重试写入 | 无提示（自动清理） | cache_evict, type=Disk, evicted=*, reason=NoSpace | NFR-MEM-001 |
+| EX-024 | DiskCacheImpl.put | 磁盘 I/O 写入失败 | ResourceError.CacheError | 否 | 返回失败，由调用方跳过磁盘缓存 | 无提示（降级到仅内存缓存） | cache_write_failed, type=Disk, error=* | NFR-REL-002 |
+| EX-025 | DiskCacheImpl.get | 缓存文件不存在或损坏 | - | 否 | 返回 null，从元数据中移除，由调用方重新加载 | 无提示（跳过磁盘缓存） | cache_file_missing, id=* | NFR-REL-002 |
+| EX-026 | DiskCacheImpl.loadMetadata | 元数据文件损坏 | - | 否 | 重建元数据（扫描缓存目录），继续操作 | 无提示（重建元数据） | cache_metadata_corrupted | NFR-REL-002 |
 
 #####（Capability Feature 场景）交付物与接入契约（若适用则必填）
 
