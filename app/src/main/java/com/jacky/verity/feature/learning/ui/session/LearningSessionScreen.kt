@@ -20,8 +20,10 @@ import kotlinx.coroutines.delay
 @Composable
 fun LearningSessionScreen(
     currentWord: WordCardModel?,
+    isLoading: Boolean = false,
+    error: String? = null,
     onNextWord: () -> Unit = {},
-    onWordRated: (wordId: String, quality: Int) -> Unit = {},
+    onWordRated: (wordId: String, quality: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var dragOffset by remember { mutableStateOf(0f) }
@@ -51,7 +53,7 @@ fun LearningSessionScreen(
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectVerticalDragGestures(
-                    onDragStart = { isDragging = true },
+                    onDragStart = { _ -> isDragging = true },
                     onDragEnd = {
                         isDragging = false
                         // 滑动超过阈值，切换到下一个单词
@@ -60,8 +62,8 @@ fun LearningSessionScreen(
                         }
                         dragOffset = 0f
                     },
-                    onDrag = { change, dragAmount ->
-                        dragOffset += dragAmount.y
+                    onVerticalDrag = { _, dragAmount ->
+                        dragOffset += dragAmount
                     }
                 )
             }
@@ -84,8 +86,14 @@ fun LearningSessionScreen(
                     .offset(y = with(LocalDensity.current) { offsetY.toDp() })
             )
         } ?: run {
-            // 空状态：没有更多单词
-            EmptyState()
+            // 空状态：没有更多单词或加载中
+            if (isLoading) {
+                LoadingState()
+            } else if (error != null) {
+                ErrorState(error = error)
+            } else {
+                EmptyState()
+            }
         }
     }
 }
@@ -108,6 +116,58 @@ private fun EmptyState() {
             Text(
                 text = "上滑切换单词卡片",
                 style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "正在加载学习任务...",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun ErrorState(error: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "加载失败",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = error,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "提示：请先导入词库",
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

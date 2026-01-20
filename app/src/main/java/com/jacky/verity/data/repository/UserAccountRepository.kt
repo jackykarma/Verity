@@ -25,7 +25,7 @@ class UserAccountRepository(
      */
     fun getCurrentUserAccount(): Flow<Result<UserAccountEntity, DatabaseError>> {
         return userAccountDao.getUserAccount()
-            .map { account ->
+            .map<UserAccountEntity?, Result<UserAccountEntity, DatabaseError>> { account ->
                 if (account != null) {
                     Result.Success(account)
                 } else {

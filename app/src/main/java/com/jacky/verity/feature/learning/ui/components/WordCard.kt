@@ -5,7 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -115,7 +118,7 @@ private fun WordHeader(
                     modifier = Modifier.size(24.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.VolumeUp,
+                        imageVector = Icons.Default.PlayArrow,
                         contentDescription = "播放发音",
                         tint = Color.Black,
                         modifier = Modifier.size(20.dp)
@@ -257,7 +260,7 @@ private fun ExampleRow(example: WordExample) {
                     modifier = Modifier.size(20.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.VolumeUp,
+                        imageVector = Icons.Default.PlayArrow,
                         contentDescription = "播放例句",
                         tint = Color.Black,
                         modifier = Modifier.size(16.dp)
@@ -331,7 +334,7 @@ private fun FloatingActionButtons(
             elevation = FloatingActionButtonDefaults.elevation(2.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.StarBorder,
+                imageVector = Icons.Default.Star,
                 contentDescription = "收藏",
                 tint = Color.Black
             )
@@ -361,7 +364,7 @@ private fun FloatingActionButtons(
             elevation = FloatingActionButtonDefaults.elevation(2.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Psychology,
+                imageVector = Icons.Default.Info,
                 contentDescription = "统计",
                 tint = Color.Black
             )

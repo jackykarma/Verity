@@ -17,6 +17,13 @@ data class LibraryMetadata(
     val isSelected: Boolean = false
 ) {
     /**
+     * 生成唯一标识（用于去重）
+     */
+    fun generateFingerprint(): String {
+        return "${filePath}_${fileSize}_${createdAt}"
+    }
+    
+    /**
      * 转换为领域模型
      */
     fun toWordLibrary(): WordLibrary {

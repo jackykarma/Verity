@@ -1,0 +1,182 @@
+[
+  {
+    "id": "word_001",
+    "word": "abandon",
+    "phonetic": "/əˈbændən/",
+    "translation": "v. 放弃；抛弃",
+    "definitions": [
+      {
+        "partOfSpeech": "v.",
+        "meanings": ["放弃（信念、计划）", "抛弃（某人）", "离开（地方）"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "They had to abandon the car in the snow.",
+        "chinese": "他们不得不把车丢在雪地里。"
+      }
+    ]
+  },
+  {
+    "id": "word_002",
+    "word": "ability",
+    "phonetic": "/əˈbɪləti/",
+    "translation": "n. 能力；才能",
+    "definitions": [
+      {
+        "partOfSpeech": "n.",
+        "meanings": ["能力", "才能", "技能"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "She has the ability to learn languages quickly.",
+        "chinese": "她有快速学习语言的能力。"
+      }
+    ]
+  },
+  {
+    "id": "word_003",
+    "word": "abnormal",
+    "phonetic": "/æbˈnɔːml/",
+    "translation": "adj. 异常的；不正常的",
+    "definitions": [
+      {
+        "partOfSpeech": "adj.",
+        "meanings": ["异常的", "不正常的", "反常的"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "The test results were abnormal.",
+        "chinese": "检测结果异常。"
+      }
+    ]
+  },
+  {
+    "id": "word_004",
+    "word": "aboard",
+    "phonetic": "/əˈbɔːd/",
+    "translation": "adv./prep. 在船上；在飞机上",
+    "definitions": [
+      {
+        "partOfSpeech": "adv.",
+        "meanings": ["在船上", "在飞机上", "在车上"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "Welcome aboard!",
+        "chinese": "欢迎登机！"
+      }
+    ]
+  },
+  {
+    "id": "word_005",
+    "word": "abolish",
+    "phonetic": "/əˈbɒlɪʃ/",
+    "translation": "v. 废除；废止",
+    "definitions": [
+      {
+        "partOfSpeech": "v.",
+        "meanings": ["废除", "废止", "取消"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "The government voted to abolish the tax.",
+        "chinese": "政府投票决定废除这项税收。"
+      }
+    ]
+  },
+  {
+    "id": "word_006",
+    "word": "abundant",
+    "phonetic": "/əˈbʌndənt/",
+    "translation": "adj. 丰富的；充裕的",
+    "definitions": [
+      {
+        "partOfSpeech": "adj.",
+        "meanings": ["丰富的", "充裕的", "大量的"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "The country has abundant natural resources.",
+        "chinese": "这个国家有丰富的自然资源。"
+      }
+    ]
+  },
+  {
+    "id": "word_007",
+    "word": "accelerate",
+    "phonetic": "/əkˈseləreɪt/",
+    "translation": "v. 加速；促进",
+    "definitions": [
+      {
+        "partOfSpeech": "v.",
+        "meanings": ["加速", "促进", "增加"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "The car accelerated rapidly.",
+        "chinese": "汽车迅速加速。"
+      }
+    ]
+  },
+  {
+    "id": "word_008",
+    "word": "accomplish",
+    "phonetic": "/əˈkʌmplɪʃ/",
+    "translation": "v. 完成；实现",
+    "definitions": [
+      {
+        "partOfSpeech": "v.",
+        "meanings": ["完成", "实现", "达到"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "She accomplished her goal of becoming a doctor.",
+        "chinese": "她实现了成为医生的目标。"
+      }
+    ]
+  },
+  {
+    "id": "word_009",
+    "word": "accurate",
+    "phonetic": "/ˈækjərət/",
+    "translation": "adj. 准确的；精确的",
+    "definitions": [
+      {
+        "partOfSpeech": "adj.",
+        "meanings": ["准确的", "精确的", "正确的"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "The report provides an accurate picture of the situation.",
+        "chinese": "报告准确描述了情况。"
+      }
+    ]
+  },
+  {
+    "id": "word_010",
+    "word": "achieve",
+    "phonetic": "/əˈtʃiːv/",
+    "translation": "v. 达成；取得",
+    "definitions": [
+      {
+        "partOfSpeech": "v.",
+        "meanings": ["达成", "取得", "实现"]
+      }
+    ],
+    "examples": [
+      {
+        "english": "He achieved great success in his career.",
+        "chinese": "他在事业上取得了巨大成功。"
+      }
+    ]
+  }
+]

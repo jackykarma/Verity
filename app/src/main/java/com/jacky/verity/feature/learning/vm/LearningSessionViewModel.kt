@@ -7,6 +7,7 @@ import com.jacky.verity.algorithm.data.repository.AlgorithmResult
 import com.jacky.verity.feature.learning.data.model.SessionType
 import com.jacky.verity.feature.learning.data.model.StudyTask
 import com.jacky.verity.feature.learning.data.model.WordCardModel
+import com.jacky.verity.feature.learning.data.repository.LibraryWordRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,8 +42,23 @@ class LearningSessionViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             
-            // 获取学习任务列表
-            val taskListResult = algorithmEngine.getLearningTaskList(limit = 20)
+            // 首先从词库获取所有可用单词
+            val availableWordIds = if (wordRepository is LibraryWordRepository) {
+                wordRepository.getAllWordIds()
+            } else {
+                emptyList()
+            }
+            
+            if (availableWordIds.isEmpty()) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "没有可学习的单词"
+                )
+                return@launch
+            }
+            
+            // 获取学习任务列表（基于词库单词）
+            val taskListResult = algorithmEngine.getLearningTaskList(availableWordIds, limit = 20)
             taskListResult.fold(
                 onSuccess = { taskList ->
                     if (taskList.isNotEmpty()) {

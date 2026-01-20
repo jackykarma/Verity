@@ -8,7 +8,8 @@ import com.jacky.verity.feature.learning.vm.WordRepository
  */
 class FakeWordRepository : WordRepository {
     override suspend fun getWordCard(wordId: String): WordCardModel? {
-        // 临时返回示例数据
+        // 临时返回示例数据（即使wordId不同，也返回相同数据用于演示）
+        // 实际应用中，这里应该根据wordId从词库中查找对应的单词
         return WordCardModel(
             wordId = wordId,
             word = "painless",

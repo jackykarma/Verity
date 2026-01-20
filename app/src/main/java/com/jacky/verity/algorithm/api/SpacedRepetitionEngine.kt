@@ -29,6 +29,17 @@ interface SpacedRepetitionEngine {
     suspend fun getLearningTaskList(limit: Int = 20): AlgorithmResult<List<String>>
     
     /**
+     * 获取学习任务列表（基于词库提供的单词列表）
+     * @param availableWordIds 词库中的所有单词ID
+     * @param limit 返回数量限制
+     * @return 待学习单词列表
+     */
+    suspend fun getLearningTaskList(
+        availableWordIds: List<String>,
+        limit: Int = 20
+    ): AlgorithmResult<List<String>>
+    
+    /**
      * 更新学习状态
      * @param wordId 单词ID
      * @param quality 复习质量（0-5）

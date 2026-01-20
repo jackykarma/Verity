@@ -21,7 +21,7 @@ sealed class Result<out T, out E> {
         }
     }
     
-    inline fun <R> flatMap(transform: (T) -> Result<R, E>): Result<R, E> {
+    inline fun <R> flatMap(transform: (T) -> Result<R, @UnsafeVariance E>): Result<R, E> {
         return when (this) {
             is Success -> transform(data)
             is Error -> this

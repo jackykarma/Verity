@@ -66,6 +66,36 @@ class SpacedRepetitionEngineImpl(
         return scheduler.getLearningTaskList(limit)
     }
     
+    override suspend fun getLearningTaskList(
+        availableWordIds: List<String>,
+        limit: Int
+    ): AlgorithmResult<List<String>> = withContext(Dispatchers.IO) {
+        try {
+            // 1. 获取需要复习的单词
+            val reviewResult = scheduler.getReviewList(limit)
+            val reviewWordIds = reviewResult.getOrNull()?.map { it.wordId } ?: emptyList()
+            
+            // 2. 获取新单词（从词库中选择未学习过的）
+            val learnedWordIds = reviewWordIds.toSet()
+            val newWordIds = availableWordIds
+                .filter { it !in learnedWordIds }
+                .take(limit - reviewWordIds.size)
+            
+            // 3. 合并列表：优先复习，然后新单词
+            val taskList = (reviewWordIds + newWordIds).take(limit)
+            
+            if (taskList.isEmpty()) {
+                AlgorithmResult.success(availableWordIds.take(limit))
+            } else {
+                AlgorithmResult.success(taskList)
+            }
+        } catch (e: Exception) {
+            AlgorithmLogger.logError("getLearningTaskList", "Exception: ${e.message}", e)
+            // 出错时返回词库前N个单词
+            AlgorithmResult.success(availableWordIds.take(limit))
+        }
+    }
+    
     override suspend fun updateLearningState(
         wordId: String,
         quality: Int
