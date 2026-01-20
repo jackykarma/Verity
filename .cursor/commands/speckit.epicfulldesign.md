@@ -33,6 +33,13 @@ $ARGUMENTS
 4. **生成/更新 EPIC Full Design**：
    - 将 EPIC 总览、整体 FR/NFR、通用能力整理为统一章节
    - 汇总各 Feature 的 Story（plan.md 的 Story Breakdown）与 Task（tasks.md）
+   - **EPIC 模块目录与映射（强制，若模板包含）**：
+     - 从各 Feature 的 `plan.md:A3.2 模块拆分与职责` 汇总 Feature 模块清单
+     - 形成 EPIC Module Catalog（EPIC 级能力/子系统视角），并输出 EPIC 模块 ↔ Feature 模块映射表
+     - EPIC Full Design 只做归并/映射与暴露差异，不新增统一决策；冲突用 `TODO(Clarify)` 指向应修改的 Feature plan
+   - **EPIC 级模块 UML 一致性视图（可选但建议，若模板包含）**：
+     - 基于 EPIC Module Catalog/Mapping 与各 Feature 契约工件生成 EPIC 视角的“边界/契约级”类图与端到端时序图（成功/异常）
+     - 若无法从现有工件推导（契约缺失/边界不清），必须标注 `TODO(Clarify)` 指向应补齐的 Feature plan（A3.2/A3.4/B4）
    - 对跨 Feature 冲突与缺口标注 `TODO(Clarify)` 并指向来源文档
 
 5. **写入**：保存到 `specs/epics/<EPIC-xxx-...>/epic-full-design.md`
