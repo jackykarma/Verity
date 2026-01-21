@@ -25,13 +25,41 @@
 
 ## Plan-A：工程决策 & 风险评估（必须量化）
 
+### A0. 领域概念（Domain Concepts / Glossary，必须）
+
+> **目的**：统一命名与语义口径，成为后续“架构图/流程图/类图/时序图/接口契约”的**命名权威**。
+>
+> 要求：
+> - 只写本 Feature 涉及或新引入的领域概念；已有概念可引用来源（其他 Feature/EPIC/已有模块文档）
+> - 每个概念必须给出：名称、定义、关键属性/状态、与其他概念的关系（可用表格或简易概念图）
+
+#### A0.1 领域概念词汇表（必须）
+
+| 概念（中文） | 名称（英文/代码名） | 定义（一句话） | 关键属性/状态（Top3） | 不变量/约束 | 关联概念 |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
+
+#### A0.2 概念关系图（推荐，可选）
+
+```plantuml
+@startuml
+!theme mars
+
+' 用“概念”而非“实现类”画关系；必要时用注释表达状态机/约束
+class ConceptA
+class ConceptB
+ConceptA --> ConceptB : relates_to
+
+@enduml
+```
+
 ### A1. 技术选型（候选方案对比 + 决策理由）
 
 | 决策点 | 候选方案 | 优缺点 | 约束/风险 | 决策 | 决策理由 |
 |---|---|---|---|---|---|
 | [例如：本地存储] | A / B / C |  |  |  |  |
 
-### A2. Feature 全景架构（边界 + 外部依赖）
+### A2. Feature 全景架构（0 层框架图：边界 + 外部依赖）
 
 > **目的**：一张图展示本 Feature 的全貌——它在系统中的位置、与外部的关系、内部的核心组件。
 >
@@ -44,32 +72,34 @@
 
 > 一张图展示：Feature 边界、内部核心组件、外部依赖、数据/控制流向
 
-```mermaid
-flowchart TB
-  %% TODO: 用真实名称替换
-  subgraph Feature["本 Feature 边界"]
-    direction TB
-    UI[UI 层]
-    Logic[业务逻辑层]
-    Data[数据层]
-  end
-  
-  subgraph Existing["复用已有模块"]
-    Auth[认证模块]
-    Logger[日志模块]
-  end
-  
-  subgraph External["外部依赖"]
-    API[后端 API]
-    OS[系统能力]
-  end
-  
-  UI --> Logic
-  Logic --> Data
-  Logic --> Auth
-  Logic --> Logger
-  Data --> API
-  Logic --> OS
+```plantuml
+@startuml
+!theme mars
+
+package "本 Feature 边界" {
+  component [UI 层] as UI
+  component [业务逻辑层] as Logic
+  component [数据层] as Data
+}
+
+package "复用已有模块" {
+  component [认证模块] as Auth
+  component [日志模块] as Logger
+}
+
+package "外部依赖" {
+  component [后端 API] as API
+  component [系统能力] as OS
+}
+
+UI --> Logic
+Logic --> Data
+Logic --> Auth
+Logic --> Logger
+Data --> API
+Logic --> OS
+
+@enduml
 ```
 
 #### A2.1.1 架构设计说明（必须：理由/决策/思考）
@@ -84,11 +114,11 @@ flowchart TB
 
 #### A2.2 外部依赖清单（必须）
 
-| 依赖项 | 类型 | 提供的能力 | 通信方式 | 故障模式 | 我方策略 |
-|--------|------|-----------|----------|----------|----------|
-| [后端 API] | 内部服务 | 数据读写 | HTTPS | 超时/限流/不可用 | 重试+降级 |
-| [系统能力] | OS/SDK | 权限/存储 | 系统 API | 权限拒绝/不支持 | 提示+引导 |
-| [已有模块] | 内部模块 | 认证/日志 | 函数调用 | — | — |
+| 依赖项 | 类型 | 提供方（团队名称） | 提供的能力 | 通信方式 | 故障模式 | 我方策略 |
+|--------|------|------------------|-----------|----------|----------|----------|
+| [后端 API] | 内部服务 | [团队名称] | 数据读写 | HTTPS | 超时/限流/不可用 | 重试+降级 |
+| [系统能力] | OS/SDK | [系统/平台] | 权限/存储 | 系统 API | 权限拒绝/不支持 | 提示+引导 |
+| [已有模块] | 内部模块 | [团队名称] | 认证/日志 | 函数调用 | — | — |
 
 #### A2.3 通信与交互约束（必须）
 
@@ -97,7 +127,7 @@ flowchart TB
 - **错误处理**：统一错误类型、用户提示策略
 - **数据一致性**：强一致/最终一致、补偿策略（如适用）
 
-### A3. Feature 内部设计（组件拆分 + 静态结构 + 动态协作）
+### A3. Feature 内部设计（1 层设计：组件拆分 + 静态结构 + 动态协作）
 
 > **目的**：展示 Feature 内部"长什么样"——组件划分、类/接口关系、协作方式。
 >
@@ -106,7 +136,7 @@ flowchart TB
 > - 必须产出：**组件清单 + 全局类图 + 组件协作说明**
 > - 每个组件的详细设计（类图/时序图/异常）在 A3.4 细化
 
-#### A3.0 整体设计说明（必须：关键点/决策/思考，先于 A3.1）
+#### A3.0 整体设计说明（必须：关键点/决策/思考）
 
 > **目的**：先把整体方案“讲清楚”，再进入组件级拆分与细化，确保评审从整体到局部理解一致。
 >
@@ -115,14 +145,66 @@ flowchart TB
 > - 与 A2（全景架构）保持一致：A2 讲外部边界与依赖，这里讲内部方案与协作
 > - 所有结论必须可追溯：引用到 spec/plan 的决策点（必要时写 `TODO(Clarify)`）
 
-##### A3.0.1 整体设计关键点（必须）
+##### A3.0.1 Feature 内部总体框架图（1 层组件图，必须）
+
+> **目的**：用“组件图”把 Feature 内部设计**一图讲清楚**：组件边界、依赖方向（静态结构）与关键交互（动态协作）。
+>
+> **硬性要求（不可省略）**：
+> - 图中必须覆盖 `A3.1 组件清单` 的**全部组件**（至少用同名节点表示）
+> - **静态结构**：用**实线箭头**（`-->`）表示依赖/调用方向（谁依赖谁）
+> - **动态协作**：用**虚线箭头**（`..>`）表示事件/回调/异步消息（如适用；若纯同步，可省略虚线但要说明原因）
+> - 图中必须标注**跨层约束**（例如：UI 不得直接依赖 DataSource）
+>
+> 说明：使用 PlantUML Component Diagram 绘制，主题为 mars。
+
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 用真实组件名替换
+package "UI 层" {
+  component [UI/View] as UI1
+  component [ViewModel/Presenter] as VM
+}
+
+package "Domain/UseCase 层" {
+  component [UseCase/Interactor] as UC
+  component [Policy/Strategy（可选）] as Policy
+}
+
+package "Data 层" {
+  component [Repository] as Repo
+  component [DataSource（Local/Remote）] as DS
+  component [Mapper/Converter（可选）] as Mapper
+}
+
+' 静态依赖（同步调用）- 实线箭头
+UI1 --> VM
+VM --> UC
+UC --> Repo
+Repo --> DS
+Repo --> Mapper
+
+' 动态协作（异步/事件）- 虚线箭头
+DS ..> Repo : dataChanged/event
+Repo ..> VM : Flow/Callback
+
+' 跨层约束标注（禁止依赖）
+note right of UI1
+  UI 不得直接依赖 DataSource
+end note
+
+@enduml
+```
+
+##### A3.0.2 整体设计关键点（必须）
 
 - **关键点 1**：[例如：分层清晰、依赖单向、可测试]
 - **关键点 2**：[例如：弱网/离线优先，失败可降级]
 - **关键点 3**：[例如：并发与取消语义明确，避免重入/竞态]
 - **关键点 4**：[例如：可观测性最小闭环（日志/埋点/告警）]
 
-##### A3.0.2 关键设计决策清单（必须）
+##### A3.0.3 关键设计决策清单（必须）
 
 | 决策点 | 候选方案 | 决策 | 决策理由 | 影响范围（组件/接口/数据） | 引用来源 |
 |---|---|---|---|---|---|
@@ -130,14 +212,14 @@ flowchart TB
 | [例如：缓存策略] | A/B/C |  |  |  | plan.md:A? |
 | [例如：错误体系] | A/B/C |  |  |  | plan.md:A3.4 |
 
-##### A3.0.3 核心协作策略（必须）
+##### A3.0.4 核心协作策略（必须）
 
 - **分层与依赖方向**：[UI → Domain → Data；跨层只能通过接口/契约]
 - **线程/并发模型**：[主线程/IO；互斥/队列/去重；取消语义]
 - **错误与失败传播**：[错误类型/错误码体系、重试/降级/提示、日志字段]
 - **数据一致性与补偿**：[强一致/最终一致；补偿/回滚/重放（如适用）]
 
-##### A3.0.4 主要风险与权衡（必须）
+##### A3.0.5 主要风险与权衡（必须）
 
 - **权衡点**：[例如：实时性 vs 功耗]
 - **已知风险**：[例如：外部依赖 SLA 不稳定 → 需降级]（详见 A4 风险与消解策略）
@@ -163,43 +245,43 @@ flowchart TB
 > - **依赖方向必须正确**：上层依赖下层；禁止“下层反依赖上层”（除非通过接口回调且在图中显式体现）
 > - **与动态图互校**：端到端时序图/流程图中出现的参与者与关键调用，必须在此类图中找到对应类/接口
 >
-> Mermaid `classDiagram` 提示：
+> PlantUML 类图提示：
 > - 成员变量：`+fieldName: Type`（必要时用注释补充线程/生命周期约束）
 > - 方法：`+methodName(param: Type): ReturnType`
 > - 接口：`<<interface>>`；抽象类：`<<abstract>>`；密封类/错误体系可用 `<<sealed>>` 注释表达
 
-```mermaid
-classDiagram
-  %% TODO: 画清 Feature 的全局类结构
-  %% 建议分层：UI/ViewModel → UseCase/Domain → Repository → DataSource
-  %% 标注：接口用 <<interface>>，抽象类用 <<abstract>>
-  
-  class FeatureViewModel {
-    +state: StateFlow
-    +onAction(action)
-  }
-  
-  class FeatureUseCase {
-    <<interface>>
-    +execute(params): Result
-  }
-  
-  class FeatureRepository {
-    <<interface>>
-    +getData(): Flow
-    +saveData(data)
-  }
-  
-  class FeatureError {
-    <<sealed>>
-    +NetworkError
-    +ValidationError
-    +UnknownError
-  }
-  
-  FeatureViewModel --> FeatureUseCase
-  FeatureUseCase --> FeatureRepository
-  FeatureUseCase --> FeatureError
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 画清 Feature 的全局类结构
+' 建议分层：UI/ViewModel → UseCase/Domain → Repository → DataSource
+
+class FeatureViewModel {
+  + state: StateFlow
+  + onAction(action)
+}
+
+interface FeatureUseCase {
+  + execute(params): Result
+}
+
+interface FeatureRepository {
+  + getData(): Flow
+  + saveData(data)
+}
+
+class FeatureError <<sealed>> {
+  + NetworkError
+  + ValidationError
+  + UnknownError
+}
+
+FeatureViewModel --> FeatureUseCase
+FeatureUseCase --> FeatureRepository
+FeatureUseCase --> FeatureError
+
+@enduml
 ```
 
 #### A3.2.1 关键类/接口清单（必须：与类图互校）
@@ -223,51 +305,58 @@ classDiagram
 
 #### A3.3.1 Feature 端到端时序图集（必须：全景动态协作，覆盖全部流程与异常）
 
-> **目的**：给评审一个“端到端动态全景”的全集视图：**本 Feature 设计里的所有关键时序图**（正常 + 异常）都必须在这里出现，而不是只画一两张示意图。
+> **目的**：给评审一个“端到端动态全景”的全集视图：本 Feature 设计里的每个关键流程都必须对应一张“端到端全景时序图”。
 >
 > **硬性要求（不可省略）**：
 > - **必须是 Feature 级全景**：每张时序图都要覆盖 UI→Domain→Data→External 的完整链路（不要只画某个组件内部）
 > - **必须覆盖全部关键流程**：每个关键用户流程/系统流程都要有对应端到端时序图（多流程→多时序图）
-> - **必须覆盖全部关键异常**：每个流程都要用 `alt/else` 覆盖关键失败模式（至少：权限/参数校验/超时/弱网/限流/不可用/数据损坏/并发重入/取消）；必要时拆分为多张“异常专用时序图”
+> - **必须覆盖全部关键异常（同图）**：每个流程都必须在**同一张**时序图中用 `alt/else` 覆盖关键失败模式（至少：权限/参数校验/超时/弱网/限流/不可用/数据损坏/并发重入/取消）；**不得**把“成功/异常”拆成两张图，也不得把异常拆成多张图
 > - **互校规则**：
->   - 流程图（A3.3.2）里每个流程必须能映射到这里的至少一张“成功端到端时序图”
+>   - 流程图（A3.3.2）里每个流程必须能映射到这里对应的那张“端到端全景时序图”
 >   - 异常清单（A3.4 组件 / Story）里的每个关键异常都必须能映射到这里某张时序图的 `alt/else` 分支（或反向亦然）
 
 ##### A3.3.1.0 时序图清单与覆盖矩阵（必须）
 
-| Seq ID | 对应流程（A3.3.2） | 名称 | 类型（成功/异常/补偿/回滚） | 覆盖的关键异常（EX-xxx） | 备注 |
+| Seq ID | 对应流程（A3.3.2） | 名称 | 覆盖范围（正常+异常） | 覆盖的关键异常（EX-xxx） | 备注 |
 |---|---|---|---|---|---|
-| SEQ-001 | 流程 1 | [流程 1 - 成功] | 成功 |  |  |
-| SEQ-002 | 流程 1 | [流程 1 - 异常] | 异常 | EX-001/EX-002/... |  |
+| SEQ-001 | 流程 1 | [流程 1 - 端到端全景时序] | 正常 + 全部关键异常（alt/else） | EX-001/EX-002/... |  |
 
-##### A3.3.1.1 时序图模板 - 端到端成功链路（每个流程至少 1 张）
+##### 时序图模板 - 端到端全景（每个流程 1 张，必须同图含正常+异常）
 
-```mermaid
-sequenceDiagram
-  %% TODO: [流程名] 端到端 Happy Path（把标题/参与者/调用替换成真实内容）
-  %% 参与者建议（按实际裁剪/补充）：User/UI, ViewModel/Presenter, UseCase, Repository, DataSource, External API/OS, Logger/Analytics
-  %% 要求：体现返回值/状态更新点/线程(主线程/IO)/缓存命中与否（如适用）
-  participant TODO_ReplaceMe
-  TODO_ReplaceMe->>TODO_ReplaceMe: TODO（用真实调用替换/删除此占位）
-```
+```plantuml
+@startuml
+!theme mars
 
-##### A3.3.1.2 时序图模板 - 端到端异常链路（每个流程至少 1 张；复杂则多张）
+' TODO: [流程名] 端到端全景（把标题/参与者/调用替换成真实内容）
+' 参与者建议（按实际裁剪/补充）：User/UI, ViewModel/Presenter, UseCase, Repository, DataSource, External API/OS, Logger/Analytics
+' 要求：
+' - 同图包含正常链路 + 全部关键异常分支（用 alt/else）
+' - 每个异常分支写清“对策”（重试/退避/降级/提示/回滚/补偿/埋点/告警）
+' - 体现返回值/状态更新点/线程(主线程/IO)/缓存命中与否（如适用）
 
-```mermaid
-sequenceDiagram
-  %% TODO: [流程名] 端到端 Failure Paths（把标题/参与者/分支替换成真实内容）
-  %% 要求：用 alt/else 覆盖全部关键异常；每个分支写清“对策”（重试/降级/提示/回滚/补偿/埋点）
-  participant TODO_ReplaceMe
-  TODO_ReplaceMe-->>TODO_ReplaceMe: TODO（用 alt/else 真实异常分支替换/删除此占位）
-```
+participant "UI/ViewModel" as UI
+participant "FeatureService" as Service
+participant "Repository" as Repo
+participant "ExternalDependency" as External
+participant "Logger/Analytics" as Logger
 
-##### A3.3.1.3（可选）异常专用时序图 - 按异常类型拆分（推荐：复杂异常/补偿/回滚/多阶段重试）
+UI -> Service: doSomething(input)
+alt 输入非法/前置条件不满足
+  Service -> Logger: error("...", InvalidInput, {...})
+  Service --> UI: Failure(InvalidInput)
+else 外部依赖超时/限流/不可用
+  Service -> External: call(...)
+  External --> Service: error/timeout
+  Service -> Logger: error("...", ExternalFailed, {...})
+  Service --> UI: Success(fallback) ' 降级/兜底（按决策）
+else 正常
+  Service -> Repo: getOrLoad(...)
+  Repo --> Service: data
+  Service -> Logger: event("...", {...})
+  Service --> UI: Success(result)
+end
 
-```mermaid
-sequenceDiagram
-  %% TODO: [异常类型] 专用端到端时序（例如：鉴权失败/限流/超时重试/补偿回滚/取消语义）
-  participant TODO_ReplaceMe
-  TODO_ReplaceMe-->>TODO_ReplaceMe: TODO（用真实分支替换/删除此占位）
+@enduml
 ```
 
 #### A3.3.2 Feature 关键流程（流程图，必须）
@@ -276,22 +365,37 @@ sequenceDiagram
 >
 > 要求：
 > - 每个关键流程一张图，覆盖正常 + **全部关键异常分支**
-> - 若异常分支复杂（例如多级重试/回滚/补偿/多入口重入），需额外补充 **异常流程图**（按异常类型拆分多张亦可）
+> - **不得**将异常分支拆分为“异常专用流程图”；复杂异常也必须放在同一张流程图中（可用子流程/注释/分组表达，但仍需同图）
 > - 流程图侧重"做什么"（业务视角），时序图侧重"怎么调用"（技术视角）
 
 ##### 流程 1：[流程名称]
 
-```mermaid
-flowchart TD
-  Start([用户触发]) --> Precheck{前置条件?}
-  Precheck -->|不满足| Block[提示/引导] --> End([结束])
-  Precheck -->|满足| Process[执行核心逻辑]
-  
-  Process -->|成功| Success[更新UI/存储] --> End
-  Process -->|失败| Error{可重试?}
-  
-  Error -->|是| Retry[重试] --> Process
-  Error -->|否| Fallback[降级/提示] --> End
+```plantuml
+@startuml
+!theme mars
+
+start
+:用户触发;
+if (前置条件?) then (不满足)
+  :提示/引导;
+  stop
+else (满足)
+  :执行核心逻辑;
+  if (成功?) then (是)
+    :更新UI/存储;
+    stop
+  else (否)
+    if (可重试?) then (是)
+      :重试;
+      :执行核心逻辑;
+    else (否)
+      :降级/提示;
+      stop
+    endif
+  endif
+endif
+
+@enduml
 ```
 
 ###### 流程 1 - 异常分支映射（必须）
@@ -304,17 +408,22 @@ flowchart TD
 
 ##### 流程 2：[流程名称]
 
-```mermaid
-flowchart TD
-  Start2([触发]) --> End2([结束])
+```plantuml
+@startuml
+!theme mars
+
+start
+:触发;
+stop
+
+@enduml
 ```
 
 #### A3.4 组件详细设计（每个组件必须）
 
 > **要求**：对 A3.1 中的每个组件，产出以下内容：
 > - **组件类图**：该组件内部的类/接口细节
-> - **主流程时序图**：成功路径的调用时序
-> - **异常流程时序图**：失败路径（用 alt/else 覆盖关键异常）
+> - **组件全景时序图（同图）**：同一张 PlantUML 时序图中覆盖正常 + 关键异常（用 `alt/else`），不得拆分成功/异常两张图
 > - **异常清单表**：与时序图互校，确保无遗漏
 
 ##### 组件：[组件名]
@@ -328,32 +437,42 @@ flowchart TD
 
 ###### 组件类图（必须）
 
-```mermaid
-classDiagram
-  %% TODO: 画清该组件内部的类/接口
-  class TODO_ComponentReplaceMe {
-    +placeholder: String
-    +doSomething(): Unit
-  }
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 画清该组件内部的类/接口
+class TODO_ComponentReplaceMe {
+  + placeholder: String
+  + doSomething(): Unit
+}
+
+@enduml
 ```
 
-###### 时序图 - 成功链路（必须）
+###### 时序图 - 全景（同图含正常+异常，必须）
 
-```mermaid
-sequenceDiagram
-  %% TODO: 主成功链路
-  %% 要求：体现调用顺序、返回值、线程切换点
-  participant TODO_ReplaceMe
-  TODO_ReplaceMe->>TODO_ReplaceMe: TODO（用真实调用替换/删除此占位）
-```
+```plantuml
+@startuml
+!theme mars
 
-###### 时序图 - 异常链路（必须）
+' TODO: 在同一张图里用 alt/else 覆盖正常 + 关键异常（不得拆分为两张图）
+participant Caller
+participant Component
+participant Dependency
 
-```mermaid
-sequenceDiagram
-  %% TODO: 用 alt/else 覆盖关键异常
-  participant TODO_ReplaceMe
-  TODO_ReplaceMe-->>TODO_ReplaceMe: TODO（用 alt/else 真实异常分支替换/删除此占位）
+Caller -> Component: call(...)
+alt 正常
+  Component -> Dependency: doWork(...)
+  Dependency --> Component: ok
+  Component --> Caller: Success(...)
+else 依赖失败/超时/取消/数据异常
+  Component -> Dependency: doWork(...)
+  Dependency --> Component: error/timeout
+  Component --> Caller: Failure(...)
+end
+
+@enduml
 ```
 
 ###### 异常清单（必须，与时序图互校）
@@ -395,6 +514,14 @@ sequenceDiagram
 - **生命周期**：[前后台切换/旋转/进程被杀/恢复等]
 - **并发**：[多线程/协程/并发写/竞态等]
 - **用户行为**：[快速连点/断网/弱网/权限拒绝等]
+
+#### A5.1 场景 → 应对措施对照表（必须）
+
+> 目的：把“枚举”落到“可执行对策”，并与 A3.3.2 / A3.3.1 / A3.4 的异常分支互校。
+
+| 场景ID | 场景类别 | 触发条件（可复现） | 影响 | 预期行为（对用户/对系统） | 技术对策（重试/退避/降级/回滚/补偿/去重/限流） | 观测信号（日志/埋点/指标） | 映射（流程/时序/异常ID） |
+|---|---|---|---|---|---|---|---|
+| SC-001 | 数据 |  |  |  |  |  | 流程1 / SEQ-001 / EX-001 |
 
 ### A6. 算法评估（如适用）
 
@@ -650,35 +777,54 @@ android/ 或 ios/
 
 #### 4) 静态结构设计（类图/关系图）
 
-```mermaid
-classDiagram
-  %% TODO: 画清本 Story 新增/修改的核心类、接口、依赖方向
-  %% 要求：至少包含 UI/ViewModel/UseCase/Repository/DataSource(若有)/Error/Entity
-  class TODO_StoryReplaceMe {
-    +placeholder: String
-    +execute(): Unit
-  }
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 画清本 Story 新增/修改的核心类、接口、依赖方向
+' 要求：至少包含 UI/ViewModel/UseCase/Repository/DataSource(若有)/Error/Entity
+class TODO_StoryReplaceMe {
+  + placeholder: String
+  + execute(): Unit
+}
+
+@enduml
 ```
 
 #### 5) 动态交互设计（时序图）
 
-##### 5.1 主成功链路（Happy Path）
+##### 时序图（同图含正常 + 全部关键异常，必须）
 
-```mermaid
-sequenceDiagram
-  %% TODO: 主链路时序
-  %% 要求：体现调用顺序、返回值、线程/协程上下文（主线程/IO）、关键状态更新点
-  participant TODO_ReplaceMe
-  TODO_ReplaceMe->>TODO_ReplaceMe: TODO（用真实调用替换/删除此占位）
-```
+```plantuml
+@startuml
+!theme mars
 
-##### 5.2 关键异常链路（Failure Paths，必须覆盖全部关键异常）
+' TODO: 在同一张图里用 alt/else 覆盖正常链路 + 全部关键异常分支（不得拆分成功/异常两张图）
+' 要求：体现调用顺序、返回值、线程/协程上下文（主线程/IO）、关键状态更新点、以及每个异常分支的对策（重试/降级/回滚/补偿/提示/埋点）
+participant "UI/ViewModel" as UI
+participant "ViewModel/Presenter" as VM
+participant "UseCase" as UC
+participant "Repository" as Repo
+participant "DataSource/External" as DS
 
-```mermaid
-sequenceDiagram
-  %% TODO: 用 alt/else 覆盖关键异常：权限/超时/IO失败/数据损坏/重复/并发重入/取消 等
-  participant TODO_ReplaceMe
-  TODO_ReplaceMe-->>TODO_ReplaceMe: TODO（用 alt/else 真实异常分支替换/删除此占位）
+UI -> VM: onAction(...)
+VM -> UC: execute(...)
+UC -> Repo: getOrDo(...)
+alt 正常
+  Repo -> DS: call(...)
+  DS --> Repo: ok
+  Repo --> UC: Success(data)
+  UC --> VM: Success(result)
+  VM --> UI: render(state)
+else 超时/限流/不可用/取消/数据损坏/并发重入...
+  Repo -> DS: call(...)
+  DS --> Repo: timeout/error
+  Repo --> UC: Failure(...)
+  UC --> VM: Success(fallback) ' 或 Failure（按决策）
+  VM --> UI: render(fallback/error)
+end
+
+@enduml
 ```
 
 #### 6) 异常场景矩阵（无遗漏清单）
@@ -688,8 +834,8 @@ sequenceDiagram
 | EX-001 |  |  |  | 是/否 |  |  |  | NFR-OBS-??? |
 
 > 校验规则（必须通过）：
-> - 上表每一条异常都能在"时序图-异常链路"中找到对应分支；
-> - "时序图-异常链路"中的每个失败分支也必须在上表中有明确对策。
+> - 上表每一条异常都能在“时序图（同图含正常+异常）”中找到对应 `alt/else` 分支；
+> - 时序图中的每个失败分支也必须在上表中有明确对策。
 
 #### 7) 并发 / 生命周期 / 资源管理
 
