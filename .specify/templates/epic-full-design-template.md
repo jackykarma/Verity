@@ -48,6 +48,8 @@ description: "EPIC Full Design 技术方案模板（整合多个 Feature 的 Pla
 ```mermaid
 flowchart LR
   %% TODO(Clarify): 若各 Feature 的 0 层图不一致，需先在对应 plan.md 对齐
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时用汇总后的真实图替换/删除占位
+  EpicSystem[TODO: EPIC System] --> External[TODO: External System]
 ```
 
 ### 2.3 部署视图（EPIC 级视图）
@@ -55,6 +57,8 @@ flowchart LR
 ```mermaid
 flowchart TB
   %% TODO(Clarify): 若各 Feature 的部署拓扑不一致，需先在对应 plan.md 对齐
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时用汇总后的真实图替换/删除占位
+  ClusterA[TODO: Cluster/Device A] --> ClusterB[TODO: Cluster/Service B]
 ```
 
 ### 2.4 通信与交互方式汇总（跨 Feature）
@@ -75,12 +79,12 @@ flowchart TB
 > 目标：从 EPIC 视角定义“模块/能力”的全局目录，并把它与各 Feature 的模块拆分建立明确映射，支持端到端一致性评审。
 >
 > 概念区分（必须遵守）：
-> - **Feature 模块**：来自各 Feature 的 `plan.md:A3.2 模块拆分与职责`（实现落码视角）。
+> - **Feature 模块/组件**：来自各 Feature 的 `plan.md:A3.1 组件清单与职责`（实现落码视角，目录权威）。
 > - **EPIC 模块**：EPIC 级别的能力/子系统视角，用于跨 Feature 对齐边界与契约；通常由多个 Feature 模块**归并/抽象**而来。
 >
 > 规则：
 > - 本节只做“汇总、归并、映射、暴露差异”，不得新增技术决策；若归并规则存在争议，标注 `TODO(Clarify)` 并指向应修改的 Feature plan。
-> - 所有引用必须指向来源 Feature 的 `plan.md`（优先：A3.2/A3.4/B4）或 `contracts/` 工件。
+> - 所有引用必须指向来源 Feature 的 `plan.md`（优先：A3.1/A3.4/B4）或 `contracts/` 工件。
 
 #### 3.0.1 EPIC 模块目录（Catalog）
 
@@ -90,11 +94,11 @@ flowchart TB
 
 #### 3.0.2 EPIC 模块 ↔ Feature 模块映射（Module Mapping）
 
-> 要求：将每个 Feature 的 `A3.2` 模块**逐行映射**到某个 EPIC 模块；若无法映射，必须标注原因与 `TODO(Clarify)`。
+> 要求：将每个 Feature 的 `A3.1` 组件/模块**逐行映射**到某个 EPIC 模块；若无法映射，必须标注原因与 `TODO(Clarify)`。
 
-| EPIC 模块 | 来源 Feature | Feature 模块（来自 FEAT plan.md:A3.2） | 关系类型（Owned-by/Consumed-by/Adapter/Shared） | 引用来源（A3.2/A3.4/B4） | 备注/差异 |
+| EPIC 模块 | 来源 Feature | Feature 模块/组件（来自 FEAT plan.md:A3.1） | 关系类型（Owned-by/Consumed-by/Adapter/Shared） | 引用来源（A3.1/A3.4/B4） | 备注/差异 |
 |---|---|---|---|---|---|
-| [EPIC 模块A] | FEAT-xxx | [模块名] | Owned-by | FEAT-xxx plan.md:A3.2 / A3.4 |  |
+| [EPIC 模块A] | FEAT-xxx | [模块名] | Owned-by | FEAT-xxx plan.md:A3.1 / A3.4 |  |
 
 #### 3.0.3 EPIC 模块级 UML 总览（全局查看入口，只引用 Feature Plan）
 
@@ -112,7 +116,7 @@ flowchart TB
 >
 > 规则（严格）：
 > - 本节是**一致性视图**：必须完全基于 3.0.1/3.0.2 的 Catalog/Mapping 与各 Feature 的 plan/契约工件推导；不得引入新的模块边界决策。
-> - 若无法从现有 Feature 工件推导出该视图（例如契约缺失/边界不清），必须标注 `TODO(Clarify)` 并指向应补齐的 Feature plan（优先：A3.2/A3.4/B4）。
+> - 若无法从现有 Feature 工件推导出该视图（例如契约缺失/边界不清），必须标注 `TODO(Clarify)` 并指向应补齐的 Feature plan（优先：A3.1/A3.4/B4）。
 > - 视图粒度：只画**模块边界/接口契约/关键数据流**，不下沉到 Feature 内部实现类细节（那属于各 Feature 的 plan.md）。
 
 ##### EPIC 模块级类图（静态视图）
@@ -121,6 +125,11 @@ flowchart TB
 classDiagram
   %% TODO: 以 EPIC 模块为中心画边界与契约（接口/数据），不画实现细节
   %% 若存在冲突，标注 TODO(Clarify) 并指向来源 Feature plan
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时替换/删除占位
+  class EPIC_ModuleReplaceMe {
+    +contract: String
+    +invoke(input): Output
+  }
 ```
 
 ##### EPIC 端到端时序图 - 成功链路（动态视图）
@@ -129,6 +138,8 @@ classDiagram
 sequenceDiagram
   %% TODO: 选择 1~2 条核心端到端用户旅程/系统链路，按 EPIC 模块标注交互
   %% 要求：每一步标注所属 EPIC 模块与来源 Feature（引用）
+  participant EPIC_ModuleReplaceMe
+  EPIC_ModuleReplaceMe->>EPIC_ModuleReplaceMe: TODO（替换为真实交互）
 ```
 
 ##### EPIC 端到端时序图 - 异常链路（动态视图）
@@ -137,6 +148,8 @@ sequenceDiagram
 sequenceDiagram
   %% TODO: 用 alt/else 覆盖关键异常（跨模块失败传播、降级、重试、兜底、可观测性信号）
   %% 若异常策略不一致，必须在 3.2/3.4 的一致性问题表中体现，并指向对应 Feature plan 修正
+  participant EPIC_ModuleReplaceMe
+  EPIC_ModuleReplaceMe-->>EPIC_ModuleReplaceMe: TODO（替换为真实异常分支）
 ```
 
 ### 3.1 1 层框架图（EPIC 级一致性视图）
@@ -144,6 +157,8 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   %% TODO(Clarify): 若各 Feature 的 1 层框架图不一致，需先在对应 plan.md 对齐
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时替换/删除占位
+  UI[TODO: UI] --> Domain[TODO: Domain] --> Data[TODO: Data]
 ```
 
 ### 3.2 模块与接口协议一致性问题（汇总）
@@ -157,6 +172,67 @@ flowchart LR
 | 关键模块 | 涉及 Feature | 设计要点（引用来源） | 策略/取舍（引用来源） | NFR 责任（性能/功耗/内存/安全/可观测性） | 风险 |
 |---|---|---|---|---|---|
 |  |  |  |  |  |  |
+
+### 3.3.1 关键模块设计（EPIC 模块级：思想/决策/原理 + 模块全景类图 + 模块时序图 + 关键流程）
+
+> 目标：在 EPIC 视角下，把“关键模块/能力”的设计说明写到可评审、可对齐的粒度。
+>
+> **必须包含（不可省略）**：
+> - **模块设计思想 / 关键设计决策 / 原理说明**（边界、契约、依赖方向、可演进性）
+> - **模块全景类图（EPIC 模块级）**：以“模块边界与契约（接口/数据）”为中心，不下沉到 Feature 内部实现类
+> - **模块时序图（EPIC 模块级）**：正常链路 + 异常链路（必要时拆多张异常专用时序图）
+> - **关键流程（EPIC 模块视角）**：可包含多个；每个流程必须同图覆盖正常 + 全部关键异常分支，并标注跨 Feature 边界点
+>
+> 规则：EPIC Full Design **不得新增决策**；若无法从现有 Feature 工件推导，必须写 `TODO(Clarify)` 并指向应补齐的 Feature/Plan（优先：各 Feature 的 `plan.md:A3.1/A3.2/A3.3.1/A3.3.2/A3.4` 与 `contracts/`）。
+
+#### EPIC 模块：[模块名]
+
+- **模块定位/边界**：
+- **模块设计思想**：TODO(Clarify): 引用 FEAT-xxx plan/full-design...
+- **关键设计决策**：TODO(Clarify): 引用 FEAT-xxx plan/full-design...
+- **原理/机制说明**：TODO(Clarify): 引用 FEAT-xxx plan/full-design...
+- **提供的接口/契约**：引用 `plan.md:B4.1` / `contracts/`
+- **依赖的接口/契约**：引用 `plan.md:B4.2` / `contracts/`
+- **失败与降级策略**：跨 Feature 一致性差异需显式标注
+- **可观测性信号**：关键日志/埋点/指标（引用来源）
+- **NFR 责任与预算**：PERF/POWER/MEM/SEC/OBS/REL（引用来源）
+
+##### 模块全景类图（EPIC 模块级，必须）
+
+```mermaid
+classDiagram
+  %% TODO: 画模块边界与契约（接口/数据），不画实现细节
+  class EPIC_ModuleReplaceMe {
+    +contract: String
+    +invoke(input): Output
+  }
+```
+
+##### 模块时序图 - 正常链路（必须）
+
+```mermaid
+sequenceDiagram
+  %% TODO: 正常端到端交互（标注 EPIC 模块 + 来源 Feature 引用）
+  participant EPIC_ModuleReplaceMe
+  EPIC_ModuleReplaceMe->>EPIC_ModuleReplaceMe: TODO
+```
+
+##### 模块时序图 - 异常链路（必须）
+
+```mermaid
+sequenceDiagram
+  %% TODO: 用 alt/else 覆盖关键异常（限流/超时/不可用/取消/补偿回滚等）
+  participant EPIC_ModuleReplaceMe
+  EPIC_ModuleReplaceMe-->>EPIC_ModuleReplaceMe: TODO
+```
+
+##### 模块关键流程（必须：可多个；每个流程同图含正常+异常）
+
+```mermaid
+flowchart TD
+  %% TODO: EPIC 模块视角关键流程（同图含正常+异常），标注跨 Feature 边界点与外部依赖
+  Start([Start]) --> End([End])
+```
 
 ### 3.4 数据模型与存储/契约一致性（跨 Feature）（汇总）
 

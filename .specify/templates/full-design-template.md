@@ -56,6 +56,8 @@ description: "Full Design 技术方案文档模板（整合 Plan + Story + Task�
 ```mermaid
 flowchart LR
   %% 直接复用 plan.md 的 0 层图；不得引入新模块决策
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时用 plan.md 图替换/删除占位
+  TODO0[TODO: System] --> TODO1[TODO: External]
 ```
 
 ### 2.3 部署视图（来自 plan.md）
@@ -63,6 +65,8 @@ flowchart LR
 ```mermaid
 flowchart TB
   %% 直接复用 plan.md 的部署视图；不得引入新模块/新拓扑决策
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时用 plan.md 图替换/删除占位
+  NodeA[TODO: Deployment A] --> NodeB[TODO: Deployment B]
 ```
 
 ### 2.4 通信与交互说明（来自 plan.md）
@@ -83,11 +87,15 @@ flowchart TB
 ```mermaid
 flowchart LR
   %% 直接复用 plan.md 的 1 层框架图；不得引入新模块决策
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时用 plan.md 图替换/删除占位
+  UI[TODO: UI] --> Domain[TODO: Domain] --> Data[TODO: Data]
 ```
 
-### 3.2 模块拆分与职责（来自 plan.md）
+### 3.2 组件/模块拆分与职责（来自 plan.md）
 
-| 模块 | 职责 | 输入/输出 | 依赖 | 约束 |
+> 来源对齐：以 `plan.md:A3.1 组件清单与职责` 为准（若你的 plan 仍使用“模块”命名，也可沿用，但必须与 plan 表格逐行一致）。
+
+| 组件/模块 | 职责 | 输入/输出 | 依赖 | 约束 |
 |---|---|---|---|---|
 |  |  |  |  |  |
 
@@ -98,15 +106,25 @@ flowchart LR
 - **接口协议**：数据结构、版本策略、错误码、重试/幂等约束（优先引用 plan.md:Plan-B:B4.1/B4.2 与 `contracts/`）
 - **并发与线程模型**：
 
-### 3.4 关键模块设计（详细设计 + 取舍）（来自 plan.md）
+### 3.4 关键模块设计（模块设计思想/决策/原理 + 模块全景类图 + 模块时序图 + 关键流程）（来自 plan.md）
 
 > 说明：本节用于整合 plan 中“关键模块/高风险模块/承载 NFR 的模块”的详细设计与取舍。
-> 若 plan 未提供详细设计，标注 `TODO(Clarify)` 并指回 plan 补齐。
+>
+> **必须包含（不可省略）**：
+> - **模块设计思想 / 设计决策 / 原理说明**（为什么这样分层/抽象/依赖）
+> - **模块全景类图**：包含该模块所有关键类/接口，且类/接口必须写出成员变量与方法签名
+> - **模块时序图**：包含正常链路与异常链路（必要时拆多张异常专用时序图）
+> - **模块关键流程**：可包含多个流程图；每张流程图必须覆盖正常 + 全部关键异常分支
+>
+> 规则：本文档不得新增决策；若 plan 缺失，用 `TODO(Clarify)` 指回 plan 对应章节补齐（优先：`plan.md:A3.4` 与 `plan.md:A3.3.1/A3.3.2`）。
 
 #### 模块：[模块名]
 
 - **模块定位**：
 - **设计目标**：
+- **模块设计思想**：TODO(Clarify): 引用 plan.md:...
+- **关键设计决策**：TODO(Clarify): 引用 plan.md:...
+- **原理/机制说明**：TODO(Clarify): 引用 plan.md:...
 - **核心数据结构/状态**：
 - **对外接口（协议）**：
 - **策略与算法**：
@@ -114,6 +132,44 @@ flowchart LR
 - **安全与隐私**：
 - **可观测性**：
 - **优缺点与替代方案**：
+
+##### 模块全景类图（必须，来自 plan.md）
+
+```mermaid
+classDiagram
+  %% 直接复制 plan.md 中该模块的类图（必须包含字段与方法签名）
+  %% 注意：为了避免 Mermaid 空图解析失败，模板提供最小可解析占位；落地时用 plan.md 图替换/删除占位
+  class TODO_ModuleReplaceMe {
+    +placeholder: String
+    +execute(): Unit
+  }
+```
+
+##### 模块时序图 - 正常链路（必须，来自 plan.md）
+
+```mermaid
+sequenceDiagram
+  %% 直接复制 plan.md 中该模块的“成功链路”时序图
+  participant TODO_ReplaceMe
+  TODO_ReplaceMe->>TODO_ReplaceMe: TODO（替换为真实调用）
+```
+
+##### 模块时序图 - 异常链路（必须，来自 plan.md）
+
+```mermaid
+sequenceDiagram
+  %% 直接复制 plan.md 中该模块的“异常链路”时序图（用 alt/else 覆盖关键异常）
+  participant TODO_ReplaceMe
+  TODO_ReplaceMe-->>TODO_ReplaceMe: TODO（替换为真实异常分支）
+```
+
+##### 模块关键流程（必须：可多个；每个流程同图含正常+异常）
+
+```mermaid
+flowchart TD
+  %% 直接复用 plan.md 的流程图（同图含正常+异常）；不得新增分支决策
+  Start([Start]) --> End([End])
+```
 
 ### 3.5 数据模型与存储设计（物理）（来自 plan.md）
 
@@ -126,10 +182,10 @@ flowchart LR
 > 目标：在 Feature 级 Full Design 中提供“全局视角”入口，方便评审/开发快速浏览每个模块的整体设计。
 >
 > 规则：
-> - 模块清单以 `plan.md:A3.2 模块拆分与职责` 为准（行数/名称必须一致）。
-> - 本节只做索引与引用，不复制粘贴整张图；所有 UML 图的权威内容在 `plan.md:A3.4`。
+> - 模块/组件清单以 `plan.md:A3.1 组件清单与职责` 为准（行数/名称必须一致）。
+> - 本节只做索引与引用，不复制粘贴整张图；模块级 UML 的权威内容在 `plan.md:A3.4`。
 
-| 模块（来自 plan.md:A3.2） | 职责（摘要） | UML 类图入口（plan.md:A3.4） | 时序图-成功入口（plan.md:A3.4） | 时序图-异常入口（plan.md:A3.4） | 关键异常（摘要） | NFR 责任（摘要） |
+| 模块/组件（来自 plan.md:A3.1） | 职责（摘要） | UML 类图入口（plan.md:A3.4） | 时序图-成功入口（plan.md:A3.4） | 时序图-异常入口（plan.md:A3.4） | 关键异常（摘要） | NFR 责任（摘要） |
 |---|---|---|---|---|---|---|
 | [模块A] |  | plan.md:A3.4:[模块A]:UML类图 | plan.md:A3.4:[模块A]:时序-成功 | plan.md:A3.4:[模块A]:时序-异常 |  | PERF/POWER/MEM/SEC/OBS/REL |
 
@@ -139,16 +195,20 @@ flowchart LR
 >
 > 规则：
 > - 本节内容必须**逐字复用/复制** `plan.md:A3.4` 的模块级 UML；不得新增模块、不得新增新的分支决策。
-> - 模块小节顺序必须与 `plan.md:A3.2 模块拆分与职责` 一致。
+> - 模块小节顺序必须与 `plan.md:A3.1 组件清单与职责` 一致。
 > - 若某个模块在 plan.md 尚未补齐 UML，必须标注 `TODO(Clarify)` 并指回 plan.md 对应模块小节补齐。
 
-#### 模块：[模块名]（来自 plan.md:A3.2）
+#### 模块/组件：[模块名]（来自 plan.md:A3.1）
 
 ##### UML 类图（来自 plan.md:A3.4）
 
 ```mermaid
 classDiagram
   %% 直接复制 plan.md:A3.4 对应模块的类图
+  class TODO_ModuleReplaceMe {
+    +placeholder: String
+    +execute(): Unit
+  }
 ```
 
 ##### UML 时序图 - 成功链路（来自 plan.md:A3.4）
@@ -156,6 +216,8 @@ classDiagram
 ```mermaid
 sequenceDiagram
   %% 直接复制 plan.md:A3.4 对应模块的“时序-成功”
+  participant TODO_ReplaceMe
+  TODO_ReplaceMe->>TODO_ReplaceMe: TODO（替换为真实调用）
 ```
 
 ##### UML 时序图 - 异常链路（来自 plan.md:A3.4）
@@ -163,9 +225,11 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   %% 直接复制 plan.md:A3.4 对应模块的“时序-异常”
+  participant TODO_ReplaceMe
+  TODO_ReplaceMe-->>TODO_ReplaceMe: TODO（替换为真实异常分支）
 ```
 
-## 4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）（来自 plan.md）
+## 4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）（来自 plan.md:A3.3.2）
 
 > 定义：每个关键流程必须用 `flowchart` 绘制，且同一张图内覆盖正常流程与全部关键异常分支（失败/超时/并发/生命周期等）。
 > 若 plan 仍为拆分的“正常/异常”两张图，需在 plan 侧对齐后再整合到本节（否则标注 `TODO(Clarify)` 指回 plan）。
@@ -177,6 +241,12 @@ flowchart TD
   %% 直接复用 plan.md：每个流程一张图（同图含正常+异常）；不得新增分支决策
   Start([Start]) --> End([End])
 ```
+
+#### 流程 1 - 异常分支映射（必须，来自 plan.md）
+
+| 分支ID | 对应异常ID（EX-xxx） | 触发条件 | 对策（重试/降级/回滚/补偿） | 用户提示 | 覆盖的 NFR | 引用来源 |
+|---|---|---|---|---|---|---|
+| BR-001 | EX-001 |  |  |  |  | plan.md:A3.3.2 |
 
 ### 流程 2：[流程名称]
 
