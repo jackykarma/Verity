@@ -28,6 +28,38 @@
 [原则5描述]
 <!-- 示例：文本输入输出确保可调试性；要求结构化日志；或：采用主版本.次版本.构建版本格式；或：从简出发，遵循“你不会需要它”（YAGNI）原则 -->
 
+## 文档格式规范（Documentation Format Standards）
+
+### 技术图表格式要求（必须）
+
+- **图表格式**：所有技术文档中的图表必须使用 **PlantUML 格式**
+  - 代码块标记：` ```plantuml ` 和 ` ``` `
+  - 文档标记：`@startuml` / `@enduml`
+  - 主题：统一使用 `!theme mars`
+  - 支持的图表类型：
+    - 类图（classDiagram）
+    - 时序图（sequenceDiagram）
+    - 流程图/活动图（activityDiagram）
+    - 组件图（componentDiagram）
+    - 部署图（deploymentDiagram）
+    - 状态图（stateDiagram）
+    - 用例图（useCaseDiagram）
+
+- **禁止使用的格式**：
+  - Mermaid 格式（` ```mermaid `）
+  - 其他图表格式（如 Graphviz、Draw.io XML 等）
+
+- **适用范围**：
+  - `plan.md`（工程级蓝图）
+  - `full-design.md`（全量技术方案）
+  - `spec.md`（如包含技术图表）
+  - 其他技术设计文档
+
+- **理由**：
+  - 统一格式便于工具链处理和渲染
+  - PlantUML 支持更丰富的 UML 标准图表类型
+  - 与现有模板规范保持一致
+
 ## [第二部分名称]
 <!-- 示例：附加约束、安全要求、性能标准等 -->
 

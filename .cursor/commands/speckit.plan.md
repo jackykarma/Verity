@@ -44,6 +44,7 @@ $ARGUMENTS
    - 读取 `FEATURE_SPEC`（提取：Epic/Feature 元信息、FR/NFR、验收与边界场景、依赖）
    - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
    - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
+   - **注意**：模板中所有图表示例均使用 PlantUML 格式，生成文档时必须严格遵循
 
 3. **填充 Plan-A（工程决策 & 风险评估）**：
    - 技术选型：候选对比 + 决策理由（禁止空泛）
@@ -51,7 +52,7 @@ $ARGUMENTS
    - **模块级详细设计（强制）**：
      - 以 `plan.md:A3.2 模块拆分与职责` 为准，`A3.4` 必须 1:1 覆盖所有模块
      - 每个模块必须输出：**UML 类图（1 张）+ UML 时序图（成功 1 张）+ UML 时序图（异常 1 张）+ 关键异常清单表**
-   - 关键流程：必须同时包含正常与异常流程（使用 Mermaid 图 + 易懂文字说明）
+   - 关键流程：必须同时包含正常与异常流程（使用 PlantUML 流程图 + 易懂文字说明）
    - 风险：给出风险表（风险描述 + 触发条件 + 范围 + 消解策略 + 绑定到 Story/Task）
    - 边界/异常：枚举数据/状态/生命周期/并发/用户行为
    - **算法/功耗/性能/内存评估**：必须量化，并写明验收阈值与测试方法
@@ -75,6 +76,13 @@ $ARGUMENTS
    - `/speckit.tasks` 生成 tasks.md
 
 核心规则：
+- **文档格式要求（强制）**：所有技术图表必须使用 **PlantUML 格式**（`@startuml` / `@enduml`，主题 `mars`），包括但不限于：
+  - 类图（classDiagram）
+  - 时序图（sequenceDiagram）
+  - 流程图（activityDiagram）
+  - 组件图（componentDiagram）
+  - 部署图（deploymentDiagram）
+  - 不得使用 Mermaid 或其他图表格式
 - 所有评估（算法/功耗/性能/内存）必须可量化且带验收指标与测试方法。
 - 执行主体：**SE/TL（或架构师）**。开发者应将 `plan.md` 视为只读输入；如需变更必须提交变更提案（PR/Issue/评论）并由 SE/TL 在 EPIC 分支落地后再继续实现。
 - Plan 内容是 Implement 的唯一权威输入；Implement 期不得“边写边改设计”。

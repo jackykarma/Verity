@@ -3,10 +3,10 @@
 **Epic**：EPIC-001 - 无痛记忆单词神器APP
 **Feature ID**：FEAT-002
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.1
+**Plan Version**：v0.1.0
 **当前工作分支**：`epic/EPIC-001-word-memory-app`
 **Feature 目录**：`specs/epics/EPIC-001-word-memory-app/features/FEAT-002-spaced-repetition-algorithm/`
-**日期**：2026-01-21
+**日期**：2026-01-22
 **输入**：来自 `Feature 目录/spec.md`
 
 > 规则：
@@ -17,8 +17,7 @@
 
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
-| v0.1.0 | 2026-01-18 | Feature | 初始版本：创建 Plan 工程级蓝图，完成技术选型、架构设计和 Story 拆分 |  | 否 |
-| v0.1.1 | 2026-01-21 | Feature | 补齐 A3 静态/动态设计：新增全局类图、端到端时序图集、以及 A3.4 全模块详细设计（类图/成功时序/异常时序/异常清单） | A3 | 否 |
+| v0.1.0 | 2026-01-22 | Feature | 初始版本：创建 Plan 工程级蓝图，完成技术选型、架构设计和 Story 拆分 |  | 否 |
 
 ## 概述
 
@@ -32,6 +31,41 @@
 
 ## Plan-A：工程决策 & 风险评估（必须量化）
 
+### A0. 领域概念（Domain Concepts / Glossary，必须）
+
+> **目的**：统一命名与语义口径，成为后续“架构图/流程图/类图/时序图/接口契约”的**命名权威**。
+>
+> 要求：
+> - 只写本 Feature 涉及或新引入的领域概念；已有概念可引用来源（其他 Feature/EPIC/已有模块文档）
+> - 每个概念必须给出：名称、定义、关键属性/状态、与其他概念的关系（可用表格或简易概念图）
+
+#### A0.1 领域概念词汇表（必须）
+
+| 概念（中文） | 名称（英文/代码名） | 定义（一句话） | 关键属性/状态（Top3） | 不变量/约束 | 关联概念 |
+|---|---|---|---|---|---|
+| 学习状态 | LearningState | 表示一个单词的学习进度和记忆状态 | wordId（单词ID）、nextReviewAt（下次复习时间）、memoryStrength（记忆强度） | wordId 唯一；nextReviewAt >= 当前时间；memoryStrength 范围 0.0-1.0 | 复习记录（一对多） |
+| 复习记录 | ReviewRecord | 记录一次复习操作的结果和历史 | wordId（单词ID）、reviewedAt（复习时间）、quality（复习质量） | quality 范围 0-5（SM-2 标准）；reviewedAt <= 当前时间 | 学习状态（多对一） |
+| 复习时机 | ReviewTiming | 根据算法计算出的下次复习时间点 | nextReviewAt（下次复习时间戳）、intervalDays（复习间隔天数） | nextReviewAt >= 当前时间；intervalDays >= 1 且 <= 365 | 学习状态（一对一） |
+| 记忆强度 | MemoryStrength | 评估单词在用户记忆中的牢固程度 | strength（强度值，0.0-1.0）、lastReviewedAt（最后复习时间） | strength 范围 0.0-1.0；值越大表示记忆越牢固 | 学习状态（一对一） |
+| 算法参数 | AlgorithmParameters | SM-2 算法的配置参数 | initialIntervalDays（初始间隔）、minEaseFactor（最小难度因子）、maxIntervalDays（最大间隔） | initialIntervalDays >= 1；minEaseFactor >= 1.3；maxIntervalDays <= 365 | SM-2 算法（一对多） |
+| 复习质量 | ReviewQuality | 用户对单词复习结果的评分 | quality（质量值，0-5） | quality 范围 0-5（SM-2 标准：0=完全忘记，5=完全记住） | 复习记录（一对一） |
+| 学习任务 | LearningTask | 需要用户学习或复习的单词任务 | wordId（单词ID）、dueAt（到期时间）、priorityScore（优先级评分） | dueAt <= 当前时间表示已到期；priorityScore 越大优先级越高 | 学习状态（一对一） |
+| 间隔重复算法 | SpacedRepetitionAlgorithm | 基于遗忘曲线的科学记忆方法，在最佳时机安排复习 | algorithmType（算法类型，如 SM-2）、parameters（算法参数） | 算法计算必须可复现；计算结果符合遗忘曲线规律 | 学习状态（多对一） |
+
+#### A0.2 概念关系图（推荐，可选）
+
+```plantuml
+@startuml
+!theme mars
+
+' 用“概念”而非“实现类”画关系；必要时用注释表达状态机/约束
+class ConceptA
+class ConceptB
+ConceptA --> ConceptB : relates_to
+
+@enduml
+```
+
 ### A1. 技术选型（候选方案对比 + 决策理由）
 
 | 决策点 | 候选方案 | 优缺点 | 约束/风险 | 决策 | 决策理由 |
@@ -41,126 +75,238 @@
 | 算法计算方式 | A: 同步计算（主线程）<br>B: 异步计算（协程）<br>C: 后台服务计算 | A: 简单，但阻塞主线程<br>B: 不阻塞主线程、易于管理，但需要协程管理<br>C: 独立进程，但复杂度高 | 性能要求：单个单词计算 ≤ 10ms，不能阻塞主线程 | B: 异步计算（协程） | 使用协程在 IO 线程执行算法计算，不阻塞主线程，满足性能要求 |
 | 算法引擎接口 | A: 函数式接口（suspend 函数）<br>B: 回调式接口<br>C: 事件驱动接口 | A: 简洁、类型安全、易于测试，符合 Kotlin 协程规范<br>B: 灵活，但回调地狱、难以测试<br>C: 解耦，但复杂度高 | 需要与业务 Feature 集成，接口应简洁易用 | A: 函数式接口（suspend 函数） | 符合 Kotlin 协程规范，类型安全，易于测试和集成 |
 
-### A2. 0 层架构设计（对外系统边界、部署、通信、交互）
+### A2. Feature 全景架构（0 层框架图：边界 + 外部依赖）
 
-> 定义：0 层架构设计反映“本系统与外部系统之间的关系”。必须覆盖：结构、部署、通信方式、交互方式与边界。
+> **目的**：一张图展示本 Feature 的全貌——它在系统中的位置、与外部的关系、内部的核心组件。
 >
 > 要求：
-> - 同时给出“一句话描述每个模块/外部系统的职责与边界”。
-> - 明确外部依赖的**故障模式**（超时/限流/不可用/返回不一致）与本系统应对策略（重试/降级/兜底/提示）。
-> - 明确通信方式（协议/鉴权/重试/幂等/超时/限流）与部署拓扑（端/服务/第三方）。
+> - 明确 Feature 边界：哪些是本 Feature 新增/修改的，哪些是复用已有的
+> - 明确外部依赖的**故障模式**与应对策略
+> - 无论 Feature 大小，都必须产出全景图（小 Feature 图更简单，但不能省略）
 
-#### A2.1 外部系统与依赖清单（必须）
+#### A2.1 Feature 全景架构图（必须）
 
-| 外部系统/依赖 | 类型（三方/内部服务/设备能力） | 关键能力/数据 | 通信方式（协议/鉴权） | SLA/限流/超时 | 故障模式 | 我方策略 |
-|---|---|---|---|---|---|---|
-| 单词库管理（FEAT-001） | 内部 Feature | 词库数据、单词列表 | Kotlin 函数调用（Repository 接口） | 本地调用，无网络 | 词库数据缺失、数据格式错误 | 返回空列表，记录错误日志 |
-| 用户账户与数据管理（FEAT-007） | 内部 Feature | 学习历史数据存储和查询 | Kotlin 函数调用（Repository 接口） | 本地数据库，无网络 | 数据库不可用、数据损坏 | 使用默认参数，容错处理，记录错误日志 |
-| Android Room 数据库 | 设备能力 | 学习状态数据存储 | 系统 API | 本地数据库，无网络 | 数据库操作失败、存储空间不足 | 捕获异常，使用默认参数，记录错误日志 |
+> 一张图展示：Feature 边界、内部核心组件、外部依赖、数据/控制流向
 
-#### A2.2 0 层架构图（系统边界 + 外部交互）
+```plantuml
+@startuml
+!theme mars
 
-```mermaid
-flowchart LR
-  subgraph System["本系统（System Boundary）<br/>间隔重复算法引擎"]
-    AlgorithmEngine[算法引擎核心<br/>SM-2 算法实现]
-    StateManager[学习状态管理<br/>状态跟踪与更新]
-    Scheduler[复习调度器<br/>复习时机计算]
-    Repository[算法数据仓库<br/>学习状态数据访问]
-  end
-  subgraph External["外部系统/依赖（System 外部）"]
-    WordLibrary[单词库管理<br/>（FEAT-001）]
-    UserData[用户数据管理<br/>（FEAT-007）]
-    RoomDB[Android Room 数据库<br/>（学习状态存储）]
-  end
-  subgraph Clients["业务 Feature（调用方）"]
-    LearningUI[学习界面<br/>（FEAT-003）]
-    Statistics[学习统计<br/>（FEAT-005）]
-    Gamification[游戏化<br/>（FEAT-004）]
-  end
-  LearningUI -->|获取学习任务| AlgorithmEngine
-  Statistics -->|获取学习状态| AlgorithmEngine
-  Gamification -->|获取学习进度| AlgorithmEngine
-  AlgorithmEngine -->|获取词库数据| WordLibrary
-  AlgorithmEngine -->|存储学习历史| UserData
-  Repository -->|数据持久化| RoomDB
-  StateManager --> Repository
-  Scheduler --> StateManager
-  AlgorithmEngine --> Scheduler
+package "本 Feature 边界（间隔重复算法引擎）" {
+  component [算法引擎接口] as Engine
+  component [SM-2 算法核心] as SM2
+  component [学习状态管理器] as StateMgr
+  component [复习调度器] as Scheduler
+  component [学习状态仓库] as StateRepo
+  component [复习记录仓库] as RecordRepo
+}
+
+package "业务 Feature（调用方）" {
+  component [学习界面] as LearningUI
+  component [学习统计] as Statistics
+  component [游戏化] as Gamification
+}
+
+package "外部依赖" {
+  component [单词库管理<br/>FEAT-001] as WordLib
+  component [用户数据管理<br/>FEAT-007] as UserData
+  component [Room 数据库] as RoomDB
+}
+
+' 业务 Feature 调用算法引擎
+LearningUI --> Engine : 获取学习任务
+Statistics --> Engine : 获取学习状态
+Gamification --> Engine : 获取学习进度
+
+' Feature 内部依赖
+Engine --> SM2
+Engine --> StateMgr
+Engine --> Scheduler
+Scheduler --> StateMgr
+StateMgr --> StateRepo
+StateMgr --> RecordRepo
+StateRepo --> RoomDB
+RecordRepo --> RoomDB
+
+' 外部依赖
+Engine --> WordLib : 获取词库数据
+Engine --> UserData : 存储学习历史
+
+note right of Engine
+  算法引擎通过统一接口
+  向业务 Feature 提供能力
+end note
+
+@enduml
 ```
 
+#### A2.1.1 架构设计说明（必须：理由/决策/思考）
 
-#### A2.3 部署视图（必须）
+> 用文字把“为什么这样画”说清楚，便于评审与后续实现期不走样。
 
-> 要求：说明各节点部署位置（端上/服务端/第三方）、网络边界、以及关键链路的通信方式。
+- **边界与职责**：
+  - 本 Feature 负责间隔重复算法的实现、学习状态管理和复习调度，是 Platform-Capability Feature
+  - 算法引擎通过统一接口向业务 Feature 提供能力，业务 Feature 不关心算法实现细节
+  - 明确不做：机器学习模型训练、个性化算法调优（第一阶段）、算法可视化展示
+- **分层与依赖方向**：
+  - API 层（算法引擎接口）→ Core 层（算法实现）→ Domain 层（状态管理）→ Data 层（数据访问）→ Storage 层（Room 数据库）
+  - 禁止业务 Feature 直接访问 Data 层，必须通过算法引擎接口
+- **关键数据流**：
+  - 学习状态数据：System of Record 是 Room 数据库，内存缓存用于性能优化
+  - 词库数据：从 FEAT-001 获取，只读访问
+  - 学习历史：通过 FEAT-007 存储，算法引擎负责计算和更新
+- **外部依赖策略**：
+  - 词库数据缺失：返回空列表，记录错误日志，不阻塞算法计算
+  - 学习历史数据损坏：容错处理，使用默认参数重新初始化，记录错误日志
+  - 数据库操作失败：捕获异常，使用默认参数或降级策略，记录错误日志
+- **可演进性**：
+  - 算法接口支持版本化，未来可扩展支持其他算法（SM-4/SM-5）
+  - 算法参数可配置，支持未来个性化调优
+  - 数据模型支持迁移，Room 数据库版本管理
 
-```mermaid
-flowchart TB
-  subgraph Device["Android 设备（终端）"]
-    AlgorithmEngine["算法引擎模块<br/>（本 Feature）"]
-    RoomDB["Room 数据库<br/>（学习状态存储）"]
-  end
-  subgraph Internal["应用内部 Feature"]
-    WordLibrary["单词库管理<br/>（FEAT-001）"]
-    UserData["用户数据管理<br/>（FEAT-007）"]
-  end
-  AlgorithmEngine -->|本地函数调用| WordLibrary
-  AlgorithmEngine -->|本地函数调用| UserData
-  AlgorithmEngine -->|Room API| RoomDB
+#### A2.2 外部依赖清单（必须）
+
+| 依赖项 | 类型 | 提供方（团队名称） | 提供的能力 | 通信方式 | 故障模式 | 我方策略 |
+|--------|------|------------------|-----------|----------|----------|----------|
+| 单词库管理（FEAT-001） | 内部 Feature | 本团队 | 词库数据、单词列表 | Kotlin 函数调用（Repository 接口） | 词库数据缺失、数据格式错误 | 返回空列表，记录错误日志 |
+| 用户账户与数据管理（FEAT-007） | 内部 Feature | 本团队 | 学习历史数据存储和查询 | Kotlin 函数调用（Repository 接口） | 数据库不可用、数据损坏 | 使用默认参数，容错处理，记录错误日志 |
+| Android Room 数据库 | 设备能力 | Android 系统 | 学习状态数据存储 | 系统 API | 数据库操作失败、存储空间不足 | 捕获异常，使用默认参数，记录错误日志 |
+
+#### A2.3 通信与交互约束（必须）
+
+- **协议**：Kotlin 函数调用（本地调用，无网络）
+- **超时与重试**：
+  - 算法计算超时：100ms，超时使用默认参数
+  - 数据库操作：Room 自动重试机制，失败时使用默认参数
+  - 无网络请求，无需退避策略
+- **错误处理**：
+  - 统一错误类型：Sealed Class（SrsError：InvalidInput、CalculationOverflow、DbReadFailed、DbWriteFailed、DataCorrupted、Cancelled、Unknown）
+  - 用户提示策略：算法计算失败不直接提示用户，返回空列表或默认结果；数据库失败提示"保存失败，请重试"
+- **数据一致性**：
+  - 强一致：学习状态更新使用 Room 事务，确保状态和记录一致性
+  - 补偿策略：复习记录写入失败不阻塞主流程，状态已保存即可，记录失败仅影响统计
+
+### A3. Feature 内部设计（1 层设计：组件拆分 + 静态结构 + 动态协作）
+
+> **目的**：展示 Feature 内部"长什么样"——组件划分、类/接口关系、协作方式。
+>
+> 要求：
+> - 无论 Feature 大小，都要明确内部组件划分（即使只有 1-2 个组件）
+> - 必须产出：**组件清单 + 全局类图 + 组件协作说明**
+> - 每个组件的详细设计（类图/时序图/异常）在 A3.4 细化
+
+#### A3.0 整体设计说明（必须：关键点/决策/思考）
+
+> **目的**：先把整体方案“讲清楚”，再进入组件级拆分与细化，确保评审从整体到局部理解一致。
+>
+> 要求：
+> - 这里写“为什么这样设计”（关键点/取舍/边界），不要堆细节实现
+> - 与 A2（全景架构）保持一致：A2 讲外部边界与依赖，这里讲内部方案与协作
+> - 所有结论必须可追溯：引用到 spec/plan 的决策点（必要时写 `TODO(Clarify)`）
+
+##### A3.0.1 Feature 内部总体框架图（1 层组件图，必须）
+
+> **目的**：用“组件图”把 Feature 内部设计**一图讲清楚**：组件边界、依赖方向（静态结构）与关键交互（动态协作）。
+>
+> **硬性要求（不可省略）**：
+> - 图中必须覆盖 `A3.1 组件清单` 的**全部组件**（至少用同名节点表示）
+> - **静态结构**：用**实线箭头**（`-->`）表示依赖/调用方向（谁依赖谁）
+> - **动态协作**：用**虚线箭头**（`..>`）表示事件/回调/异步消息（如适用；若纯同步，可省略虚线但要说明原因）
+> - 图中必须标注**跨层约束**（例如：UI 不得直接依赖 DataSource）
+>
+> 说明：使用 PlantUML Component Diagram 绘制，主题为 mars。
+
+```plantuml
+@startuml
+!theme mars
+
+package "算法引擎接口层" {
+  component [SpacedRepetitionEngine<br/>统一接口入口] as Engine
+}
+
+package "算法核心层" {
+  component [SM2Algorithm<br/>算法计算] as SM2
+  component [MemoryStrengthEvaluator<br/>记忆强度评估] as Evaluator
+  component [ReviewScheduler<br/>复习调度] as Scheduler
+}
+
+package "领域层" {
+  component [LearningStateManager<br/>状态管理] as StateMgr
+  component [ReviewCalculator<br/>时机计算] as Calculator
+}
+
+package "数据层" {
+  component [LearningStateRepository<br/>状态数据访问] as StateRepo
+  component [ReviewRecordRepository<br/>记录数据访问] as RecordRepo
+}
+
+package "存储层" {
+  database [Room 数据库] as RoomDB
+}
+
+' 静态依赖（同步调用）- 实线箭头
+Engine --> SM2
+Engine --> Evaluator
+Engine --> Scheduler
+Engine --> StateMgr
+Engine --> Calculator
+
+Scheduler --> StateMgr
+Scheduler --> Evaluator
+Calculator --> SM2
+StateMgr --> StateRepo
+StateMgr --> RecordRepo
+StateRepo --> RoomDB
+RecordRepo --> RoomDB
+
+' 动态协作（异步/事件）- 虚线箭头
+StateMgr ..> Engine : Flow 通知状态变化
+
+' 跨层约束标注
+note right of Engine
+  业务 Feature 不得直接依赖
+  Data 层或 Storage 层
+end note
+
+@enduml
 ```
 
+##### A3.0.2 整体设计关键点（必须）
 
-#### A2.4 通信与交互说明（必须）
+- **关键点 1**：分层清晰、依赖单向（API → Core/Domain → Data → Storage），上层不依赖下层实现细节，便于测试和维护
+- **关键点 2**：算法计算本地执行，不依赖网络，失败可降级（使用默认参数），确保算法引擎始终可用
+- **关键点 3**：并发与取消语义明确，使用协程管理异步操作，共享状态使用线程安全容器或 Mutex 保护，避免重入/竞态
+- **关键点 4**：可观测性最小闭环（日志/埋点/错误记录），关键操作可追踪，算法计算事件、状态更新事件、异常事件都有记录
 
-- **协议**：REST / gRPC / WebSocket / MQ / 文件 / 设备能力（按实际选择）
-- **鉴权**：OAuth2 / JWT / mTLS / API Key（按实际选择）
-- **超时与重试**：超时阈值、最大重试次数、退避策略、重试白名单接口
-- **幂等**：哪些请求必须幂等、幂等键策略
-- **限流**：外部限流策略与我方退避/降级
-- **数据一致性**：强一致/最终一致、补偿策略
+##### A3.0.3 关键设计决策清单（必须）
 
-### A3. 1 层架构设计（系统内部框架图 + 模块拆分 + 接口协议）
+| 决策点 | 候选方案 | 决策 | 决策理由 | 影响范围（组件/接口/数据） | 引用来源 |
+|---|---|---|---|---|---|
+| 分层架构 | A: 单层扁平<br>B: 三层（API/Domain/Data）<br>C: 五层（API/Core/Domain/Data/Storage） | C: 五层架构 | 职责清晰，便于测试和维护，符合 Clean Architecture 原则 | 所有组件 | plan.md:A1 |
+| 状态管理策略 | A: 内存缓存<br>B: 数据库直查<br>C: 缓存+数据库 | C: 缓存+数据库 | 平衡性能和数据一致性，支持实时查询和持久化 | LearningStateManager, Repository | plan.md:A1 |
+| 错误处理策略 | A: 异常抛出<br>B: Result 封装<br>C: 回调式 | B: Result 封装 | 类型安全，易于测试，符合 Kotlin 协程规范 | 所有组件 | plan.md:A1 |
+| 算法计算线程 | A: 主线程<br>B: IO 线程<br>C: 后台服务 | B: IO 线程 | 不阻塞主线程，满足性能要求 | SM2Algorithm, ReviewCalculator | plan.md:A1 |
 
-> 定义：1 层架构设计描述“系统内部的模块拆分与协作”，包括框架图、模块职责、模块交互、通信方式、接口协议等。
+##### A3.0.4 核心协作策略（必须）
 
-#### A3.1 1 层框架图（必须）
+- **分层与依赖方向**：API → Core/Domain → Data → Storage；跨层只能通过接口/契约；禁止下层反依赖上层
+- **线程/并发模型**：主线程仅用于接口调用入口；IO 线程执行算法计算和数据库操作；使用协程管理异步操作；共享状态使用线程安全容器或 Mutex 保护
+- **错误与失败传播**：使用 Result<T> 封装结果；底层异常转换为领域错误（SrsError）；算法计算失败使用默认参数降级；关键错误记录日志
+- **数据一致性与补偿**：学习状态更新使用 Room 事务确保一致性；复习记录写入失败不阻塞主流程（降级处理）；应用退出时确保数据持久化
 
-```mermaid
-flowchart LR
-  subgraph API["算法引擎接口层"]
-    AlgorithmAPI[算法引擎接口<br/>SpacedRepetitionEngine]
-  end
-  subgraph Core["算法核心层"]
-    SM2Algorithm[SM-2 算法实现<br/>复习时机计算]
-    MemoryEvaluator[记忆强度评估器<br/>优先级排序]
-    Scheduler[复习调度器<br/>任务列表生成]
-  end
-  subgraph Domain["领域层"]
-    LearningStateManager[学习状态管理器<br/>状态跟踪与更新]
-    ReviewCalculator[复习时机计算器<br/>下次复习时间]
-  end
-  subgraph Data["数据层"]
-    LearningStateRepository[学习状态仓库<br/>状态数据访问]
-    ReviewRecordRepository[复习记录仓库<br/>历史数据访问]
-  end
-  subgraph Storage["存储层"]
-    RoomDB[(Room 数据库<br/>学习状态存储)]
-  end
-  AlgorithmAPI --> SM2Algorithm
-  AlgorithmAPI --> MemoryEvaluator
-  AlgorithmAPI --> Scheduler
-  SM2Algorithm --> ReviewCalculator
-  Scheduler --> LearningStateManager
-  LearningStateManager --> LearningStateRepository
-  ReviewCalculator --> LearningStateRepository
-  LearningStateRepository --> RoomDB
-  ReviewRecordRepository --> RoomDB
-```
+##### A3.0.5 主要风险与权衡（必须）
 
-#### A3.2 模块拆分与职责（必须）
+- **权衡点**：性能 vs 数据一致性（使用缓存提升性能，但需保证缓存与数据库一致性）
+- **已知风险**：算法计算异常 → 需降级策略（详见 A5 风险与消解策略）
 
-| 模块 | 职责 | 输入/输出 | 依赖 | 约束 |
-|---|---|---|---|---|
+#### A3.1 组件清单与职责（必须）
+
+> **重要**：本表是 Feature 的**组件目录（Component Catalog）**，驱动后续详细设计。
+> - `A3.4 组件详细设计` 必须 **1:1 覆盖**本表的每个组件
+> - 组件粒度建议：按职责边界划分（UI/ViewModel/UseCase/Repository/DataSource 等）
+
+| 组件 | 职责（一句话） | 输入/输出 | 依赖 | 约束 |
+|------|---------------|-----------|------|------|
 | 算法引擎接口层 | 提供统一的算法引擎接口，封装算法实现细节 | 输入：学习/复习请求<br>输出：学习任务列表、复习时机计算结果 | 算法核心层 | 接口稳定，向后兼容 |
 | SM-2 算法实现 | 实现 SM-2 算法，计算复习间隔和记忆强度 | 输入：学习历史、复习结果<br>输出：下次复习时间、记忆强度 | 无 | 算法计算不能阻塞主线程 |
 | 记忆强度评估器 | 评估单词记忆强度，用于优先级排序 | 输入：学习次数、复习间隔、正确率<br>输出：记忆强度值 | 学习状态数据 | 评估结果可复现 |
@@ -170,1119 +316,325 @@ flowchart LR
 | 学习状态仓库 | 提供学习状态数据的访问接口 | 输入：数据操作请求<br>输出：学习状态实体 | Room 数据库 | 支持事务、查询优化 |
 | 复习记录仓库 | 提供复习历史记录的访问接口 | 输入：数据操作请求<br>输出：复习记录实体 | Room 数据库 | 支持历史查询 |
 
-#### A3.2.1 Feature 全局类图（静态结构，必须）
+#### A3.2 Feature 全局类图（静态结构，必须）
 
-> 说明：本图是“端到端协作”会出现的全部关键类/接口/数据结构的静态全景，用于与后续时序图/异常清单互相校验。
+> 一张图展示 Feature 涉及的**所有关键类/接口/数据结构**及其依赖关系。
+> 这是 Feature 的"静态全景"，后续 A3.4 会对每个组件细化。
+>
+> **硬性要求（不可省略）**：
+> - **必须覆盖所有关键类/接口**：UI / ViewModel / UseCase(or Interactor) / Repository / DataSource(若存在) / Entity / DTO / Error(错误体系) / Mapper(or Converter) / 其他核心抽象
+> - **类与接口必须写出成员变量与方法（签名级别）**：字段名 + 类型；方法名 + 参数 + 返回值（必要时标注 throws/错误类型）
+> - **依赖方向必须正确**：上层依赖下层；禁止“下层反依赖上层”（除非通过接口回调且在图中显式体现）
+> - **与动态图互校**：端到端时序图/流程图中出现的参与者与关键调用，必须在此类图中找到对应类/接口
+>
+> PlantUML 类图提示：
+> - 成员变量：`+fieldName: Type`（必要时用注释补充线程/生命周期约束）
+> - 方法：`+methodName(param: Type): ReturnType`
+> - 接口：`<<interface>>`；抽象类：`<<abstract>>`；密封类/错误体系可用 `<<sealed>>` 注释表达
 
-```mermaid
-classDiagram
-  %% API
-  class SpacedRepetitionEngine {
-    <<interface>>
-    +getReviewList(now: Instant, limit: Int): Result~List~LearningTask~~
-    +submitReview(wordId: String, quality: Int, reviewedAt: Instant): Result~LearningState~
-    +observeLearningState(wordId: String): Flow~LearningState?~
-  }
+```plantuml
+@startuml
+!theme mars
 
-  class DefaultSpacedRepetitionEngine {
-    -scheduler: ReviewScheduler
-    -stateManager: LearningStateManager
-    -calculator: ReviewCalculator
-    -evaluator: MemoryStrengthEvaluator
-    -logger: SrsLogger
-    +getReviewList(now: Instant, limit: Int): Result~List~LearningTask~~
-    +submitReview(wordId: String, quality: Int, reviewedAt: Instant): Result~LearningState~
-    +observeLearningState(wordId: String): Flow~LearningState?~
-  }
+' TODO: 画清 Feature 的全局类结构
+' 建议分层：UI/ViewModel → UseCase/Domain → Repository → DataSource
 
-  %% Core/Domain
-  class ReviewScheduler {
-    -stateManager: LearningStateManager
-    -evaluator: MemoryStrengthEvaluator
-    -clock: Clock
-    +buildReviewList(limit: Int): Result~List~LearningTask~~
-  }
+class FeatureViewModel {
+  + state: StateFlow
+  + onAction(action)
+}
 
-  class LearningStateManager {
-    -learningRepo: LearningStateRepository
-    -reviewRepo: ReviewRecordRepository
-    -clock: Clock
-    +getOrCreate(wordId: String): Result~LearningState~
-    +updateAfterReview(wordId: String, review: ReviewResult): Result~LearningState~
-    +observe(wordId: String): Flow~LearningState?~
-    +queryDue(now: Instant, limit: Int): Result~List~LearningState~~
-  }
+interface FeatureUseCase {
+  + execute(params): Result
+}
 
-  class ReviewCalculator {
-    -sm2: SM2Algorithm
-    -params: AlgorithmParameters
-    +calculate(state: LearningState, quality: Int, reviewedAt: Instant): Result~ReviewResult~
-  }
+interface FeatureRepository {
+  + getData(): Flow
+  + saveData(data)
+}
 
-  class MemoryStrengthEvaluator {
-    +evaluate(state: LearningState, now: Instant): Float
-    +scoreForSort(state: LearningState, now: Instant): Float
-  }
+class FeatureError <<sealed>> {
+  + NetworkError
+  + ValidationError
+  + UnknownError
+}
 
-  class SM2Algorithm {
-    +nextIntervalDays(n: Int, ef: Float, lastIntervalDays: Int, quality: Int): Result~Sm2Step~
-  }
+FeatureViewModel --> FeatureUseCase
+FeatureUseCase --> FeatureRepository
+FeatureUseCase --> FeatureError
 
-  %% Data
-  class LearningStateRepository {
-    <<interface>>
-    +get(wordId: String): Result~LearningState?~
-    +upsert(state: LearningState): Result~Unit~
-    +queryDue(now: Instant, limit: Int): Result~List~LearningState~~
-  }
-
-  class ReviewRecordRepository {
-    <<interface>>
-    +insert(record: ReviewRecord): Result~Unit~
-    +queryByWord(wordId: String, limit: Int): Result~List~ReviewRecord~~
-  }
-
-  %% Models / Errors / Infra
-  class LearningState {
-    +wordId: String
-    +learnCount: Int
-    +lastReviewedAt: Instant?
-    +nextReviewAt: Instant
-    +easeFactor: Float
-    +intervalDays: Int
-    +memoryStrength: Float
-    +mastered: Boolean
-  }
-
-  class ReviewRecord {
-    +wordId: String
-    +reviewedAt: Instant
-    +quality: Int
-    +intervalDays: Int
-  }
-
-  class ReviewResult {
-    +reviewedAt: Instant
-    +nextReviewAt: Instant
-    +newEaseFactor: Float
-    +newIntervalDays: Int
-    +newMemoryStrength: Float
-  }
-
-  class AlgorithmParameters {
-    +minEaseFactor: Float
-    +maxIntervalDays: Int
-    +minIntervalMinutes: Int
-    +firstIntervalDays: Int
-  }
-
-  class SrsError {
-    <<sealed>>
-    +InvalidInput
-    +CalculationOverflow
-    +ClockSkew
-    +DbReadFailed
-    +DbWriteFailed
-    +DataCorrupted
-    +Cancelled
-    +Unknown
-  }
-
-  class SrsLogger {
-    <<interface>>
-    +event(name: String, fields: Map~String, Any~): Unit
-    +error(name: String, err: SrsError, fields: Map~String, Any~): Unit
-  }
-
-  SpacedRepetitionEngine <|.. DefaultSpacedRepetitionEngine
-  DefaultSpacedRepetitionEngine --> ReviewScheduler
-  DefaultSpacedRepetitionEngine --> LearningStateManager
-  DefaultSpacedRepetitionEngine --> ReviewCalculator
-  DefaultSpacedRepetitionEngine --> MemoryStrengthEvaluator
-  DefaultSpacedRepetitionEngine --> SrsLogger
-
-  ReviewScheduler --> LearningStateManager
-  ReviewScheduler --> MemoryStrengthEvaluator
-  LearningStateManager --> LearningStateRepository
-  LearningStateManager --> ReviewRecordRepository
-  ReviewCalculator --> SM2Algorithm
-  ReviewCalculator --> AlgorithmParameters
-  ReviewCalculator --> SrsError
-  LearningStateRepository --> SrsError
-  ReviewRecordRepository --> SrsError
+@enduml
 ```
 
-#### A3.2.2 关键类/接口清单（必须：与类图互校）
+#### A3.2.1 关键类/接口清单（必须：与类图互校）
 
-| 类/接口 | 类型 | 所属层级（API/Core/Domain/Data/Infra） | 核心职责（一句话） | 关键方法（列 1-3 个） | 变更频率预期 |
+> 目的：让“全景类图”不只是图，还能快速定位每个关键抽象的职责与稳定性。
+
+| 类/接口 | 类型（class/interface/data） | 所属层级（UI/Domain/Data/External） | 核心职责（一句话） | 关键方法（列 1-3 个） | 变更频率预期（高/中/低） |
 |---|---|---|---|---|---|
-| `SpacedRepetitionEngine` | interface | API | 对业务 Feature 暴露间隔重复能力的唯一入口 | `getReviewList` / `submitReview` | 低 |
-| `DefaultSpacedRepetitionEngine` | class | API | 编排 Scheduler/Calculator/Manager，统一错误与日志口径 | `getReviewList` / `submitReview` | 中 |
-| `SM2Algorithm` | class | Core | 计算 SM-2 步进（EF/interval） | `nextIntervalDays` | 低 |
-| `ReviewCalculator` | class | Domain | 把 SM-2 计算与时间/边界/错误语义组合成可用的 ReviewResult | `calculate` | 中 |
-| `LearningStateManager` | class | Domain | 学习状态生命周期（读/写/幂等/缓存/观察） | `getOrCreate` / `updateAfterReview` | 中 |
-| `ReviewScheduler` | class | Core | 生成“待复习任务列表”，按优先级与上限输出 | `buildReviewList` | 中 |
-| `LearningStateRepository` | interface | Data | 学习状态持久化访问（查询/写入/到期筛选） | `get` / `upsert` / `queryDue` | 低 |
-| `ReviewRecordRepository` | interface | Data | 复习记录持久化访问（写入/查询） | `insert` / `queryByWord` | 低 |
-| `SrsError` | sealed | Infra | 统一错误类型体系（可重试/不可重试） | - | 中 |
+| `FeatureViewModel` | class | UI |  |  | 中 |
+| `FeatureUseCase` | interface | Domain |  |  | 中 |
+| `FeatureRepository` | interface | Data |  |  | 低 |
 
-#### A3.3 模块协作与通信方式（必须）
+#### A3.3 组件协作与通信（必须）
 
-> 要求：写清楚"谁调用谁、通过什么方式、传什么、失败如何处理"。如果是异步（队列/事件），必须写清楚消费语义与重放/去重。
+> 说明组件之间"谁调用谁、传什么、失败怎么办"
 
-- **调用关系**：
-  - 业务 Feature → 算法引擎接口 → SM-2 算法 / 记忆强度评估器 / 复习调度器
-  - 复习调度器 → 学习状态管理器 → 学习状态仓库 → Room 数据库
-  - SM-2 算法 → 复习时机计算器 → 学习状态仓库
-  - 学习状态管理器 → 复习记录仓库 → Room 数据库
+- **调用关系**：[UI → ViewModel → UseCase → Repository → DataSource]
+- **通信方式**：函数调用 / Flow / Callback / Event（按实际）
+- **线程模型**：[主线程：UI/ViewModel] → [IO线程：Repository/DataSource]
+- **错误传播**：[DataSource 抛异常 → Repository 捕获转换 → UseCase 返回 Result → ViewModel 更新 State]
 
-- **通信方式**：
-  - 函数调用：Kotlin suspend 函数调用，使用协程处理异步操作
-  - 错误处理：使用 Result<T> 或 Sealed Class（Success/Failure）封装结果
-  - 状态同步：学习状态更新后通过 Flow 通知订阅者
+#### A3.3.1 Feature 端到端时序图集（必须：全景动态协作，覆盖全部流程与异常）
 
-- **接口协议**：
-  - 数据结构：使用 Kotlin data class 定义实体（LearningState, ReviewRecord, AlgorithmParameters）
-  - 错误码：使用 Sealed Class 定义错误类型（AlgorithmError, CalculationError, DataError）
-  - 版本策略：接口向后兼容，新增方法使用默认参数，数据结构变更时自动迁移
-  - 幂等约束：学习状态更新基于单词 ID + 时间戳去重，确保幂等
-
-- **并发与线程模型**：
-  - 主线程：不执行算法计算，仅用于接口调用入口
-  - IO 线程：算法计算、数据库操作在 Dispatchers.IO 执行
-  - 协程：所有算法计算使用 suspend 函数，由调用方在协程作用域中调用
-  - 共享状态保护：学习状态缓存使用线程安全的容器，数据库操作使用 Room 的事务机制
-
-#### A3.3.1 Feature 端到端时序图集（必须：全景动态协作）
-
-> 说明：每张时序图都必须覆盖 UI→Engine→Domain/Core→Data→Storage 的完整链路，并用 `alt/else` 覆盖关键失败模式（至少：参数校验/DB失败/数据损坏/取消）。
+> **目的**：给评审一个“端到端动态全景”的全集视图：本 Feature 设计里的每个关键流程都必须对应一张“端到端全景时序图”。
+>
+> **硬性要求（不可省略）**：
+> - **必须是 Feature 级全景**：每张时序图都要覆盖 UI→Domain→Data→External 的完整链路（不要只画某个组件内部）
+> - **必须覆盖全部关键流程**：每个关键用户流程/系统流程都要有对应端到端时序图（多流程→多时序图）
+> - **必须覆盖全部关键异常（同图）**：每个流程都必须在**同一张**时序图中用 `alt/else` 覆盖关键失败模式（至少：权限/参数校验/超时/弱网/限流/不可用/数据损坏/并发重入/取消）；**不得**把“成功/异常”拆成两张图，也不得把异常拆成多张图
+> - **互校规则**：
+>   - 流程图（A3.3.2）里每个流程必须能映射到这里对应的那张“端到端全景时序图”
+>   - 异常清单（A3.4 组件 / Story）里的每个关键异常都必须能映射到这里某张时序图的 `alt/else` 分支（或反向亦然）
 
 ##### A3.3.1.0 时序图清单与覆盖矩阵（必须）
 
-| Seq ID | 对应流程（A4） | 名称 | 类型（成功/异常） | 覆盖的关键异常 | 备注 |
+| Seq ID | 对应流程（A3.3.2） | 名称 | 覆盖范围（正常+异常） | 覆盖的关键异常（EX-xxx） | 备注 |
 |---|---|---|---|---|---|
-| SEQ-001 | 流程 2 | 获取待复习列表 - 成功 | 成功 |  | 覆盖排序与限额 |
-| SEQ-002 | 流程 2 | 获取待复习列表 - 异常 | 异常 | EX-API-001/EX-SCH-001/EX-LR-001 | 参数/DB/映射失败 |
-| SEQ-003 | 流程 1 | 提交复习结果并更新状态 - 成功 | 成功 |  | 覆盖写入状态与记录 |
-| SEQ-004 | 流程 1 | 提交复习结果并更新状态 - 异常 | 异常 | EX-CALC-001/EX-SM2-002/EX-MGR-001/EX-RR-001 | 输入/溢出/写入失败 |
+| SEQ-001 | 流程 1 | [流程 1 - 端到端全景时序] | 正常 + 全部关键异常（alt/else） | EX-001/EX-002/... |  |
 
-##### SEQ-001 获取待复习列表（端到端成功链路）
+##### 时序图模板 - 端到端全景（每个流程 1 张，必须同图含正常+异常）
 
-```mermaid
-sequenceDiagram
-  participant UI as UI/ViewModel
-  participant Engine as SpacedRepetitionEngine
-  participant Scheduler as ReviewScheduler
-  participant Manager as LearningStateManager
-  participant Repo as LearningStateRepository
-  participant Dao as LearningStateDao
-  participant DB as RoomDB
-  participant Eval as MemoryStrengthEvaluator
-  participant Logger as SrsLogger
+```plantuml
+@startuml
+!theme mars
 
-  UI->>Engine: getReviewList(now, limit)
-  Engine->>Scheduler: buildReviewList(limit)
-  Scheduler->>Manager: queryDue(now, limit*oversample)
-  Manager->>Repo: queryDue(now, limit*oversample)
-  Repo->>Dao: queryDue(nowEpochMs, limit*oversample)
-  Dao->>DB: SELECT due states
-  DB-->>Dao: rows
-  Dao-->>Repo: entities
-  Repo-->>Manager: states
-  Manager-->>Scheduler: states
-  loop each state
-    Scheduler->>Eval: scoreForSort(state, now)
-    Eval-->>Scheduler: score
-  end
-  Scheduler-->>Engine: tasks(sorted, limited)
-  Engine->>Logger: event("srs.review_list.ok", {limit, size, costMs})
-  Engine-->>UI: Result.Success(tasks)
+' TODO: [流程名] 端到端全景（把标题/参与者/调用替换成真实内容）
+' 参与者建议（按实际裁剪/补充）：User/UI, ViewModel/Presenter, UseCase, Repository, DataSource, External API/OS, Logger/Analytics
+' 要求：
+' - 同图包含正常链路 + 全部关键异常分支（用 alt/else）
+' - 每个异常分支写清“对策”（重试/退避/降级/提示/回滚/补偿/埋点/告警）
+' - 体现返回值/状态更新点/线程(主线程/IO)/缓存命中与否（如适用）
+
+participant "UI/ViewModel" as UI
+participant "FeatureService" as Service
+participant "Repository" as Repo
+participant "ExternalDependency" as External
+participant "Logger/Analytics" as Logger
+
+UI -> Service: doSomething(input)
+alt 输入非法/前置条件不满足
+  Service -> Logger: error("...", InvalidInput, {...})
+  Service --> UI: Failure(InvalidInput)
+else 外部依赖超时/限流/不可用
+  Service -> External: call(...)
+  External --> Service: error/timeout
+  Service -> Logger: error("...", ExternalFailed, {...})
+  Service --> UI: Success(fallback) ' 降级/兜底（按决策）
+else 正常
+  Service -> Repo: getOrLoad(...)
+  Repo --> Service: data
+  Service -> Logger: event("...", {...})
+  Service --> UI: Success(result)
+end
+
+@enduml
 ```
 
-##### SEQ-002 获取待复习列表（端到端异常链路）
+#### A3.3.2 Feature 关键流程（流程图，必须）
 
-```mermaid
-sequenceDiagram
-  participant UI as UI/ViewModel
-  participant Engine as SpacedRepetitionEngine
-  participant Scheduler as ReviewScheduler
-  participant Manager as LearningStateManager
-  participant Repo as LearningStateRepository
-  participant Logger as SrsLogger
-
-  UI->>Engine: getReviewList(now, limit)
-  alt limit 非法
-    Engine->>Logger: error("srs.review_list.bad_input", InvalidInput, {limit})
-    Engine-->>UI: Result.Failure(InvalidInput)
-  else DB 读取失败
-    Engine->>Scheduler: buildReviewList(limit)
-    Scheduler->>Manager: queryDue(now, limit*oversample)
-    Manager->>Repo: queryDue(now, limit*oversample)
-    Repo-->>Manager: Result.Failure(DbReadFailed)
-    Manager-->>Scheduler: Result.Failure(DbReadFailed)
-    Scheduler-->>Engine: Result.Failure(DbReadFailed)
-    Engine->>Logger: error("srs.review_list.fail", DbReadFailed, {limit})
-    Engine-->>UI: Result.Success([])  %% 降级：空列表（不阻塞业务）
-  else 协程取消/中断
-    Engine-->>UI: Result.Failure(Cancelled)
-  end
-```
-
-##### SEQ-003 提交复习结果并更新状态（端到端成功链路）
-
-```mermaid
-sequenceDiagram
-  participant UI as UI/ViewModel
-  participant Engine as SpacedRepetitionEngine
-  participant Manager as LearningStateManager
-  participant Calc as ReviewCalculator
-  participant SM2 as SM2Algorithm
-  participant LRepo as LearningStateRepository
-  participant RRepo as ReviewRecordRepository
-  participant Logger as SrsLogger
-
-  UI->>Engine: submitReview(wordId, quality, reviewedAt)
-  Engine->>Manager: getOrCreate(wordId)
-  Manager-->>Engine: state
-  Engine->>Calc: calculate(state, quality, reviewedAt)
-  Calc->>SM2: nextIntervalDays(n, ef, intervalDays, quality)
-  SM2-->>Calc: Sm2Step
-  Calc-->>Engine: ReviewResult(nextReviewAt,...)
-  Engine->>Manager: updateAfterReview(wordId, ReviewResult)
-  Manager->>LRepo: upsert(newState)
-  LRepo-->>Manager: ok
-  Manager->>RRepo: insert(reviewRecord)
-  RRepo-->>Manager: ok
-  Manager-->>Engine: newState
-  Engine->>Logger: event("srs.review.submit.ok", {wordId, costMs})
-  Engine-->>UI: Result.Success(newState)
-```
-
-##### SEQ-004 提交复习结果并更新状态（端到端异常链路）
-
-```mermaid
-sequenceDiagram
-  participant UI as UI/ViewModel
-  participant Engine as SpacedRepetitionEngine
-  participant Calc as ReviewCalculator
-  participant Manager as LearningStateManager
-  participant Logger as SrsLogger
-
-  UI->>Engine: submitReview(wordId, quality, reviewedAt)
-  alt quality 非法
-    Engine->>Calc: calculate(state, quality, reviewedAt)
-    Calc-->>Engine: Failure(InvalidInput)
-    Engine->>Logger: error("srs.review.submit.bad_input", InvalidInput, {wordId, quality})
-    Engine-->>UI: Result.Failure(InvalidInput)
-  else 计算溢出/异常（降级）
-    Engine->>Calc: calculate(...)
-    Calc-->>Engine: Success(ReviewResult(defaultInterval))
-    Engine->>Manager: updateAfterReview(wordId, ReviewResult)
-    Manager-->>Engine: Success(newState)
-    Engine-->>UI: Result.Success(newState)
-  else 状态写入失败
-    Engine->>Manager: updateAfterReview(wordId, ReviewResult)
-    Manager-->>Engine: Failure(DbWriteFailed)
-    Engine->>Logger: error("srs.review.submit.persist_fail", DbWriteFailed, {wordId})
-    Engine-->>UI: Result.Failure(DbWriteFailed)
-  end
-```
-
-#### A3.4 模块详细设计（A3.2 全覆盖：类图 + 成功时序 + 异常时序 + 异常清单）
-
-> 说明：本节以 `A3.2 模块拆分与职责` 为“模块目录”，要求 **1:1 覆盖每个模块**，并且每个模块必须产出：
-> - UML 类图（Mermaid `classDiagram`，字段/方法签名级别）
-> - UML 时序图（成功 1 张，Mermaid `sequenceDiagram`）
-> - UML 时序图（异常 1 张，必须用 `alt/else` 覆盖关键失败模式）
-> - 异常清单表（与异常时序图互校）
->
-> 约定：
-> - `quality` 取值范围：0..5（SM-2 语义）；超范围视为输入错误
-> - 时间使用 `Instant`（或等价 UTC 时间戳），避免本地时区导致的排序与到期判断偏差
-
-##### 模块：算法引擎接口层（`SpacedRepetitionEngine`）
-
-- **模块定位**：对业务 Feature 提供唯一接入点（API 层），负责编排 Scheduler/Calculator/Manager，并统一错误/日志/线程语义
-- **设计目标**：接口稳定（向后兼容）、调用简单、错误语义一致、关键路径可观测
-- **对外接口（协议）**：
-  - `suspend fun getReviewList(now: Instant, limit: Int): Result<List<LearningTask>>`
-  - `suspend fun submitReview(wordId: String, quality: Int, reviewedAt: Instant): Result<LearningState>`
-  - `fun observeLearningState(wordId: String): Flow<LearningState?>`
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class SpacedRepetitionEngine {
-    <<interface>>
-    +getReviewList(now: Instant, limit: Int): Result~List~LearningTask~~
-    +submitReview(wordId: String, quality: Int, reviewedAt: Instant): Result~LearningState~
-    +observeLearningState(wordId: String): Flow~LearningState?~
-  }
-
-  class DefaultSpacedRepetitionEngine {
-    -scheduler: ReviewScheduler
-    -stateManager: LearningStateManager
-    -calculator: ReviewCalculator
-    -logger: SrsLogger
-    +getReviewList(now: Instant, limit: Int): Result~List~LearningTask~~
-    +submitReview(wordId: String, quality: Int, reviewedAt: Instant): Result~LearningState~
-    +observeLearningState(wordId: String): Flow~LearningState?~
-  }
-
-  class SrsLogger {
-    <<interface>>
-    +event(name: String, fields: Map~String, Any~): Unit
-    +error(name: String, err: SrsError, fields: Map~String, Any~): Unit
-  }
-
-  SpacedRepetitionEngine <|.. DefaultSpacedRepetitionEngine
-  DefaultSpacedRepetitionEngine --> ReviewScheduler
-  DefaultSpacedRepetitionEngine --> LearningStateManager
-  DefaultSpacedRepetitionEngine --> ReviewCalculator
-  DefaultSpacedRepetitionEngine --> SrsLogger
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant UI as Business(UI/ViewModel)
-  participant Engine as SpacedRepetitionEngine
-  participant Scheduler as ReviewScheduler
-  participant Logger as SrsLogger
-
-  UI->>Engine: getReviewList(now, limit)
-  Engine->>Scheduler: buildReviewList(limit)
-  Scheduler-->>Engine: Result.Success(list)
-  Engine->>Logger: event("srs.review_list.ok", {limit, size, costMs})
-  Engine-->>UI: Result.Success(list)
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant UI as Business(UI/ViewModel)
-  participant Engine as SpacedRepetitionEngine
-  participant Scheduler as ReviewScheduler
-  participant Logger as SrsLogger
-
-  UI->>Engine: getReviewList(now, limit)
-  alt limit 非法（<=0 或过大）
-    Engine->>Logger: error("srs.review_list.bad_input", InvalidInput, {limit})
-    Engine-->>UI: Result.Failure(InvalidInput)
-  else Scheduler/DB 失败
-    Engine->>Scheduler: buildReviewList(limit)
-    Scheduler-->>Engine: Result.Failure(DbReadFailed)
-    Engine->>Logger: error("srs.review_list.fail", DbReadFailed, {limit})
-    Engine-->>UI: Result.Success([])  %% 降级：返回空列表（避免阻塞学习流程）
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-API-001 | `getReviewList` | `limit<=0` 或超过上限 | `InvalidInput` | 否 | 直接失败返回 | 开发期参数错误（不面向用户） | `limit` |
-| EX-API-002 | `getReviewList` | Scheduler 返回 `DbReadFailed` | `DbReadFailed` | 是 | 降级为空列表 + 记录日志 | “暂无可复习内容” | `limit` `costMs` |
-
-##### 模块：SM-2 算法实现（`SM2Algorithm`）
-
-- **模块定位**：纯算法核心（Core），计算 SM-2 的 EF/interval 步进与边界裁剪
-- **设计目标**：结果可复现、边界完备、耗时稳定（单词级 p95 ≤ 10ms 的子预算 ≤ 2ms）
-- **对外接口（协议）**：
-  - `fun nextIntervalDays(n: Int, ef: Float, lastIntervalDays: Int, quality: Int): Result<Sm2Step>`
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class SM2Algorithm {
-    +nextIntervalDays(n: Int, ef: Float, lastIntervalDays: Int, quality: Int): Result~Sm2Step~
-  }
-
-  class Sm2Step {
-    +newN: Int
-    +newEF: Float
-    +newIntervalDays: Int
-  }
-
-  class SrsError {
-    <<sealed>>
-    +InvalidInput
-    +CalculationOverflow
-    +Unknown
-  }
-
-  SM2Algorithm --> Sm2Step
-  SM2Algorithm --> SrsError
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Calc as ReviewCalculator
-  participant SM2 as SM2Algorithm
-
-  Calc->>SM2: nextIntervalDays(n, ef, intervalDays, quality)
-  SM2-->>Calc: Result.Success(Sm2Step(newN,newEF,newIntervalDays))
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Calc as ReviewCalculator
-  participant SM2 as SM2Algorithm
-
-  Calc->>SM2: nextIntervalDays(n, ef, intervalDays, quality)
-  alt quality 不在 0..5
-    SM2-->>Calc: Result.Failure(InvalidInput)
-  else 计算溢出/非法数值（NaN/Inf）
-    SM2-->>Calc: Result.Failure(CalculationOverflow)
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-SM2-001 | `nextIntervalDays` | `quality` 超范围 | `InvalidInput` | 否 | 直接失败，交由上层降级/默认参数 | - | `quality` |
-| EX-SM2-002 | `nextIntervalDays` | NaN/Inf/乘法溢出 | `CalculationOverflow` | 否 | 返回失败，由上层使用边界值/默认值 | - | `n` `ef` `intervalDays` |
-
-##### 模块：记忆强度评估器（`MemoryStrengthEvaluator`）
-
-- **模块定位**：根据 LearningState 计算 `memoryStrength`（0..1）与排序评分（越大越优先）
-- **设计目标**：计算确定性、排序稳定、耗时可控（单词级子预算 ≤ 1ms）
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class MemoryStrengthEvaluator {
-    +evaluate(state: LearningState, now: Instant): Float
-    +scoreForSort(state: LearningState, now: Instant): Float
-  }
-  class LearningState {
-    +learnCount: Int
-    +lastReviewedAt: Instant?
-    +nextReviewAt: Instant
-    +easeFactor: Float
-    +intervalDays: Int
-    +memoryStrength: Float
-  }
-  MemoryStrengthEvaluator --> LearningState
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Scheduler as ReviewScheduler
-  participant Eval as MemoryStrengthEvaluator
-
-  Scheduler->>Eval: scoreForSort(state, now)
-  Eval-->>Scheduler: score(Float)
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Scheduler as ReviewScheduler
-  participant Eval as MemoryStrengthEvaluator
-
-  Scheduler->>Eval: scoreForSort(state, now)
-  alt state 字段缺失/非法（例如 nextReviewAt 为 0）
-    Eval-->>Scheduler: 0.0  %% 降级：最低优先级
-  else 正常
-    Eval-->>Scheduler: score(Float)
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-EVAL-001 | `scoreForSort` | 状态字段非法/缺失 | `DataCorrupted` | 否 | 降级评分为 0，并在上层记录告警日志 | - | `wordId` |
-
-##### 模块：复习调度器（`ReviewScheduler`）
-
-- **模块定位**：生成待复习任务列表（Due + Priority Sort + Limit），对外只输出 `LearningTask`
-- **设计目标**：列表生成 p95 ≤ 200ms（Top 100 Due）；支持批量到期（1000）p95 ≤ 500ms
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class ReviewScheduler {
-    -stateManager: LearningStateManager
-    -evaluator: MemoryStrengthEvaluator
-    -clock: Clock
-    +buildReviewList(limit: Int): Result~List~LearningTask~~
-  }
-  class LearningTask {
-    +wordId: String
-    +dueAt: Instant
-    +priorityScore: Float
-  }
-  ReviewScheduler --> LearningStateManager
-  ReviewScheduler --> MemoryStrengthEvaluator
-  ReviewScheduler --> LearningTask
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Engine as SpacedRepetitionEngine
-  participant Scheduler as ReviewScheduler
-  participant Manager as LearningStateManager
-  participant Eval as MemoryStrengthEvaluator
-
-  Engine->>Scheduler: buildReviewList(limit)
-  Scheduler->>Manager: queryDue(now, limit*oversample)
-  Manager-->>Scheduler: Result.Success(states)
-  loop for each state
-    Scheduler->>Eval: scoreForSort(state, now)
-    Eval-->>Scheduler: score
-  end
-  Scheduler-->>Engine: Result.Success(tasks(sorted, limited))
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Engine as SpacedRepetitionEngine
-  participant Scheduler as ReviewScheduler
-  participant Manager as LearningStateManager
-
-  Engine->>Scheduler: buildReviewList(limit)
-  alt DB 查询失败
-    Scheduler->>Manager: queryDue(now, limit*oversample)
-    Manager-->>Scheduler: Result.Failure(DbReadFailed)
-    Scheduler-->>Engine: Result.Failure(DbReadFailed)
-  else 查询成功但状态数据损坏
-    Scheduler->>Manager: queryDue(now, limit*oversample)
-    Manager-->>Scheduler: Result.Success(states)
-    Scheduler-->>Engine: Result.Success([]) %% 降级：忽略坏数据
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-SCH-001 | `buildReviewList` | `queryDue` 失败 | `DbReadFailed` | 是 | 透传失败给 Engine，由 Engine 降级为空列表 | “暂无可复习内容” | `limit` |
-| EX-SCH-002 | `buildReviewList` | 状态数据损坏 | `DataCorrupted` | 否 | 忽略坏数据 + 记录告警 | - | `wordId` |
-
-##### 模块：学习状态管理器（`LearningStateManager`）
-
-- **模块定位**：学习状态生命周期（创建/读取/更新/观察），保证幂等与一致性（事务）
-- **设计目标**：更新 p95 ≤ 100ms；幂等更新；可观测（成功/失败/耗时/冲突）
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class LearningStateManager {
-    -learningRepo: LearningStateRepository
-    -reviewRepo: ReviewRecordRepository
-    -clock: Clock
-    -mutex: Mutex
-    +getOrCreate(wordId: String): Result~LearningState~
-    +updateAfterReview(wordId: String, review: ReviewResult): Result~LearningState~
-    +observe(wordId: String): Flow~LearningState?~
-    +queryDue(now: Instant, limit: Int): Result~List~LearningState~~
-  }
-  class LearningStateRepository {
-    <<interface>>
-    +get(wordId: String): Result~LearningState?~
-    +upsert(state: LearningState): Result~Unit~
-    +queryDue(now: Instant, limit: Int): Result~List~LearningState~~
-  }
-  class ReviewRecordRepository {
-    <<interface>>
-    +insert(record: ReviewRecord): Result~Unit~
-  }
-  LearningStateManager --> LearningStateRepository
-  LearningStateManager --> ReviewRecordRepository
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Engine as SpacedRepetitionEngine
-  participant Manager as LearningStateManager
-  participant LRepo as LearningStateRepository
-  participant RRepo as ReviewRecordRepository
-
-  Engine->>Manager: updateAfterReview(wordId, review)
-  Manager->>LRepo: get(wordId)
-  LRepo-->>Manager: Result.Success(state?)
-  Manager->>LRepo: upsert(newState)
-  LRepo-->>Manager: Result.Success(Unit)
-  Manager->>RRepo: insert(reviewRecord)
-  RRepo-->>Manager: Result.Success(Unit)
-  Manager-->>Engine: Result.Success(newState)
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Engine as SpacedRepetitionEngine
-  participant Manager as LearningStateManager
-  participant LRepo as LearningStateRepository
-  participant RRepo as ReviewRecordRepository
-
-  Engine->>Manager: updateAfterReview(wordId, review)
-  alt 学习状态写入失败
-    Manager->>LRepo: upsert(newState)
-    LRepo-->>Manager: Result.Failure(DbWriteFailed)
-    Manager-->>Engine: Result.Failure(DbWriteFailed)
-  else 复习记录写入失败（允许降级）
-    Manager->>LRepo: upsert(newState)
-    LRepo-->>Manager: Result.Success(Unit)
-    Manager->>RRepo: insert(reviewRecord)
-    RRepo-->>Manager: Result.Failure(DbWriteFailed)
-    Manager-->>Engine: Result.Success(newState) %% 降级：状态已保存，记录写入失败仅影响统计
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-MGR-001 | `updateAfterReview` | 状态写入失败 | `DbWriteFailed` | 是 | 返回失败；上层可重试或提示 | “保存失败，请重试” | `wordId` |
-| EX-MGR-002 | `updateAfterReview` | 复习记录写入失败 | `DbWriteFailed` | 是 | 降级成功（不阻塞学习），后台重试（未来） | - | `wordId` |
-
-##### 模块：复习时机计算器（`ReviewCalculator`）
-
-- **模块定位**：把 SM-2 步进 + 时间边界（1h..365d）组合成 `ReviewResult`
-- **设计目标**：单词级计算 p95 ≤ 10ms（整体），此模块子预算 ≤ 5ms；异常可降级
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class ReviewCalculator {
-    -sm2: SM2Algorithm
-    -params: AlgorithmParameters
-    +calculate(state: LearningState, quality: Int, reviewedAt: Instant): Result~ReviewResult~
-  }
-  ReviewCalculator --> SM2Algorithm
-  ReviewCalculator --> AlgorithmParameters
-  ReviewCalculator --> ReviewResult
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Engine as SpacedRepetitionEngine
-  participant Calc as ReviewCalculator
-  participant SM2 as SM2Algorithm
-
-  Engine->>Calc: calculate(state, quality, reviewedAt)
-  Calc->>SM2: nextIntervalDays(n, ef, intervalDays, quality)
-  SM2-->>Calc: Success(Sm2Step)
-  Calc-->>Engine: Success(ReviewResult(nextReviewAt,...))
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Engine as SpacedRepetitionEngine
-  participant Calc as ReviewCalculator
-  participant SM2 as SM2Algorithm
-
-  Engine->>Calc: calculate(state, quality, reviewedAt)
-  alt quality 非法
-    Calc-->>Engine: Failure(InvalidInput)
-  else SM2 溢出/异常
-    Calc->>SM2: nextIntervalDays(...)
-    SM2-->>Calc: Failure(CalculationOverflow)
-    Calc-->>Engine: Success(ReviewResult(defaultInterval)) %% 降级：默认间隔
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-CALC-001 | `calculate` | `quality` 超范围 | `InvalidInput` | 否 | 直接失败 | - | `quality` |
-| EX-CALC-002 | `calculate` | SM2 溢出/非法值 | `CalculationOverflow` | 否 | 降级默认间隔（如 1d） | - | `wordId` |
-
-##### 模块：学习状态仓库（`LearningStateRepository`）
-
-- **模块定位**：数据访问（Data），把 DAO/Entity 与 Domain Model 映射；提供 due 查询与索引要求
-- **设计目标**：查询稳定、支持事务、索引覆盖 `nextReviewAt`；单次 due 查询 p95 ≤ 50ms（子预算）
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class LearningStateRepository {
-    <<interface>>
-    +get(wordId: String): Result~LearningState?~
-    +upsert(state: LearningState): Result~Unit~
-    +queryDue(now: Instant, limit: Int): Result~List~LearningState~~
-  }
-  class LearningStateRepositoryImpl {
-    -dao: LearningStateDao
-    +get(wordId: String): Result~LearningState?~
-    +upsert(state: LearningState): Result~Unit~
-    +queryDue(now: Instant, limit: Int): Result~List~LearningState~~
-  }
-  class LearningStateDao {
-    <<interface>>
-    +get(wordId: String): LearningStateEntity?
-    +upsert(entity: LearningStateEntity): Unit
-    +queryDue(nowEpochMs: Long, limit: Int): List~LearningStateEntity~
-  }
-  class LearningStateEntity {
-    +wordId: String
-    +learnCount: Int
-    +lastReviewedAtEpochMs: Long?
-    +nextReviewAtEpochMs: Long
-    +easeFactor: Float
-    +intervalDays: Int
-    +memoryStrength: Float
-    +mastered: Boolean
-  }
-  LearningStateRepository <|.. LearningStateRepositoryImpl
-  LearningStateRepositoryImpl --> LearningStateDao
-  LearningStateDao --> LearningStateEntity
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Manager as LearningStateManager
-  participant Repo as LearningStateRepository
-  participant Dao as LearningStateDao
-  participant DB as RoomDB
-
-  Manager->>Repo: queryDue(now, limit)
-  Repo->>Dao: queryDue(nowEpochMs, limit)
-  Dao->>DB: SELECT ... WHERE nextReviewAt<=now ORDER BY nextReviewAt LIMIT ?
-  DB-->>Dao: rows
-  Dao-->>Repo: entities
-  Repo-->>Manager: Result.Success(states)
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Manager as LearningStateManager
-  participant Repo as LearningStateRepository
-  participant Dao as LearningStateDao
-  participant DB as RoomDB
-
-  Manager->>Repo: queryDue(now, limit)
-  alt DB 读取异常/损坏
-    Repo->>Dao: queryDue(...)
-    Dao-->>Repo: throws/returns error
-    Repo-->>Manager: Result.Failure(DbReadFailed)
-  else 数据映射失败
-    Repo-->>Manager: Result.Failure(DataCorrupted)
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-LR-001 | `queryDue/get` | Room 读取失败 | `DbReadFailed` | 是 | 返回失败，交由上层降级 | - | `limit` |
-| EX-LR-002 | 映射 Entity→Domain | 字段缺失/非法 | `DataCorrupted` | 否 | 返回失败，上层使用默认参数重新初始化 | `可能需要重置学习数据` | `wordId` |
-
-##### 模块：复习记录仓库（`ReviewRecordRepository`）
-
-- **模块定位**：复习记录持久化（用于统计/追溯/未来调优），写入失败不得阻塞学习主流程
-- **设计目标**：写入 p95 ≤ 50ms（子预算）；失败可降级
-
-###### UML 类图（必须）
-
-```mermaid
-classDiagram
-  class ReviewRecordRepository {
-    <<interface>>
-    +insert(record: ReviewRecord): Result~Unit~
-    +queryByWord(wordId: String, limit: Int): Result~List~ReviewRecord~~
-  }
-  class ReviewRecordRepositoryImpl {
-    -dao: ReviewRecordDao
-    +insert(record: ReviewRecord): Result~Unit~
-    +queryByWord(wordId: String, limit: Int): Result~List~ReviewRecord~~
-  }
-  class ReviewRecordDao {
-    <<interface>>
-    +insert(entity: ReviewRecordEntity): Unit
-    +queryByWord(wordId: String, limit: Int): List~ReviewRecordEntity~
-  }
-  class ReviewRecordEntity {
-    +id: Long
-    +wordId: String
-    +reviewedAtEpochMs: Long
-    +quality: Int
-    +intervalDays: Int
-  }
-  ReviewRecordRepository <|.. ReviewRecordRepositoryImpl
-  ReviewRecordRepositoryImpl --> ReviewRecordDao
-  ReviewRecordDao --> ReviewRecordEntity
-```
-
-###### 时序图 - 成功链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Manager as LearningStateManager
-  participant Repo as ReviewRecordRepository
-  participant Dao as ReviewRecordDao
-  participant DB as RoomDB
-
-  Manager->>Repo: insert(reviewRecord)
-  Repo->>Dao: insert(entity)
-  Dao->>DB: INSERT INTO review_records ...
-  DB-->>Dao: ok
-  Dao-->>Repo: ok
-  Repo-->>Manager: Result.Success(Unit)
-```
-
-###### 时序图 - 异常链路（必须）
-
-```mermaid
-sequenceDiagram
-  participant Manager as LearningStateManager
-  participant Repo as ReviewRecordRepository
-
-  Manager->>Repo: insert(reviewRecord)
-  alt DB 写入失败/空间不足
-    Repo-->>Manager: Result.Failure(DbWriteFailed)
-  else 正常
-    Repo-->>Manager: Result.Success(Unit)
-  end
-```
-
-###### 异常清单（必须，与时序图互校）
-
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|---|---|---|---|---|---|---|---|
-| EX-RR-001 | `insert` | Room 写入失败/空间不足 | `DbWriteFailed` | 是 | 上层降级（不阻塞学习），记录日志，未来补偿重试 | - | `wordId` |
-
-#####（算法 Capability Feature 场景）算法交付与工程化清单（若适用则必填）
-
-- **模型提供**：
-  - 算法模型：SM-2（SuperMemo 2）算法，基于遗忘曲线理论（Ebbinghaus）
-  - 算法来源：经典间隔重复算法，无需训练数据
-  - 算法版本：v1.0（第一阶段固定版本，后续可扩展支持其他算法）
-
-- **推理部署**：
-  - 部署方式：端侧本地计算，不依赖网络
-  - 运行时：Kotlin 协程，在 IO 线程执行算法计算
-  - 算法更新策略：通过接口版本化，支持未来切换算法实现
-
-- **工程化封装**：
-  - 算法 SDK/API：提供统一的 `SpacedRepetitionEngine` 接口，封装算法实现细节
-  - 线程与资源控制：算法计算在 Dispatchers.IO 执行，限制并发数（最多 10 个）
-  - 缓存：学习状态内存缓存，减少数据库查询
-  - 降级与回退：算法计算失败时使用默认参数或上次成功结果，记录错误日志
-
-- **评估与监控**：
-  - 离线指标：算法计算耗时、准确率（基于测试数据集）
-  - 线上指标：复习时机计算成功率、学习状态更新成功率
-  - 漂移监测：监控算法参数效果，收集用户学习数据用于未来优化
-  - 告警：算法计算失败率超过阈值时告警
-  - 灰度策略：算法参数调整时支持 A/B 测试（未来扩展）
-
-### A4. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）
-
-> 定义：关键流程设计必须用**流程图（flowchart）**描述，且流程图中必须覆盖正常流程与所有关键异常分支（失败/超时/并发/生命周期等）。
+> **目的**：展示 Feature 的核心用户流程，从触发到完成的完整路径。
 >
 > 要求：
-> - 若存在多个关键流程（如“登录”“同步”“下单”“上传”等），则每个流程单独一张图。
-> - 每张图必须包含：触发条件、关键决策点、外部依赖调用、重试/降级/兜底路径、最终可观测信号（日志/指标/埋点）。
+> - 每个关键流程一张图，覆盖正常 + **全部关键异常分支**
+> - **不得**将异常分支拆分为“异常专用流程图”；复杂异常也必须放在同一张流程图中（可用子流程/注释/分组表达，但仍需同图）
+> - 流程图侧重"做什么"（业务视角），时序图侧重"怎么调用"（技术视角）
 
-#### 流程 1：单词学习流程
+##### 流程 1：[流程名称]
 
-```mermaid
-flowchart TD
-  Start([用户开始学习单词]) --> CheckWordId{单词 ID 有效?}
-  CheckWordId -->|无效| InvalidError[返回错误] --> End([结束])
-  CheckWordId -->|有效| LoadState{加载学习状态}
-  
-  LoadState -->|状态存在| CheckFirstTime{首次学习?}
-  LoadState -->|状态不存在| InitState[初始化学习状态<br/>使用默认参数]
-  LoadState -->|加载失败| LoadError[使用默认参数初始化]
-  
-  InitState --> RecordFirstLearn[记录首次学习]
-  CheckFirstTime -->|是| RecordFirstLearn
-  CheckFirstTime -->|否| CheckReviewTime{到达复习时间?}
-  
-  CheckReviewTime -->|是| ReviewFlow[进入复习流程]
-  CheckReviewTime -->|否| ShowWord[显示单词]
-  RecordFirstLearn --> ShowWord
-  
-  ShowWord --> UserAnswer{用户回答结果}
-  UserAnswer -->|认识| Quality5[quality = 5]
-  UserAnswer -->|不认识| Quality0[quality = 0]
-  
-  Quality5 --> CalculateReview[调用 SM-2 算法计算复习时机]
-  Quality0 --> CalculateReview
-  
-  CalculateReview --> CalcResult{计算结果}
-  CalcResult -->|计算成功| UpdateState[更新学习状态<br/>保存到数据库]
-  CalcResult -->|计算失败| CalcError[使用默认参数<br/>记录错误日志] --> DefaultUpdate[使用默认间隔更新状态]
-  
-  UpdateState --> UpdateResult{更新结果}
-  DefaultUpdate --> UpdateResult
-  UpdateResult -->|成功| LogSuccess[记录学习成功事件] --> End
-  UpdateResult -->|失败| UpdateError[记录更新失败日志<br/>使用内存状态] --> End
-  
-  ReviewFlow --> End
+```plantuml
+@startuml
+!theme mars
+
+start
+:用户触发;
+if (前置条件?) then (不满足)
+  :提示/引导;
+  stop
+else (满足)
+  :执行核心逻辑;
+  if (成功?) then (是)
+    :更新UI/存储;
+    stop
+  else (否)
+    if (可重试?) then (是)
+      :重试;
+      :执行核心逻辑;
+    else (否)
+      :降级/提示;
+      stop
+    endif
+  endif
+endif
+
+@enduml
 ```
 
-#### 流程 2：复习时机计算流程
+###### 流程 1 - 异常分支映射（必须）
 
-```mermaid
-flowchart TD
-  Start([请求计算复习时机]) --> LoadState{加载学习状态}
-  LoadState -->|成功| ValidateInput{验证输入参数}
-  LoadState -->|失败| StateError[使用默认状态] --> ValidateInput
-  
-  ValidateInput -->|参数无效| InputError[返回参数错误<br/>记录日志] --> End([结束])
-  ValidateInput -->|参数有效| CheckAlgorithm{算法类型}
-  
-  CheckAlgorithm -->|SM-2| SM2Calc[执行 SM-2 算法计算]
-  CheckAlgorithm -->|其他算法| OtherCalc[执行其他算法]
-  
-  SM2Calc --> CalcResult{计算结果}
-  OtherCalc --> CalcResult
-  
-  CalcResult -->|成功| ValidateResult{验证结果范围}
-  CalcResult -->|计算异常| CalcException[捕获异常<br/>使用默认参数] --> DefaultResult[使用默认间隔]
-  
-  ValidateResult -->|结果有效| SaveResult[保存计算结果]
-  ValidateResult -->|结果超范围| RangeError[截断到边界值] --> SaveResult
-  
-  DefaultResult --> SaveResult
-  SaveResult --> LogCalc[记录计算事件<br/>耗时/参数/结果] --> End
-  InputError --> End
+> 目的：确保异常流程“无遗漏、可追踪”，并能与时序图/异常清单互相校验。
+
+| 分支ID | 对应异常ID（EX-xxx） | 触发条件 | 对策（重试/降级/回滚/补偿） | 用户提示 | 覆盖的 NFR |
+|---|---|---|---|---|---|
+| BR-001 | EX-001 |  |  |  | NFR-OBS-??? |
+
+##### 流程 2：[流程名称]
+
+```plantuml
+@startuml
+!theme mars
+
+start
+:触发;
+stop
+
+@enduml
 ```
 
-### A5. 技术风险与消解策略（绑定 Story/Task）
+#### A3.4 组件详细设计（每个组件必须）
+
+> **要求**：对 A3.1 中的每个组件，产出以下内容：
+> - **组件类图**：该组件内部的类/接口细节
+> - **组件全景时序图（同图）**：同一张 PlantUML 时序图中覆盖正常 + 关键异常（用 `alt/else`），不得拆分成功/异常两张图
+> - **异常清单表**：与时序图互校，确保无遗漏
+
+##### 组件：[组件名]
+
+- **组件定位**：[它解决什么问题]
+- **设计目标**：[性能/可测试性/可扩展性等]
+- **核心数据结构**：[关键实体/状态/DTO]
+- **对外接口**：[暴露的方法签名、错误类型]
+- **策略与算法**：[缓存/重试/合并等策略，如适用]
+- **失败与降级**：[超时/IO失败/数据异常的处理]
+
+###### 组件类图（必须）
+
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 画清该组件内部的类/接口
+class TODO_ComponentReplaceMe {
+  + placeholder: String
+  + doSomething(): Unit
+}
+
+@enduml
+```
+
+###### 时序图 - 全景（同图含正常+异常，必须）
+
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 在同一张图里用 alt/else 覆盖正常 + 关键异常（不得拆分为两张图）
+participant Caller
+participant Component
+participant Dependency
+
+Caller -> Component: call(...)
+alt 正常
+  Component -> Dependency: doWork(...)
+  Dependency --> Component: ok
+  Component --> Caller: Success(...)
+else 依赖失败/超时/取消/数据异常
+  Component -> Dependency: doWork(...)
+  Dependency --> Component: error/timeout
+  Component --> Caller: Failure(...)
+end
+
+@enduml
+```
+
+###### 异常清单（必须，与时序图互校）
+
+| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
+|--------|--------|----------|----------|--------|------|----------|----------|
+| EX-001 |  |  |  | 是/否 |  |  |  |
+
+> **互校规则**：
+> - 异常清单每一行 ↔ 时序图中有对应 alt/else 分支
+> - 时序图每个失败分支 ↔ 异常清单中有明确对策
+
+##### （Capability Feature）交付物与接入契约（若适用）
+
+> 适用于：埋点/组件库/算法SDK 等横切能力 Feature
+
+- **交付物形态**：SDK / 资源包 / 配置 / 服务接口
+- **对外接口**：初始化、调用方式、生命周期
+- **版本与兼容**：SemVer、向后兼容策略
+- **验收标准**：可测量的完成定义
+
+##### （算法 Feature）算法交付清单（若适用）
+
+- **模型提供**：来源/版本/输入输出
+- **推理部署**：端侧/服务端、运行时
+- **降级策略**：无模型/低端机/失败时的兜底
+- **监控**：指标/告警/灰度
+
+### A4. 技术风险与消解策略（绑定 Story/Task）
 
 | 风险ID | 风险描述 | 触发条件 | 影响范围 | 严重度 | 消解策略 | 对应 Story/Task |
 |---|---|---|---|---|---|---|
-| RISK-001 | 算法计算异常导致复习时机计算失败 | 输入参数无效、计算溢出、除零错误、算法实现错误 | 用户无法获得准确的复习时机，学习效果下降 | High | 1. 严格的参数校验和边界检查 2. 捕获所有计算异常，使用默认参数 3. 记录详细错误日志用于排查 4. 算法计算超时保护（100ms） 5. 计算结果范围验证（间隔 1 小时-365 天） | ST-001, ST-005 |
-| RISK-002 | 学习状态数据丢失导致学习进度丢失 | 数据库操作失败、数据损坏、应用崩溃时数据未保存 | 用户学习进度丢失，需重新开始学习 | High | 1. 使用 Room 事务确保数据一致性 2. 关键操作前检查数据库可用性 3. 应用生命周期监听，退出前保存数据 4. 数据校验和恢复机制 5. 定期备份机制（可选） | ST-006 |
-| RISK-003 | 算法性能不达标导致用户体验差 | 批量计算耗时过长、数据库查询慢、内存占用过高 | 用户等待时间长，功能不可用 | Med | 1. 算法计算优化（批量并行处理） 2. 数据库查询优化（索引、分页） 3. 内存缓存机制 4. 性能监控和告警 5. 降级策略（简化计算、延迟加载） | ST-001, ST-002, ST-004 |
-| RISK-004 | 算法参数配置错误导致学习效果不佳 | 算法参数超出合理范围、参数调优不当 | 用户学习效果未达到预期，记忆效率低 | Med | 1. 参数校验和范围限制 2. 使用经过验证的默认参数 3. 提供参数调优能力（未来扩展） 4. 监控算法效果，收集用户反馈 | ST-001 |
-| RISK-005 | 大量单词同时到达复习时间导致性能问题 | 用户长时间未学习，大量单词同时需要复习 | 复习列表生成慢，应用卡顿 | Low | 1. 批量计算优化（分批处理） 2. 优先级排序和限制数量 3. 延迟加载策略 4. 性能监控 | ST-002, ST-004 |
+| RISK-001 |  |  |  | High/Med/Low |  | ST-??? / T??? |
 
-### A6. 边界 & 异常场景枚举（数据/状态/生命周期/并发/用户行为）
+### A5. 边界 & 异常场景枚举（数据/状态/生命周期/并发/用户行为）
 
-- **数据边界**：
-  - **空词库**：词库数据为空 → 算法引擎返回空学习列表，不抛出异常
-  - **无学习历史**：首次学习无历史数据 → 使用默认算法参数初始化学习状态
-  - **学习历史数据损坏**：数据格式错误、字段缺失 → 数据校验失败，使用默认参数重新初始化，记录错误日志
-  - **算法参数超范围**：参数超出合理范围（如间隔 < 1 小时或 > 365 天） → 参数校验失败，使用边界值或默认参数，记录警告日志
-  - **大量单词状态**：学习状态数据量过大（> 10000 个） → 分批加载，使用分页查询，限制内存占用
+- **数据边界**：[空/超大/非法/重复/过期等]
+- **状态边界**：[状态机不可达/回退/重入等]
+- **生命周期**：[前后台切换/旋转/进程被杀/恢复等]
+- **并发**：[多线程/协程/并发写/竞态等]
+- **用户行为**：[快速连点/断网/弱网/权限拒绝等]
 
-- **状态边界**：
-  - **学习状态不一致**：数据库中的状态与内存缓存不一致 → 以数据库为准，更新内存缓存
-  - **复习时间已过期**：下次复习时间已过期但未复习 → 提高优先级，立即出现在复习列表中
-  - **状态机异常**：学习状态从"已掌握"回退到"学习中" → 允许状态回退（用户可能遗忘），重新计算复习间隔
-  - **并发状态更新**：多个操作同时更新同一单词的学习状态 → 使用数据库事务和锁机制，确保状态一致性
+#### A5.1 场景 → 应对措施对照表（必须）
 
-- **生命周期**：
-  - **前后台切换**：应用切换到后台时正在计算复习时机 → 后台继续计算，恢复时显示结果
-  - **屏幕旋转**：计算过程中屏幕旋转 → 使用 ViewModel 保存状态，恢复后继续显示
-  - **进程被杀**：系统回收进程时正在更新学习状态 → 状态更新失败，下次启动时重新计算
-  - **应用重启**：应用重启后 → 从数据库恢复学习状态，重新计算到达复习时间的单词
+> 目的：把“枚举”落到“可执行对策”，并与 A3.3.2 / A3.3.1 / A3.4 的异常分支互校。
 
-- **并发**：
-  - **并发学习操作**：用户快速连续学习多个单词 → 支持批量更新，使用事务确保一致性
-  - **并发复习计算**：多个单词同时到达复习时间 → 批量计算，使用协程并行处理（最多 10 个并发）
-  - **并发状态查询**：多个组件同时查询学习状态 → 使用共享的 Repository 单例，避免重复查询
-  - **竞态条件**：状态更新和查询时间差 → 使用 Flow 实时同步，确保数据一致性
+| 场景ID | 场景类别 | 触发条件（可复现） | 影响 | 预期行为（对用户/对系统） | 技术对策（重试/退避/降级/回滚/补偿/去重/限流） | 观测信号（日志/埋点/指标） | 映射（流程/时序/异常ID） |
+|---|---|---|---|---|---|---|---|
+| SC-001 | 数据 |  |  |  |  |  | 流程1 / SEQ-001 / EX-001 |
 
-- **用户行为**：
-  - **快速连点**：用户快速连续点击学习按钮 → 防抖处理，只响应第一次点击
-  - **长时间未学习**：用户长时间未使用应用 → 算法引擎应考虑时间衰减，长时间未复习的单词提高优先级
-  - **学习频率过低**：用户学习频率远低于算法预期 → 算法效果会打折扣，但不应导致错误，使用当前学习频率计算
-  - **大量单词同时学习**：用户一次性学习大量单词 → 支持批量处理，分批更新状态，避免性能问题
+### A6. 算法评估（如适用）
 
-### A7. 算法评估（如适用）
+- **目标**：[要优化什么？]
+- **指标**：[准确率/召回率/误报率/时延等]
+- **验收标准**：[量化阈值]
+- **测试方法**：[离线数据集/线上灰度/AB/回放]
+- **风险**：[数据漂移/极端样本/可解释性]
 
-- **目标**：实现基于遗忘曲线的间隔重复算法，在最佳复习时机安排复习，提升用户记忆效率
-- **指标**：
-  - **算法准确性**：复习时机计算的准确性（基于测试数据集，与标准 SM-2 算法结果对比，准确率 ≥ 95%）
-  - **记忆效果**：用户通过算法学习后的记忆保持率（7 天后记忆准确率 ≥ 70%，30 天后 ≥ 60%）
-  - **计算性能**：单个单词复习时机计算耗时 ≤ 10ms（p95）
-- **验收标准**：
-  - 算法计算结果与标准 SM-2 算法一致（测试数据集：1000 个单词的学习历史）
-  - 算法计算耗时 ≤ 10ms（p95）（测试方法：使用性能测试工具测量计算时间）
-  - 算法参数在合理范围内（初始间隔 1-7 天，难度因子 1.3-3.0）
-- **测试方法**：
-  - **离线测试**：使用标准测试数据集验证算法准确性
-  - **单元测试**：测试算法计算的边界情况（quality 0-5、各种间隔值）
-  - **集成测试**：测试算法引擎与学习状态管理的集成
-  - **线上监控**：收集用户学习数据，监控算法效果（未来扩展）
-- **风险**：
-  - **算法精度不足**：SM-2 算法精度相对较低，可能影响学习效果 → 未来可扩展支持更高级算法（SM-4/SM-5）
-  - **参数调优困难**：算法参数需要根据用户特征调优 → 第一阶段使用通用参数，未来支持个性化调优
-  - **极端学习行为**：用户学习频率过低或过高，算法效果会打折扣 → 算法应能容错处理，不导致错误
+### A7. 功耗评估（必须量化）
 
-### A8. 功耗评估（必须量化）
+- **Top5% 用户模型**：[设备/网络/使用频次/场景]
+- **测量口径**：[电流/唤醒/网络请求/定位等]
+- **预估增量**：每日 \(mAh\) 增量 ≤ [阈值]（或每次操作平均 ≤ [阈值]）
+- **验收上限**：[明确上限与失败处置]
+- **降级策略**：[达到阈值时如何降级/关闭]
 
-- **Top5% 用户模型**：Android 设备，每天学习 200 个单词，每次学习触发算法计算和状态更新
-- **测量口径**：算法计算 CPU 消耗、数据库操作 I/O 消耗、内存分配消耗
-- **预估增量**：每日 mAh 增量 ≤ 2mAh（假设每个单词计算消耗约 0.01mAh，200 个单词共 2mAh）
-- **验收上限**：每日电池消耗增量不超过 2mAh（Top5% 用户模型），超过时需优化算法计算策略
-- **降级策略**：无降级策略（算法引擎为本地计算，功耗可控）；若功耗超标，优化算法计算频率（批量计算、降低计算精度）
+### A8. 性能评估（必须量化）
 
-### A9. 性能评估（必须量化）
+- **前台**：[关键路径 p50/p95/p99 时延预算与阈值]
+- **后台**：[任务时延/调度频次/失败重试]
+- **验收指标**：[阈值 + 测试方法]
+- **降级策略**：[缓存/降采样/降精度/延后等]
 
-- **前台**：
-  - 复习时机计算（单个单词）：p50 ≤ 5ms，p95 ≤ 10ms，p99 ≤ 20ms
-  - 学习任务列表生成：p50 ≤ 100ms，p95 ≤ 200ms，p99 ≤ 400ms
-  - 学习状态更新：p50 ≤ 50ms，p95 ≤ 100ms，p99 ≤ 200ms
-- **后台**：
-  - 批量计算（1000 个单词）：p50 ≤ 300ms，p95 ≤ 500ms，p99 ≤ 800ms
-  - 算法计算：异步处理，不阻塞主线程
-- **验收指标**：
-  - 复习时机计算时间 p95 ≤ 10ms（测试方法：使用性能测试工具测量计算时间，测试设备：中端 Android 设备）
-  - 批量计算时间（1000 个单词）p95 ≤ 500ms（测试方法：批量计算标准测试数据，测量总耗时）
-  - 学习任务列表生成时间 p95 ≤ 200ms（测试方法：生成包含 100 个待复习单词的列表，测量生成时间）
-- **降级策略**：
-  - 计算超时：限制计算时间，超时使用默认参数或上次成功结果
-  - 批量计算慢：减少批量大小，分批处理
-  - 列表生成慢：限制列表数量，使用分页加载
+### A9. 内存评估（必须量化）
 
-### A10. 内存评估（必须量化）
-
-- **峰值增量**：≤ 30MB（假设 10000 个单词的学习状态，每个状态约 3KB）
-- **平均增量**：≤ 15MB（假设 5000 个单词的平均场景）
-- **生命周期**：
-  - **学习状态缓存**：应用运行期间常驻，应用退出时持久化到数据库
-  - **算法计算临时内存**：计算过程中分配，计算完成后立即释放
-  - **Room 数据库数据**：系统管理，不占用应用内存
-- **风险与对策**：
-  - **风险点**：大量学习状态缓存导致内存占用过高；批量计算时临时内存分配过多
-  - **对策**：学习状态缓存限制数量（最多 10000 个），超出部分使用数据库查询；批量计算分批处理，限制并发数；已掌握单词的状态数据可归档或清理
-- **验收标准**：
-  - 测试方法：使用内存分析工具（如 Android Profiler）测量峰值内存占用，测试场景：10000 个单词的学习状态
-  - 阈值：峰值内存增量 ≤ 30MB（不含系统开销）
-  - 算法计算临时内存：计算完成后立即释放，不增加常驻内存
+- **峰值增量**：≤ [阈值] MB
+- **平均增量**：≤ [阈值] MB
+- **生命周期**：[在哪些生命周期阶段常驻/释放]
+- **风险与对策**：[泄漏点/大对象/缓存策略]
+- **验收标准**：[测试方法 + 阈值]
 
 ## Plan-B：技术规约 & 实现约束（保留原 spec-kit 输出内容）
 
@@ -1290,141 +642,106 @@ flowchart TD
 
 > 注意：为保证工具链自动提取信息，下列字段名需保留英文 Key（括号内可补充中文）。
 
-**Language/Version**：Kotlin 1.9+ / Java 17（Android 开发）
-**Primary Dependencies**：Room 数据库（学习状态存储）、Kotlin Coroutines（异步）、AndroidX Lifecycle（生命周期）
-**Storage**：Room 数据库（学习状态和复习记录存储）
-**Test Framework**：JUnit 5、Kotlin Coroutines Test、MockK（Mocking）、Robolectric（Android 单元测试）
-**Target Platform**：Android 8.0+（API Level 26+）
-**Project Type**：mobile（Android 应用）
-**Performance Targets**：复习时机计算 p95 ≤ 10ms、批量计算（1000 个单词）p95 ≤ 500ms、学习任务列表生成 p95 ≤ 200ms
-**Constraints**：内存峰值 ≤ 30MB、本地存储 ≤ 100MB（学习状态数据）、离线可用（无需网络）
-**Scale/Scope**：单用户本地应用、学习单词数量 ≤ 10000 个、算法计算本地执行
+**Language/Version**：[例如：Kotlin 2.x / Java 17 / 需明确]
+**Primary Dependencies**：[例如：Jetpack Compose、Room、Ktor 或 需明确]
+**Storage**：[如适用，例如：Room/SQLite、DataStore、文件 或 N/A]
+**Test Framework**：[例如：JUnit、Robolectric、XCTest、pytest 或 需明确]
+**Target Platform**：[例如：Android 8+、iOS 15+、Linux server 或 需明确]
+**Project Type**：[single / web / mobile - 决定源码结构]
+**Performance Targets**：[例如：60fps、启动耗时、p95 时延等 或 需明确]
+**Constraints**：[例如：p95 <200ms、内存 <100MB、离线可用等 或 需明确]
+**Scale/Scope**：[例如：DAU、数据规模、页面数等 或 需明确]
 
 ### B2. 架构细化（实现必须遵循）
 
-- **分层约束**：
-  - 算法引擎接口层：提供统一接口，封装算法实现细节
-  - 算法核心层：实现算法逻辑，不依赖业务层
-  - 领域层：管理学习状态，协调算法计算和数据访问
-  - 数据层：提供数据访问抽象，不包含业务逻辑
-  - 存储层：仅负责数据持久化
-
-- **线程/并发模型**：
-  - 主线程：不执行算法计算，仅用于接口调用入口
-  - IO 线程：算法计算、数据库操作在 Dispatchers.IO 执行
-  - 协程：所有算法计算使用 suspend 函数，由调用方在协程作用域中调用
-  - 共享状态保护：学习状态缓存使用线程安全的容器，数据库操作使用 Room 的事务机制
-
-- **错误处理规范**：
-  - 使用 Result<T> 或 Sealed Class（Success/Failure）封装结果
-  - 错误类型：Sealed Class（AlgorithmError, CalculationError, DataError）
-  - 异常转换：底层异常转换为领域错误，不直接向上抛出系统异常
-  - 算法计算异常：捕获所有计算异常，使用默认参数或降级策略
-
-- **日志与可观测性**：
-  - 结构化日志：使用结构化日志库（如 Timber），包含操作类型、结果、耗时
-  - 关键事件记录：算法计算、复习时机计算、学习状态更新、算法异常
-  - 敏感信息脱敏：不记录单词内容，只记录单词 ID 和元数据
-  - 采样：高频操作（如批量计算）采样记录，低频操作（如学习状态更新）全量记录
+- **分层约束**：[例如：UI 只能调用 Domain；Domain 不能依赖 UI]
+- **线程/并发模型**：[主线程/IO/协程/锁策略]
+- **错误处理规范**：[统一错误码/异常封装/用户提示]
+- **日志与可观测性**：[结构化字段、采样、敏感信息脱敏]
 
 ### B3. 数据模型（引用或内联）
 
-**核心实体**：
+- 若已有 `data-model.md`：在此引用并补充关键约束
+- 若未单独拆分：在此列出实体、字段、关系、状态机与校验规则
 
-1. **LearningState（学习状态）**
-   - `wordId: String`：单词唯一标识
-   - `learningCount: Int`：学习次数
-   - `lastReviewTime: Long`：最后复习时间戳（毫秒）
-   - `memoryStrength: Float`：记忆强度（0.0-1.0）
-   - `nextReviewTime: Long`：下次复习时间戳（毫秒）
-   - `mastered: Boolean`：是否已掌握
-   - `difficultyFactor: Float`：难度因子（EF，1.3-3.0）
-   - `currentInterval: Long`：当前复习间隔（毫秒）
+#### B3.1 存储形态与边界（必须）
 
-2. **ReviewRecord（复习记录）**
-   - `wordId: String`：单词唯一标识
-   - `reviewTime: Long`：复习时间戳（毫秒）
-   - `quality: Int`：复习质量（0-5，SM-2 算法）
-   - `interval: Long`：复习间隔（毫秒）
-   - `result: ReviewResult`：复习结果（正确/错误）
+> 目的：先明确"数据落在哪里、谁负责持久化、数据生命周期"，再谈表结构/键结构。
 
-3. **AlgorithmParameters（算法参数）**
-   - `initialInterval: Long`：初始间隔（1 天，毫秒）
-   - `minDifficultyFactor: Float`：最小难度因子（1.3）
-   - `maxInterval: Long`：最大间隔（365 天，毫秒）
+- **存储形态**：Room/SQLite / DataStore / SharedPreferences / 文件（JSON/CSV/二进制） / 远端服务 / N/A
+- **System of Record（权威来源）**：哪一份数据是权威（例如：DB 为准、文件为准、服务端为准）
+- **缓存与派生数据**：哪些字段是派生/可重建的（可用于迁移与降级）
+- **生命周期**：常驻/前台/后台/退出时持久化；清理/归档策略
+- **数据规模与增长**：数量级、写入频次、读写热点（用于索引与分页策略）
 
-**数据关系**：
-- 一个单词对应一个学习状态记录（一对一）
-- 一个单词可以有多个复习记录（一对多）
-- 算法参数全局共享（单例）
+#### B3.2 物理数据结构（若使用持久化存储则必填）
 
-**校验规则**：
-- 单词 ID：非空，长度 ≤ 100 字符
-- 学习次数：≥ 0
-- 记忆强度：0.0-1.0
-- 复习间隔：1 小时-365 天（毫秒）
-- 难度因子：1.3-3.0
+> 要求：写到"可实现/可评审/可迁移"的粒度。
+> - 若使用数据库：必须列出每张表的字段、约束、索引、外键、典型查询与迁移策略。
+> - 若使用 KV/文件：必须写出键名/文件名规则、序列化结构（JSON schema/字段表）、版本与迁移策略。
+
+##### （数据库）表结构清单
+
+| 表 | 用途 | 主键/唯一约束 | 索引 | 外键 | 典型查询（Top3） | 数据量级 |
+|---|---|---|---|---|---|---|
+|  |  |  |  |  |  |  |
+
+##### （数据库）字段说明模板（每表一份）
+
+**表**：`<table_name>`
+
+| 字段 | 类型 | 约束（NOT NULL/默认值/范围） | 含义 | 来源/生成方式 | 用途（读写场景） |
+|---|---|---|---|---|---|
+|  |  |  |  |  |  |
+
+##### （数据库）迁移与兼容策略
+
+- **Schema 版本**：v1 / v2 / …（例如：Room `version`）
+- **向后兼容**：新增列默认值；字段废弃策略；索引变更策略
+- **迁移策略**：Migration 列表、失败回滚/重试策略、数据回填/重建策略
+
+##### （KV/文件）键/文件结构清单（如适用）
+
+| Key/文件 | 用途 | 结构版本 | Schema/字段说明位置 | 迁移策略 |
+|---|---|---|---|---|
+|  |  |  |  |  |
 
 ### B4. 接口规范/协议（引用或内联）
 
-**算法引擎接口**：
+- 若已有 `contracts/`：在此引用端点/协议文件（OpenAPI/Proto/JSON Schema 等）
+- 明确版本策略、兼容策略、错误响应格式
 
-```kotlin
-interface SpacedRepetitionEngine {
-    suspend fun calculateNextReview(
-        wordId: String,
-        quality: Int
-    ): Result<ReviewResult>
-    
-    suspend fun getLearningTaskList(
-        limit: Int = 50
-    ): Result<List<LearningState>>
-    
-    suspend fun updateLearningState(
-        wordId: String,
-        quality: Int
-    ): Result<LearningState>
-    
-    suspend fun getLearningState(wordId: String): Flow<LearningState?>
-    
-    suspend fun getReviewList(limit: Int): Result<List<LearningState>>
-}
-```
+#### B4.1 本 Feature 对外提供的接口（必须：Capability Feature/跨模块复用场景）
 
-**版本策略**：
-- 接口版本：使用接口版本号（v1.0），新增方法使用默认参数，确保向后兼容
-- 数据结构版本：使用 Room 数据库版本号，数据结构变更时自动迁移
+> 目的：把"能力交付物"写成可联调的契约（不是仅写类名/方法名）。
 
-**兼容策略**：
-- 向后兼容：新增字段使用默认值，删除字段时保留字段但标记为废弃
-- 数据迁移：Room 数据库版本升级时，自动迁移旧数据
+- **接口清单**：对外暴露的 API/SDK/Repository 接口列表（含用途、调用方）
+- **输入/输出**：字段含义、必填/可选、默认值、范围、示例
+- **错误语义**：错误码/错误类型、可重试/不可重试、用户可见提示策略
+- **幂等与副作用**：哪些调用必须幂等、幂等键/语义、重复调用的效果
+- **并发/线程模型**：调用是否线程安全；协程/线程调度要求；取消语义
+- **版本与兼容**：SemVer/接口版本号；新增/弃用策略；向后兼容约束
 
-**错误响应格式**：
-- Result<T>：Success(value: T) / Failure(error: AlgorithmError)
-- AlgorithmError（Sealed Class）：CalculationError, DataError, InvalidInputError
+#### B4.2 本 Feature 依赖的外部接口/契约（必须：存在外部依赖时）
+
+> 目的：把 A2.2 的"依赖清单"下沉到"调用级契约"，避免实现期口径不一致。
+
+- **依赖接口清单**：依赖的模块/服务/API（含 owner/路径）
+- **调用约束**：超时/重试/退避/限流；缓存策略；一致性假设
+- **失败模式与降级**：超时/限流/不一致/不可用时如何处理（与 A2.2 对齐）
+
+#### B4.3 契约工件（contracts/）与引用方式（推荐）
+
+> 推荐：把可机读的契约沉淀为文件，便于测试与演进。
+
+- **contracts/**：`openapi.yaml` / `*.proto` / `json-schema/*.json` / `errors.md` 等
+- **变更流程**：契约变更必须更新版本 + 兼容策略 + 关联 Story/Task
 
 ### B5. 合规性检查（关卡）
 
 *关卡：必须在进入 Implement 前通过；若不通过，必须明确整改项并绑定到 Story/Task。*
 
-**隐私合规检查**：
-- [x] 学习状态数据存储在本地 Room 数据库，不共享（符合 NFR-SEC-001）
-- [x] 算法计算在本地设备执行，不上传云端（符合 EPIC 隐私要求）
-- [x] 不记录敏感信息（单词内容），只记录单词 ID 和元数据
-
-**性能检查**：
-- [x] 复习时机计算时间 ≤ 10ms（p95）（符合 NFR-PERF-001）
-- [x] 批量计算时间（1000 个单词）≤ 500ms（p95）（符合 NFR-PERF-001）
-- [x] 学习任务列表生成时间 ≤ 200ms（p95）（符合 NFR-PERF-001）
-
-**内存检查**：
-- [x] 内存峰值 ≤ 30MB（符合 NFR-MEM-001）
-- [x] 算法计算使用临时内存，计算完成后立即释放
-
-**可测试性检查**：
-- [x] 算法核心层可独立测试（不依赖 Android 组件）
-- [x] 学习状态管理器可单元测试（使用 Mock Repository）
-- [x] 算法计算可单元测试（使用测试数据集）
+[基于章程/合规性文件确定的检查项]
 
 ### B6. 项目结构（本 Feature）
 
@@ -1461,40 +778,7 @@ api/
 android/ 或 ios/
 ```
 
-**结构决策**：选项3 - 移动应用（Android 应用结构）
-
-```
-app/src/main/java/com/jacky/verity/algorithm/
-├── api/
-│   └── SpacedRepetitionEngine.kt        # 算法引擎接口
-├── core/
-│   ├── sm2/
-│   │   ├── SM2Algorithm.kt              # SM-2 算法实现
-│   │   └── AlgorithmParameters.kt       # 算法参数
-│   ├── evaluator/
-│   │   └── MemoryStrengthEvaluator.kt   # 记忆强度评估器
-│   └── scheduler/
-│       └── ReviewScheduler.kt            # 复习调度器
-├── domain/
-│   ├── manager/
-│   │   └── LearningStateManager.kt      # 学习状态管理器
-│   └── calculator/
-│       └── ReviewCalculator.kt           # 复习时机计算器
-├── data/
-│   ├── repository/
-│   │   ├── LearningStateRepository.kt
-│   │   └── ReviewRecordRepository.kt
-│   └── database/
-│       ├── LearningDatabase.kt           # Room 数据库
-│       ├── dao/
-│       │   ├── LearningStateDao.kt
-│       │   └── ReviewRecordDao.kt
-│       └── entity/
-│           ├── LearningStateEntity.kt
-│           └── ReviewRecordEntity.kt
-└── di/
-    └── AlgorithmModule.kt                # 依赖注入模块
-```
+**结构决策**：[记录选定的结构，并引用上述捕获的实际目录]
 
 ## Story Breakdown（Plan 阶段末尾，必须）
 
@@ -1599,6 +883,137 @@ app/src/main/java/com/jacky/verity/algorithm/
 | NFR-SEC-001 | ST-002、ST-007 | 安全隐私要求（本地存储） |
 | NFR-OBS-001/002 | ST-001、ST-002、ST-003、ST-006 | 可观测性要求 |
 | NFR-REL-001/002 | ST-001、ST-006、ST-007 | 可靠性要求 |
+
+## Story Detailed Design（L2 二层详细设计：面向开发落码，强烈建议）
+
+> 目标：把每个 Story 的"实现方法"写清楚，做到**不写每行代码**也能明确指导开发如何落地。
+>
+> 规则：
+> - 本节内容属于 Plan 的一部分，视为**权威技术决策输入**（必须纳入版本管理与变更记录）。
+> - tasks.md 的每个 Task 应明确引用对应 Story 的详细设计入口（例如：`plan.md:ST-001:4.2 时序图`）。
+> - 对每个 Story，必须同时覆盖：**静态结构（类/接口/数据）**、**动态交互（时序）**、**异常矩阵（无遗漏）**、**并发/取消语义**、**验证方式**。
+>
+> **硬约束（Story 级设计边界）**：
+> - **Story 级设计不得新增组件级概念**。Story Detailed Design 只能在 A3.1/A3.4 已定义的组件边界内做细化，不得：
+>   - 新增组件（A3.1 未列出的组件）
+>   - 新增核心类/接口（A3.2 全局类图未定义的关键抽象）
+>   - 新增错误类型/错误码体系（A3.4 异常清单未覆盖的错误分类）
+> - **若发现需要新增上述内容**，必须：
+>   1. 回到 A3.1/A3.4 修订组件级设计
+>   2. 提升 Plan Version（例如 v0.1.0 → v0.2.0）
+>   3. 在变更记录中注明影响范围
+> - **Review 否决依据**：任何违反此约束的 Story 设计输出，应被驳回并要求修订。
+
+### ST-001 Detailed Design：[标题]
+
+#### 1) 目标 & Done 定义（DoD）
+
+- **目标**：[一句话说明交付能力]
+- **DoD（可验证）**：
+  - [ ] [功能验收：引用 FR-xxx]
+  - [ ] [性能/功耗/内存阈值：引用 NFR-xxx，给出测量方法]
+  - [ ] [可靠性/可观测性：引用 NFR-xxx，给出日志/埋点/告警最小集]
+
+#### 2) 代码落点与边界（开发导航）
+
+- **新增/修改目录与文件（建议到包/文件级）**：
+  - `app/src/main/...` / `src/...`：[文件路径与职责]
+- **分层与依赖约束**：复用 Plan-B:B2（必要时补充本 Story 的额外约束）
+- **对外暴露点**：[Repository/UseCase/ViewModel/Service 等；列出函数签名级别的入口]
+
+#### 3) 核心接口与数据契约（签名级别 + 错误语义）
+
+- **接口清单**：
+  - `interface XxxRepository { ... }`
+  - `class XxxUseCase { ... }`
+- **输入/输出约束**：必填/可选、默认值、范围、示例
+- **错误语义**：错误类型（Sealed Class/错误码）、可重试/不可重试、用户可见提示策略
+- **取消语义**：协程取消/线程中断时必须保证的资源释放与一致性（避免半写入）
+
+#### 4) 静态结构设计（类图/关系图）
+
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 画清本 Story 新增/修改的核心类、接口、依赖方向
+' 要求：至少包含 UI/ViewModel/UseCase/Repository/DataSource(若有)/Error/Entity
+class TODO_StoryReplaceMe {
+  + placeholder: String
+  + execute(): Unit
+}
+
+@enduml
+```
+
+#### 5) 动态交互设计（时序图）
+
+##### 时序图（同图含正常 + 全部关键异常，必须）
+
+```plantuml
+@startuml
+!theme mars
+
+' TODO: 在同一张图里用 alt/else 覆盖正常链路 + 全部关键异常分支（不得拆分成功/异常两张图）
+' 要求：体现调用顺序、返回值、线程/协程上下文（主线程/IO）、关键状态更新点、以及每个异常分支的对策（重试/降级/回滚/补偿/提示/埋点）
+participant "UI/ViewModel" as UI
+participant "ViewModel/Presenter" as VM
+participant "UseCase" as UC
+participant "Repository" as Repo
+participant "DataSource/External" as DS
+
+UI -> VM: onAction(...)
+VM -> UC: execute(...)
+UC -> Repo: getOrDo(...)
+alt 正常
+  Repo -> DS: call(...)
+  DS --> Repo: ok
+  Repo --> UC: Success(data)
+  UC --> VM: Success(result)
+  VM --> UI: render(state)
+else 超时/限流/不可用/取消/数据损坏/并发重入...
+  Repo -> DS: call(...)
+  DS --> Repo: timeout/error
+  Repo --> UC: Failure(...)
+  UC --> VM: Success(fallback) ' 或 Failure（按决策）
+  VM --> UI: render(fallback/error)
+end
+
+@enduml
+```
+
+#### 6) 异常场景矩阵（无遗漏清单）
+
+| 场景ID | 触发点（组件/步骤） | 触发条件 | 错误类型/错误码 | 是否可重试 | 用户提示/引导 | 回滚与一致性策略 | 日志/埋点字段 | 覆盖 NFR |
+|---|---|---|---|---|---|---|---|---|
+| EX-001 |  |  |  | 是/否 |  |  |  | NFR-OBS-??? |
+
+> 校验规则（必须通过）：
+> - 上表每一条异常都能在“时序图（同图含正常+异常）”中找到对应 `alt/else` 分支；
+> - 时序图中的每个失败分支也必须在上表中有明确对策。
+
+#### 7) 并发 / 生命周期 / 资源管理
+
+- **并发策略**：串行/并行；互斥（Mutex/队列）；共享状态保护
+- **线程/协程模型**：哪些在主线程、哪些在 IO；切线程边界点
+- **生命周期**：旋转/前后台切换/进程被杀（若在范围内则写恢复策略；不适用写原因）
+- **资源释放**：文件句柄/游标/连接/缓存的释放时机
+
+#### 8) 验证与测试设计（可执行）
+
+- **单元测试**：覆盖核心逻辑与错误分支（与异常矩阵对齐）
+- **集成/端到端**：覆盖用户主流程与关键异常流程
+- **NFR 验证**：性能/功耗/内存测量方法、数据集/设备模型、阈值
+
+#### 9) 与 Tasks 的映射（可选但推荐）
+
+| 设计要点 | 建议 Task | 备注 |
+|---|---|---|
+|  | T??? |  |
+
+### ST-002 Detailed Design：[标题]
+
+（复用 ST-001 的结构）
 
 ## 复杂度跟踪（仅当合规性检查存在需说明理由的违规项时填写）
 
