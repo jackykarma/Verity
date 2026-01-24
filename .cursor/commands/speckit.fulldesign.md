@@ -53,8 +53,10 @@ $ARGUMENTS
 5. **一致性校验（写入前）**：
    - Full Design 的 Epic/Feature/Version 字段与 `spec.md` / `plan.md` 保持一致
    - 模块级 UML 总览（若模板包含）：
-     - 模块清单必须与 `plan.md:A3.2 模块拆分与职责` 一致
+     - 模块/组件清单必须与 `plan.md:A3.1 组件清单与职责` 一致
      - Full Design 可提供索引与按模块汇总展示；模块 UML 图的权威内容在 `plan.md:A3.4`（仅复制/引用，不新增决策）
+   - Plan-A ↔ Plan-B 一致性：
+     - `plan.md:Plan-B:B0` 的互校必须通过；若不通过必须指回 plan 补齐/修订（Full Design 不得自行补决策）
    - 追溯矩阵：
      - FR/NFR（来自 spec）必须能映射到至少一个 Story（来自 plan）
      - 若 tasks.md 存在：Story 必须能映射到 Task；否则标注“待生成 tasks.md”

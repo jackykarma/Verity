@@ -87,6 +87,10 @@ ClusterA --> ClusterB
 ## 3. 1 层架构设计一致性（跨 Feature：框架图、模块拆分、接口协议）
 
 > 定义：1 层架构设计描述“系统内部的模块拆分与协作”。在 EPIC 级别，本节用于汇总各 Feature 的 1 层框架与关键模块设计，并显式标注不一致之处与对齐建议（不新增决策）。
+>
+> 一致性基线（必须遵守）：
+> - 每个 Feature 的模块/组件目录以其 `plan.md:A3.1 组件清单与职责` 为权威来源
+> - 每个 Feature 的 Plan-A ↔ Plan-B 必须通过 `plan.md:Plan-B:B0` 的互校（若未通过，必须在本 EPIC 文档标注冲突并指回具体 Feature 修订）
 
 ### 3.0 EPIC 模块目录（EPIC Module Catalog）与映射关系（跨 Feature，核心）
 

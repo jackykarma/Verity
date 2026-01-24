@@ -104,6 +104,10 @@ NodeA --> NodeB
 ## 4. 1 层架构设计（系统内部框架图 + 模块拆分 + 接口协议）（来自 plan.md）
 
 > 定义：1 层架构设计描述“系统内部的模块拆分与协作”，包括框架图、模块职责、模块交互、通信方式、接口协议等。
+>
+> 一致性要求（必须）：
+> - `plan.md:Plan-B:B0` 的互校结论必须成立（Plan-A 与 Plan-B 无冲突）
+> - 组件/模块目录以 `plan.md:A3.1 组件清单与职责` 为准；Full Design 只能引用/整合，不得新增或改名
 
 ### 4.1 1 层框架图（来自 plan.md）
 
@@ -223,13 +227,13 @@ stop
 > - 模块/组件清单以 `plan.md:A3.1 组件清单与职责` 为准（行数/名称必须一致）。
 > - 本节只做索引与引用，不复制粘贴整张图；模块级 UML 的权威内容在 `plan.md:A3.4`。
 
-| 模块/组件（来自 plan.md:A3.1） | 职责（摘要） | UML 类图入口（plan.md:A3.4） | 时序图入口（同图含正常+异常，plan.md:A3.4） | 关键异常（摘要） | NFR 责任（摘要） |
+| 模块/组件（来自 plan.md:A3.1） | 职责（摘要） | UML 类图入口（plan.md:A3.4） | 时序图入口（同图含正常+异常，plan.md:A3.4） | 流程图入口（同图含正常+异常，plan.md:A3.4） | 关键异常（摘要） | NFR 责任（摘要） |
 |---|---|---|---|---|---|---|
-| [模块A] |  | plan.md:A3.4:[模块A]:UML类图 | plan.md:A3.4:[模块A]:时序图（全景） |  | PERF/POWER/MEM/SEC/OBS/REL |
+| [模块A] |  | plan.md:A3.4:[模块A]:UML类图 | plan.md:A3.4:[模块A]:时序图（全景） | plan.md:A3.4:[模块A]:流程图（全景） |  | PERF/POWER/MEM/SEC/OBS/REL |
 
 ### 4.7 模块级 UML（按模块汇总，来自 plan.md）
 
-> 目标：在 Full Design 中直接呈现每个模块的 UML（类图 + 成功/异常时序），便于评审与全局浏览。
+> 目标：在 Full Design 中直接呈现每个模块的 UML（类图 + 时序图 + 流程图，均要求同图含正常+异常），便于评审与全局浏览。
 >
 > 规则：
 > - 本节内容必须**逐字复用/复制** `plan.md:A3.4` 的模块级 UML；不得新增模块、不得新增新的分支决策。
@@ -263,6 +267,20 @@ class TODO_ModuleReplaceMe {
 participant "TODO_ReplaceMe" as TODO
 
 TODO -> TODO: TODO（替换为真实调用）
+
+@enduml
+```
+
+##### UML 流程图 - 全景（同图含正常+异常，来自 plan.md:A3.4）
+
+```plantuml
+@startuml
+!theme mars
+
+' 直接复制 plan.md:A3.4 对应模块的“流程图（全景，同图含正常+异常）”
+start
+:TODO（替换为真实流程）;
+stop
 
 @enduml
 ```
