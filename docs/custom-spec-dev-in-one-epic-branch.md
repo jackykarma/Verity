@@ -86,6 +86,10 @@ Spec-Kit 用环境变量 `SPECIFY_FEATURE` 指定“当前要操作的 Feature �
 - `/speckit.fulldesign`
 - `/speckit.implement`
 - `/speckit.epicsync`
+- `/speckit.feature-update`（对当前 Feature 的 spec.md 做增量更新）
+- `/speckit.plan-update`（对当前 Feature 的 plan.md 做增量更新）
+
+> **说明**：`/speckit.specify-update` 对 **epic.md** 做增量更新，通过 `$ARGUMENTS` 中的 EPIC 标识（如 `EPIC-001`）定位，不依赖 `SPECIFY_FEATURE`。
 
 ### PowerShell 设置方式（每个终端会话都要设置）
 
@@ -180,6 +184,12 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 - **版本必须可追溯**：Feature/Plan/Tasks/Full Design（以及 EPIC 文档）都要记录版本与变更摘要
 - **禁止 Implement 期偷改设计**：发现设计缺口必须先回到 spec/plan 变更，再重新生成 tasks/设计文档
 
+**增量更新命令**（优先使用，避免全量重写）：
+
+- **`/speckit.specify-update "EPIC-001 范围：…"`**：仅重写 epic.md 指定章节，不改 Feature Registry；用于 EPIC 层变更。
+- **`/speckit.feature-update "范围：…"`**：仅重写当前 Feature 的 spec.md 指定章节；**默认级联**更新 plan.md（按需求变更推导受影响的 plan 范围）。关闭级联：在 `$ARGUMENTS` 中加入「不级联 plan」「仅 spec」或「no-cascade」。
+- **`/speckit.plan-update "范围：…"`**：仅重写当前 Feature 的 plan.md；**plan 范围不由人枚举**。当 **spec 已变更**且 feature-update 未级联时，传 **spec 范围**（如 `范围：FR 与 NFR`），plan-update 按映射**推导**受影响的 plan 章节；当 **纯技术方案变更**（无 spec 变更）时，传 **plan 范围**（如 `A4 风险`、`Story Breakdown`），因无法从 spec 推导。
+
 ### 6.1 需求变更（Scope/FR/NFR/AC）发生在 Feature 层
 
 触发场景：
@@ -191,20 +201,17 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 推荐流程（职责分工）：
 
 - **开发者**：发现变更需求 → 停止继续实现 → 提交变更提案（PR/Issue/评论，包含证据与影响范围）
-- **SE/TL**：在 EPIC 分支更新 spec/plan/tasks（版本递增）→ 同步 EPIC 总览与 EPIC Full Design
+- **SE/TL**：在 EPIC 分支用**增量更新命令**更新 spec/plan/tasks（版本递增）→ 同步 EPIC 总览与 EPIC Full Design
 
 推荐重跑链路（由 SE/TL 在 EPIC 分支执行）：
 
-1) 更新对应 Feature 的 `spec.md`
-   - 记录变更点（建议在 spec/plan 的“变更记录”里补一行）
-2) 若变更影响设计：更新 `plan.md`
-   - 特别是 Plan-A 的风险与各类评估（算法/功耗/性能/内存）阈值与验收方法
-3) 重新运行 `/speckit.tasks`
-   - 让 tasks.md 与最新 Story Breakdown/NFR 验收对齐
-4) 重新运行 `/speckit.fulldesign`（Feature 级）
-   - 保证 full-design.md 只整合最新产物
-5) 运行 `/speckit.epicsync "<备注：xxx变更>"` 同步到 EPIC 总览
-6) 如该变更影响跨 Feature 或整体预算：再运行 `/speckit.epicfulldesign "EPIC-xxx"` 更新 EPIC 全局方案
+1) `/speckit.feature-update "范围：FR 与 NFR"`（或 `验收标准`、`边界与异常场景`、`依赖关系`、`核心实体`、`假设与约束` 等，按实际变更选）
+   - **默认级联**：同一命令内会按需求变更范围推导受影响的 plan 章节并增量更新 plan.md；spec 与 plan 的「变更记录」自动追加。
+   - **关闭级联**：若 `$ARGUMENTS` 含「不级联 plan」「仅 spec」或「no-cascade」，则只更新 spec；需再手动 `/speckit.plan-update "范围：FR 与 NFR"`（或与 feature-update 相同的 **spec 范围**），plan-update 将按 **spec 变更推导**受影响的 plan 章节并更新，后执行下列步骤。
+2) `/speckit.tasks` — 让 tasks.md 与最新 Story Breakdown/NFR 验收对齐
+3) `/speckit.fulldesign`（Feature 级）— 保证 full-design.md 只整合最新产物
+4) `/speckit.epicsync "<备注：xxx变更>"`
+5) 如该变更影响跨 Feature 或整体预算：`/speckit.epicfulldesign "EPIC-xxx"`
 
 ### 6.2 技术方案变更（Plan 决策变化、架构变化）
 
@@ -215,12 +222,11 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 
 推荐流程（由 SE/TL 在 EPIC 分支执行）：
 
-1) **先改 plan.md**（Plan-A/Plan-B），并在 Plan 的变更记录中写清“为什么变更”
-2) 若 Story 拆分受影响：更新 Story Breakdown（ST-xxx）
-3) 重新运行 `/speckit.tasks`（Tasks 必须严格来源于 Story）
-4) 重新运行 `/speckit.fulldesign`（Feature 级方案重新整合）
-5) `/speckit.epicsync` 同步状态与版本到 epic.md
-6) 如为通用能力/跨 Feature 决策：更新 epic.md 的“通用能力/整体 FR-NFR”，并运行 `/speckit.epicfulldesign`
+1) `/speckit.plan-update "范围：…"` — **纯技术方案变更**时无 spec 变更，需传 **plan 范围**（如 `A1 技术选型`、`A2 架构`、`A4 风险`、`Story Breakdown` 等）；仅重写对应章节，在 Plan 的「变更记录」中自动追加一行。
+2) `/speckit.tasks` — Tasks 必须严格来源于 Story
+3) `/speckit.fulldesign`（Feature 级方案重新整合）
+4) `/speckit.epicsync` 同步状态与版本到 epic.md
+5) 如为通用能力/跨 Feature 决策：更新 epic.md 的“通用能力/整体 FR-NFR”（可用 `/speckit.specify-update "EPIC-001 范围：通用能力"` 等），并运行 `/speckit.epicfulldesign`
 
 ### 6.3 仅 Task 级变更（执行顺序/步骤/验证方式更细化）
 
@@ -246,7 +252,7 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
    - 变更原因（事实/数据/复现）
    - 影响范围（哪些 Feature/Story/Task）
    - 是否需要回滚（如果上线/已合入）
-3) SE/TL 更新 `spec.md` / `plan.md` 明确变更点（必要时更新 Story Breakdown）
+3) SE/TL 用增量更新命令明确变更点：**需求类**用 `/speckit.feature-update "范围：…"`（默认级联 plan）；若此前已仅更新 spec、未级联，则 `/speckit.plan-update "范围：FR 与 NFR"` 等 **spec 范围**，由命令推导 plan 范围。**纯方案类**用 `/speckit.plan-update "范围：A2 架构"` 等 **plan 范围**（无 spec 变更可推导）。
 4) SE/TL 重新运行 `/speckit.tasks`
 5) SE/TL 重新运行 `/speckit.fulldesign`
 6) SE/TL 运行 `/speckit.epicsync` 同步到 EPIC 总览
@@ -261,14 +267,13 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 
 推荐流程（由 SE/TL 在 EPIC 分支执行）：
 
-1) 更新 `epic.md`（整体 FR/NFR、通用能力、Feature 拆分、里程碑/风险）
-2) 对受影响的 Feature：
-   - 更新各自 `spec.md`（继承 EPIC 约束）
-   - 更新 `plan.md`（若设计/预算/接口受影响）
-   - 重新 `/speckit.tasks`（必要时）
-   - 重新 `/speckit.fulldesign`（必要时）
-   - 对每个 Feature 跑一次 `/speckit.epicsync`（或在合并后统一跑）
-3) 最后运行 `/speckit.epicfulldesign` 生成新的 EPIC 全局方案
+1) `/speckit.specify-update "EPIC-001 范围：…"` — 按实际变更指定范围，例如：`整体FR/NFR`、`Feature 拆分`、`通用能力`、`背景、目标与价值、范围`、`约束与假设`、`依赖关系`、`EPIC 级风险与里程碑`、`EPIC 验收` 等；仅重写 epic.md 对应章节，**不修改 Feature Registry**；变更记录自动追加。
+2) 对受影响的 Feature（设置 `SPECIFY_FEATURE` 后依次）：
+   - `/speckit.feature-update "范围：…"` 或 `/speckit.plan-update "范围：…"`（按 EPIC 约束的落点选）继承 EPIC 变更；
+   - 重新 `/speckit.tasks`（必要时）；
+   - 重新 `/speckit.fulldesign`（必要时）；
+   - 对每个 Feature 跑一次 `/speckit.epicsync`（或在合并后统一跑）。
+3) `/speckit.epicfulldesign "EPIC-xxx"` 生成新的 EPIC 全局方案
 
 ---
 
