@@ -87,47 +87,59 @@ description: "Full Design 技术方案文档模板（整合 Plan + Story + Task�
 
 ### 2.2 0 层架构图（系统边界 + 外部交互）（来自 plan.md）
 
-```mermaid
-flowchart LR
-  subgraph System["本系统（System Boundary）<br/>词库管理模块"]
-    UI[UI 层<br/>词库列表/导入界面]
-    ViewModel[ViewModel 层<br/>状态管理]
-    UseCase[领域层<br/>业务用例]
-    Repository[数据层<br/>词库仓库]
-    Parser[解析层<br/>文件解析器]
-    DataSource[数据源层<br/>本地数据源]
-  end
-  subgraph External["外部系统/依赖（System 外部）"]
-    SAF["Android Storage Access Framework<br/>（文件选择器）"]
-    FileSystem["Android 文件系统<br/>（文件存储/读取）"]
-    SharedPrefs["Android SharedPreferences<br/>（元数据存储）"]
-  end
-  UI --> ViewModel
-  ViewModel --> UseCase
-  UseCase --> Repository
-  Repository --> DataSource
-  UseCase --> Parser
-  UI -->|Intent 调用| SAF
-  Parser -->|ContentResolver API| FileSystem
-  DataSource -->|系统 API| SharedPrefs
-  DataSource -->|ContentResolver/File API| FileSystem
+```plantuml
+@startuml
+!theme mars
+
+package "本系统（System Boundary）\n词库管理模块" {
+  component "UI 层\n词库列表/导入界面" as UI
+  component "ViewModel 层\n状态管理" as ViewModel
+  component "领域层\n业务用例" as UseCase
+  component "数据层\n词库仓库" as Repository
+  component "解析层\n文件解析器" as Parser
+  component "数据源层\n本地数据源" as DataSource
+}
+
+package "外部系统/依赖（System 外部）" {
+  component "Android Storage Access Framework\n（文件选择器）" as SAF
+  component "Android 文件系统\n（文件存储/读取）" as FileSystem
+  component "Android SharedPreferences\n（元数据存储）" as SharedPrefs
+}
+
+UI --> ViewModel
+ViewModel --> UseCase
+UseCase --> Repository
+Repository --> DataSource
+UseCase --> Parser
+UI --> SAF : Intent 调用
+Parser --> FileSystem : ContentResolver API
+DataSource --> SharedPrefs : 系统 API
+DataSource --> FileSystem : ContentResolver/File API
+
+@enduml
 ```
 
 ### 2.3 部署视图（来自 plan.md）
 
-```mermaid
-flowchart TB
-  subgraph Device["Android 设备（终端）"]
-    App["词库管理模块<br/>（本 Feature）"]
-    Storage["应用私有目录<br/>SharedPreferences"]
-  end
-  subgraph Android["Android 系统"]
-    SAF["Storage Access Framework<br/>（文件选择器）"]
-    FileSystem["文件系统 API"]
-  end
-  App -->|本地存储| Storage
-  App -->|Intent 调用| SAF
-  App -->|ContentResolver/File API| FileSystem
+```plantuml
+@startuml
+!theme mars
+
+node "Android 设备（终端）" as Device {
+  component "词库管理模块\n（本 Feature）" as App
+  database "应用私有目录\nSharedPreferences" as Storage
+}
+
+node "Android 系统" as Android {
+  component "Storage Access Framework\n（文件选择器）" as SAF
+  component "文件系统 API" as FileSystem
+}
+
+App --> Storage : 本地存储
+App --> SAF : Intent 调用
+App --> FileSystem : ContentResolver/File API
+
+@enduml
 ```
 
 ### 2.4 通信与交互说明（来自 plan.md）
@@ -145,45 +157,54 @@ flowchart TB
 
 ### 3.1 1 层框架图（来自 plan.md）
 
-```mermaid
-flowchart LR
-  subgraph UI["UI 层（Jetpack Compose）"]
-    LibraryScreen[词库列表界面]
-    ImportScreen[导入界面]
-  end
-  subgraph ViewModel["ViewModel 层"]
-    LibraryViewModel[词库 ViewModel]
-  end
-  subgraph Domain["领域层（UseCase）"]
-    ImportLibraryUseCase[导入词库用例]
-    GetLibrariesUseCase[获取词库列表用例]
-    SelectLibraryUseCase[选择词库用例]
-    SearchLibrariesUseCase[搜索词库用例]
-  end
-  subgraph Data["数据层"]
-    LibraryRepository[词库仓库]
-    LibraryParser[文件解析器]
-    LibraryLocalDataSource[本地数据源]
-  end
-  subgraph Storage["存储层"]
-    SharedPrefs[SharedPreferences<br/>元数据存储]
-    FileStorage[文件系统<br/>词库文件存储]
-  end
-  LibraryScreen --> LibraryViewModel
-  ImportScreen --> LibraryViewModel
-  LibraryViewModel --> ImportLibraryUseCase
-  LibraryViewModel --> GetLibrariesUseCase
-  LibraryViewModel --> SelectLibraryUseCase
-  LibraryViewModel --> SearchLibrariesUseCase
-  ImportLibraryUseCase --> LibraryRepository
-  ImportLibraryUseCase --> LibraryParser
-  GetLibrariesUseCase --> LibraryRepository
-  SelectLibraryUseCase --> LibraryRepository
-  SearchLibrariesUseCase --> LibraryRepository
-  LibraryRepository --> LibraryLocalDataSource
-  LibraryParser --> FileStorage
-  LibraryLocalDataSource --> SharedPrefs
-  LibraryLocalDataSource --> FileStorage
+```plantuml
+@startuml
+!theme mars
+
+package "UI 层（Jetpack Compose）" {
+  component "词库列表界面" as LibraryScreen
+  component "导入界面" as ImportScreen
+}
+
+package "ViewModel 层" {
+  component "词库 ViewModel" as LibraryViewModel
+}
+
+package "领域层（UseCase）" {
+  component "导入词库用例" as ImportLibraryUseCase
+  component "获取词库列表用例" as GetLibrariesUseCase
+  component "选择词库用例" as SelectLibraryUseCase
+  component "搜索词库用例" as SearchLibrariesUseCase
+}
+
+package "数据层" {
+  component "词库仓库" as LibraryRepository
+  component "文件解析器" as LibraryParser
+  component "本地数据源" as LibraryLocalDataSource
+}
+
+package "存储层" {
+  database "SharedPreferences\n元数据存储" as SharedPrefs
+  database "文件系统\n词库文件存储" as FileStorage
+}
+
+LibraryScreen --> LibraryViewModel
+ImportScreen --> LibraryViewModel
+LibraryViewModel --> ImportLibraryUseCase
+LibraryViewModel --> GetLibrariesUseCase
+LibraryViewModel --> SelectLibraryUseCase
+LibraryViewModel --> SearchLibrariesUseCase
+ImportLibraryUseCase --> LibraryRepository
+ImportLibraryUseCase --> LibraryParser
+GetLibrariesUseCase --> LibraryRepository
+SelectLibraryUseCase --> LibraryRepository
+SearchLibrariesUseCase --> LibraryRepository
+LibraryRepository --> LibraryLocalDataSource
+LibraryParser --> FileStorage
+LibraryLocalDataSource --> SharedPrefs
+LibraryLocalDataSource --> FileStorage
+
+@enduml
 ```
 
 ### 3.2 模块拆分与职责（来自 plan.md）
@@ -301,79 +322,154 @@ flowchart LR
 
 ### 流程 1：词库文件导入流程
 
-```mermaid
-flowchart TD
-  Start([用户点击导入按钮]) --> CheckQueue{导入队列是否空闲?}
-  CheckQueue -->|否| QueueWait[加入队列等待] --> CheckQueue
-  CheckQueue -->|是| OpenSAF[打开 Storage Access Framework<br/>文件选择器]
-  
-  OpenSAF --> UserSelect{用户选择文件?}
-  UserSelect -->|取消| Cancel[取消导入] --> End([结束])
-  UserSelect -->|选择文件| GetURI[获取文件 URI]
-  
-  GetURI --> CheckPermission{检查文件访问权限}
-  CheckPermission -->|权限被拒绝| PermissionError[显示权限错误提示<br/>引导用户到设置授权] --> End
-  CheckPermission -->|权限正常| CheckStorage{检查存储空间<br/>≥50MB?}
-  
-  CheckStorage -->|存储空间不足| StorageError[显示存储空间不足提示<br/>引导用户清理空间] --> End
-  CheckStorage -->|空间充足| CheckFormat{检查文件格式<br/>JSON/CSV/TXT?}
-  
-  CheckFormat -->|格式不支持| FormatError[显示格式错误提示<br/>说明支持的格式] --> End
-  CheckFormat -->|格式支持| CheckSize{检查文件大小<br/>≤50MB?}
-  
-  CheckSize -->|文件过大| SizeWarning[警告提示文件过大<br/>询问是否继续] --> UserConfirm{用户确认继续?}
-  UserConfirm -->|否| Cancel
-  UserConfirm -->|是| CheckDuplicate{检查是否重复导入<br/>文件指纹匹配?}
-  CheckSize -->|文件大小正常| CheckDuplicate
-  
-  CheckDuplicate -->|已存在| DuplicateError[提示词库已存在<br/>询问是否覆盖] --> OverwriteConfirm{用户确认覆盖?}
-  OverwriteConfirm -->|否| Cancel
-  OverwriteConfirm -->|是| ParseFile[开始解析文件<br/>显示进度]
-  CheckDuplicate -->|新文件| ParseFile
-  
-  ParseFile --> ParseResult{解析结果}
-  ParseResult -->|解析失败| ParseError[显示解析错误提示<br/>说明失败原因<br/>记录错误日志] --> End
-  ParseResult -->|解析超时| TimeoutError[显示超时错误提示<br/>允许重新选择文件] --> End
-  ParseResult -->|解析成功| SaveFile[保存词库文件到<br/>应用私有目录]
-  
-  SaveFile --> SaveResult{保存结果}
-  SaveResult -->|保存失败| SaveError[显示保存错误提示<br/>回滚操作<br/>记录错误日志] --> End
-  SaveResult -->|保存成功| SaveMetadata[保存词库元数据到<br/>SharedPreferences]
-  
-  SaveMetadata --> MetadataResult{元数据保存结果}
-  MetadataResult -->|保存失败| MetadataError[显示保存错误提示<br/>回滚文件保存<br/>记录错误日志] --> End
-  MetadataResult -->|保存成功| UpdateCache[更新内存缓存]
-  
-  UpdateCache --> UpdateUI[更新 UI<br/>显示导入成功]
-  UpdateUI --> LogSuccess[记录导入成功事件<br/>词库名称/大小/格式/耗时]
-  LogSuccess --> End
+```plantuml
+@startuml
+!theme mars
+
+start
+:用户点击导入按钮;
+
+while (导入队列是否空闲?) is (否)
+  :加入队列等待;
+endwhile (是)
+
+:打开 Storage Access Framework\n文件选择器;
+
+if (用户选择文件?) then (取消)
+  :取消导入;
+  stop
+else (选择文件)
+  :获取文件 URI;
+endif
+
+if (检查文件访问权限?) then (权限被拒绝)
+  :显示权限错误提示\n引导用户到设置授权;
+  stop
+else (权限正常)
+endif
+
+if (检查存储空间 >= 50MB?) then (不足)
+  :显示存储空间不足提示\n引导用户清理空间;
+  stop
+else (充足)
+endif
+
+if (检查文件格式 JSON/CSV/TXT?) then (不支持)
+  :显示格式错误提示\n说明支持的格式;
+  stop
+else (支持)
+endif
+
+if (检查文件大小 <= 50MB?) then (过大)
+  :警告提示文件过大\n询问是否继续;
+  if (用户确认继续?) then (否)
+    :取消导入;
+    stop
+  else (是)
+  endif
+else (正常)
+endif
+
+if (检查是否重复导入\n文件指纹匹配?) then (已存在)
+  :提示词库已存在\n询问是否覆盖;
+  if (用户确认覆盖?) then (否)
+    :取消导入;
+    stop
+  else (是)
+  endif
+else (新文件)
+endif
+
+:开始解析文件\n显示进度;
+if (解析结果?) then (失败)
+  :显示解析错误提示\n说明失败原因\n记录错误日志;
+  stop
+elseif (超时)
+  :显示超时错误提示\n允许重新选择文件;
+  stop
+else (成功)
+endif
+
+:保存词库文件到\n应用私有目录;
+if (保存结果?) then (失败)
+  :显示保存错误提示\n回滚操作\n记录错误日志;
+  stop
+else (成功)
+endif
+
+:保存词库元数据到\nSharedPreferences;
+if (元数据保存结果?) then (失败)
+  :显示保存错误提示\n回滚文件保存\n记录错误日志;
+  stop
+else (成功)
+endif
+
+:更新内存缓存;
+:更新 UI\n显示导入成功;
+:记录导入成功事件\n词库名称/大小/格式/耗时;
+stop
+
+@enduml
 ```
 
 ### 流程 2：词库列表加载流程
 
-```mermaid
-flowchart TD
-  Start([进入词库列表界面]) --> LoadFromCache{内存缓存存在?}
-  LoadFromCache -->|是| UseCache[使用缓存数据更新 UI] --> End([结束])
-  LoadFromCache -->|否| LoadFromPrefs[从 SharedPreferences 加载]
-  LoadFromPrefs -->|成功| ValidateData{数据验证}
-  LoadFromPrefs -->|失败| ShowLoadError[显示加载失败提示] --> End
-  ValidateData -->|是| UpdateCache[更新内存缓存] --> UpdateUI[更新 UI] --> End
-  ValidateData -->|否| ShowDataError[显示数据错误提示] --> End
+```plantuml
+@startuml
+!theme mars
+
+start
+:进入词库列表界面;
+if (内存缓存存在?) then (是)
+  :使用缓存数据更新 UI;
+  stop
+else (否)
+  :从 SharedPreferences 加载;
+endif
+
+if (加载成功?) then (否)
+  :显示加载失败提示;
+  stop
+else (是)
+endif
+
+if (数据验证通过?) then (是)
+  :更新内存缓存;
+  :更新 UI;
+  stop
+else (否)
+  :显示数据错误提示;
+  stop
+endif
+
+@enduml
 ```
 
 ### 流程 3：词库搜索流程
 
-```mermaid
-flowchart TD
-  Start([用户输入搜索关键词]) --> Debounce{防抖检查}
-  Debounce -->|延迟中| CancelPrevious[取消上一次搜索] --> Debounce
-  Debounce -->|延迟完成| CheckQuery{查询关键词为空?}
-  CheckQuery -->|是| ShowAll[显示所有词库] --> End([结束])
-  CheckQuery -->|否| FilterLibraries[过滤词库列表]
-  FilterLibraries --> CheckResult{有匹配结果?}
-  CheckResult -->|是| UpdateUI[更新 UI 显示搜索结果] --> End
-  CheckResult -->|否| ShowNoResult[显示无结果提示] --> End
+```plantuml
+@startuml
+!theme mars
+
+start
+:用户输入搜索关键词;
+:防抖（debounce）;
+if (查询关键词为空?) then (是)
+  :显示所有词库;
+  stop
+else (否)
+  :过滤词库列表;
+endif
+
+if (有匹配结果?) then (是)
+  :更新 UI 显示搜索结果;
+  stop
+else (否)
+  :显示无结果提示;
+  stop
+endif
+
+@enduml
 ```
 
 ## 5. Feature → Story → Task 追溯关系

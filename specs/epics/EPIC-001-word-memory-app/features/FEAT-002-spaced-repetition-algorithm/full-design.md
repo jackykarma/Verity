@@ -82,50 +82,63 @@
 
 ### 2.2 0 层架构图（系统边界 + 外部交互）（来自 plan.md）
 
-```mermaid
-flowchart LR
-  subgraph System["本系统（System Boundary）<br/>间隔重复算法引擎"]
-    AlgorithmEngine[算法引擎核心<br/>SM-2 算法实现]
-    StateManager[学习状态管理<br/>状态跟踪与更新]
-    Scheduler[复习调度器<br/>复习时机计算]
-    Repository[算法数据仓库<br/>学习状态数据访问]
-  end
-  subgraph External["外部系统/依赖（System 外部）"]
-    WordLibrary[单词库管理<br/>（FEAT-001）]
-    UserData[用户数据管理<br/>（FEAT-007）]
-    RoomDB[Android Room 数据库<br/>（学习状态存储）]
-  end
-  subgraph Clients["业务 Feature（调用方）"]
-    LearningUI[学习界面<br/>（FEAT-003）]
-    Statistics[学习统计<br/>（FEAT-005）]
-    Gamification[游戏化<br/>（FEAT-004）]
-  end
-  LearningUI -->|获取学习任务| AlgorithmEngine
-  Statistics -->|获取学习状态| AlgorithmEngine
-  Gamification -->|获取学习进度| AlgorithmEngine
-  AlgorithmEngine -->|获取词库数据| WordLibrary
-  AlgorithmEngine -->|存储学习历史| UserData
-  Repository -->|数据持久化| RoomDB
-  StateManager --> Repository
-  Scheduler --> StateManager
-  AlgorithmEngine --> Scheduler
+```plantuml
+@startuml
+!theme mars
+
+package "本系统（System Boundary）\n间隔重复算法引擎" {
+  component "算法引擎核心\nSM-2 算法实现" as AlgorithmEngine
+  component "学习状态管理\n状态跟踪与更新" as StateManager
+  component "复习调度器\n复习时机计算" as Scheduler
+  component "算法数据仓库\n学习状态数据访问" as Repository
+}
+
+package "外部系统/依赖（System 外部）" {
+  component "单词库管理\n（FEAT-001）" as WordLibrary
+  component "用户数据管理\n（FEAT-007）" as UserData
+  database "Android Room 数据库\n（学习状态存储）" as RoomDB
+}
+
+package "业务 Feature（调用方）" {
+  component "学习界面\n（FEAT-003）" as LearningUI
+  component "学习统计\n（FEAT-005）" as Statistics
+  component "游戏化\n（FEAT-004）" as Gamification
+}
+
+LearningUI --> AlgorithmEngine : 获取学习任务
+Statistics --> AlgorithmEngine : 获取学习状态
+Gamification --> AlgorithmEngine : 获取学习进度
+AlgorithmEngine --> WordLibrary : 获取词库数据
+AlgorithmEngine --> UserData : 存储学习历史
+Repository --> RoomDB : 数据持久化
+StateManager --> Repository
+Scheduler --> StateManager
+AlgorithmEngine --> Scheduler
+
+@enduml
 ```
 
 ### 2.3 部署视图（来自 plan.md）
 
-```mermaid
-flowchart TB
-  subgraph Device["Android 设备（终端）"]
-    AlgorithmEngine["算法引擎模块<br/>（本 Feature）"]
-    RoomDB["Room 数据库<br/>（学习状态存储）"]
-  end
-  subgraph Internal["应用内部 Feature"]
-    WordLibrary["单词库管理<br/>（FEAT-001）"]
-    UserData["用户数据管理<br/>（FEAT-007）"]
-  end
-  AlgorithmEngine -->|本地函数调用| WordLibrary
-  AlgorithmEngine -->|本地函数调用| UserData
-  AlgorithmEngine -->|Room API| RoomDB
+```plantuml
+@startuml
+!theme mars
+
+node "Android 设备（终端）" as Device {
+  component "算法引擎模块\n（本 Feature）" as AlgorithmEngine
+  database "Room 数据库\n（学习状态存储）" as RoomDB
+}
+
+node "应用内部 Feature" as Internal {
+  component "单词库管理\n（FEAT-001）" as WordLibrary
+  component "用户数据管理\n（FEAT-007）" as UserData
+}
+
+AlgorithmEngine --> WordLibrary : 本地函数调用
+AlgorithmEngine --> UserData : 本地函数调用
+AlgorithmEngine --> RoomDB : Room API
+
+@enduml
 ```
 
 ### 2.4 通信与交互说明（来自 plan.md）
@@ -143,36 +156,45 @@ flowchart TB
 
 ### 3.1 1 层框架图（来自 plan.md）
 
-```mermaid
-flowchart LR
-  subgraph API["算法引擎接口层"]
-    AlgorithmAPI[算法引擎接口<br/>SpacedRepetitionEngine]
-  end
-  subgraph Core["算法核心层"]
-    SM2Algorithm[SM-2 算法实现<br/>复习时机计算]
-    MemoryEvaluator[记忆强度评估器<br/>优先级排序]
-    Scheduler[复习调度器<br/>任务列表生成]
-  end
-  subgraph Domain["领域层"]
-    LearningStateManager[学习状态管理器<br/>状态跟踪与更新]
-    ReviewCalculator[复习时机计算器<br/>下次复习时间]
-  end
-  subgraph Data["数据层"]
-    LearningStateRepository[学习状态仓库<br/>状态数据访问]
-    ReviewRecordRepository[复习记录仓库<br/>历史数据访问]
-  end
-  subgraph Storage["存储层"]
-    RoomDB[(Room 数据库<br/>学习状态存储)]
-  end
-  AlgorithmAPI --> SM2Algorithm
-  AlgorithmAPI --> MemoryEvaluator
-  AlgorithmAPI --> Scheduler
-  SM2Algorithm --> ReviewCalculator
-  Scheduler --> LearningStateManager
-  LearningStateManager --> LearningStateRepository
-  ReviewCalculator --> LearningStateRepository
-  LearningStateRepository --> RoomDB
-  ReviewRecordRepository --> RoomDB
+```plantuml
+@startuml
+!theme mars
+
+package "算法引擎接口层" {
+  component "算法引擎接口\nSpacedRepetitionEngine" as AlgorithmAPI
+}
+
+package "算法核心层" {
+  component "SM-2 算法实现\n复习时机计算" as SM2Algorithm
+  component "记忆强度评估器\n优先级排序" as MemoryEvaluator
+  component "复习调度器\n任务列表生成" as Scheduler
+}
+
+package "领域层" {
+  component "学习状态管理器\n状态跟踪与更新" as LearningStateManager
+  component "复习时机计算器\n下次复习时间" as ReviewCalculator
+}
+
+package "数据层" {
+  component "学习状态仓库\n状态数据访问" as LearningStateRepository
+  component "复习记录仓库\n历史数据访问" as ReviewRecordRepository
+}
+
+package "存储层" {
+  database "Room 数据库\n学习状态存储" as RoomDB
+}
+
+AlgorithmAPI --> SM2Algorithm
+AlgorithmAPI --> MemoryEvaluator
+AlgorithmAPI --> Scheduler
+SM2Algorithm --> ReviewCalculator
+Scheduler --> LearningStateManager
+LearningStateManager --> LearningStateRepository
+ReviewCalculator --> LearningStateRepository
+LearningStateRepository --> RoomDB
+ReviewRecordRepository --> RoomDB
+
+@enduml
 ```
 
 ### 3.2 模块拆分与职责（来自 plan.md）
@@ -310,69 +332,97 @@ flowchart LR
 
 ### 流程 1：单词学习流程
 
-```mermaid
-flowchart TD
-  Start([用户开始学习单词]) --> CheckWordId{单词 ID 有效?}
-  CheckWordId -->|无效| InvalidError[返回错误] --> End([结束])
-  CheckWordId -->|有效| LoadState{加载学习状态}
-  
-  LoadState -->|状态存在| CheckFirstTime{首次学习?}
-  LoadState -->|状态不存在| InitState[初始化学习状态<br/>使用默认参数]
-  LoadState -->|加载失败| LoadError[使用默认参数初始化]
-  
-  InitState --> RecordFirstLearn[记录首次学习]
-  CheckFirstTime -->|是| RecordFirstLearn
-  CheckFirstTime -->|否| CheckReviewTime{到达复习时间?}
-  
-  CheckReviewTime -->|是| ReviewFlow[进入复习流程]
-  CheckReviewTime -->|否| ShowWord[显示单词]
-  RecordFirstLearn --> ShowWord
-  
-  ShowWord --> UserAnswer{用户回答结果}
-  UserAnswer -->|认识| Quality5[quality = 5]
-  UserAnswer -->|不认识| Quality0[quality = 0]
-  
-  Quality5 --> CalculateReview[调用 SM-2 算法计算复习时机]
-  Quality0 --> CalculateReview
-  
-  CalculateReview --> CalcResult{计算结果}
-  CalcResult -->|计算成功| UpdateState[更新学习状态<br/>保存到数据库]
-  CalcResult -->|计算失败| CalcError[使用默认参数<br/>记录错误日志] --> DefaultUpdate[使用默认间隔更新状态]
-  
-  UpdateState --> UpdateResult{更新结果}
-  DefaultUpdate --> UpdateResult
-  UpdateResult -->|成功| LogSuccess[记录学习成功事件] --> End
-  UpdateResult -->|失败| UpdateError[记录更新失败日志<br/>使用内存状态] --> End
-  
-  ReviewFlow --> End
+```plantuml
+@startuml
+!theme mars
+
+start
+:用户开始学习单词;
+if (单词 ID 有效?) then (无效)
+  :返回错误;
+  stop
+else (有效)
+endif
+
+:加载学习状态;
+if (状态存在?) then (否/加载失败)
+  :初始化学习状态\n使用默认参数;
+else (是)
+  if (首次学习?) then (是)
+    :记录首次学习;
+  else (否)
+    if (到达复习时间?) then (是)
+      :进入复习流程;
+      stop
+    endif
+  endif
+endif
+
+:显示单词;
+if (用户回答结果) then (认识)
+  :quality = 5;
+else (不认识)
+  :quality = 0;
+endif
+
+:调用 SM-2 算法计算复习时机;
+if (计算成功?) then (是)
+  :更新学习状态\n保存到数据库;
+else (否)
+  :使用默认参数\n记录错误日志;
+  :使用默认间隔更新状态;
+endif
+
+if (更新结果成功?) then (是)
+  :记录学习成功事件;
+else (否)
+  :记录更新失败日志\n使用内存状态;
+endif
+stop
+
+@enduml
 ```
 
 ### 流程 2：复习时机计算流程
 
-```mermaid
-flowchart TD
-  Start([请求计算复习时机]) --> LoadState{加载学习状态}
-  LoadState -->|成功| ValidateInput{验证输入参数}
-  LoadState -->|失败| StateError[使用默认状态] --> ValidateInput
-  
-  ValidateInput -->|参数无效| InputError[返回参数错误<br/>记录日志] --> End([结束])
-  ValidateInput -->|参数有效| CheckAlgorithm{算法类型}
-  
-  CheckAlgorithm -->|SM-2| SM2Calc[执行 SM-2 算法计算]
-  CheckAlgorithm -->|其他算法| OtherCalc[执行其他算法]
-  
-  SM2Calc --> CalcResult{计算结果}
-  OtherCalc --> CalcResult
-  
-  CalcResult -->|成功| ValidateResult{验证结果范围}
-  CalcResult -->|计算异常| CalcException[捕获异常<br/>使用默认参数] --> DefaultResult[使用默认间隔]
-  
-  ValidateResult -->|结果有效| SaveResult[保存计算结果]
-  ValidateResult -->|结果超范围| RangeError[截断到边界值] --> SaveResult
-  
-  DefaultResult --> SaveResult
-  SaveResult --> LogCalc[记录计算事件<br/>耗时/参数/结果] --> End
-  InputError --> End
+```plantuml
+@startuml
+!theme mars
+
+start
+:请求计算复习时机;
+:加载学习状态;
+if (加载成功?) then (否)
+  :使用默认状态;
+endif
+
+if (验证输入参数) then (无效)
+  :返回参数错误\n记录日志;
+  stop
+else (有效)
+endif
+
+if (算法类型) then (SM-2)
+  :执行 SM-2 算法计算;
+else (其他算法)
+  :执行其他算法;
+endif
+
+if (计算异常?) then (是)
+  :捕获异常\n使用默认参数;
+  :使用默认间隔;
+else (否)
+endif
+
+if (验证结果范围) then (结果超范围)
+  :截断到边界值;
+endif
+
+:保存计算结果;
+:记录计算事件\n耗时/参数/结果;
+stop
+
+@enduml
 ```
 
 ## 5. Feature → Story → Task 追溯关系

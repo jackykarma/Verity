@@ -57,10 +57,12 @@ $ARGUMENTS
      - Full Design 可提供索引与按模块汇总展示；模块 UML 图的权威内容在 `plan.md:A3.4`（仅复制/引用，不新增决策）
    - Plan-A ↔ Plan-B 一致性：
      - `plan.md:Plan-B:B0` 的互校必须通过；若不通过必须指回 plan 补齐/修订（Full Design 不得自行补决策）
-   - 追溯矩阵：
-     - FR/NFR（来自 spec）必须能映射到至少一个 Story（来自 plan）
-     - 若 tasks.md 存在：Story 必须能映射到 Task；否则标注“待生成 tasks.md”
-   - 所有 Mermaid 图必须来自 plan.md（可复制粘贴），不得凭空新增流程/模块
+  - 追溯矩阵：
+    - FR/NFR（来自 spec）必须能映射到至少一个 Story（来自 plan）
+    - 若 tasks.md 存在：Story 必须能映射到 Task；否则标注“待生成 tasks.md”
+  - 技术图表格式：
+    - **必须使用 PlantUML**（与项目章程 `.specify/memory/constitution.md` 保持一致）
+    - Full Design 中出现的图表只能**复用/整合** plan.md 已存在的 PlantUML（可复制粘贴），不得凭空新增流程/模块/边界决策
 
 6. **写入文件**：将结果写入 `FEATURE_DIR/full-design.md`。
 

@@ -33,9 +33,14 @@ $ARGUMENTS
 
 ## 执行步骤
 
-1. **环境准备**：从代码库根目录运行 `.specify/scripts/powershell/check-prerequisites.ps1 -Json`，并解析返回的JSON数据，获取 FEATURE_DIR（功能目录）和 AVAILABLE_DOCS（可用文档列表）。
+1. **环境准备**：从代码库根目录运行 `.specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly`，并解析返回的 JSON 数据，获取：
+   - `FEATURE_DIR`（功能目录）
+   - `FEATURE_SPEC`（spec.md 路径）
+   - `IMPL_PLAN`（plan.md 路径，可能不存在）
+   - `TASKS`（tasks.md 路径，可能不存在）
     - 所有文件路径必须为绝对路径。
     - 若参数中包含单引号（如 "I'm Groot"），需使用转义语法：例如 'I'\''m Groot'（或尽可能使用双引号："I'm Groot"）。
+   - 若 `FEATURE_SPEC` 不存在：终止并提示先运行 `/speckit.feature` 创建 Feature 文档目录与 spec.md。
 
 2. **明确意图（动态）**：推导最多三个初始的上下文澄清问题（禁止使用预设模板）。问题必须满足：
     - 基于用户表述 + 从规格说明/计划/任务中提取的关键信息生成
@@ -75,10 +80,10 @@ $ARGUMENTS
     - 将聚焦选择映射到分类框架
     - 从规格说明/计划/任务中推导缺失上下文（禁止无依据编造）
 
-4. **加载功能上下文**：从FEATURE_DIR读取以下文件：
-    - spec.md：功能需求和范围
-    - plan.md（若存在）：技术细节、依赖项
-    - tasks.md（若存在）：实现任务
+4. **加载功能上下文**：从 `FEATURE_DIR` 读取以下文件（按存在性渐进加载）：
+    - spec.md：功能需求和范围（必需）
+    - plan.md（若存在）：技术背景、依赖项与约束（可选）
+    - tasks.md（若存在）：实现任务（可选）
 
    **上下文加载策略**：
     - 仅加载与当前聚焦领域相关的必要部分（避免全文件导入）

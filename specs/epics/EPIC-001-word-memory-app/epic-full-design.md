@@ -69,62 +69,76 @@
 
 ### 2.2 0 层架构图（EPIC 级视图）
 
-```mermaid
-flowchart LR
-  subgraph EpicSystem["EPIC 系统边界<br/>无痛记忆单词神器APP"]
-    subgraph FEAT001["FEAT-001<br/>单词库管理"]
-      LibraryUI[词库管理 UI]
-      LibraryVM[词库 ViewModel]
-      LibraryRepo[词库仓库]
-    end
-    subgraph FEAT002["FEAT-002<br/>间隔重复算法引擎"]
-      AlgorithmEngine[算法引擎接口]
-      SM2Algorithm[SM-2 算法]
-      StateManager[学习状态管理器]
-    end
-  end
-  subgraph External["外部系统/依赖"]
-    SAF["Android SAF<br/>（文件选择器）"]
-    FileSystem["Android 文件系统"]
-    SharedPrefs["SharedPreferences"]
-    RoomDB["Room 数据库"]
-  end
-  LibraryUI --> LibraryVM
-  LibraryVM --> LibraryRepo
-  LibraryUI -->|Intent| SAF
-  LibraryRepo --> FileSystem
-  LibraryRepo --> SharedPrefs
-  AlgorithmEngine --> SM2Algorithm
-  AlgorithmEngine --> StateManager
-  StateManager --> RoomDB
-  AlgorithmEngine -.->|获取词库数据| LibraryRepo
+```plantuml
+@startuml
+!theme mars
+
+package "EPIC 系统边界\n无痛记忆单词神器APP" {
+  package "FEAT-001\n单词库管理" {
+    component "词库管理 UI" as LibraryUI
+    component "词库 ViewModel" as LibraryVM
+    component "词库仓库" as LibraryRepo
+  }
+
+  package "FEAT-002\n间隔重复算法引擎" {
+    component "算法引擎接口" as AlgorithmEngine
+    component "SM-2 算法" as SM2Algorithm
+    component "学习状态管理器" as StateManager
+  }
+}
+
+package "外部系统/依赖" {
+  component "Android SAF\n（文件选择器）" as SAF
+  component "Android 文件系统" as FileSystem
+  database "SharedPreferences" as SharedPrefs
+  database "Room 数据库" as RoomDB
+}
+
+LibraryUI --> LibraryVM
+LibraryVM --> LibraryRepo
+LibraryUI --> SAF : Intent
+LibraryRepo --> FileSystem
+LibraryRepo --> SharedPrefs
+AlgorithmEngine --> SM2Algorithm
+AlgorithmEngine --> StateManager
+StateManager --> RoomDB
+AlgorithmEngine ..> LibraryRepo : 获取词库数据
+
+@enduml
 ```
 
 ### 2.3 部署视图（EPIC 级视图）
 
-```mermaid
-flowchart TB
-  subgraph Device["Android 设备（终端）"]
-    subgraph App["应用（EPIC 系统）"]
-      FEAT001_Module["词库管理模块<br/>（FEAT-001）"]
-      FEAT002_Module["算法引擎模块<br/>（FEAT-002）"]
-    end
-    subgraph Storage["本地存储"]
-      SharedPrefs_Storage["SharedPreferences<br/>（词库元数据）"]
-      FileStorage["应用私有目录<br/>（词库文件）"]
-      RoomDB_Storage["Room 数据库<br/>（学习状态）"]
-    end
-  end
-  subgraph Android["Android 系统"]
-    SAF_System["Storage Access Framework"]
-    FileSystem_System["文件系统 API"]
-  end
-  FEAT001_Module -->|本地存储| SharedPrefs_Storage
-  FEAT001_Module -->|本地存储| FileStorage
-  FEAT001_Module -->|Intent 调用| SAF_System
-  FEAT001_Module -->|ContentResolver API| FileSystem_System
-  FEAT002_Module -->|本地存储| RoomDB_Storage
-  FEAT002_Module -.->|本地函数调用| FEAT001_Module
+```plantuml
+@startuml
+!theme mars
+
+node "Android 设备（终端）" as Device {
+  package "应用（EPIC 系统）" {
+    component "词库管理模块\n（FEAT-001）" as FEAT001_Module
+    component "算法引擎模块\n（FEAT-002）" as FEAT002_Module
+  }
+
+  package "本地存储" {
+    database "SharedPreferences\n（词库元数据）" as SharedPrefs_Storage
+    database "应用私有目录\n（词库文件）" as FileStorage
+    database "Room 数据库\n（学习状态）" as RoomDB_Storage
+  }
+}
+
+node "Android 系统" as Android {
+  component "Storage Access Framework" as SAF_System
+  component "文件系统 API" as FileSystem_System
+}
+
+FEAT001_Module --> SharedPrefs_Storage : 本地存储
+FEAT001_Module --> FileStorage : 本地存储
+FEAT001_Module --> SAF_System : Intent 调用
+FEAT001_Module --> FileSystem_System : ContentResolver API
+FEAT002_Module --> RoomDB_Storage : 本地存储
+FEAT002_Module ..> FEAT001_Module : 本地函数调用
+
+@enduml
 ```
 
 ### 2.4 通信与交互方式汇总（跨 Feature）
@@ -192,121 +206,142 @@ flowchart TB
 
 ##### EPIC 模块级类图（静态视图）
 
-```mermaid
-classDiagram
-  %% EPIC 模块边界与契约（接口/数据），不画实现细节
-  class WordLibraryModule {
-    <<EPIC Module>>
-    +getLibraries(): Result~List~WordLibrary~~
-    +getCurrentLibrary(): WordLibrary?
-    +selectLibrary(libraryId: String): Result~Unit~
-  }
-  
-  class SpacedRepetitionEngineModule {
-    <<EPIC Module>>
-    +getReviewList(now: Instant, limit: Int): Result~List~LearningTask~~
-    +submitReview(wordId: String, quality: Int, reviewedAt: Instant): Result~LearningState~
-    +observeLearningState(wordId: String): Flow~LearningState?~
-  }
-  
-  class WordLibrary {
-    +id: String
-    +name: String
-    +wordCount: Int
-    +createdAt: Instant
-  }
-  
-  class LearningTask {
-    +wordId: String
-    +dueAt: Instant
-    +priorityScore: Float
-  }
-  
-  class LearningState {
-    +wordId: String
-    +learnCount: Int
-    +nextReviewAt: Instant
-    +memoryStrength: Float
-  }
-  
-  SpacedRepetitionEngineModule --> WordLibraryModule : consumes
-  SpacedRepetitionEngineModule --> LearningTask
-  SpacedRepetitionEngineModule --> LearningState
-  WordLibraryModule --> WordLibrary
+```plantuml
+@startuml
+!theme mars
+
+' EPIC 模块边界与契约（接口/数据），不画实现细节
+class WordLibraryModule <<EPIC Module>> {
+  +getLibraries(): Result<List<WordLibrary>>
+  +getCurrentLibrary(): WordLibrary?
+  +selectLibrary(libraryId: String): Result<Unit>
+}
+
+class SpacedRepetitionEngineModule <<EPIC Module>> {
+  +getReviewList(now: Instant, limit: Int): Result<List<LearningTask>>
+  +submitReview(wordId: String, quality: Int, reviewedAt: Instant): Result<LearningState>
+  +observeLearningState(wordId: String): Flow<LearningState?>
+}
+
+class WordLibrary {
+  +id: String
+  +name: String
+  +wordCount: Int
+  +createdAt: Instant
+}
+
+class LearningTask {
+  +wordId: String
+  +dueAt: Instant
+  +priorityScore: Float
+}
+
+class LearningState {
+  +wordId: String
+  +learnCount: Int
+  +nextReviewAt: Instant
+  +memoryStrength: Float
+}
+
+SpacedRepetitionEngineModule --> WordLibraryModule : consumes
+SpacedRepetitionEngineModule --> LearningTask
+SpacedRepetitionEngineModule --> LearningState
+WordLibraryModule --> WordLibrary
+
+@enduml
 ```
 
 ##### EPIC 端到端时序图 - 成功链路（动态视图）
 
-```mermaid
-sequenceDiagram
-  participant UI as UI/ViewModel
-  participant SRS as SpacedRepetitionEngineModule
-  participant Library as WordLibraryModule
-  participant DB as RoomDB
-  
-  UI->>SRS: getReviewList(now, limit)
-  SRS->>Library: getCurrentLibrary()
-  Library-->>SRS: WordLibrary
-  SRS->>DB: queryDue(now, limit)
-  DB-->>SRS: LearningState[]
-  SRS-->>UI: Result.Success(tasks)
+```plantuml
+@startuml
+!theme mars
+
+participant "UI/ViewModel" as UI
+participant "SpacedRepetitionEngineModule" as SRS
+participant "WordLibraryModule" as Library
+database "RoomDB" as DB
+
+UI -> SRS : getReviewList(now, limit)
+SRS -> Library : getCurrentLibrary()
+Library --> SRS : WordLibrary
+SRS -> DB : queryDue(now, limit)
+DB --> SRS : LearningState[]
+SRS --> UI : Result.Success(tasks)
+
+@enduml
 ```
 
 ##### EPIC 端到端时序图 - 异常链路（动态视图）
 
-```mermaid
-sequenceDiagram
-  participant UI as UI/ViewModel
-  participant SRS as SpacedRepetitionEngineModule
-  participant Library as WordLibraryModule
-  
-  UI->>SRS: getReviewList(now, limit)
-  alt 词库数据缺失
-    SRS->>Library: getCurrentLibrary()
-    Library-->>SRS: null
-    SRS-->>UI: Result.Success([])  %% 降级：空列表
-  else DB 读取失败
-    SRS->>DB: queryDue(now, limit)
-    DB-->>SRS: Failure(DbReadFailed)
-    SRS-->>UI: Result.Success([])  %% 降级：空列表
-  end
+```plantuml
+@startuml
+!theme mars
+
+participant "UI/ViewModel" as UI
+participant "SpacedRepetitionEngineModule" as SRS
+participant "WordLibraryModule" as Library
+database "RoomDB" as DB
+
+UI -> SRS : getReviewList(now, limit)
+
+alt 词库数据缺失
+  SRS -> Library : getCurrentLibrary()
+  Library --> SRS : null
+  SRS --> UI : Result.Success([])  ' 降级：空列表
+else DB 读取失败
+  SRS -> DB : queryDue(now, limit)
+  DB --> SRS : Failure(DbReadFailed)
+  SRS --> UI : Result.Success([])  ' 降级：空列表
+end
+
+@enduml
 ```
 
 ### 3.1 1 层框架图（EPIC 级一致性视图）
 
-```mermaid
-flowchart TB
-  subgraph UI["UI 层（Jetpack Compose）"]
-    LibraryUI[词库管理 UI]
-    LearningUI[学习界面 UI]
-  end
-  subgraph ViewModel["ViewModel 层"]
-    LibraryVM[词库 ViewModel]
-    LearningVM[学习 ViewModel]
-  end
-  subgraph Domain["领域层"]
-    LibraryUseCase[词库 UseCase]
-    AlgorithmEngine[算法引擎接口]
-  end
-  subgraph Data["数据层"]
-    LibraryRepo[词库仓库]
-    StateRepo[学习状态仓库]
-  end
-  subgraph Storage["存储层"]
-    SharedPrefs[SharedPreferences]
-    FileStorage[文件系统]
-    RoomDB[Room 数据库]
-  end
-  LibraryUI --> LibraryVM
-  LearningUI --> LearningVM
-  LibraryVM --> LibraryUseCase
-  LearningVM --> AlgorithmEngine
-  LibraryUseCase --> LibraryRepo
-  AlgorithmEngine --> StateRepo
-  AlgorithmEngine -.->|获取词库数据| LibraryRepo
-  LibraryRepo --> SharedPrefs
-  LibraryRepo --> FileStorage
-  StateRepo --> RoomDB
+```plantuml
+@startuml
+!theme mars
+
+package "UI 层（Jetpack Compose）" {
+  component "词库管理 UI" as LibraryUI
+  component "学习界面 UI" as LearningUI
+}
+
+package "ViewModel 层" {
+  component "词库 ViewModel" as LibraryVM
+  component "学习 ViewModel" as LearningVM
+}
+
+package "领域层" {
+  component "词库 UseCase" as LibraryUseCase
+  component "算法引擎接口" as AlgorithmEngine
+}
+
+package "数据层" {
+  component "词库仓库" as LibraryRepo
+  component "学习状态仓库" as StateRepo
+}
+
+package "存储层" {
+  database "SharedPreferences" as SharedPrefs
+  database "文件系统" as FileStorage
+  database "Room 数据库" as RoomDB
+}
+
+LibraryUI --> LibraryVM
+LearningUI --> LearningVM
+LibraryVM --> LibraryUseCase
+LearningVM --> AlgorithmEngine
+LibraryUseCase --> LibraryRepo
+AlgorithmEngine --> StateRepo
+AlgorithmEngine ..> LibraryRepo : 获取词库数据
+LibraryRepo --> SharedPrefs
+LibraryRepo --> FileStorage
+StateRepo --> RoomDB
+
+@enduml
 ```
 
 ### 3.2 模块与接口协议一致性问题（汇总）
@@ -353,57 +388,71 @@ flowchart TB
 
 ### 流程 1：用户导入词库并开始学习（跨 Feature 端到端）
 
-```mermaid
-flowchart TD
-  Start([用户启动应用]) --> CheckLibrary{是否有词库?}
-  CheckLibrary -->|无| Import[导入词库<br/>FEAT-001]
-  CheckLibrary -->|有| SelectLibrary[选择词库<br/>FEAT-001]
-  
-  Import --> ImportResult{导入结果}
-  ImportResult -->|成功| SelectLibrary
-  ImportResult -->|失败| ImportError[显示错误提示<br/>FEAT-001] --> End([结束])
-  
-  SelectLibrary --> GetReviewList[获取复习列表<br/>FEAT-002]
-  GetReviewList --> GetResult{获取结果}
-  GetResult -->|成功| ShowWords[显示单词列表<br/>FEAT-003]
-  GetResult -->|失败/空列表| EmptyState[显示空状态<br/>降级策略] --> End
-  
-  ShowWords --> End
-  
-  %% 异常分支
-  Import -.->|文件格式不支持| FormatError[提示格式错误<br/>FEAT-001]
-  Import -.->|存储空间不足| SpaceError[提示空间不足<br/>FEAT-001]
-  Import -.->|权限被拒绝| PermissionError[引导授权<br/>FEAT-001]
-  GetReviewList -.->|词库数据缺失| LibraryError[返回空列表<br/>降级策略<br/>FEAT-002]
-  GetReviewList -.->|DB 读取失败| DBError[返回空列表<br/>降级策略<br/>FEAT-002]
+```plantuml
+@startuml
+!theme mars
+
+start
+:用户启动应用;
+if (是否有词库?) then (无)
+  :导入词库\nFEAT-001;
+  if (导入结果) then (失败)
+    :显示错误提示\nFEAT-001;
+    stop
+  endif
+  :选择词库\nFEAT-001;
+else (有)
+  :选择词库\nFEAT-001;
+endif
+
+:获取复习列表\nFEAT-002;
+if (获取结果) then (成功)
+  :显示单词列表\nFEAT-003;
+  stop
+else (失败/空列表)
+  :显示空状态\n降级策略;
+  stop
+endif
+
+@enduml
 ```
 
 ### 流程 2：用户复习单词并更新学习状态（跨 Feature 端到端）
 
-```mermaid
-flowchart TD
-  Start([用户复习单词]) --> SubmitReview[提交复习结果<br/>FEAT-002]
-  SubmitReview --> ValidateInput{输入验证}
-  ValidateInput -->|无效| InputError[返回错误<br/>FEAT-002] --> End([结束])
-  ValidateInput -->|有效| Calculate[计算复习时机<br/>SM-2 算法<br/>FEAT-002]
-  
-  Calculate --> CalcResult{计算结果}
-  CalcResult -->|成功| UpdateState[更新学习状态<br/>FEAT-002]
-  CalcResult -->|溢出/异常| CalcError[使用默认参数<br/>降级策略<br/>FEAT-002] --> UpdateState
-  
-  UpdateState --> UpdateResult{更新结果}
-  UpdateResult -->|成功| SaveRecord[保存复习记录<br/>FEAT-002]
-  UpdateResult -->|失败| UpdateError[返回错误<br/>FEAT-002] --> End
-  
-  SaveRecord --> SaveResult{保存结果}
-  SaveResult -->|成功| Success[更新 UI<br/>显示结果]
-  SaveRecord -->|失败| RecordError[降级成功<br/>不阻塞学习<br/>FEAT-002] --> Success
-  
-  Success --> End
-  
-  %% 异常分支
-  Calculate -.->|计算超时| TimeoutError[使用默认间隔<br/>FEAT-002]
-  UpdateState -.->|DB 写入失败| DBWriteError[返回错误<br/>可重试<br/>FEAT-002]
+```plantuml
+@startuml
+!theme mars
+
+start
+:用户复习单词;
+:提交复习结果\nFEAT-002;
+if (输入验证) then (无效)
+  :返回错误\nFEAT-002;
+  stop
+else (有效)
+endif
+
+:计算复习时机\nSM-2 算法\nFEAT-002;
+if (计算结果) then (溢出/异常)
+  :使用默认参数\n降级策略\nFEAT-002;
+endif
+
+:更新学习状态\nFEAT-002;
+if (更新结果) then (失败)
+  :返回错误\nFEAT-002;
+  stop
+else (成功)
+endif
+
+:保存复习记录\nFEAT-002;
+if (保存结果) then (失败)
+  :降级成功\n不阻塞学习\nFEAT-002;
+endif
+
+:更新 UI\n显示结果;
+stop
+
+@enduml
 ```
 
 ## 5. Feature → Story → Task 汇总追溯
