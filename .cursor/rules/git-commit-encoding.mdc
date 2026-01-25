@@ -1,0 +1,38 @@
+---
+description: Git 中文提交信息编码规范，避免 PowerShell 下乱码
+alwaysApply: true
+---
+
+# Git 中文提交信息：避免乱码
+
+在 Windows PowerShell 下，`git commit -m "中文"` 易因编码问题产生乱码。**生成或执行含中文的提交时，请使用 `-F` 从 UTF-8 文件读取**。
+
+## 推荐做法
+
+1. **用 `-F` 读文件**：将完整提交信息写入 UTF-8 文本（如 `.git-msg.txt`），再执行：
+   ```bash
+   git commit -F .git-msg.txt
+   ```
+
+2. **先配置编码（可选）**：仓库内建议已有：
+   ```bash
+   git config i18n.commitEncoding utf-8
+   git config i18n.logOutputEncoding utf-8
+   git config core.quotepath false
+   ```
+
+## 示例
+
+```
+docs(spec): 同步 specify 脚本、模板及文档至 main
+
+- 更新 check-prerequisites、common、setup-plan 脚本
+- 新增 get-epic-paths.ps1
+```
+
+写入 UTF-8 文件后：`git commit -F .git-msg.txt`。提交完成可删除该临时文件。
+
+## 避免
+
+- 在 PowerShell 中直接 `git commit -m "中文标题"` 或多行 `-m` 传入中文，易乱码。
+- 用 `-F` 时，确保文件以 **UTF-8** 保存（无 BOM 或有 BOM 均可）。
