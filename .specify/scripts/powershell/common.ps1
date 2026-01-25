@@ -128,6 +128,8 @@ function Get-FeaturePathsEnv {
         FEATURE_SPEC  = Join-Path $featureDir 'spec.md'
         IMPL_PLAN     = Join-Path $featureDir 'plan.md'
         FULL_DESIGN = Join-Path $featureDir 'full-design.md'
+        UX_DESIGN    = Join-Path $featureDir 'ux-design.md'
+        DESIGN_DIR   = Join-Path $featureDir 'design'
         TASKS         = Join-Path $featureDir 'tasks.md'
         RESEARCH      = Join-Path $featureDir 'research.md'
         DATA_MODEL    = Join-Path $featureDir 'data-model.md'

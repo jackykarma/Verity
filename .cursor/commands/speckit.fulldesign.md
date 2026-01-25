@@ -34,8 +34,9 @@ $ARGUMENTS
 
 2. **加载上下文（渐进式披露）**：
    - 必读：`spec.md`、`plan.md`
-   - 可选：`tasks.md`（若存在）、`research.md`、`data-model.md`、`contracts/`、`quickstart.md`
+   - 可选：`tasks.md`（若存在）、`ux-design.md`（若存在）、`research.md`、`data-model.md`、`contracts/`、`quickstart.md`
    - 只加载生成 Full Design 所需的最少上下文；避免把整份文件全文搬运进输出。
+   - 若加载了 `ux-design.md`：在 Full Design 的「背景与范围」或单独小节中，可增加对 ux-design 的索引（页面/流程、设计稿形式与路径或 Figma 链接：Figma/截图/HTML），**只做引用与追溯，不做 ux 决策**。
 
 3. **加载模板**：读取 `.specify/templates/full-design-template.md`，并按模板结构生成文档。
 

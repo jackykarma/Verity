@@ -19,6 +19,7 @@
 - **FR/NFR**：Feature 的功能与非功能需求（性能/功耗/内存/安全/可观测性…）  
 - **Story（ST-xxx）**：Feature 的可开发最小单元（Plan 阶段拆分）  
 - **Task（Txxx）**：Story 的执行单元（Tasks 阶段拆分，Implement 执行）  
+- **ux-design / UI 设计稿**：交互与视觉设计产出；**ux-design.md**（信息架构、交互说明、视觉规范、设计稿索引）+ **设计稿**（形式可为 **Figma 链接**、**截图** `design/*.png`、**本地 HTML** `design/*.html`）  
 - **Full Design（Full Technical Design）**：整合 Plan + Story + Task 的技术方案文档（只整合现有产物，不新增决策）
 
 ---
@@ -59,9 +60,11 @@
 - 路径：`specs/epics/EPIC-001-xxx/features/FEAT-001-yyy/`
 - 典型文件：
   - `spec.md`：Feature 规格（含 Epic/Feature 元信息、FR/NFR、验收与边界）
-  - `plan.md`：工程级 Plan（Plan-A/Plan-B + Story Breakdown）
+  - `ux-design.md`：交互与视觉设计（信息架构、交互说明、视觉规范、设计稿索引）；设计稿形式：**Figma 链接**、**截图**（`design/*.png`）、**本地 HTML**（`design/*.html`）
+  - `design/`：可选；存放截图或本地 HTML 设计稿；若仅用 Figma 链接可不创建
+  - `plan.md`：工程级 Plan（Plan-A/Plan-B + Story Breakdown）；输入为 **spec + ux-design**（含设计稿）
   - `tasks.md`：按 Story（ST-xxx）拆解的可执行任务
-  - `full-design.md`：Feature 级 Full Design（整合 spec/plan/tasks）
+  - `full-design.md`：Feature 级 Full Design（整合 spec/plan/tasks，可引用 ux-design）
 
 ### 3.3 EPIC 级 Full Design（全局技术方案）
 
@@ -81,6 +84,8 @@ Spec-Kit 用环境变量 `SPECIFY_FEATURE` 指定“当前要操作的 Feature �
 它会影响这些命令把产物写到哪里：
 
 - `/speckit.clarify`
+- `/speckit.uidesign`（产出 ux-design.md 与 design/；设计稿支持 Figma 链接、截图、本地 HTML）
+- `/speckit.uidesign-update`（对 ux-design.md 做增量更新；按影响评估 handoff feature-update / plan-update / tasks）
 - `/speckit.plan`
 - `/speckit.tasks`
 - `/speckit.fulldesign`
@@ -102,6 +107,8 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 ---
 
 ## 5. 端到端流程（怎么跑）
+
+整体顺序：**创建 EPIC** → **创建 Feature** → （可选）**澄清** → （建议）**uidesign** → **plan** → **tasks** → （可选）**fulldesign** → **实现**（Story 分支）→ **epicsync** / **epicfulldesign**。
 
 ### 5.1 创建 EPIC（由负责人执行）
 
@@ -132,20 +139,39 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 - 生成该 Feature 的 `spec.md`
 - 设置 `SPECIFY_FEATURE` 指向该 Feature 目录（当前终端会话）
 
-### 5.3 方案产出（SE/TL，在 EPIC 分支）
+下一步建议：先 `/speckit.clarify`（可选），**再 `/speckit.uidesign` 再做 `/speckit.plan`**，或直接 `/speckit.plan`。
+
+### 5.3 交互与视觉设计（uidesign，在 plan 之前，可选但建议）
+
+在 EPIC 分支、已设置 `SPECIFY_FEATURE` 时运行：
+
+- `/speckit.uidesign`（`$ARGUMENTS` 可空或补充侧重范围）
+
+结果：
+
+- 产出 `ux-design.md`（信息架构、交互说明、视觉规范、设计稿索引）
+- 可选创建 `design/` 与 `design/index.html` 占位，以支持后续添加**截图**或**本地 HTML**
+- **设计稿形式**：**Figma 链接**（在设计稿索引填 URL）、**截图**（.png/.jpg 放于 `design/`）、**本地 HTML**（`design/*.html`）；在 ux-design.md 的「设计稿索引」中登记**形式**（Figma/截图/HTML）与**路径或链接**
+
+若 ux-design.md 已存在，改用 `/speckit.uidesign-update "本次更新范围：…"` 做增量更新。
+
+### 5.4 方案产出（SE/TL，在 EPIC 分支）
 
 > 说明：你们公司约定 Feature 的方案设计与任务拆解由架构师/SE（或 TL）负责，因此 **plan/tasks 只允许由 SE/TL 在 EPIC 分支产出与维护**，避免设计分叉。
 
+**方案设计的输入**：**spec 需求** 与 **uidesign 输出的 UI 设计稿**（ux-design.md + Figma 链接 / `design/` 下截图或 HTML）；若 uidesign 未执行则仅以 spec 为输入。
+
 0) 在 EPIC 分支确保已选定目标 Feature：设置 `SPECIFY_FEATURE` 指向对应 Feature 目录  
 1) （可选）运行 `/speckit.clarify`：用于补齐 spec 的关键澄清项（由 SE/TL 决定是否需要）  
-2) 运行 `/speckit.plan`：生成 `plan.md`（Plan-A/Plan-B + Story Breakdown：ST-xxx）  
-3) 运行 `/speckit.tasks`：生成 `tasks.md`（按 ST-xxx 拆为可执行 Task）  
-4) （可选）运行 `/speckit.fulldesign`：生成 Feature 级 `full-design.md`（只整合，不新增决策）  
-5) （建议）运行 `/speckit.epicsync "<备注>"`：把该 Feature 的版本/状态同步回 `epic.md` Registry
+2) （建议）运行 `/speckit.uidesign`：产出 `ux-design.md` 与 `design/`（可选）；设计稿可选用 Figma 链接、截图、本地 HTML；为 plan 提供交互与视觉输入  
+3) 运行 `/speckit.plan`：生成 `plan.md`（Plan-A/Plan-B + Story Breakdown：ST-xxx）；**会考虑 spec 与 ux-design（含设计稿）**  
+4) 运行 `/speckit.tasks`：生成 `tasks.md`（按 ST-xxx 拆为可执行 Task）  
+5) （可选）运行 `/speckit.fulldesign`：生成 Feature 级 `full-design.md`（只整合，不新增决策；可引用 ux-design）  
+6) （建议）运行 `/speckit.epicsync "<备注>"`：把该 Feature 的版本/状态同步回 `epic.md` Registry
 
 产物经评审后合入 EPIC 分支，作为后续实现的权威输入。
 
-### 5.4 开发者领取 Story 并实现（Story 分支）
+### 5.5 开发者领取 Story 并实现（Story 分支）
 
 1) 开发者从 EPIC 分支拉 Story 分支  
 2) 在自己的终端设置 `SPECIFY_FEATURE` 指向自己负责的 Feature  
@@ -154,9 +180,9 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 
 > 重要：开发者**不运行** `/speckit.plan` 与 `/speckit.tasks`，也不在实现期擅自改写 plan/spec。若发现必须变更，走“变更管理流程”。
 
-### 5.5 同步 EPIC 总览（建议每次 Feature 有进展就跑）
+### 5.6 同步 EPIC 总览（建议每次 Feature 有进展就跑）
 
-在更新了 Feature 的 `spec/plan/tasks/full-design` 后运行：
+在更新了 Feature 的 `spec/ux-design/plan/tasks/full-design` 后运行：
 
 - `/speckit.epicsync "<备注>"`
 
@@ -164,7 +190,7 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 
 - 增量更新 `epic.md` 的 Feature Registry 区块（版本/状态/链接），保持 EPIC 统一视图。
 
-### 5.6 生成 EPIC 级整体技术方案（Story 拆完后）
+### 5.7 生成 EPIC 级整体技术方案（Story 拆完后）
 
 在 EPIC 分支运行：
 
@@ -188,7 +214,8 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 
 - **`/speckit.specify-update "EPIC-001 范围：…"`**：仅重写 epic.md 指定章节，不改 Feature Registry；用于 EPIC 层变更。
 - **`/speckit.feature-update "范围：…"`**：仅重写当前 Feature 的 spec.md 指定章节；**默认级联**更新 plan.md（按需求变更推导受影响的 plan 范围）。关闭级联：在 `$ARGUMENTS` 中加入「不级联 plan」「仅 spec」或「no-cascade」。
-- **`/speckit.plan-update "范围：…"`**：仅重写当前 Feature 的 plan.md；**plan 范围不由人枚举**。当 **spec 已变更**且 feature-update 未级联时，传 **spec 范围**（如 `范围：FR 与 NFR`），plan-update 按映射**推导**受影响的 plan 章节；当 **纯技术方案变更**（无 spec 变更）时，传 **plan 范围**（如 `A4 风险`、`Story Breakdown`），因无法从 spec 推导。
+- **`/speckit.uidesign-update "本次更新范围：…"`**：仅重写 ux-design.md 指定章节；按**实际影响**评估：若影响 spec → handoff `/speckit.feature-update`（级联 plan）；若影响视觉且 plan 的 A2/A3/Story 会变 → handoff `/speckit.plan-update 范围：A2、A3、Story Breakdown（因 uidesign 视觉/交互 变更）`；然后 `/speckit.tasks`。设计稿索引支持 Figma/截图/HTML。
+- **`/speckit.plan-update "范围：…"`**：仅重写当前 Feature 的 plan.md。当 **spec 已变更**且 feature-update 未级联时，传 **spec 范围**（如 `范围：FR 与 NFR`），plan-update 按映射**推导**受影响的 plan 章节；当 **纯技术方案变更**或 **uidesign 已变更**（仅视觉/ux 影响 plan）时，传 **plan 范围**（如 `A2 架构、A3、Story Breakdown（因 uidesign 视觉/交互 变更）`）。
 
 ### 6.1 需求变更（Scope/FR/NFR/AC）发生在 Feature 层
 
@@ -213,7 +240,30 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 4) `/speckit.epicsync "<备注：xxx变更>"`
 5) 如该变更影响跨 Feature 或整体预算：`/speckit.epicfulldesign "EPIC-xxx"`
 
-### 6.2 技术方案变更（Plan 决策变化、架构变化）
+### 6.2 交互/视觉变更（uidesign：交互规则、视觉、设计稿）
+
+触发场景：
+
+- 交互规则/状态/反馈方式变更（如加载态、空态、确认步骤）
+- 视觉、动效、布局、组件约定变更
+- 设计稿形式或内容变更（Figma 链接、`design/` 下截图或 HTML）
+
+**按影响评估**（可同时发生）：**影响 spec 范围**（如新增验收、改 FR/NFR）→ 需更新 spec；**影响视觉设计**（布局、组件、design 索引）→ 需写回 ux-design；上述任一导致 plan 的 A2/A3/Story 变化 → 需 plan-update，再 tasks。
+
+推荐流程（由 SE/TL 或设计负责人在 EPIC 分支执行）：
+
+1) `/speckit.uidesign-update "本次更新范围：交互规则、加载态"` 或 `"视觉：按钮动效、design 索引"` 等  
+   - 命令会更新 ux-design.md，并在完成报告中给出**影响评估**（影响 spec / 影响视觉 / 两者）及 **handoff 建议**。
+2) 若**影响 spec**：按建议运行  
+   `/speckit.feature-update 范围：FR 与 NFR、验收标准（因 uidesign 交互/视觉 变更）`  
+   并 级联 plan；或按 uidesign-update 输出的具体范围调整。
+3) 若**影响视觉**且 plan 的 A2/A3/Story 会变：按建议运行  
+   `/speckit.plan-update 范围：A2 架构、A3 内部设计、Story Breakdown（因 uidesign 视觉/交互 变更）`。  
+   若已执行 2) 的 feature-update 级联 plan，仍可再跑 plan-update 以补齐 ux-derived 范围；**顺序：先 feature-update，再 plan-update**。
+4) `/speckit.tasks` 重新生成 tasks
+5) （可选）`/speckit.fulldesign`；（建议）`/speckit.epicsync "<备注：uidesign 变更>"`
+
+### 6.3 技术方案变更（Plan 决策变化、架构变化）
 
 触发场景：
 - 技术选型变化、架构边界调整、关键流程变化
@@ -228,7 +278,7 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 4) `/speckit.epicsync` 同步状态与版本到 epic.md
 5) 如为通用能力/跨 Feature 决策：更新 epic.md 的“通用能力/整体 FR-NFR”（可用 `/speckit.specify-update "EPIC-001 范围：通用能力"` 等），并运行 `/speckit.epicfulldesign`
 
-### 6.3 仅 Task 级变更（执行顺序/步骤/验证方式更细化）
+### 6.4 仅 Task 级变更（执行顺序/步骤/验证方式更细化）
 
 触发场景：
 - tasks.md 的步骤更细化
@@ -241,7 +291,7 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 2) 如需要：重新运行 `/speckit.fulldesign`（让 Full Design 的追溯矩阵与验证方式更新）
 3) `/speckit.epicsync "<备注：仅task细化>"` 更新 EPIC Registry
 
-### 6.4 Implement 阶段发现必须变更（“做不下去/指标过不去/方案不成立”）
+### 6.5 Implement 阶段发现必须变更（“做不下去/指标过不去/方案不成立”）
 
 这是最关键的治理点：**不得在实现中偷偷改设计**。
 
@@ -258,7 +308,7 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-001-yyy"
 6) SE/TL 运行 `/speckit.epicsync` 同步到 EPIC 总览
 7) 若为跨 Feature 影响：SE/TL 运行 `/speckit.epicfulldesign`
 
-### 6.5 EPIC 层变更（整体目标/整体 NFR 预算/通用能力调整）
+### 6.6 EPIC 层变更（整体目标/整体 NFR 预算/通用能力调整）
 
 触发场景：
 - EPIC 范围变化、里程碑变化
@@ -296,6 +346,11 @@ echo $env:SPECIFY_FEATURE
 - 如果你是**开发者**：正常情况下你不需要运行 plan/tasks（只需按冻结的 `tasks.md` 运行 `/speckit.implement`）。
 - 如果你是 **SE/TL**：建议在 **EPIC 分支** 运行 plan/tasks，并确保 `SPECIFY_FEATURE` 已设置为 `epics/<EPIC>/features/<FEAT>/`。
 
+### 7.3 关于 uidesign 与 design/
+
+- **设计稿形式**：可选 **Figma 链接**（在 ux-design 设计稿索引填 URL）、**截图**（.png/.jpg 放于 `design/`）、**本地 HTML**（`design/*.html`）；可组合使用。
+- **design/ 目录**：若仅用 Figma 链接，可不创建 `design/`；若使用截图或本地 HTML，需在 `design/` 中放置文件，并在 ux-design.md 的「设计稿索引」中登记形式与路径。
+
 ---
 
 ## 8. 最小示例（可复制）
@@ -317,7 +372,8 @@ $env:SPECIFY_FEATURE="epics/EPIC-001-xxx/features/FEAT-002-offline-queue"
 
 SE/TL 在 EPIC 分支对该 Feature 依次：
 
-- `/speckit.plan`
+- （建议）`/speckit.uidesign` — 产出 ux-design.md 与 design/（可选）；设计稿可选用 Figma 链接、截图、本地 HTML
+- `/speckit.plan` — 方案设计会考虑 spec 与 ux-design（含设计稿）
 - `/speckit.tasks`
 - （可选）`/speckit.fulldesign`
 - `/speckit.epicsync "计划与任务已冻结，进入实现"`

@@ -72,7 +72,9 @@ if ($PathsOnly) {
             FEATURE_DIR  = $paths.FEATURE_DIR
             FEATURE_SPEC = $paths.FEATURE_SPEC
             IMPL_PLAN    = $paths.IMPL_PLAN
-            FULL_DESIGN = $paths.FULL_DESIGN
+            FULL_DESIGN  = $paths.FULL_DESIGN
+            UX_DESIGN    = $paths.UX_DESIGN
+            DESIGN_DIR   = $paths.DESIGN_DIR
             TASKS        = $paths.TASKS
         } | ConvertTo-Json -Compress
     } else {
@@ -82,6 +84,8 @@ if ($PathsOnly) {
         Write-Output "FEATURE_SPEC: $($paths.FEATURE_SPEC)"
         Write-Output "IMPL_PLAN: $($paths.IMPL_PLAN)"
         Write-Output "FULL_DESIGN: $($paths.FULL_DESIGN)"
+        Write-Output "UX_DESIGN: $($paths.UX_DESIGN)"
+        Write-Output "DESIGN_DIR: $($paths.DESIGN_DIR)"
         Write-Output "TASKS: $($paths.TASKS)"
     }
     exit 0
@@ -124,6 +128,9 @@ if (Test-Path $paths.QUICKSTART) { $docs += 'quickstart.md' }
 # Full design (optional)
 if (Test-Path $paths.FULL_DESIGN) { $docs += 'full-design.md' }
 
+# UX design (optional)
+if (Test-Path $paths.UX_DESIGN) { $docs += 'ux-design.md' }
+
 # Include tasks.md if requested and it exists
 if ($IncludeTasks -and (Test-Path $paths.TASKS)) { 
     $docs += 'tasks.md' 
@@ -147,7 +154,8 @@ if ($Json) {
     Test-DirHasFiles -Path $paths.CONTRACTS_DIR -Description 'contracts/' | Out-Null
     Test-FileExists -Path $paths.QUICKSTART -Description 'quickstart.md' | Out-Null
     Test-FileExists -Path $paths.FULL_DESIGN -Description 'full-design.md' | Out-Null
-    
+    Test-FileExists -Path $paths.UX_DESIGN -Description 'ux-design.md' | Out-Null
+
     if ($IncludeTasks) {
         Test-FileExists -Path $paths.TASKS -Description 'tasks.md' | Out-Null
     }

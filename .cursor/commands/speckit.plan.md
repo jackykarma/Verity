@@ -30,6 +30,8 @@ $ARGUMENTS
 - **Plan-B**：技术规约与实现约束（保留原 spec-kit 约定：技术背景字段、合规性检查、项目结构等）。
 - **Story Breakdown**：把 Feature 拆为可开发的技术 Story（ST-xxx），并映射覆盖 FR/NFR。
 
+**方案设计的输入（必须考虑）**：**spec 需求**（spec.md）与 **uidesign 输出的 UI 设计稿**。设计稿形式可为：**Figma 链接**、**截图**（`design/` 下 .png/.jpg 等）、**本地 HTML**（`design/*.html`）；在 ux-design.md 的「设计稿索引」中登记。若 uidesign 未执行则仅以 spec 为输入。
+
 建议：在 **EPIC 分支** 执行，并确保已通过 `SPECIFY_FEATURE` 选中目标 Feature（避免写入错误目录或造成设计分叉）。
 
 执行步骤：
@@ -41,12 +43,14 @@ $ARGUMENTS
    - 对于参数中包含单引号（如 "I'm Groot"），使用转义语法：例如 'I'\''m Groot'（或尽可能使用双引号："I'm Groot"）。
 
 2. **加载上下文（只加载必要部分）**：
-   - 读取 `FEATURE_SPEC`（提取：Epic/Feature 元信息、FR/NFR、验收与边界场景、依赖）
+   - 读取 `FEATURE_SPEC`（提取：Epic/Feature 元信息、FR/NFR、验收与边界场景、依赖）——**spec 需求**为方案设计的主要输入。
+   - 若 `FEATURE_DIR/ux-design.md` 存在（`FEATURE_DIR` 即 `SPECS_DIR` 或 `FEATURE_SPEC` 的父目录）：读取 ux-design.md，提取**信息架构、交互规则与状态、视觉规范、设计稿索引**；按设计稿索引**参考 UI 设计稿**——形式可为 **Figma 链接**（按 URL 查阅）、**`design/` 下截图**（.png/.jpg 等）、**`design/` 下 HTML**（布局、组件、动效等），用于 A2 全景、A3 组件/协作、Story 的细化与命名；在 plan 中可引用 ux-design 的页面/组件 ID 及对应路径或 Figma 链接。
    - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
    - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
    - **注意**：模板中所有图表示例均使用 PlantUML 格式，生成文档时必须严格遵循
 
 3. **填充 Plan-A（工程决策 & 风险评估）**：
+   - **对齐要求**：架构、组件、流程、Story 须与 **spec 需求** 及 **uidesign 的 UI 设计稿**（若存在：ux-design.md + Figma 链接 / `design/` 下截图或 HTML）对齐。
    - 技术选型：候选对比 + 决策理由（禁止空泛）
    - 模块级架构：0层概览 + 1层模块表（边界/职责/依赖/约束）
    - **模块级详细设计（强制）**：
