@@ -23,20 +23,15 @@ $ARGUMENTS
 ## 执行步骤
 
 1. **环境准备**：从代码库根目录运行一次 `.specify/scripts/powershell/check-prerequisites.ps1 -Json`，解析返回的 JSON 获取：
-   - `FEATURE_DIR`
-   - `AVAILABLE_DOCS`
-   - 绝对路径推导：
-     - `SPEC` = FEATURE_DIR/spec.md
-     - `PLAN` = FEATURE_DIR/plan.md
-     - `TASKS` = FEATURE_DIR/tasks.md（可选）
-     - `FULL_DESIGN` = FEATURE_DIR/full-design.md（生成目标）
-   - 若 `spec.md` 或 `plan.md` 缺失：终止并提示先运行 `/speckit.feature`（生成 Feature spec.md）或 `/speckit.plan`。
+   - `FEATURE_DIR`、`AVAILABLE_DOCS`、`UX_DESIGN`、`DESIGN_DIR`（`UX_DESIGN` 在 EPIC 工作流下为 **EPIC 级** ux-design.md 路径）
+   - 绝对路径推导：`SPEC` = FEATURE_DIR/spec.md，`PLAN` = FEATURE_DIR/plan.md，`TASKS` = FEATURE_DIR/tasks.md（可选），`FULL_DESIGN` = FEATURE_DIR/full-design.md（生成目标）
+   - 若 `spec.md` 或 `plan.md` 缺失：终止并提示先运行 `/speckit.feature` 或 `/speckit.plan`。
 
 2. **加载上下文（渐进式披露）**：
    - 必读：`spec.md`、`plan.md`
-   - 可选：`tasks.md`（若存在）、`ux-design.md`（若存在）、`research.md`、`data-model.md`、`contracts/`、`quickstart.md`
+   - 可选：`tasks.md`（若存在）、**`UX_DESIGN`**（若存在：在 EPIC 工作流下为 EPIC 级 ux-design.md）、`research.md`、`data-model.md`、`contracts/`、`quickstart.md`
    - 只加载生成 Full Design 所需的最少上下文；避免把整份文件全文搬运进输出。
-   - 若加载了 `ux-design.md`：在 Full Design 的「背景与范围」或单独小节中，可增加对 ux-design 的索引（页面/流程、设计稿形式与路径或 Figma 链接：Figma/截图/HTML），**只做引用与追溯，不做 ux 决策**。
+   - 若加载了 `ux-design.md`（从 `UX_DESIGN` 路径）：在 Full Design 的「背景与范围」或单独小节中，可增加对 ux-design 的索引（页面/流程、设计稿形式与路径或 Figma 链接），**只做引用与追溯，不做 ux 决策**。
 
 3. **加载模板**：读取 `.specify/templates/full-design-template.md`，并按模板结构生成文档。
 

@@ -119,22 +119,60 @@ function Get-FeaturePathsEnv {
         $featureDir = Get-FeatureDir -RepoRoot $repoRoot -Branch $currentBranch
     }
     
+    # EPIC 级 ux-design 路径（仅当 featureKey 为 epics/EPIC-xxx/features/FEAT-xxx 时）
+    $epicDir = $null
+    $epicUx = $null
+    $epicDesign = $null
+    if ($featureKey -match '^epics/(EPIC-\d{3}-[^/]+)/') {
+        $epicDirName = $matches[1]
+        $epicsBase = Join-Path (Join-Path $repoRoot "specs") "epics"
+        $epicDir = Join-Path $epicsBase $epicDirName
+        $epicUx = Join-Path $epicDir 'ux-design.md'
+        $epicDesign = Join-Path $epicDir 'design'
+    }
+    
+    # UX_DESIGN、DESIGN_DIR：在 EPIC 工作流下指向 EPIC 级，否则为 Feature 级（兼容旧流程）
+    $uxDesign = if ($epicUx) { $epicUx } else { Join-Path $featureDir 'ux-design.md' }
+    $designDir = if ($epicDesign) { $epicDesign } else { Join-Path $featureDir 'design' }
+    
     [PSCustomObject]@{
-        REPO_ROOT     = $repoRoot
-        CURRENT_BRANCH = $currentBranch
-        HAS_GIT       = $hasGit
-        FEATURE_KEY   = $featureKey
-        FEATURE_DIR   = $featureDir
-        FEATURE_SPEC  = Join-Path $featureDir 'spec.md'
-        IMPL_PLAN     = Join-Path $featureDir 'plan.md'
-        FULL_DESIGN = Join-Path $featureDir 'full-design.md'
-        UX_DESIGN    = Join-Path $featureDir 'ux-design.md'
-        DESIGN_DIR   = Join-Path $featureDir 'design'
-        TASKS         = Join-Path $featureDir 'tasks.md'
-        RESEARCH      = Join-Path $featureDir 'research.md'
-        DATA_MODEL    = Join-Path $featureDir 'data-model.md'
-        QUICKSTART    = Join-Path $featureDir 'quickstart.md'
-        CONTRACTS_DIR = Join-Path $featureDir 'contracts'
+        REPO_ROOT       = $repoRoot
+        CURRENT_BRANCH  = $currentBranch
+        HAS_GIT         = $hasGit
+        FEATURE_KEY     = $featureKey
+        FEATURE_DIR     = $featureDir
+        FEATURE_SPEC    = Join-Path $featureDir 'spec.md'
+        IMPL_PLAN       = Join-Path $featureDir 'plan.md'
+        FULL_DESIGN     = Join-Path $featureDir 'full-design.md'
+        UX_DESIGN       = $uxDesign
+        DESIGN_DIR      = $designDir
+        EPIC_DIR        = $epicDir
+        EPIC_UX_DESIGN  = $epicUx
+        EPIC_DESIGN_DIR = $epicDesign
+        TASKS           = Join-Path $featureDir 'tasks.md'
+        RESEARCH        = Join-Path $featureDir 'research.md'
+        DATA_MODEL      = Join-Path $featureDir 'data-model.md'
+        QUICKSTART      = Join-Path $featureDir 'quickstart.md'
+        CONTRACTS_DIR   = Join-Path $featureDir 'contracts'
+    }
+}
+
+# 解析 EPIC 标识并返回 EPIC 根路径，供 /speckit.epicuidesign、/speckit.epicuidesign-update 使用。
+# $EpicIdOrArg：如 "EPIC-002"、"EPIC-002-android-english-learning" 或 "EPIC-002 范围：整体"；可从 $env:SPECIFY_EPIC 或 $ARGUMENTS 传入。
+function Get-EpicPathsForUidesign {
+    param([string]$EpicIdOrArg)
+    if (-not $EpicIdOrArg) { return $null }
+    $epicId = if ($EpicIdOrArg -match '(EPIC-\d{3})') { $matches[1] } else { $null }
+    if (-not $epicId) { return $null }
+    $repoRoot = Get-RepoRoot
+    $epicsDir = Join-Path (Join-Path $repoRoot "specs") "epics"
+    if (-not (Test-Path $epicsDir -PathType Container)) { return $null }
+    $dir = Get-ChildItem -Path $epicsDir -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "$epicId-*" } | Select-Object -First 1
+    if (-not $dir) { return $null }
+    [PSCustomObject]@{
+        EPIC_DIR         = $dir.FullName
+        EPIC_UX_DESIGN   = Join-Path $dir.FullName 'ux-design.md'
+        EPIC_DESIGN_DIR  = Join-Path $dir.FullName 'design'
     }
 }
 

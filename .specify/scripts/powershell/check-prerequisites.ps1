@@ -138,10 +138,12 @@ if ($IncludeTasks -and (Test-Path $paths.TASKS)) {
 
 # Output results
 if ($Json) {
-    # JSON output
+    # JSON output（UX_DESIGN 在 EPIC 工作流下为 EPIC 级路径，供 fulldesign 等引用）
     [PSCustomObject]@{ 
         FEATURE_DIR = $paths.FEATURE_DIR
-        AVAILABLE_DOCS = $docs 
+        AVAILABLE_DOCS = $docs
+        UX_DESIGN = $paths.UX_DESIGN
+        DESIGN_DIR = $paths.DESIGN_DIR
     } | ConvertTo-Json -Compress
 } else {
     # Text output

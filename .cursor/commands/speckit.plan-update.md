@@ -29,7 +29,7 @@ $ARGUMENTS
 |----------|---------------------|--------------------------|
 | **spec 已变更**（如 feature-update 未级联后的补跑） | **spec 范围**：`FR 与 NFR`、`验收标准`、`边界与异常场景`、`依赖关系`、`核心实体`、`假设与约束`、`需求追溯`；或「因 spec 的 FR、NFR 变更」等 | 按**保守映射**（见下）从 spec 范围**推导**受影响的 plan 章节，**不需**用户列举 A4、A5、A6 等 |
 | **纯技术方案变更**（架构、风险、选型等，**无 spec 变更**） | **plan 范围**：`A1 技术选型`、`A2 架构`、`A4 风险`、`Story Breakdown` 等 | 因无 spec 可推导，按用户指定的 plan 范围更新 |
-| **uidesign 已变更**（仅视觉/ux 影响 plan，或需补充 ux-derived 的 plan 范围） | **plan 范围**：例如 `A2 架构、A3 内部设计、Story Breakdown（因 uidesign 视觉/交互 变更）` | 按用户给出的 plan 范围直接更新（与「纯技术方案变更」相同） |
+| **epic uidesign 已变更**（仅视觉/ux 影响 plan，或需补充 ux-derived 的 plan 范围） | **plan 范围**：例如 `A2 架构、A3 内部设计、Story Breakdown（因 epic uidesign 视觉/交互 变更）` | 按用户给出的 plan 范围直接更新（与「纯技术方案变更」相同） |
 
 示例（spec 范围，由命令推导 plan 章节）：
 - `范围：FR 与 NFR`
@@ -86,7 +86,7 @@ $ARGUMENTS
    | 假设与约束 | A4、Plan-B（B2、B5 等） |
    | 需求追溯（Story 增删或映射变化） | Story Breakdown |
 
-2. **若 `$ARGUMENTS` 为 plan 范围**（A0、A1、A2、A3、A4、A5、A6、A7、A8、A9、Plan-B、B0–B7、Story Breakdown、概述 等），或含「因 uidesign」「因 uidesign 的…」：  
+2. **若 `$ARGUMENTS` 为 plan 范围**（A0、A1、A2、A3、A4、A5、A6、A7、A8、A9、Plan-B、B0–B7、Story Breakdown、概述 等），或含「因 uidesign」「因 epic uidesign」「因 uidesign 的…」：  
    直接以用户指定的 plan 章节为**可更新范围**；**不从 spec 推导**（与「纯技术方案变更」相同）。
 
 **plan 章节与 plan-template 的对应**（用于写回时定位）：

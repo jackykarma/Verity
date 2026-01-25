@@ -42,7 +42,7 @@ if (Test-Path $template) {
     New-Item -ItemType File -Path $paths.IMPL_PLAN -Force | Out-Null
 }
 
-# Output results
+# Output results（UX_DESIGN、DESIGN_DIR 在 EPIC 工作流下指向 EPIC 级，供 plan 引用）
 if ($Json) {
     $result = [PSCustomObject]@{ 
         FEATURE_SPEC = $paths.FEATURE_SPEC
@@ -50,6 +50,8 @@ if ($Json) {
         SPECS_DIR = $paths.FEATURE_DIR
         BRANCH = $paths.CURRENT_BRANCH
         HAS_GIT = $paths.HAS_GIT
+        UX_DESIGN = $paths.UX_DESIGN
+        DESIGN_DIR = $paths.DESIGN_DIR
     }
     $result | ConvertTo-Json -Compress
 } else {
@@ -58,4 +60,6 @@ if ($Json) {
     Write-Output "SPECS_DIR: $($paths.FEATURE_DIR)"
     Write-Output "BRANCH: $($paths.CURRENT_BRANCH)"
     Write-Output "HAS_GIT: $($paths.HAS_GIT)"
+    Write-Output "UX_DESIGN: $($paths.UX_DESIGN)"
+    Write-Output "DESIGN_DIR: $($paths.DESIGN_DIR)"
 }
