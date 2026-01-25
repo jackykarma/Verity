@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>听力 - 结果反馈</title>
+  <style>
+    :root { --bg: #F0F2F8; --bg-card: #FFFFFF; --primary: #5B7CFF; --text: #1A1D26; --text-muted: #6B7280; --radius: 18px; --shadow: 0 4px 20px rgba(0,0,0,0.06); --tap: 220ms cubic-bezier(0.4, 0, 0.2, 1); --success: #10B981; --error: #EF4444; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .header { background: var(--bg-card); padding: 14px 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
+    .header a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .screen { padding: 20px; }
+    .result {
+      background: linear-gradient(145deg, rgba(91, 124, 255, 0.08), rgba(91, 124, 255, 0.04));
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(91, 124, 255, 0.15);
+    }
+    .result .icon { font-size: 56px; margin-bottom: 16px; }
+    .result .score { font-size: 32px; font-weight: 700; color: var(--primary); margin-bottom: 8px; letter-spacing: -0.5px; }
+    .result .msg { font-size: 15px; color: var(--text-muted); }
+    .detail {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .detail h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #F3F4F6; font-size: 15px; font-weight: 500; }
+    .row:last-child { border-bottom: none; }
+    .row .ok { color: var(--success); }
+    .row .err { color: var(--error); }
+    .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: 14px; background: linear-gradient(135deg, var(--primary), #4C63E6); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(91, 124, 255, 0.35); transition: transform 200ms; }
+    .btn:active { transform: scale(0.98); }
+  </style>
+</head>
+<body>
+  <header class="header"><a href="listening.html">← 返回</a></header>
+
+  <div class="screen">
+    <div class="result">
+      <div class="icon">📊</div>
+      <div class="score">正确率 66.7%</div>
+      <div class="msg">2/3 题正确</div>
+    </div>
+    <div class="detail">
+      <h4>答题明细</h4>
+      <div class="row"><span>第 1 题</span><span class="ok">✓ 正确</span></div>
+      <div class="row"><span>第 2 题</span><span class="ok">✓ 正确</span></div>
+      <div class="row"><span>第 3 题</span><span class="err">✗ 错误</span></div>
+    </div>
+    <button class="btn" onclick="location.href='listening.html'">继续练习</button>
+  </div>
+</body>
+</html>

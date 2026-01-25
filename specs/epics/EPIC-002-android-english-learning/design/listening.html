@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>听力训练 - 材料与播放+题目</title>
+  <style>
+    :root { --bg: #F0F2F8; --bg-card: #FFFFFF; --primary: #5B7CFF; --primary-soft: rgba(91, 124, 255, 0.12); --text: #1A1D26; --text-muted: #6B7280; --radius: 18px; --radius-sm: 12px; --shadow: 0 4px 20px rgba(0,0,0,0.06); --tap: 220ms cubic-bezier(0.4, 0, 0.2, 1); --accent: #8B5CF6; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .header { background: var(--bg-card); padding: 14px 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
+    .header a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .screen { padding: 20px; }
+    .list .item {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform var(--tap), box-shadow var(--tap);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .list .item:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+    .list .item:active { transform: scale(0.99); }
+    .list .item h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .list .item .muted { font-size: 14px; color: var(--text-muted); }
+    .player {
+      background: linear-gradient(145deg, rgba(91, 124, 255, 0.08), rgba(139, 92, 246, 0.06));
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(91, 124, 255, 0.12);
+    }
+    .player .title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+    .progress { height: 6px; background: #E5E7EB; border-radius: 3px; margin-bottom: 10px; overflow: hidden; }
+    .progress .fill { height: 100%; width: 35%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 3px; transition: width var(--tap); }
+    .time { font-size: 13px; color: var(--text-muted); display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: 500; }
+    .controls { display: flex; justify-content: center; align-items: center; gap: 28px; }
+    .controls button {
+      width: 56px; height: 56px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #4C63E6);
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      transition: transform var(--tap), box-shadow var(--tap);
+      box-shadow: 0 4px 16px rgba(91, 124, 255, 0.4);
+    }
+    .controls button:first-child, .controls button:last-child { width: 44px; height: 44px; font-size: 18px; background: #E5E7EB; color: var(--text); box-shadow: none; }
+    .controls button:hover { transform: scale(1.05); }
+    .quiz { background: var(--bg-card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.03); }
+    .quiz .q { font-size: 16px; font-weight: 600; margin-bottom: 14px; line-height: 1.5; }
+    .opt {
+      display: block; width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      border: 2px solid #E5E7EB;
+      border-radius: var(--radius-sm);
+      background: #fff;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--tap), background var(--tap);
+    }
+    .opt:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), #4C63E6); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 16px rgba(91, 124, 255, 0.35); transition: transform 200ms; }
+    .btn:active { transform: scale(0.98); }
+    .empty { text-align: center; padding: 64px 24px; color: var(--text-muted); }
+    .skeleton { background: var(--bg-card); border-radius: var(--radius); height: 88px; margin-bottom: 14px; box-shadow: var(--shadow); animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+  </style>
+</head>
+<body>
+  <header class="header"><a href="index.html">← 返回</a></header>
+
+  <div class="screen">
+    <div id="list-view" class="list">
+      <a href="#" class="item" onclick="document.getElementById('list-view').style.display='none'; document.getElementById('play-view').style.display='block'; return false;">
+        <h3>Daily News - Technology</h3>
+        <p class="muted">约 2 分钟 · 3 题</p>
+      </a>
+      <a href="#" class="item">
+        <h3>Short Story - The Garden</h3>
+        <p class="muted">约 4 分钟 · 5 题</p>
+      </a>
+    </div>
+
+    <div id="play-view" style="display:none">
+      <div class="player">
+        <div class="title">Daily News - Technology</div>
+        <div class="progress"><div class="fill"></div></div>
+        <div class="time"><span>0:42</span><span>2:00</span></div>
+        <div class="controls">
+          <button>⏮</button>
+          <button>▶️</button>
+          <button>⏭</button>
+        </div>
+      </div>
+      <div class="quiz">
+        <div class="q">1. What is the main topic of the report?</div>
+        <button class="opt">A. Climate change</button>
+        <button class="opt">B. AI developments</button>
+        <button class="opt">C. Space travel</button>
+        <button class="opt">D. Health care</button>
+      </div>
+      <button class="btn" onclick="location.href='listening-result.html'">提交答案</button>
+    </div>
+
+    <div id="loading-view" style="display:none">
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
+    </div>
+    <div id="empty-view" class="empty" style="display:none"><div>暂无可练内容</div></div>
+  </div>
+</body>
+</html>

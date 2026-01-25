@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>口语训练 - 跟读与完成反馈</title>
+  <style>
+    :root { --bg: #F0F2F8; --bg-card: #FFFFFF; --primary: #5B7CFF; --primary-soft: rgba(91, 124, 255, 0.12); --text: #1A1D26; --text-muted: #6B7280; --radius: 18px; --radius-sm: 12px; --shadow: 0 4px 20px rgba(0,0,0,0.06); --tap: 220ms cubic-bezier(0.4, 0, 0.2, 1); --success: #10B981; --accent: #EC4899; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .header { background: var(--bg-card); padding: 14px 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
+    .header a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .screen { padding: 20px; }
+    .list .item {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform var(--tap), box-shadow var(--tap);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .list .item:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+    .list .item:active { transform: scale(0.99); }
+    .list .item h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .list .item .muted { font-size: 14px; color: var(--text-muted); }
+    .practice {
+      background: linear-gradient(145deg, rgba(236, 72, 153, 0.06), rgba(91, 124, 255, 0.06));
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      border: 1px solid rgba(236, 72, 153, 0.12);
+    }
+    .practice .text { font-size: 20px; line-height: 1.6; margin-bottom: 24px; font-weight: 500; color: var(--text); }
+    .practice .hint { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+    .toolbar { display: flex; gap: 12px; flex-wrap: wrap; }
+    .toolbar .btn {
+      padding: 14px 22px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform var(--tap), opacity var(--tap);
+    }
+    .toolbar .btn:active { transform: scale(0.97); }
+    .btn-demo { background: var(--primary-soft); color: var(--primary); }
+    .btn-record { background: linear-gradient(135deg, var(--primary), #4C63E6); color: #fff; box-shadow: 0 4px 16px rgba(91, 124, 255, 0.35); }
+    .btn-record.recording { background: linear-gradient(135deg, #EF4444, #DC2626); box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4); animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.9; } }
+    .btn-play { background: #F3F4F6; color: var(--text); }
+    .btn-next { display: block; width: 100%; padding: 16px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), #4C63E6); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 24px; box-shadow: 0 4px 16px rgba(91, 124, 255, 0.35); transition: transform 200ms; }
+    .btn-next:active { transform: scale(0.98); }
+    .done { text-align: center; padding: 48px 28px; }
+    .done .icon { font-size: 72px; margin-bottom: 20px; filter: drop-shadow(0 4px 12px rgba(16, 185, 129, 0.3)); }
+    .done .t { font-size: 24px; font-weight: 700; color: var(--success); margin-bottom: 10px; letter-spacing: -0.5px; }
+    .done .h { font-size: 15px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <header class="header"><a href="index.html">← 返回</a></header>
+
+  <div class="screen">
+    <div id="list-view" class="list">
+      <a href="#" class="item" onclick="document.getElementById('list-view').style.display='none'; document.getElementById('practice-view').style.display='block'; return false;">
+        <h3>跟读 - 日常对话</h3>
+        <p class="muted">示范音 · 录音 · 回放</p>
+      </a>
+      <a href="#" class="item">
+        <h3>复述 - 短句</h3>
+        <p class="muted">听示范后复述</p>
+      </a>
+    </div>
+
+    <div id="practice-view" style="display:none">
+      <div class="practice">
+        <div class="text">"Good morning! How are you today?"</div>
+        <div class="hint">示范发音遵循设置中的英式/美式偏好</div>
+        <div class="toolbar">
+          <button class="btn btn-demo">🔊 听示范</button>
+          <button class="btn btn-record" id="rec">🎤 录音</button>
+          <button class="btn btn-play">▶ 回放</button>
+        </div>
+      </div>
+      <button class="btn-next" onclick="document.getElementById('practice-view').style.display='none'; document.getElementById('done-view').style.display='block';">完成并查看反馈</button>
+    </div>
+
+    <div id="done-view" style="display:none">
+      <div class="done">
+        <div class="icon">✓</div>
+        <div class="t">已完成</div>
+        <div class="h">完成反馈（首版）· 简单评分后续迭代</div>
+      </div>
+      <button class="btn-next" onclick="location.href='speaking.html'">继续练习</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>阅读 - 理解题与生词本</title>
+  <style>
+    :root { --bg: #F0F2F8; --bg-card: #FFFFFF; --primary: #5B7CFF; --primary-soft: rgba(91, 124, 255, 0.12); --text: #1A1D26; --text-muted: #6B7280; --radius: 18px; --radius-sm: 12px; --shadow: 0 4px 20px rgba(0,0,0,0.06); --tap: 220ms cubic-bezier(0.4, 0, 0.2, 1); --success: #10B981; --error: #EF4444; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .header { background: var(--bg-card); padding: 14px 20px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
+    .header a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .screen { padding: 20px; }
+    .tabs {
+      display: flex;
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      padding: 6px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .tabs .t {
+      flex: 1; padding: 12px 16px;
+      text-align: center;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all var(--tap);
+    }
+    .tabs .t.active { background: var(--primary-soft); color: var(--primary); }
+    .quiz {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .quiz .q { font-size: 16px; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+    .opt {
+      display: block; width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      border: 2px solid #E5E7EB;
+      border-radius: var(--radius-sm);
+      background: #fff;
+      font-size: 15px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color var(--tap), background var(--tap);
+    }
+    .opt:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .opt.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
+    .opt.wrong { border-color: var(--error); background: rgba(239, 68, 68, 0.08); }
+    .btn { display: block; width: 100%; padding: 16px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), #4C63E6); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; box-shadow: 0 4px 16px rgba(91, 124, 255, 0.35); transition: transform 200ms; }
+    .btn:active { transform: scale(0.98); }
+    .result { text-align: center; padding: 36px 24px; background: linear-gradient(145deg, rgba(91, 124, 255, 0.08), rgba(91, 124, 255, 0.04)); border-radius: var(--radius); margin-bottom: 20px; border: 1px solid rgba(91, 124, 255, 0.12); }
+    .result .score { font-size: 36px; font-weight: 700; color: var(--primary); margin-bottom: 10px; letter-spacing: -0.5px; }
+    .result .msg { font-size: 15px; color: var(--text-muted); }
+    .vocab-list .item {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0,0,0,0.03);
+    }
+    .vocab-list .item .word { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+    .vocab-list .item .def { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+    .empty { text-align: center; padding: 56px 24px; color: var(--text-muted); }
+    .empty .t { font-size: 18px; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+  </style>
+</head>
+<body>
+  <header class="header"><a href="reading.html">← 返回阅读</a></header>
+
+  <div class="screen">
+    <div class="tabs">
+      <div class="t active">理解题</div>
+      <div class="t">生词本</div>
+    </div>
+
+    <div id="quiz-panel">
+      <div class="quiz">
+        <div class="q">1. According to the passage, why is sleep important for memory?</div>
+        <button class="opt">A. It slows down brain activity</button>
+        <button class="opt correct">B. It helps consolidate memories</button>
+        <button class="opt">C. It reduces stress only</button>
+        <button class="opt">D. It has no effect on memory</button>
+      </div>
+      <button class="btn">提交答案</button>
+    </div>
+
+    <div id="result-panel" style="display:none">
+      <div class="result">
+        <div class="score">正确率 80%</div>
+        <div class="msg">4/5 题正确 · 可查看解析</div>
+      </div>
+      <button class="btn" onclick="location.href='reading.html'">返回阅读</button>
+    </div>
+
+    <div id="vocab-panel" style="display:none">
+      <div class="vocab-list">
+        <div class="item"><div class="word">impaired</div><div class="def">adj. 受损的；削弱的</div></div>
+        <div class="item"><div class="word">consolidate</div><div class="def">v. 巩固；合并</div></div>
+      </div>
+      <div id="vocab-empty" class="empty" style="display:none">
+        <div class="t">生词本为空</div>
+        <div class="h">阅读时点击生词可添加</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
