@@ -4,6 +4,7 @@
 **Feature ID**：FEAT-[编号，例如 001]
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
+**Plan Level**：Lite / Standard / Deep（按风险选择；高风险/高不确定性选 Deep）
 **当前工作分支**：`[epic/... 或 story/... ]`
 **Feature 目录**：`specs/epics/EPIC-[编号]-[short-name]/features/FEAT-[编号]-[short-name]/`
 **日期**：[YYYY-MM-DD]
@@ -12,6 +13,10 @@
 > 规则：
 > - Plan 阶段必须包含工程决策、风险评估、算法/功耗/性能/内存评估（量化 + 验收指标）。
 > - Implement 阶段**不得**擅自改写 Plan 的技术决策；若必须变更，走增量变更流程并提升 Version。
+> - Plan Level 选择建议：
+>   - **Lite**：小改动/低风险（无新契约、无持久化迁移、无复杂动效/并发）
+>   - **Standard**：默认（补齐关键类图/时序图与风险/预算落点）
+>   - **Deep**：新契约/持久化迁移/复杂动效与性能预算/并发竞态/灰度回滚等（补齐组件详细设计与关键 Story 的 L2）
 
 ## 变更记录（增量变更）
 

@@ -48,6 +48,7 @@ $ARGUMENTS
    - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
    - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
    - **注意**：模板中所有图表示例均使用 PlantUML 格式，生成文档时必须严格遵循
+   - 按 `.specify/templates/plan-template.md` 填写 `Plan Level`（Lite/Standard/Deep），并确保细化粒度与 Feature 风险匹配（避免小需求过度设计）
 
 3. **填充 Plan-A（工程决策 & 风险评估）**：
    - **对齐要求**：架构、组件、流程、Story 须与 **spec 需求** 及 **EPIC 级 epic uidesign**（若存在：ux-design.md + Figma 链接 / `design/` 下截图或 HTML）对齐。
@@ -88,6 +89,6 @@ $ARGUMENTS
   - 部署图（deploymentDiagram）
   - 不得使用 Mermaid 或其他图表格式
 - 所有评估（算法/功耗/性能/内存）必须可量化且带验收指标与测试方法。
-- 执行主体：**SE/TL（或架构师）**。开发者应将 `plan.md` 视为只读输入；如需变更必须提交变更提案（PR/Issue/评论）并由 SE/TL 在 EPIC 分支落地后再继续实现。
+- 执行主体：**SE/TL（或架构师）**。开发者应将 `plan.md` 视为只读输入；如需变更必须提交变更提案（PR/Issue/评论；建议使用 `.specify/templates/change-request-template.md` 作为 CR 模板）并由 SE/TL 在 EPIC 分支落地后再继续实现。
 - Plan 内容是 Implement 的唯一权威输入；Implement 期不得“边写边改设计”。
 ```

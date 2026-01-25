@@ -54,7 +54,7 @@ $ARGUMENTS
 
    **强制约束（不可越权）**：
     - Implement 阶段 **不得**擅自改写 `plan.md` 的工程决策与 Story Breakdown，也不得改写 `spec.md` 的 FR/NFR/AC。
-    - 若发现设计缺口或必须变更：停止 Implement，提交变更提案（PR/Issue/评论，包含证据与影响范围），由 SE/TL 在 EPIC 分支先更新 plan/spec（走增量变更并提升 Version），再重新生成 tasks.md（必要时）后继续。
+    - 若发现设计缺口或必须变更：停止 Implement，提交变更提案（PR/Issue/评论，包含证据与影响范围；建议使用 `.specify/templates/change-request-template.md` 作为 CR 模板），由 SE/TL 在 EPIC 分支先更新 plan/spec（走增量变更并提升 Version），再重新生成 tasks.md（必要时）后继续。
 
 4. **项目配置验证**：
     - **必填**：根据实际项目配置创建/验证忽略文件（ignore files）：
