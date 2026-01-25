@@ -5,9 +5,9 @@ handoffs:
     agent: speckit.clarify
     prompt: 澄清规格说明的相关要求
     send: true
-  - label: 交互与视觉设计
-    agent: speckit.uidesign
-    prompt: 基于 spec 进行交互与视觉设计，产出 ux-design.md 与 design/ 设计稿目录；建议在 plan 之前完成
+  - label: 交互与视觉设计（EPIC 级）
+    agent: speckit.epicuidesign
+    prompt: 若尚未为 EPIC 做 epic uidesign，可运行 /speckit.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后，从整个需求整体设计）；建议在任意 Feature 的 plan 之前完成
     send: false
   - label: 制定技术方案
     agent: speckit.plan
@@ -58,5 +58,5 @@ $ARGUMENTS
 
 6. **完成报告**：输出 Feature Key、spec.md 路径、检查清单路径，并提示下一步：
 - `/speckit.clarify`（建议先做）
-- **建议** `/speckit.uidesign` 再做 `/speckit.plan`，或直接 `/speckit.plan`
+- 若**尚未**为 EPIC 做 epic uidesign：**`/speckit.epicuidesign "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后，见工作流 5.3）再做 `/speckit.plan`；或直接 `/speckit.plan`（plan 会引用 EPIC 级 ux-design，若存在）
 
