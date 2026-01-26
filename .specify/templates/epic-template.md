@@ -108,6 +108,59 @@ description: "EPIC 规格说明模板（输入为大需求容器，输出 Featur
 | 动效合集/交互规范 | FEAT-??? | 资产复用；性能预算统一；验收一致 | FEAT-??? |
 | 算法能力：[模型A] | FEAT-??? | 模型/推理/SDK 需版本化；回退策略统一 | FEAT-??? |
 
+## 跨 Feature 技术策略（在任意 Feature plan 之前完成）*（必填）*
+
+> **目的**：在各 Feature 开始 plan 设计之前，识别跨 Feature 的共享技术能力，避免重复设计，统一技术口径。
+>
+> **时机**：在所有 Feature `spec.md` 完成之后、任意 Feature `plan.md` 开始之前填写。
+>
+> **强制规则**：
+> - 后续每个 Feature 在开始 plan 之前，**必须先阅读本章节**
+> - 若 Feature plan 中需要设计的组件已在此登记为"由其他 Feature 提供"，则**必须复用**，不得另起炉灶
+> - 若发现新的共享需求，必须**先更新本章节**，再继续 Feature plan
+
+### 共享能力识别（跨 Feature 技术组件）
+
+> 识别多个 Feature 都可能用到的技术组件/框架/基础设施，明确由哪个 Feature 负责设计（Owner）。
+
+| 共享能力名称 | 类型 | 涉及 Feature | Owner Feature | 消费方 Feature | 设计状态 | 备注 |
+|---|---|---|---|---|---|---|
+| [例如：UI 基础框架] | Infrastructure | A, B, C | FEAT-001 | FEAT-002, FEAT-003 | 待设计 | 主题、布局、导航 |
+| [例如：数据持久层] | Infrastructure | A, B | FEAT-001 | FEAT-002 | 待设计 | Room + 迁移策略 |
+| [例如：网络层封装] | Infrastructure | B, C | FEAT-002 | FEAT-003 | 待设计 | Retrofit + 错误处理 |
+| [例如：通用错误处理] | Enabler | All | FEAT-001 | All | 待设计 | 统一错误码 + 用户提示 |
+
+> 类型说明：
+> - **Infrastructure**：基础设施（UI框架、数据层、网络层、存储层等）
+> - **Enabler**：使能组件（错误处理、日志、配置、权限等）
+> - **Capability**：业务能力（应作为独立 Capability Feature，见"通用能力"章节）
+
+### Feature Plan 执行顺序（基于依赖关系）
+
+> 根据共享能力的依赖关系，确定 Feature plan 的执行顺序。Owner Feature 必须先完成 plan。
+
+| 顺序 | Feature | 原因 | 依赖（需要先完成 plan 的 Feature） | 提供的共享能力 |
+|---|---|---|---|---|
+| 1 | FEAT-001 | 设计基础设施（UI/Data/错误处理） | 无 | UI框架, 数据层, 错误处理 |
+| 2 | FEAT-002 | 设计网络层 | FEAT-001（UI框架） | 网络层 |
+| 3 | FEAT-003 | 纯业务，依赖基础设施 | FEAT-001, FEAT-002 | 无 |
+
+### 技术约束（所有 Feature plan 必须遵守）
+
+> 在此定义跨 Feature 的技术约束，后续 Feature plan 不得违反。
+
+- **UI 框架**：由 [Owner Feature] 设计后，其他 Feature 必须复用，不得另起炉灶
+- **数据层**：统一使用 [技术选型]，迁移策略由 [Owner Feature] 定义
+- **错误处理**：统一错误码体系，由 [Owner Feature] 设计
+- **线程模型**：[统一约束，如：IO 操作统一使用 Dispatchers.IO]
+- **依赖注入**：[统一约束，如：统一使用 Hilt]
+
+### 技术策略变更记录
+
+| 版本 | 日期 | 变更内容 | 影响 Feature | 变更原因 |
+|---|---|---|---|---|
+| v0.1.0 | [YYYY-MM-DD] | 初始版本 |  |  |
+
 ## 整体 FR / NFR（EPIC Level）*（必填）*
 
 > 说明：
@@ -168,9 +221,9 @@ description: "EPIC 规格说明模板（输入为大需求容器，输出 Featur
 > - 开发者可手工补充“备注”列，但不要修改表头与 `BEGIN/END` 标记。
 
 <!-- BEGIN_FEATURE_REGISTRY -->
-| Feature | 分支 | Feature Version | Plan Version | Tasks Version | Full Design | 状态 | 备注 |
-|---|---|---|---|---|---|---|---|
-| [Feature A] | 001-feature-a | v0.1.0 | v0.1.0 | v0.1.0 | full-design.md | Plan Ready |  |
+| Feature | 分支 | Feature Version | Plan Version | Tasks Version | 状态 | 备注 |
+|---|---|---|---|---|---|---|
+| [Feature A] | 001-feature-a | v0.1.0 | v0.1.0 | v0.1.0 | Plan Ready |  |
 <!-- END_FEATURE_REGISTRY -->
 
 ## 变更记录（增量变更）

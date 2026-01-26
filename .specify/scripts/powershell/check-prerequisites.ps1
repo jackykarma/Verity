@@ -72,7 +72,6 @@ if ($PathsOnly) {
             FEATURE_DIR  = $paths.FEATURE_DIR
             FEATURE_SPEC = $paths.FEATURE_SPEC
             IMPL_PLAN    = $paths.IMPL_PLAN
-            FULL_DESIGN  = $paths.FULL_DESIGN
             UX_DESIGN    = $paths.UX_DESIGN
             DESIGN_DIR   = $paths.DESIGN_DIR
             TASKS        = $paths.TASKS
@@ -83,7 +82,6 @@ if ($PathsOnly) {
         Write-Output "FEATURE_DIR: $($paths.FEATURE_DIR)"
         Write-Output "FEATURE_SPEC: $($paths.FEATURE_SPEC)"
         Write-Output "IMPL_PLAN: $($paths.IMPL_PLAN)"
-        Write-Output "FULL_DESIGN: $($paths.FULL_DESIGN)"
         Write-Output "UX_DESIGN: $($paths.UX_DESIGN)"
         Write-Output "DESIGN_DIR: $($paths.DESIGN_DIR)"
         Write-Output "TASKS: $($paths.TASKS)"
@@ -125,9 +123,6 @@ if ((Test-Path $paths.CONTRACTS_DIR) -and (Get-ChildItem -Path $paths.CONTRACTS_
 
 if (Test-Path $paths.QUICKSTART) { $docs += 'quickstart.md' }
 
-# Full design (optional)
-if (Test-Path $paths.FULL_DESIGN) { $docs += 'full-design.md' }
-
 # UX design (optional)
 if (Test-Path $paths.UX_DESIGN) { $docs += 'ux-design.md' }
 
@@ -138,7 +133,7 @@ if ($IncludeTasks -and (Test-Path $paths.TASKS)) {
 
 # Output results
 if ($Json) {
-    # JSON output（UX_DESIGN 在 EPIC 工作流下为 EPIC 级路径，供 fulldesign 等引用）
+    # JSON output（UX_DESIGN 在 EPIC 工作流下为 EPIC 级路径）
     [PSCustomObject]@{ 
         FEATURE_DIR = $paths.FEATURE_DIR
         AVAILABLE_DOCS = $docs
@@ -155,7 +150,6 @@ if ($Json) {
     Test-FileExists -Path $paths.DATA_MODEL -Description 'data-model.md' | Out-Null
     Test-DirHasFiles -Path $paths.CONTRACTS_DIR -Description 'contracts/' | Out-Null
     Test-FileExists -Path $paths.QUICKSTART -Description 'quickstart.md' | Out-Null
-    Test-FileExists -Path $paths.FULL_DESIGN -Description 'full-design.md' | Out-Null
     Test-FileExists -Path $paths.UX_DESIGN -Description 'ux-design.md' | Out-Null
 
     if ($IncludeTasks) {

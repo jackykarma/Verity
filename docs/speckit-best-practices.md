@@ -59,13 +59,12 @@ specs/epics/EPIC-xxx-.../
 ├── epic.md
 ├── ux-design.md          # EPIC 级交互/视觉/动效 + 设计稿索引
 ├── design/               # 可选：截图/HTML 等设计稿文件
-├── epic-full-design.md   # 可选：EPIC 级整合方案
+├── epic-full-design.md   # 可选：EPIC 级跨 Feature 一致性检查
 └── features/
     └── FEAT-xxx-.../
         ├── spec.md
         ├── plan.md
-        ├── tasks.md
-        └── full-design.md
+        └── tasks.md
 ```
 
 ---
@@ -119,11 +118,33 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 
 - `/speckit.epicuidesign "EPIC-xxx"`（须在**所有** Feature `spec.md` 输出之后、任意 Feature `plan` 之前）
 
-### 5.4 Feature：Plan（逐个，SE/TL 在 EPIC 分支执行）
+### 5.4 EPIC：技术策略规划（新增，必须）
+
+> **目的**：在各 Feature 开始 plan 之前，识别跨 Feature 的共享技术能力，避免重复设计。
+
+目标：在 `epic.md` 中填写"跨 Feature 技术策略"章节。
+
+在 `epic.md` 的"跨 Feature 技术策略"中补齐：
+- **共享能力识别**：识别多个 Feature 都可能用到的技术组件（如 UI 框架、数据层、网络层）
+- **Owner Feature**：明确每个共享能力由哪个 Feature 负责设计
+- **Plan 执行顺序**：根据依赖关系确定 Feature plan 的先后顺序
+- **技术约束**：定义跨 Feature 必须遵守的技术约束
+
+**硬规则**：
+- 后续每个 Feature plan **必须先阅读此章节**
+- Owner Feature 必须**先完成 plan**，消费方 Feature 才能开始
+- 若发现新的共享需求，必须**先更新 epic.md**，再继续 Feature plan
+
+### 5.5 Feature：Plan（按依赖顺序执行，SE/TL 在 EPIC 分支执行）
 
 目标：产出 `plan.md`（工程级蓝图 + Story Breakdown），并冻结关键决策。
 
 - `/speckit.plan`
+
+**前置检查（必须）**：
+- 在开始 plan 之前，必须完成 `plan.md` 中的"Plan 前置检查"章节
+- 确认已阅读 `epic.md` 的"跨 Feature 技术策略"
+- 若依赖其他 Feature 的共享能力，确认 Owner Feature 的 plan 已完成
 
 #### Plan Level 选择（务必填写）
 
@@ -132,13 +153,13 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 - **Standard**：默认
 - **Deep**：新契约/迁移/复杂动效与性能预算/并发竞态/灰度回滚等高风险
 
-### 5.5 Feature：Tasks（逐个，SE/TL 在 EPIC 分支执行）
+### 5.6 Feature：Tasks（逐个，SE/TL 在 EPIC 分支执行）
 
 目标：产出 `tasks.md`，把 Story 拆成可执行步骤与验证清单（含 NFR 阈值）。
 
 - `/speckit.tasks`
 
-### 5.6 Implement（开发者在 Story 分支执行）
+### 5.7 Implement（开发者在 Story 分支执行）
 
 目标：严格按 `tasks.md` 落码与验证。
 
@@ -148,10 +169,10 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 - Implement 阶段不得擅自改写 `spec.md`/`plan.md`
 - 发现设计缺口或必须变更：停止实现 → 发起 CR → 由 SE/TL 在 EPIC 分支增量更新并提升版本 → 必要时重跑 tasks → 再继续实现
 
-### 5.7 EPIC Sync / EPIC Full Design（可选但强烈建议）
+### 5.8 EPIC Sync / EPIC Full Design（可选）
 
-- `/speckit.epicsync "<备注>"`
-- `/speckit.epicfulldesign "EPIC-xxx"`（当 Story 拆完后、或跨 Feature 冲突需要统一视图时）
+- `/speckit.epicsync "<备注>"`（同步 Feature 状态到 epic.md Registry）
+- `/speckit.epicfulldesign "EPIC-xxx"`（可选：当跨 Feature 存在一致性冲突需要检查时）
 
 ---
 
@@ -162,6 +183,8 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 - `spec.md`：范围/FR/NFR/AC/边界可测试且完整
 - `ux-design.md`：该 Feature 的页面/流程/动效索引可追溯（若 EPIC 有 ux-design）
 - 关键依赖与失败模式已列出
+- **（新增）`epic.md` 的"跨 Feature 技术策略"已填写**：共享能力已识别、Owner 已明确、Plan 执行顺序已确定
+- **（新增）前置 Feature 的 plan 已完成**：若本 Feature 依赖其他 Feature 的共享能力，Owner Feature 必须先完成 plan
 
 ### 6.2 进入 Implement 前（Design Freeze）
 
@@ -209,8 +232,7 @@ CR 必须回答：
 1. `spec.md`（`/speckit.feature-update "范围：..."`）
 2. `plan.md`（默认级联；或 `/speckit.plan-update "范围：FR 与 NFR"`）
 3. `tasks.md`（`/speckit.tasks`）
-4. （可选）`/speckit.fulldesign`
-5. `/speckit.epicsync`
+4. `/speckit.epicsync`
 
 #### B) EPIC 需求/约束变更（`epic.md`：范围/拆分/通用能力/EPIC-NFR）
 
@@ -242,8 +264,7 @@ CR 必须回答：
 最小链路：
 1. `/speckit.plan-update "范围：A2/A3/A4/..."`（提升 Plan Version）
 2. `/speckit.tasks`
-3. （可选）`/speckit.fulldesign`
-4. `/speckit.epicsync`
+3. `/speckit.epicsync`
 
 ---
 

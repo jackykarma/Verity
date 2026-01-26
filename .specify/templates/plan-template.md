@@ -26,6 +26,52 @@
 |---|---|---|---|---|---|
 | v0.1.0 | [YYYY-MM-DD] | Feature | 初始版本 |  | 否 |
 
+## Plan 前置检查（必须，在开始设计前完成）
+
+> **目的**：确保本 Feature 的 plan 设计基于 EPIC 整体考虑，避免与其他 Feature 重复设计共享组件。
+>
+> **强制规则**：
+> - 在开始 Plan 设计之前，**必须完成以下检查**
+> - 若 EPIC 的"跨 Feature 技术策略"中已有 Owner Feature 负责某共享能力，本 Feature **必须复用**，不得另起炉灶
+> - 若发现新的共享需求，**必须先更新 epic.md 的"跨 Feature 技术策略"章节**，再继续本 plan
+
+### 前置检查清单
+
+- [ ] 已阅读 `epic.md` 的"跨 Feature 技术策略"章节
+- [ ] 已确认本 Feature 在 Plan 执行顺序中的位置（是否有前置依赖）
+- [ ] 已检查前置 Feature 的 plan（如果存在），识别可复用组件
+- [ ] 本 Feature 需要设计的共享能力已在 EPIC 级登记为 Owner
+
+### 依赖的共享能力（从其他 Feature 复用）
+
+> 列出本 Feature 需要使用但由其他 Feature 设计的共享能力。
+
+| 依赖的共享能力 | Owner Feature | Owner Plan 状态 | 如何获取/引用 |
+|---|---|---|---|
+| [例如：UI 基础框架] | FEAT-001 | Plan Ready / 待设计 | 引用 FEAT-001 plan.md:A3.4:UIModule |
+| [例如：错误处理] | FEAT-001 | Plan Ready | 引用 FEAT-001 plan.md:A3.4:ErrorHandler |
+
+> 若 Owner Feature 的 plan 尚未完成，需要：
+> - **等待**：Owner Feature 完成 plan 后再继续本 Feature
+> - **协商**：与 Owner Feature 负责人协商接口契约，先行设计
+
+### 本 Feature 提供的共享能力（供其他 Feature 复用）
+
+> 若本 Feature 是某共享能力的 Owner，列出需要设计并提供给其他 Feature 的能力。
+
+| 共享能力名称 | 消费方 Feature | 设计位置（本 plan 章节） | 接口/契约位置 |
+|---|---|---|---|
+| [例如：主题系统] | FEAT-002, FEAT-003 | A3.4:ThemeModule | Plan-B:B4.1 |
+
+### 前置检查结论
+
+- **检查日期**：[YYYY-MM-DD]
+- **检查人**：[姓名/角色]
+- **结论**：通过 / 需等待 [Feature] / 需先更新 epic.md
+- **备注**：[如有阻塞或协商事项]
+
+---
+
 ## 概述
 
 [摘自 Feature 规格说明：核心需求 + 本 Plan 的关键工程决策与取舍]
@@ -304,15 +350,13 @@ classDiagram
     FeatureUseCase --> FeatureError : throws
 ```
 
-#### A3.2.1 关键类职责与接口说明（必须：与类图互校）
+#### A3.2.1 关键类职责说明
 
-> 目的：让"全景类图"不只是图，还能快速定位每个关键抽象的职责与稳定性。
-
-| 类/接口 | 类型（class/interface/data） | 所属层级（UI/Domain/Data/External） | 核心职责（一句话） | 关键方法（列 1-3 个） | 变更频率预期（高/中/低） |
-|---|---|---|---|---|---|
-| `FeatureViewModel` | class | UI |  |  | 中 |
-| `FeatureUseCase` | interface | Domain |  |  | 中 |
-| `FeatureRepository` | interface | Data |  |  | 低 |
+| 类/接口 | 层级 | 职责 | 关键方法 |
+|---|---|---|---|
+| `FeatureViewModel` | UI |  |  |
+| `FeatureUseCase` | Domain |  |  |
+| `FeatureRepository` | Data |  |  |
 
 #### A3.3 组件协作与通信（必须）
 
@@ -323,25 +367,18 @@ classDiagram
 - **线程模型**：[主线程：UI/ViewModel] → [IO线程：Repository/DataSource]
 - **错误传播**：[DataSource 抛异常 → Repository 捕获转换 → UseCase 返回 Result → ViewModel 更新 State]
 
-#### A3.3.1 Feature 端到端时序图集（必须：全景动态协作，覆盖全部流程与异常）
+#### A3.3.1 Feature 时序图集（必须）
 
-> **目的**：给评审一个"端到端动态全景"的全集视图：本 Feature 设计里的每个关键流程都必须对应一张"端到端全景时序图"。
->
-> **硬性要求（不可省略）**：
-> - **必须是 Feature 级全景**：每张时序图都要覆盖 UI→Domain→Data→External 的完整链路（不要只画某个组件内部）
-> - **必须覆盖全部关键流程**：每个关键用户流程/系统流程都要有对应端到端时序图（多流程→多时序图）
-> - **必须覆盖全部关键异常（同图）**：每个流程都必须在**同一张**时序图中用 `alt/else` 覆盖关键失败模式（至少：权限/参数校验/超时/弱网/限流/不可用/数据损坏/并发重入/取消）；**不得**把"成功/异常"拆成两张图，也不得把异常拆成多张图
-> - **互校规则**：
->   - 流程图（A3.3.2）里每个流程必须能映射到这里对应的那张"端到端全景时序图"
->   - 异常清单（A3.4 组件 / Story）里的每个关键异常都必须能映射到这里某张时序图的 `alt/else` 分支（或反向亦然）
+> **要求**：
+> - 每个关键流程 1 张时序图
+> - 覆盖完整链路上的关键参与者/类/对象（UI→Domain→Data→External）
+> - 同图包含正常流程 + 关键异常（用 `alt/else`）
 
-##### A3.3.1.0 时序图清单与覆盖矩阵（必须）
+| Seq ID | 流程名称 | 覆盖的异常（EX-xxx） |
+|---|---|---|
+| SEQ-001 | [流程名称] | EX-001, EX-002 |
 
-| Seq ID | 对应流程（A3.3.2） | 名称 | 覆盖范围（正常+异常） | 覆盖的关键异常（EX-xxx） | 备注 |
-|---|---|---|---|---|---|
-| SEQ-001 | 流程 1 | [流程 1 - 端到端全景时序] | 正常 + 全部关键异常（alt/else） | EX-001/EX-002/... |  |
-
-##### 时序图模板 - 端到端全景（每个流程 1 张，必须同图含正常+异常）
+##### SEQ-001：[流程名称]
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
@@ -349,107 +386,69 @@ sequenceDiagram
     autonumber
     
     participant UI as 📱 UI/ViewModel
-    participant Service as ⚙️ FeatureService
+    participant UC as ⚙️ UseCase
     participant Repo as 💾 Repository
-    participant External as ☁️ ExternalDependency
-    participant Logger as 📊 Logger/Analytics
+    participant DS as ☁️ DataSource
 
-    UI->>Service: doSomething(input)
+    UI->>UC: execute(input)
     
-    alt 输入非法/前置条件不满足
-        Service->>Logger: error("...", InvalidInput, {...})
-        Service-->>UI: Failure(InvalidInput)
-    else 外部依赖超时/限流/不可用
-        Service->>External: call(...)
-        External-->>Service: error/timeout
-        Service->>Logger: error("...", ExternalFailed, {...})
-        Service-->>UI: Success(fallback)
-        Note right of Service: 降级/兜底（按决策）
+    alt 参数校验失败
+        UC-->>UI: Failure(InvalidInput)
+    else 外部依赖失败
+        UC->>Repo: getData()
+        Repo->>DS: fetch()
+        DS-->>Repo: error/timeout
+        Repo-->>UC: Failure
+        UC-->>UI: Success(fallback)
     else 正常
-        Service->>Repo: getOrLoad(...)
-        Repo-->>Service: data
-        Service->>Logger: event("...", {...})
-        Service-->>UI: Success(result)
+        UC->>Repo: getData()
+        Repo->>DS: fetch()
+        DS-->>Repo: data
+        Repo-->>UC: Success
+        UC-->>UI: Success(result)
     end
 ```
 
-#### A3.3.2 Feature 关键流程（流程图，必须）
+#### A3.3.2 Feature 流程图集（必须）
 
-> **目的**：展示 Feature 的核心用户流程，从触发到完成的完整路径。
->
-> 要求：
-> - 每个关键流程一张图，覆盖正常 + **全部关键异常分支**
-> - **不得**将异常分支拆分为"异常专用流程图"；复杂异常也必须放在同一张流程图中（可用子流程/注释/分组表达，但仍需同图）
-> - 流程图侧重"做什么"（业务视角），时序图侧重"怎么调用"（技术视角）
+> **要求**：每个关键流程 1 张图，同图覆盖正常 + 异常分支
 
 ##### 流程 1：[流程名称]
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Start([🚀 用户触发]) --> CheckPre{前置条件?}
-    
-    CheckPre -->|❌ 不满足| Guide[提示/引导]
-    Guide --> EndFail([❌ 结束])
-    
-    CheckPre -->|✅ 满足| Execute[执行核心逻辑]
-    Execute --> CheckResult{成功?}
-    
-    CheckResult -->|✅ 是| Update[更新UI/存储]
-    Update --> EndSuccess([✅ 结束])
-    
-    CheckResult -->|❌ 否| CheckRetry{可重试?}
-    CheckRetry -->|✅ 是| Retry[重试]
-    Retry --> Execute
-    CheckRetry -->|❌ 否| Fallback[降级/提示]
-    Fallback --> EndFail
+    Start([🚀 触发]) --> Check{校验?}
+    Check -->|❌| Fail[提示]
+    Fail --> EndFail([❌ 结束])
+    Check -->|✅| Execute[执行]
+    Execute --> Result{成功?}
+    Result -->|✅| Update[更新]
+    Update --> EndOK([✅ 结束])
+    Result -->|❌| Handle[降级/重试]
+    Handle --> EndFail
 
     style Start fill:#E8F5E9,stroke:#388E3C
-    style EndSuccess fill:#E8F5E9,stroke:#388E3C
+    style EndOK fill:#E8F5E9,stroke:#388E3C
     style EndFail fill:#FFEBEE,stroke:#D32F2F
-    style CheckPre fill:#FFF3E0,stroke:#F57C00
-    style CheckResult fill:#FFF3E0,stroke:#F57C00
-    style CheckRetry fill:#FFF3E0,stroke:#F57C00
-    style Guide fill:#FFEBEE,stroke:#D32F2F
-    style Fallback fill:#FFEBEE,stroke:#D32F2F
+    style Check fill:#FFF3E0,stroke:#F57C00
+    style Result fill:#FFF3E0,stroke:#F57C00
 ```
 
-###### 流程 1 - 异常分支映射（必须）
-
-> 目的：确保异常流程"无遗漏、可追踪"，并能与时序图/异常清单互相校验。
-
-| 分支ID | 对应异常ID（EX-xxx） | 触发条件 | 对策（重试/降级/回滚/补偿） | 用户提示 | 覆盖的 NFR |
-|---|---|---|---|---|---|
-| BR-001 | EX-001 |  |  |  | NFR-OBS-??? |
-
-##### 流程 2：[流程名称]
-
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
-flowchart TD
-    Start([🚀 触发]) --> Process[处理]
-    Process --> End([✅ 结束])
-
-    style Start fill:#E8F5E9,stroke:#388E3C
-    style End fill:#E8F5E9,stroke:#388E3C
-```
+| 分支 | 异常ID | 触发条件 | 对策 |
+|---|---|---|---|
+| 校验失败 | EX-001 |  | 提示用户 |
+| 执行失败 | EX-002 |  | 降级/重试 |
 
 #### A3.4 组件详细设计（每个组件必须）
 
-> **要求**：对 A3.1 中的每个组件，产出以下内容：
-> - **组件类图**：该组件内部的类/接口细节
-> - **组件全景时序图（同图）**：同一张时序图中覆盖正常 + 关键异常（用 `alt/else`），不得拆分成功/异常两张图
-> - **组件流程图（同图，必须）**：同一张流程图中覆盖正常 + 关键异常分支（不得拆分成功/异常）
-> - **异常清单表**：与时序图互校，确保无遗漏
+> 对 A3.1 中的每个组件，产出：类图、时序图、流程图、异常清单
 
 ##### 组件：[组件名]
 
-- **组件定位**：[它解决什么问题]
-- **设计目标**：[性能/可测试性/可扩展性等]
-- **核心数据结构**：[关键实体/状态/DTO]
-- **对外接口**：[暴露的方法签名、错误类型]
-- **策略与算法**：[缓存/重试/合并等策略，如适用]
-- **失败与降级**：[超时/IO失败/数据异常的处理]
+- **定位**：[解决什么问题]
+- **对外接口**：[方法签名、错误类型]
+- **失败与降级**：[异常处理策略]
 
 ###### 组件类图（必须）
 
@@ -464,15 +463,13 @@ classDiagram
     }
 ```
 
-###### 组件类职责说明（必须）
+###### 类职责说明
 
-> 说明类图中各类的职责、关键方法用途、接口设计意图
+| 类/接口 | 职责 | 关键方法 |
+|---|---|---|
+| [类名] | [做什么] | [方法1], [方法2] |
 
-| 类/接口 | 核心职责 | 关键方法说明 | 设计考量 |
-|---|---|---|---|
-| [类名] | [做什么] | [方法1]：用途；[方法2]：用途 | [为何这样设计] |
-
-###### 时序图 - 全景（同图含正常+异常，必须）
+###### 组件时序图（含正常+异常）
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
@@ -481,61 +478,47 @@ sequenceDiagram
     
     participant Caller as 📱 Caller
     participant Component as ⚙️ Component
-    participant Dependency as ☁️ Dependency
+    participant Dep as ☁️ Dependency
 
     Caller->>Component: call(...)
     
     alt 正常
-        Component->>Dependency: doWork(...)
-        Dependency-->>Component: ok
-        Component-->>Caller: Success(...)
-    else 依赖失败/超时/取消/数据异常
-        Component->>Dependency: doWork(...)
-        Dependency-->>Component: error/timeout
-        Component-->>Caller: Failure(...)
+        Component->>Dep: doWork(...)
+        Dep-->>Component: ok
+        Component-->>Caller: Success
+    else 异常
+        Component->>Dep: doWork(...)
+        Dep-->>Component: error
+        Component-->>Caller: Failure
     end
 ```
 
-###### 流程图 - 全景（同图含正常+异常，必须）
-
-> 目的：让组件内部关键逻辑路径"可读、可审、可落地"，并与异常清单互校。
+###### 组件流程图（含正常+异常）
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Start([🚀 进入组件关键流程]) --> CheckPre{前置条件/参数校验?}
-    
-    CheckPre -->|❌ 不满足| Fail[返回 Failure + 用户提示/引导]
+    Start([🚀 开始]) --> Check{校验?}
+    Check -->|❌| Fail[Failure]
     Fail --> EndFail([❌ 结束])
-    
-    CheckPre -->|✅ 满足| Execute[执行核心步骤]
-    Execute --> CheckDep{依赖调用成功?}
-    
-    CheckDep -->|✅ 是| Result[产出结果/更新状态]
-    Result --> EndSuccess([✅ 结束])
-    
-    CheckDep -->|❌ 否| Handle[按决策执行重试/退避/降级/补偿]
-    Handle --> Log[记录日志/埋点]
-    Log --> EndFail
+    Check -->|✅| Execute[执行]
+    Execute --> Result{成功?}
+    Result -->|✅| EndOK([✅ 结束])
+    Result -->|❌| Handle[降级/重试]
+    Handle --> EndFail
 
     style Start fill:#E8F5E9,stroke:#388E3C
-    style EndSuccess fill:#E8F5E9,stroke:#388E3C
+    style EndOK fill:#E8F5E9,stroke:#388E3C
     style EndFail fill:#FFEBEE,stroke:#D32F2F
-    style CheckPre fill:#FFF3E0,stroke:#F57C00
-    style CheckDep fill:#FFF3E0,stroke:#F57C00
-    style Fail fill:#FFEBEE,stroke:#D32F2F
-    style Handle fill:#FFF8E1,stroke:#FFC107
+    style Check fill:#FFF3E0,stroke:#F57C00
+    style Result fill:#FFF3E0,stroke:#F57C00
 ```
 
-###### 异常清单（必须，与时序图互校）
+###### 异常清单
 
-| 异常ID | 触发点 | 触发条件 | 错误类型 | 可重试 | 对策 | 用户提示 | 日志字段 |
-|--------|--------|----------|----------|--------|------|----------|----------|
-| EX-001 |  |  |  | 是/否 |  |  |  |
-
-> **互校规则**：
-> - 异常清单每一行 ↔ 时序图中有对应 alt/else 分支
-> - 时序图每个失败分支 ↔ 异常清单中有明确对策
+| 异常ID | 触发条件 | 错误类型 | 可重试 | 对策 |
+|---|---|---|---|---|
+| EX-001 |  |  | 是/否 |  |
 
 ##### （Capability Feature）交付物与接入契约（若适用）
 
@@ -732,7 +715,6 @@ flowchart TD
 specs/[###-feature-short-name]/
 ├── spec.md                     # Feature 规格说明（/speckit.specify）
 ├── plan.md                     # 本文件（/speckit.plan）
-├── full-design.md               # 全量技术方案文档（/speckit.fulldesign）
 ├── tasks.md                    # 任务拆解（/speckit.tasks）
 ├── research.md                 # 可选：调研产物
 ├── data-model.md               # 可选：数据模型
@@ -862,50 +844,39 @@ classDiagram
 |---|---|---|---|
 | [类名] | [做什么] | [方法1]：用途；[方法2]：用途 | [为何这样设计] |
 
-#### 5) 动态交互设计（时序图）
-
-##### 时序图（同图含正常 + 全部关键异常，必须）
+#### 5) 时序图（含正常+异常）
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
 sequenceDiagram
     autonumber
     
-    participant UI as 📱 UI/ViewModel
-    participant VM as ⚙️ ViewModel/Presenter
-    participant UC as UseCase
+    participant UI as 📱 UI
+    participant UC as ⚙️ UseCase
     participant Repo as 💾 Repository
-    participant DS as ☁️ DataSource/External
+    participant DS as ☁️ DataSource
 
-    UI->>VM: onAction(...)
-    VM->>UC: execute(...)
-    UC->>Repo: getOrDo(...)
+    UI->>UC: execute(...)
+    UC->>Repo: getData()
     
     alt 正常
-        Repo->>DS: call(...)
-        DS-->>Repo: ok
-        Repo-->>UC: Success(data)
-        UC-->>VM: Success(result)
-        VM-->>UI: render(state)
-    else 超时/限流/不可用/取消/数据损坏/并发重入...
-        Repo->>DS: call(...)
-        DS-->>Repo: timeout/error
-        Repo-->>UC: Failure(...)
-        UC-->>VM: Success(fallback)
-        Note right of VM: 或 Failure（按决策）
-        VM-->>UI: render(fallback/error)
+        Repo->>DS: fetch()
+        DS-->>Repo: data
+        Repo-->>UC: Success
+        UC-->>UI: Success(result)
+    else 异常
+        Repo->>DS: fetch()
+        DS-->>Repo: error
+        Repo-->>UC: Failure
+        UC-->>UI: Failure/fallback
     end
 ```
 
-#### 6) 异常场景矩阵（无遗漏清单）
+#### 6) 异常矩阵
 
-| 场景ID | 触发点（组件/步骤） | 触发条件 | 错误类型/错误码 | 是否可重试 | 用户提示/引导 | 回滚与一致性策略 | 日志/埋点字段 | 覆盖 NFR |
-|---|---|---|---|---|---|---|---|---|
-| EX-001 |  |  |  | 是/否 |  |  |  | NFR-OBS-??? |
-
-> 校验规则（必须通过）：
-> - 上表每一条异常都能在"时序图（同图含正常+异常）"中找到对应 `alt/else` 分支；
-> - 时序图中的每个失败分支也必须在上表中有明确对策。
+| 异常ID | 触发条件 | 错误类型 | 可重试 | 对策 |
+|---|---|---|---|---|
+| EX-001 |  |  | 是/否 |  |
 
 #### 7) 并发 / 生命周期 / 资源管理
 

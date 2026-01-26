@@ -34,7 +34,6 @@ $branch = $paths.CURRENT_BRANCH
 $specFile = $paths.FEATURE_SPEC
 $planFile = $paths.IMPL_PLAN
 $tasksFile = $paths.TASKS
-$fullDesignFile = $paths.FULL_DESIGN
 
 if (-not (Test-Path $specFile)) {
     Write-Error "Feature spec not found: $specFile. Run /speckit.feature first."
@@ -126,7 +125,6 @@ if (-not (Test-Path $epicFile)) {
 $featureVersion = Extract-Version -Path $specFile -Label "Feature Version"
 $planVersion = Extract-Version -Path $planFile -Label "Plan Version"
 $tasksVersion = Extract-Version -Path $tasksFile -Label "Tasks Version"
-$fullDesignVersion = Extract-Version -Path $fullDesignFile -Label "Full Design Version"
 
 function Infer-Status {
     if (Test-Path $tasksFile) { return "Tasks Ready" }
@@ -136,7 +134,6 @@ function Infer-Status {
 }
 $status = Infer-Status
 
-$fullDesignLink = if (Test-Path $fullDesignFile) { "full-design.md ($fullDesignVersion)" } else { "N/A" }
 
 function Escape-Pipe {
     param([string]$s)
@@ -146,13 +143,12 @@ function Escape-Pipe {
 
 $notesCell = Escape-Pipe -s $Notes
 
-$row = '| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} |' -f @(
+$row = '| {0} | {1} | {2} | {3} | {4} | {5} | {6} |' -f @(
     (Escape-Pipe -s $featureDisplayName),
     $branch,
     $featureVersion,
     $planVersion,
     $tasksVersion,
-    $fullDesignLink,
     $status,
     $notesCell
 )
@@ -182,8 +178,8 @@ $headerLines = $block | Where-Object { $_ -match '^\|\s*Feature\s*\|' } | Select
 if (-not $headerLines) {
     # If missing, create header
     $block = @(
-        "| Feature | 分支 | Feature Version | Plan Version | Tasks Version | Full Design | 状态 | 备注 |",
-        "|---|---|---|---|---|---|---|---|"
+        "| Feature | 分支 | Feature Version | Plan Version | Tasks Version | 状态 | 备注 |",
+        "|---|---|---|---|---|---|---|"
     )
 }
 
@@ -209,18 +205,17 @@ foreach ($line in $block) {
                 if (-not $OverwriteNotes -and $Notes) {
                     # preserve existing notes if any
                     $existingNotes = ""
-                    if ($cells.Count -ge 9) { $existingNotes = $cells[8].Trim() }
+                    if ($cells.Count -ge 8) { $existingNotes = $cells[7].Trim() }
                     if ($existingNotes) {
                         # append with separator
                         # Use ASCII separator for maximum PS5 compatibility.
                         $notesCell = Escape-Pipe -s ($existingNotes + "; " + $Notes)
-                        $row = '| {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} |' -f @(
+                        $row = '| {0} | {1} | {2} | {3} | {4} | {5} | {6} |' -f @(
                             (Escape-Pipe -s $featureDisplayName),
                             $branch,
                             $featureVersion,
                             $planVersion,
                             $tasksVersion,
-                            $fullDesignLink,
                             $status,
                             $notesCell
                         )
