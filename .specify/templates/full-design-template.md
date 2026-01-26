@@ -23,6 +23,8 @@ description: "Full Design 技术方案文档模板（整合 Plan + Story + Task�
 > - 本文档**只能整合现有产物**（spec/plan/tasks 等），**不得新增技术决策**。
 > - 若遇到决策缺口，只能标注为 `TODO(Clarify): ...` 并指向应补齐的来源文档/章节。
 > - 本文档用于评审与执行：层次必须清晰、结构化、可追溯。
+>
+> **图表规范**：所有 Mermaid 图表必须遵循 `.cursor/rules/mermaid-style-guide.mdc` 中定义的 Material Design 配色方案。
 
 ## 变更记录（增量变更）
 
@@ -41,16 +43,16 @@ description: "Full Design 技术方案文档模板（整合 Plan + Story + Task�
 
 ## 2. 领域概念（Domain Concepts / Glossary）（来自 plan.md，必须）
 
-> 目的：统一命名与语义口径，成为后续“架构图/流程图/类图/时序图/接口契约”的命名权威。
+> 目的：统一命名与语义口径，成为后续"架构图/流程图/类图/时序图/接口契约"的命名权威。
 >
 > 规则：只允许整合 `plan.md:Plan-A:A0` 的内容；不得新增概念或修改定义。缺口请用 `TODO(Clarify)` 指回 plan。
 
 - **词汇表入口**：`plan.md:Plan-A:A0.1`
 - **概念关系图入口（如有）**：`plan.md:Plan-A:A0.2`
 
-## 3. 0 层架构设计（对外系统边界、部署、通信、交互）（来自 plan.md）
+## 3. 0 层架构设计（对外系统边界、通信、交互）（来自 plan.md）
 
-> 定义：0 层架构设计反映“本系统与外部系统之间的关系”。必须覆盖：结构、部署、通信方式、交互方式与边界。
+> 定义：0 层架构设计反映"本系统与外部系统之间的关系"。必须覆盖：结构、通信方式、交互方式与边界。
 >
 > 规则：本节只允许**复用/整合** `plan.md` 中已经明确的内容；不得新增技术决策。若 plan 缺失，用 `TODO(Clarify)` 指回 plan 对应章节补齐。
 
@@ -62,37 +64,26 @@ description: "Full Design 技术方案文档模板（整合 Plan + Story + Task�
 
 ### 3.2 0 层架构图（系统边界 + 外部交互）（来自 plan.md）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    %% 直接复用 plan.md 的 0 层图；不得引入新模块决策
+    %% 注意：落地时用 plan.md 图替换/删除占位
+    subgraph System["📱 本系统"]
+        TODO0["TODO: 核心模块"]
+    end
+    
+    subgraph External["☁️ 外部系统"]
+        TODO1["TODO: 外部依赖"]
+    end
+    
+    TODO0 --> TODO1
 
-' 直接复用 plan.md 的 0 层图；不得引入新模块决策
-' 注意：落地时用 plan.md 图替换/删除占位
-component "TODO: System" as TODO0
-component "TODO: External" as TODO1
-
-TODO0 --> TODO1
-
-@enduml
+    style System fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style External fill:#FFF3E0,stroke:#F57C00
 ```
 
-### 3.3 部署视图（来自 plan.md）
-
-```plantuml
-@startuml
-!theme mars
-
-' 直接复用 plan.md 的部署视图；不得引入新模块/新拓扑决策
-' 注意：落地时用 plan.md 图替换/删除占位
-node "TODO: Deployment A" as NodeA
-node "TODO: Deployment B" as NodeB
-
-NodeA --> NodeB
-
-@enduml
-```
-
-### 3.4 通信与交互说明（来自 plan.md）
+### 3.3 通信与交互说明（来自 plan.md）
 
 - **协议**：
 - **鉴权**：
@@ -103,7 +94,7 @@ NodeA --> NodeB
 
 ## 4. 1 层架构设计（系统内部框架图 + 模块拆分 + 接口协议）（来自 plan.md）
 
-> 定义：1 层架构设计描述“系统内部的模块拆分与协作”，包括框架图、模块职责、模块交互、通信方式、接口协议等。
+> 定义：1 层架构设计描述"系统内部的模块拆分与协作"，包括框架图、模块职责、模块交互、通信方式、接口协议等。
 >
 > 一致性要求（必须）：
 > - `plan.md:Plan-B:B0` 的互校结论必须成立（Plan-A 与 Plan-B 无冲突）
@@ -111,25 +102,34 @@ NodeA --> NodeB
 
 ### 4.1 1 层框架图（来自 plan.md）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    %% 直接复用 plan.md 的 1 层框架图；不得引入新模块决策
+    %% 注意：落地时用 plan.md 图替换/删除占位
+    subgraph UILayer["🎨 UI 层"]
+        UI["TODO: UI 组件"]
+    end
 
-' 直接复用 plan.md 的 1 层框架图；不得引入新模块决策
-' 注意：落地时用 plan.md 图替换/删除占位
-component "TODO: UI" as UI
-component "TODO: Domain" as Domain
-component "TODO: Data" as Data
+    subgraph DomainLayer["⚙️ Domain 层"]
+        Domain["TODO: 业务逻辑"]
+    end
 
-UI --> Domain
-Domain --> Data
+    subgraph DataLayer["💾 Data 层"]
+        Data["TODO: 数据访问"]
+    end
 
-@enduml
+    UI --> Domain
+    Domain --> Data
+
+    style UILayer fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style DomainLayer fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+    style DataLayer fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
 ```
 
 ### 4.2 组件/模块拆分与职责（来自 plan.md）
 
-> 来源对齐：以 `plan.md:A3.1 组件清单与职责` 为准（若你的 plan 仍使用“模块”命名，也可沿用，但必须与 plan 表格逐行一致）。
+> 来源对齐：以 `plan.md:A3.1 组件清单与职责` 为准（若你的 plan 仍使用"模块"命名，也可沿用，但必须与 plan 表格逐行一致）。
 
 | 组件/模块 | 职责 | 输入/输出 | 依赖 | 约束 |
 |---|---|---|---|---|
@@ -144,12 +144,12 @@ Domain --> Data
 
 ### 4.4 关键模块设计（模块设计思想/决策/原理 + 模块全景类图 + 模块时序图 + 关键流程）（来自 plan.md）
 
-> 说明：本节用于整合 plan 中“关键模块/高风险模块/承载 NFR 的模块”的详细设计与取舍。
+> 说明：本节用于整合 plan 中"关键模块/高风险模块/承载 NFR 的模块"的详细设计与取舍。
 >
 > **必须包含（不可省略）**：
 > - **模块设计思想 / 设计决策 / 原理说明**（为什么这样分层/抽象/依赖）
 > - **模块全景类图**：包含该模块所有关键类/接口，且类/接口必须写出成员变量与方法签名
-> - **模块全景时序图（同图）**：同一张 PlantUML 时序图中覆盖正常 + 全部关键异常（用 `alt/else`）；不得拆分成功/异常两张图
+> - **模块全景时序图（同图）**：同一张 Mermaid 时序图中覆盖正常 + 全部关键异常（用 `alt/else`）；不得拆分成功/异常两张图
 > - **模块关键流程**：可包含多个流程图；每张流程图必须覆盖正常 + 全部关键异常分支
 >
 > 规则：本文档不得新增决策；若 plan 缺失，用 `TODO(Clarify)` 指回 plan 对应章节补齐（优先：`plan.md:A3.4` 与 `plan.md:A3.3.1/A3.3.2`）。
@@ -171,57 +171,60 @@ Domain --> Data
 
 ##### 模块全景类图（必须，来自 plan.md）
 
-```plantuml
-@startuml
-!theme mars
-
-' 直接复制 plan.md 中该模块的类图（必须包含字段与方法签名）
-' 注意：落地时用 plan.md 图替换/删除占位
-class TODO_ModuleReplaceMe {
-  + placeholder: String
-  + execute(): Unit
-}
-
-@enduml
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    %% 直接复制 plan.md 中该模块的类图（必须包含字段与方法签名）
+    %% 注意：落地时用 plan.md 图替换/删除占位
+    
+    class TODO_ModuleReplaceMe {
+        +placeholder: String
+        +execute() Unit
+    }
 ```
 
 ##### 模块时序图 - 全景（同图含正常+异常，必须，来自 plan.md）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    %% 直接复制 plan.md 中该模块的"全景时序图（同图含正常+异常）"
+    
+    participant TODO as ⚙️ TODO_ReplaceMe
 
-' 直接复制 plan.md 中该模块的“全景时序图（同图含正常+异常）”
-participant "TODO_ReplaceMe" as TODO
-
-TODO -> TODO: TODO（替换为真实调用）
-
-@enduml
+    TODO->>TODO: TODO（替换为真实调用）
+    
+    alt 正常
+        TODO-->>TODO: Success
+    else 异常
+        TODO-->>TODO: Failure
+    end
 ```
 
 ##### 模块关键流程（必须：可多个；每个流程同图含正常+异常）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    %% 直接复用 plan.md 的流程图（同图含正常+异常）；不得新增分支决策
+    Start([🚀 开始]) --> Process[TODO: 处理步骤]
+    Process --> End([✅ 结束])
 
-' 直接复用 plan.md 的流程图（同图含正常+异常）；不得新增分支决策
-start
-:Start;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 ### 4.5 数据模型与存储设计（物理）（来自 plan.md）
 
-> 要求：本节用于汇总可落地的“表/键/文件结构 + 迁移策略”，避免仅停留在逻辑实体描述。
-> - 若存在 `data-model.md`：在此引用其“物理模型”部分
+> 要求：本节用于汇总可落地的"表/键/文件结构 + 迁移策略"，避免仅停留在逻辑实体描述。
+> - 若存在 `data-model.md`：在此引用其"物理模型"部分
 > - 否则：引用 plan.md:Plan-B:B3.2（表结构/键结构/迁移策略）
 
 ### 4.6 模块级 UML 总览（全局查看入口，只引用 plan.md）
 
-> 目标：在 Feature 级 Full Design 中提供“全局视角”入口，方便评审/开发快速浏览每个模块的整体设计。
+> 目标：在 Feature 级 Full Design 中提供"全局视角"入口，方便评审/开发快速浏览每个模块的整体设计。
 >
 > 规则：
 > - 模块/组件清单以 `plan.md:A3.1 组件清单与职责` 为准（行数/名称必须一致）。
@@ -244,64 +247,66 @@ stop
 
 ##### UML 类图（来自 plan.md:A3.4）
 
-```plantuml
-@startuml
-!theme mars
-
-' 直接复制 plan.md:A3.4 对应模块的类图
-class TODO_ModuleReplaceMe {
-  + placeholder: String
-  + execute(): Unit
-}
-
-@enduml
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    %% 直接复制 plan.md:A3.4 对应模块的类图
+    
+    class TODO_ModuleReplaceMe {
+        +placeholder: String
+        +execute() Unit
+    }
 ```
 
 ##### UML 时序图 - 全景（同图含正常+异常，来自 plan.md:A3.4）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    %% 直接复制 plan.md:A3.4 对应模块的"时序图（全景）"
+    
+    participant TODO as ⚙️ TODO_ReplaceMe
 
-' 直接复制 plan.md:A3.4 对应模块的“时序图（全景）”
-participant "TODO_ReplaceMe" as TODO
-
-TODO -> TODO: TODO（替换为真实调用）
-
-@enduml
+    TODO->>TODO: TODO（替换为真实调用）
+    
+    alt 正常
+        TODO-->>TODO: Success
+    else 异常
+        TODO-->>TODO: Failure
+    end
 ```
 
 ##### UML 流程图 - 全景（同图含正常+异常，来自 plan.md:A3.4）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    %% 直接复制 plan.md:A3.4 对应模块的"流程图（全景，同图含正常+异常）"
+    Start([🚀 开始]) --> Process[TODO: 替换为真实流程]
+    Process --> End([✅ 结束])
 
-' 直接复制 plan.md:A3.4 对应模块的“流程图（全景，同图含正常+异常）”
-start
-:TODO（替换为真实流程）;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 ## 5. 关键流程设计（每个流程一张流程图，含正常 + 全部异常）（来自 plan.md）
 
-> 定义：每个关键流程必须用 PlantUML 活动图（Activity Diagram）绘制，且同一张图内覆盖正常流程与全部关键异常分支（失败/超时/并发/生命周期等）。
-> 若 plan 仍为拆分的“正常/异常”两张图，需在 plan 侧对齐后再整合到本节（否则标注 `TODO(Clarify)` 指回 plan）。
+> 定义：每个关键流程必须用 Mermaid 流程图绘制，且同一张图内覆盖正常流程与全部关键异常分支（失败/超时/并发/生命周期等）。
+> 若 plan 仍为拆分的"正常/异常"两张图，需在 plan 侧对齐后再整合到本节（否则标注 `TODO(Clarify)` 指回 plan）。
 
 ### 流程 1：[流程名称]
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    %% 直接复用 plan.md：每个流程一张图（同图含正常+异常）；不得新增分支决策
+    Start([🚀 开始]) --> Process[TODO: 处理步骤]
+    Process --> End([✅ 结束])
 
-' 直接复用 plan.md：每个流程一张图（同图含正常+异常）；不得新增分支决策
-start
-:Start;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 #### 流程 1 - 异常分支映射（必须，来自 plan.md）
@@ -312,15 +317,14 @@ stop
 
 ### 流程 2：[流程名称]
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start([🚀 开始]) --> Process[TODO: 处理步骤]
+    Process --> End([✅ 结束])
 
-start
-:Start;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 ## 6. Feature → Story → Task 追溯关系
@@ -328,7 +332,7 @@ stop
 > 规则：
 > - Feature 层：FR/NFR（来自 spec.md）
 > - Story 层：ST-xxx（来自 plan.md 的 Story Breakdown）
-> - Task 层：Txxx（来自 tasks.md；若缺失则先留空并标注“待生成”）
+> - Task 层：Txxx（来自 tasks.md；若缺失则先留空并标注"待生成"）
 
 ### 6.1 Story 列表（来自 plan.md）
 
@@ -358,7 +362,7 @@ stop
 
 ### 8.1 场景 → 应对措施对照（来自 plan.md，推荐）
 
-> 建议直接复用 `plan.md:A5.1` 的“场景→对策表”，确保可执行且可追溯。
+> 建议直接复用 `plan.md:A5.1` 的"场景→对策表"，确保可执行且可追溯。
 
 - **入口**：`plan.md:A5.1`
 
@@ -404,4 +408,3 @@ stop
 - **执行入口**：`tasks.md`
 - **验证入口**：各 Task 的验证清单 + Plan 的验收指标
 - **禁止事项**：Implement 期不得修改 Plan 设计；变更走增量变更流程并提升版本
-

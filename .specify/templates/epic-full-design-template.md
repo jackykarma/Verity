@@ -16,6 +16,8 @@ description: "EPIC Full Design 技术方案模板（整合多个 Feature 的 Pla
 > Agent 规则（强制）：
 > - 本文档只做**跨 Feature 的整合与一致性呈现**，不得新增新的技术决策。
 > - 若发现冲突或缺口，只能标注 `TODO(Clarify)` 并指向应修改的 Feature/Plan。
+>
+> **图表规范**：所有 Mermaid 图表必须遵循 `.cursor/rules/mermaid-style-guide.mdc` 中定义的 Material Design 配色方案。
 
 ## 变更记录（增量变更）
 
@@ -31,9 +33,9 @@ description: "EPIC Full Design 技术方案模板（整合多个 Feature 的 Pla
 - **整体 FR/NFR（EPIC Level）**：
 - **通用能力（Capability）**：
 
-## 2. 0 层架构设计（EPIC 级：对外系统边界、部署、通信、交互）
+## 2. 0 层架构设计（EPIC 级：对外系统边界、通信、交互）
 
-> 定义：0 层架构设计反映“本系统与外部系统之间的关系”。在 EPIC 级别，本节用于跨 Feature 汇总对外边界、部署拓扑、通信与交互方式，并显式暴露差异与冲突。
+> 定义：0 层架构设计反映"本系统与外部系统之间的关系"。在 EPIC 级别，本节用于跨 Feature 汇总对外边界、通信与交互方式，并显式暴露差异与冲突。
 >
 > 说明：基于各 Feature 的 `plan.md` 进行汇总；若存在差异必须显式指出来源差异，不得强行统一。
 
@@ -45,37 +47,26 @@ description: "EPIC Full Design 技术方案模板（整合多个 Feature 的 Pla
 
 ### 2.2 0 层架构图（EPIC 级视图）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    %% TODO(Clarify): 若各 Feature 的 0 层图不一致，需先在对应 plan.md 对齐
+    %% 注意：落地时用汇总后的真实图替换/删除占位
+    subgraph EpicSystem["📱 EPIC 系统"]
+        System["TODO: 系统核心"]
+    end
+    
+    subgraph External["☁️ 外部系统"]
+        Ext["TODO: 外部依赖"]
+    end
+    
+    System --> Ext
 
-' TODO(Clarify): 若各 Feature 的 0 层图不一致，需先在对应 plan.md 对齐
-' 注意：落地时用汇总后的真实图替换/删除占位
-component "TODO: EPIC System" as EpicSystem
-component "TODO: External System" as External
-
-EpicSystem --> External
-
-@enduml
+    style EpicSystem fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style External fill:#FFF3E0,stroke:#F57C00
 ```
 
-### 2.3 部署视图（EPIC 级视图）
-
-```plantuml
-@startuml
-!theme mars
-
-' TODO(Clarify): 若各 Feature 的部署拓扑不一致，需先在对应 plan.md 对齐
-' 注意：落地时用汇总后的真实图替换/删除占位
-node "TODO: Cluster/Device A" as ClusterA
-node "TODO: Cluster/Service B" as ClusterB
-
-ClusterA --> ClusterB
-
-@enduml
-```
-
-### 2.4 通信与交互方式汇总（跨 Feature）
+### 2.3 通信与交互方式汇总（跨 Feature）
 
 - **协议**：REST / gRPC / WebSocket / MQ / 文件 / 设备能力（按实际汇总）
 - **鉴权**：OAuth2 / JWT / mTLS / API Key（按实际汇总）
@@ -86,7 +77,7 @@ ClusterA --> ClusterB
 
 ## 3. 1 层架构设计一致性（跨 Feature：框架图、模块拆分、接口协议）
 
-> 定义：1 层架构设计描述“系统内部的模块拆分与协作”。在 EPIC 级别，本节用于汇总各 Feature 的 1 层框架与关键模块设计，并显式标注不一致之处与对齐建议（不新增决策）。
+> 定义：1 层架构设计描述"系统内部的模块拆分与协作"。在 EPIC 级别，本节用于汇总各 Feature 的 1 层框架与关键模块设计，并显式标注不一致之处与对齐建议（不新增决策）。
 >
 > 一致性基线（必须遵守）：
 > - 每个 Feature 的模块/组件目录以其 `plan.md:A3.1 组件清单与职责` 为权威来源
@@ -94,14 +85,14 @@ ClusterA --> ClusterB
 
 ### 3.0 EPIC 模块目录（EPIC Module Catalog）与映射关系（跨 Feature，核心）
 
-> 目标：从 EPIC 视角定义“模块/能力”的全局目录，并把它与各 Feature 的模块拆分建立明确映射，支持端到端一致性评审。
+> 目标：从 EPIC 视角定义"模块/能力"的全局目录，并把它与各 Feature 的模块拆分建立明确映射，支持端到端一致性评审。
 >
 > 概念区分（必须遵守）：
 > - **Feature 模块/组件**：来自各 Feature 的 `plan.md:A3.1 组件清单与职责`（实现落码视角，目录权威）。
 > - **EPIC 模块**：EPIC 级别的能力/子系统视角，用于跨 Feature 对齐边界与契约；通常由多个 Feature 模块**归并/抽象**而来。
 >
 > 规则：
-> - 本节只做“汇总、归并、映射、暴露差异”，不得新增技术决策；若归并规则存在争议，标注 `TODO(Clarify)` 并指向应修改的 Feature plan。
+> - 本节只做"汇总、归并、映射、暴露差异"，不得新增技术决策；若归并规则存在争议，标注 `TODO(Clarify)` 并指向应修改的 Feature plan。
 > - 所有引用必须指向来源 Feature 的 `plan.md`（优先：A3.1/A3.4/B4）或 `contracts/` 工件。
 
 #### 3.0.1 EPIC 模块目录（Catalog）
@@ -120,7 +111,7 @@ ClusterA --> ClusterB
 
 #### 3.0.3 EPIC 模块级 UML 总览（全局查看入口，只引用 Feature Plan）
 
-> 目标：从 EPIC 角度“一页看全”各 EPIC 模块的 UML 视图入口（类图 + 全景时序：同图含正常+异常）。
+> 目标：从 EPIC 角度"一页看全"各 EPIC 模块的 UML 视图入口（类图 + 全景时序：同图含正常+异常）。
 >
 > 规则：EPIC Full Design 不复制粘贴各 Feature 的模块 UML 图；只提供索引入口，图的权威内容在各 Feature `plan.md:A3.4`。
 
@@ -130,7 +121,7 @@ ClusterA --> ClusterB
 
 #### 3.0.4 EPIC 模块级 UML（EPIC 视角一致性视图，建议）
 
-> 目标：从 EPIC 角度给出“模块/能力”的整体静态/动态视图，便于端到端一致性评审。
+> 目标：从 EPIC 角度给出"模块/能力"的整体静态/动态视图，便于端到端一致性评审。
 >
 > 规则（严格）：
 > - 本节是**一致性视图**：必须完全基于 3.0.1/3.0.2 的 Catalog/Mapping 与各 Feature 的 plan/契约工件推导；不得引入新的模块边界决策。
@@ -139,60 +130,67 @@ ClusterA --> ClusterB
 
 ##### EPIC 模块级类图（静态视图）
 
-```plantuml
-@startuml
-!theme mars
-
-' TODO: 以 EPIC 模块为中心画边界与契约（接口/数据），不画实现细节
-' 若存在冲突，标注 TODO(Clarify) 并指向来源 Feature plan
-' 注意：落地时替换/删除占位
-class EPIC_ModuleReplaceMe {
-  + contract: String
-  + invoke(input): Output
-}
-
-@enduml
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    %% TODO: 以 EPIC 模块为中心画边界与契约（接口/数据），不画实现细节
+    %% 若存在冲突，标注 TODO(Clarify) 并指向来源 Feature plan
+    
+    class EPIC_ModuleReplaceMe {
+        +contract: String
+        +invoke(input) Output
+    }
 ```
 
 ##### EPIC 端到端时序图（同图含正常+异常，动态视图）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    %% TODO: 选择 1~2 条核心端到端用户旅程/系统链路，按 EPIC 模块标注交互
+    %% 要求：
+    %% - 同图包含正常链路 + 全部关键异常分支（用 alt/else）
+    %% - 每一步标注所属 EPIC 模块与来源 Feature（引用）
+    %% - 若异常策略不一致，必须在 3.2/3.4 的一致性问题表中体现，并指向对应 Feature plan 修正
+    
+    participant EPIC as ⚙️ EPIC_ModuleReplaceMe
 
-' TODO: 选择 1~2 条核心端到端用户旅程/系统链路，按 EPIC 模块标注交互
-' 要求：
-' - 同图包含正常链路 + 全部关键异常分支（用 alt/else）
-' - 每一步标注所属 EPIC 模块与来源 Feature（引用）
-' - 若异常策略不一致，必须在 3.2/3.4 的一致性问题表中体现，并指向对应 Feature plan 修正
-participant "EPIC_ModuleReplaceMe" as EPIC
-
-EPIC -> EPIC: TODO（替换为真实交互）
-alt 关键异常A
-  EPIC --> EPIC: TODO（替换为真实降级/重试/兜底）
-else 正常
-  EPIC --> EPIC: TODO（替换为真实返回）
-end
-
-@enduml
+    EPIC->>EPIC: TODO（替换为真实交互）
+    
+    alt 关键异常A
+        EPIC-->>EPIC: TODO（替换为真实降级/重试/兜底）
+    else 正常
+        EPIC-->>EPIC: TODO（替换为真实返回）
+    end
 ```
 
 ### 3.1 1 层框架图（EPIC 级一致性视图）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    %% TODO(Clarify): 若各 Feature 的 1 层框架图不一致，需先在对应 plan.md 对齐
+    %% 注意：落地时替换/删除占位
+    subgraph UILayer["🎨 UI 层"]
+        UI["TODO: UI"]
+    end
+    
+    subgraph DomainLayer["⚙️ Domain 层"]
+        Domain["TODO: Domain"]
+    end
+    
+    subgraph DataLayer["💾 Data 层"]
+        Data["TODO: Data"]
+    end
 
-' TODO(Clarify): 若各 Feature 的 1 层框架图不一致，需先在对应 plan.md 对齐
-' 注意：落地时替换/删除占位
-component "TODO: UI" as UI
-component "TODO: Domain" as Domain
-component "TODO: Data" as Data
+    UI --> Domain
+    Domain --> Data
 
-UI --> Domain
-Domain --> Data
-
-@enduml
+    style UILayer fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style DomainLayer fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+    style DataLayer fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
 ```
 
 ### 3.2 模块与接口协议一致性问题（汇总）
@@ -209,11 +207,11 @@ Domain --> Data
 
 ### 3.3.1 关键模块设计（EPIC 模块级：思想/决策/原理 + 模块全景类图 + 模块时序图 + 关键流程）
 
-> 目标：在 EPIC 视角下，把“关键模块/能力”的设计说明写到可评审、可对齐的粒度。
+> 目标：在 EPIC 视角下，把"关键模块/能力"的设计说明写到可评审、可对齐的粒度。
 >
 > **必须包含（不可省略）**：
 > - **模块设计思想 / 关键设计决策 / 原理说明**（边界、契约、依赖方向、可演进性）
-> - **模块全景类图（EPIC 模块级）**：以“模块边界与契约（接口/数据）”为中心，不下沉到 Feature 内部实现类
+> - **模块全景类图（EPIC 模块级）**：以"模块边界与契约（接口/数据）"为中心，不下沉到 Feature 内部实现类
 > - **模块时序图（EPIC 模块级）**：同一张图覆盖正常 + 全部关键异常（用 `alt/else`）；不得拆分成功/异常两张图
 > - **关键流程（EPIC 模块视角）**：可包含多个；每个流程必须同图覆盖正常 + 全部关键异常分支，并标注跨 Feature 边界点
 >
@@ -233,56 +231,54 @@ Domain --> Data
 
 ##### 模块全景类图（EPIC 模块级，必须）
 
-```plantuml
-@startuml
-!theme mars
-
-' TODO: 画模块边界与契约（接口/数据），不画实现细节
-class EPIC_ModuleReplaceMe {
-  + contract: String
-  + invoke(input): Output
-}
-
-@enduml
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    %% TODO: 画模块边界与契约（接口/数据），不画实现细节
+    
+    class EPIC_ModuleReplaceMe {
+        +contract: String
+        +invoke(input) Output
+    }
 ```
 
 ##### 模块时序图（同图含正常+异常，必须）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    %% TODO: 模块级端到端交互（标注 EPIC 模块 + 来源 Feature 引用）
+    %% 要求：同图用 alt/else 覆盖关键异常（限流/超时/不可用/取消/补偿回滚等）
+    
+    participant EPIC as ⚙️ EPIC_ModuleReplaceMe
 
-' TODO: 模块级端到端交互（标注 EPIC 模块 + 来源 Feature 引用）
-' 要求：同图用 alt/else 覆盖关键异常（限流/超时/不可用/取消/补偿回滚等）
-participant "EPIC_ModuleReplaceMe" as EPIC
-
-EPIC -> EPIC: TODO
-alt 关键异常
-  EPIC --> EPIC: TODO
-else 正常
-  EPIC --> EPIC: TODO
-end
-
-@enduml
+    EPIC->>EPIC: TODO
+    
+    alt 关键异常
+        EPIC-->>EPIC: TODO
+    else 正常
+        EPIC-->>EPIC: TODO
+    end
 ```
 
 ##### 模块关键流程（必须：可多个；每个流程同图含正常+异常）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    %% TODO: EPIC 模块视角关键流程（同图含正常+异常），标注跨 Feature 边界点与外部依赖
+    Start([🚀 开始]) --> Process[TODO: 处理步骤]
+    Process --> End([✅ 结束])
 
-' TODO: EPIC 模块视角关键流程（同图含正常+异常），标注跨 Feature 边界点与外部依赖
-start
-:Start;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 ### 3.4 数据模型与存储/契约一致性（跨 Feature）（汇总）
 
-> 目的：把“数据模型/表结构/存储键结构”和“接口契约（对外提供/对外依赖）”在 EPIC 级做一致性检查，避免各 Feature 各写各的导致联调与迁移风险。
+> 目的：把"数据模型/表结构/存储键结构"和"接口契约（对外提供/对外依赖）"在 EPIC 级做一致性检查，避免各 Feature 各写各的导致联调与迁移风险。
 >
 > 规则：只汇总与指出差异；任何对齐决策必须回到对应 Feature 的 plan/spec 里修改。
 
@@ -309,35 +305,33 @@ stop
 > 定义：在 EPIC 级别，关键流程应覆盖跨 Feature 的端到端用户旅程/系统链路（例如登录→鉴权→下单→支付→回调→通知）。
 >
 > 要求：
-> - 每个关键流程必须用 PlantUML 活动图（Activity Diagram）绘制，且同一张图内覆盖正常流程与全部关键异常分支（失败/超时/限流/并发/生命周期等）。
-> - 流程图中必须标注“跨 Feature 边界点”（哪些步骤属于哪个 Feature/模块），并引用来源（对应 Feature 的 plan/full-design）。
+> - 每个关键流程必须用 Mermaid 流程图绘制，且同一张图内覆盖正常流程与全部关键异常分支（失败/超时/限流/并发/生命周期等）。
+> - 流程图中必须标注"跨 Feature 边界点"（哪些步骤属于哪个 Feature/模块），并引用来源（对应 Feature 的 plan/full-design）。
 > - 若不同 Feature 的流程定义不一致，必须显式标注差异，并用 `TODO(Clarify)` 指向应修改的 Feature/Plan。
 
 ### 流程 1：[流程名称]
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    %% TODO: EPIC 级端到端流程（同图含正常+异常）；标注跨 Feature 边界与外部依赖
+    Start([🚀 开始]) --> Process[TODO: 处理步骤]
+    Process --> End([✅ 结束])
 
-' TODO: EPIC 级端到端流程（同图含正常+异常）；标注跨 Feature 边界与外部依赖
-start
-:Start;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 ### 流程 2：[流程名称]
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start([🚀 开始]) --> Process[TODO: 处理步骤]
+    Process --> End([✅ 结束])
 
-start
-:Start;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 ## 5. Feature → Story → Task 汇总追溯
@@ -368,7 +362,7 @@ stop
 
 ### 6.0 常见 Capability Feature 汇总（建议）
 
-> 说明：当 EPIC 存在横切能力（埋点/动效/算法）时，建议将其作为 Capability Feature 独立交付，并在 EPIC Full Design 中汇总其“交付物与接入契约”，以便业务 Feature 对齐接入方式与验收口径。
+> 说明：当 EPIC 存在横切能力（埋点/动效/算法）时，建议将其作为 Capability Feature 独立交付，并在 EPIC Full Design 中汇总其"交付物与接入契约"，以便业务 Feature 对齐接入方式与验收口径。
 
 #### 6.1 埋点与可观测性（产品埋点 + 技术埋点）
 
@@ -398,4 +392,3 @@ stop
 
 - 每个 Feature 按各自 `tasks.md` 执行
 - 任何跨 Feature 变更必须先更新对应 Feature 的 plan/spec，并运行 `/speckit.epicsync` 更新总览
-

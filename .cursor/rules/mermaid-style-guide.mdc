@@ -1,0 +1,193 @@
+---
+description: Mermaid 图表配色规范（Material Design），用于所有架构图、类图、时序图、流程图的统一样式
+alwaysApply: true
+---
+
+# Mermaid 图表样式规范
+
+所有 Mermaid 图表必须遵循 Material Design 配色方案，确保风格统一、美观。
+
+## 配色调板
+
+| 用途 | 颜色 | 色值 | 场景 |
+|------|------|------|------|
+| 主色 | Blue 50 | `#E3F2FD` | 主要节点背景 |
+| 主色边框 | Blue 700 | `#1976D2` | 主要节点边框 |
+| 主色文字 | Blue 800 | `#1565C0` | 主要节点文字 |
+| 成功色 | Green 50 | `#E8F5E9` | 成功节点、结束节点 |
+| 成功边框 | Green 700 | `#388E3C` | 成功节点边框 |
+| 警告色 | Orange 50 | `#FFF3E0` | 外部服务、判断节点 |
+| 警告边框 | Orange 700 | `#F57C00` | 警告节点边框 |
+| 错误色 | Red 50 | `#FFEBEE` | 错误节点 |
+| 错误边框 | Red 700 | `#D32F2F` | 错误节点边框 |
+| 提示色 | Amber 50 | `#FFF8E1` | 注释、提示 |
+| 提示边框 | Amber 500 | `#FFC107` | 提示边框 |
+| 连线色 | BlueGrey 600 | `#546E7A` | 连接线 |
+| 文字色 | Grey 900 | `#212121` | 通用文字 |
+
+---
+
+## 通用主题配置
+
+### flowchart / graph / classDiagram
+
+```
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#E3F2FD',
+  'primaryTextColor': '#1565C0',
+  'primaryBorderColor': '#1976D2',
+  'lineColor': '#546E7A',
+  'secondaryColor': '#E8F5E9',
+  'tertiaryColor': '#FFF3E0'
+}}}%%
+```
+
+### sequenceDiagram
+
+```
+%%{init: {'theme': 'base', 'themeVariables': {
+  'actorBkg': '#E3F2FD',
+  'actorBorder': '#1976D2',
+  'actorTextColor': '#1565C0',
+  'signalColor': '#1976D2',
+  'signalTextColor': '#212121',
+  'noteBkgColor': '#FFF8E1',
+  'noteBorderColor': '#FFC107'
+}}}%%
+```
+
+---
+
+## 节点样式速查
+
+在图表末尾添加 `style` 语句设置节点颜色：
+
+```mermaid
+style NodeName fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+```
+
+| 节点类型 | fill | stroke | 示例 |
+|----------|------|--------|------|
+| 主要节点 | `#E3F2FD` | `#1976D2` | 模块、组件 |
+| 成功/开始/结束 | `#E8F5E9` | `#388E3C` | Start, End |
+| 外部服务/判断 | `#FFF3E0` | `#F57C00` | API, Decision |
+| 错误节点 | `#FFEBEE` | `#D32F2F` | Error |
+| 警告节点 | `#FFF8E1` | `#FFC107` | Warning |
+| 用户/Actor | `#E0F7FA` | `#0097A7` | User |
+
+---
+
+## 完整示例
+
+### 流程图示例
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start([🚀 开始]) --> Input[接收输入]
+    Input --> Validate{参数校验}
+    
+    Validate -->|✅ 通过| Process[处理数据]
+    Validate -->|❌ 失败| Error[返回错误]
+    
+    Process --> Output[输出结果]
+    Output --> End([✅ 结束])
+    Error --> EndFail([❌ 结束])
+
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
+    style EndFail fill:#FFEBEE,stroke:#D32F2F
+    style Validate fill:#FFF3E0,stroke:#F57C00
+    style Error fill:#FFEBEE,stroke:#D32F2F
+```
+
+### 类图示例
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    
+    class IService {
+        <<interface>>
+        +execute(param: Type) Result
+    }
+    
+    class ServiceImpl {
+        -repository: Repository
+        +execute(param: Type) Result
+    }
+    
+    class Repository {
+        +getData() Data
+    }
+    
+    IService <|.. ServiceImpl : implements
+    ServiceImpl --> Repository : uses
+```
+
+### 时序图示例
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    
+    actor User as 👤 用户
+    participant UI as 📱 UI
+    participant Service as ⚙️ Service
+    participant API as 🌐 API
+
+    User->>UI: 触发操作
+    UI->>Service: 调用方法
+    
+    alt 成功
+        Service->>API: 请求数据
+        API-->>Service: 返回数据
+        Service-->>UI: Success
+        UI-->>User: ✅ 显示结果
+    else 失败
+        Service-->>UI: Error
+        UI-->>User: ❌ 显示错误
+    end
+```
+
+### 架构图示例
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    subgraph Presentation["🎨 表示层"]
+        UI["UI 组件"]
+        ViewModel["ViewModel"]
+    end
+
+    subgraph Domain["⚙️ 领域层"]
+        UseCase["用例"]
+    end
+
+    subgraph Data["💾 数据层"]
+        Repository["仓库"]
+        DataSource["数据源"]
+    end
+
+    UI --> ViewModel
+    ViewModel --> UseCase
+    UseCase --> Repository
+    Repository --> DataSource
+
+    style Presentation fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style Domain fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+    style Data fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
+```
+
+---
+
+## 使用规范
+
+1. **每个图表必须包含 `%%{init}%%` 配置** - 确保样式一致
+2. **使用 emoji 增强可读性** - 如 `👤`、`📱`、`🌐`、`💾`
+3. **流程图必须覆盖所有分支和异常** - 不要遗漏错误路径
+4. **时序图使用 alt/else/opt/loop** - 完整展示交互分支
+5. **subgraph 使用中文标签** - 便于理解
+6. **节点 ID 使用英文，显示文字用中文** - 如 `API["🌐 后端服务"]`

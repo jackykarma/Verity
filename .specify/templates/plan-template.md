@@ -17,6 +17,8 @@
 >   - **Lite**：小改动/低风险（无新契约、无持久化迁移、无复杂动效/并发）
 >   - **Standard**：默认（补齐关键类图/时序图与风险/预算落点）
 >   - **Deep**：新契约/持久化迁移/复杂动效与性能预算/并发竞态/灰度回滚等（补齐组件详细设计与关键 Story 的 L2）
+>
+> **图表规范**：所有 Mermaid 图表必须遵循 `.cursor/rules/mermaid-style-guide.mdc` 中定义的 Material Design 配色方案。
 
 ## 变更记录（增量变更）
 
@@ -32,7 +34,7 @@
 
 ### A0. 领域概念（Domain Concepts / Glossary，必须）
 
-> **目的**：统一命名与语义口径，成为后续“架构图/流程图/类图/时序图/接口契约”的**命名权威**。
+> **目的**：统一命名与语义口径，成为后续"架构图/流程图/类图/时序图/接口契约"的**命名权威**。
 >
 > 要求：
 > - 只写本 Feature 涉及或新引入的领域概念；已有概念可引用来源（其他 Feature/EPIC/已有模块文档）
@@ -46,30 +48,26 @@
 
 #### A0.2 概念关系图（推荐，可选）
 
-> 使用对象图表达领域概念之间的关系，不使用类图
+> 使用 Mermaid 类图表达领域概念之间的关系
 
-```plantuml
-@startuml
-!theme mars
-
-' 用“对象图”表达概念实例之间的关系，不是类关系
-object "概念A实例" as ConceptA {
-  关键属性1 = 值
-  关键属性2 = 值
-}
-
-object "概念B实例" as ConceptB {
-  关键属性1 = 值
-  关键属性2 = 值
-}
-
-ConceptA --> ConceptB : 关系说明
-
-note right of ConceptA
-  状态约束/不变量说明
-end note
-
-@enduml
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    
+    class ConceptA {
+        关键属性1
+        关键属性2
+    }
+    
+    class ConceptB {
+        关键属性1
+        关键属性2
+    }
+    
+    ConceptA --> ConceptB : 关系说明
+    
+    note for ConceptA "状态约束/不变量说明"
 ```
 
 ### A1. 技术选型（候选方案对比 + 决策理由）
@@ -91,39 +89,40 @@ end note
 
 > 一张图展示：Feature 边界、内部核心组件、外部依赖、数据/控制流向
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    subgraph FeatureBoundary["📦 本 Feature 边界"]
+        UI["🎨 UI 层"]
+        Logic["⚙️ 业务逻辑层"]
+        Data["💾 数据层"]
+    end
 
-package "本 Feature 边界" {
-  component [UI 层] as UI
-  component [业务逻辑层] as Logic
-  component [数据层] as Data
-}
+    subgraph Reused["♻️ 复用已有模块"]
+        Auth["认证模块"]
+        Logger["日志模块"]
+    end
 
-package "复用已有模块" {
-  component [认证模块] as Auth
-  component [日志模块] as Logger
-}
+    subgraph External["☁️ 外部依赖"]
+        API["🌐 后端 API"]
+        OS["📱 系统能力"]
+    end
 
-package "外部依赖" {
-  component [后端 API] as API
-  component [系统能力] as OS
-}
+    UI --> Logic
+    Logic --> Data
+    Logic --> Auth
+    Logic --> Logger
+    Data --> API
+    Logic --> OS
 
-UI --> Logic
-Logic --> Data
-Logic --> Auth
-Logic --> Logger
-Data --> API
-Logic --> OS
-
-@enduml
+    style FeatureBoundary fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style Reused fill:#E8F5E9,stroke:#388E3C
+    style External fill:#FFF3E0,stroke:#F57C00
 ```
 
 #### A2.1.1 架构设计说明（必须：理由/决策/思考）
 
-> 用文字把“为什么这样画”说清楚，便于评审与后续实现期不走样。
+> 用文字把"为什么这样画"说清楚，便于评审与后续实现期不走样。
 > **注意**：本节聚焦架构设计原理与决策，不涉及具体代码实现。
 
 - **边界与职责**：为什么这些能力属于本 Feature（而不是其他模块）；哪些能力明确不做（Out of Scope）
@@ -158,68 +157,63 @@ Logic --> OS
 
 #### A3.0 整体设计说明（必须：关键点/决策/思考）
 
-> **目的**：先把整体方案“讲清楚”，再进入组件级拆分与细化，确保评审从整体到局部理解一致。
+> **目的**：先把整体方案"讲清楚"，再进入组件级拆分与细化，确保评审从整体到局部理解一致。
 >
 > 要求：
-> - 这里写“为什么这样设计”（关键点/取舍/边界），不要堆细节实现
+> - 这里写"为什么这样设计"（关键点/取舍/边界），不要堆细节实现
 > - 与 A2（全景架构）保持一致：A2 讲外部边界与依赖，这里讲内部方案与协作
 > - 所有结论必须可追溯：引用到 spec/plan 的决策点（必要时写 `TODO(Clarify)`）
 
 ##### A3.0.1 Feature 内部总体框架图（1 层组件图，必须）
 
-> **目的**：用“组件图”把 Feature 内部设计**一图讲清楚**：组件边界、依赖方向（静态结构）与关键交互（动态协作）。
+> **目的**：用"组件图"把 Feature 内部设计**一图讲清楚**：组件边界、依赖方向（静态结构）与关键交互（动态协作）。
 >
 > **硬性要求（不可省略）**：
 > - 图中必须覆盖 `A3.1 组件清单` 的**全部组件**（至少用同名节点表示）
 > - **静态结构**：用**实线箭头**（`-->`）表示依赖/调用方向（谁依赖谁）
-> - **动态协作**：用**虚线箭头**（`..>`）表示事件/回调/异步消息（如适用；若纯同步，可省略虚线但要说明原因）
+> - **动态协作**：用**虚线箭头**（`-..->`）表示事件/回调/异步消息（如适用；若纯同步，可省略虚线但要说明原因）
 > - 图中必须标注**跨层约束**（例如：UI 不得直接依赖 DataSource）
->
-> 说明：使用 PlantUML Component Diagram 绘制，主题为 mars。
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    subgraph UILayer["🎨 UI 层"]
+        UI["UI/View"]
+        VM["ViewModel/Presenter"]
+    end
 
-' TODO: 用真实组件名替换
-package "UI 层" {
-  component [UI/View] as UI1
-  component [ViewModel/Presenter] as VM
-}
+    subgraph DomainLayer["⚙️ Domain/UseCase 层"]
+        UC["UseCase/Interactor"]
+        Policy["Policy/Strategy（可选）"]
+    end
 
-package "Domain/UseCase 层" {
-  component [UseCase/Interactor] as UC
-  component [Policy/Strategy（可选）] as Policy
-}
+    subgraph DataLayer["💾 Data 层"]
+        Repo["Repository"]
+        DS["DataSource（Local/Remote）"]
+        Mapper["Mapper/Converter（可选）"]
+    end
 
-package "Data 层" {
-  component [Repository] as Repo
-  component [DataSource（Local/Remote）] as DS
-  component [Mapper/Converter（可选）] as Mapper
-}
+    %% 静态依赖（同步调用）- 实线箭头
+    UI --> VM
+    VM --> UC
+    UC --> Repo
+    Repo --> DS
+    Repo --> Mapper
 
-' 静态依赖（同步调用）- 实线箭头
-UI1 --> VM
-VM --> UC
-UC --> Repo
-Repo --> DS
-Repo --> Mapper
+    %% 动态协作（异步/事件）- 虚线箭头
+    DS -.-> Repo
+    Repo -.-> VM
 
-' 动态协作（异步/事件）- 虚线箭头
-DS ..> Repo : dataChanged/event
-Repo ..> VM : Flow/Callback
-
-' 跨层约束标注（禁止依赖）
-note right of UI1
-  UI 不得直接依赖 DataSource
-end note
-
-@enduml
+    style UILayer fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style DomainLayer fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+    style DataLayer fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
 ```
+
+> **跨层约束**：UI 不得直接依赖 DataSource
 
 ##### A3.0.2 总体设计说明（必须：职责/协作/关键决策/风险，一节讲清楚）
 
-> **目的**：把“Feature 内部总体框架图”配套的设计说明一次讲清楚，避免分散在多个小标题里重复表述。
+> **目的**：把"Feature 内部总体框架图"配套的设计说明一次讲清楚，避免分散在多个小标题里重复表述。
 > **注意**：本节聚焦组件职责、协作机制与设计原理，不涉及具体代码实现。
 
 - **组件职责（摘要）**：
@@ -274,51 +268,45 @@ end note
 > **硬性要求（不可省略）**：
 > - **必须覆盖所有关键类/接口**：UI / ViewModel / UseCase(or Interactor) / Repository / DataSource(若存在) / Entity / DTO / Error(错误体系) / Mapper(or Converter) / 其他核心抽象
 > - **类与接口必须写出成员变量与方法（签名级别）**：字段名 + 类型；方法名 + 参数 + 返回值（必要时标注 throws/错误类型）
-> - **依赖方向必须正确**：上层依赖下层；禁止“下层反依赖上层”（除非通过接口回调且在图中显式体现）
+> - **依赖方向必须正确**：上层依赖下层；禁止"下层反依赖上层"（除非通过接口回调且在图中显式体现）
 > - **与动态图互校**：端到端时序图/流程图中出现的参与者与关键调用，必须在此类图中找到对应类/接口
->
-> PlantUML 类图提示：
-> - 成员变量：`+fieldName: Type`（必要时用注释补充线程/生命周期约束）
-> - 方法：`+methodName(param: Type): ReturnType`
-> - 接口：`<<interface>>`；抽象类：`<<abstract>>`；密封类/错误体系可用 `<<sealed>>` 注释表达
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
 
-' TODO: 画清 Feature 的全局类结构
-' 建议分层：UI/ViewModel → UseCase/Domain → Repository → DataSource
+    class FeatureViewModel {
+        +state: StateFlow
+        +onAction(action)
+    }
 
-class FeatureViewModel {
-  + state: StateFlow
-  + onAction(action)
-}
+    class FeatureUseCase {
+        <<interface>>
+        +execute(params) Result
+    }
 
-interface FeatureUseCase {
-  + execute(params): Result
-}
+    class FeatureRepository {
+        <<interface>>
+        +getData() Flow
+        +saveData(data)
+    }
 
-interface FeatureRepository {
-  + getData(): Flow
-  + saveData(data)
-}
+    class FeatureError {
+        <<sealed>>
+        NetworkError
+        ValidationError
+        UnknownError
+    }
 
-class FeatureError <<sealed>> {
-  + NetworkError
-  + ValidationError
-  + UnknownError
-}
-
-FeatureViewModel --> FeatureUseCase
-FeatureUseCase --> FeatureRepository
-FeatureUseCase --> FeatureError
-
-@enduml
+    FeatureViewModel --> FeatureUseCase : uses
+    FeatureUseCase --> FeatureRepository : uses
+    FeatureUseCase --> FeatureError : throws
 ```
 
 #### A3.2.1 关键类职责与接口说明（必须：与类图互校）
 
-> 目的：让“全景类图”不只是图，还能快速定位每个关键抽象的职责与稳定性。
+> 目的：让"全景类图"不只是图，还能快速定位每个关键抽象的职责与稳定性。
 
 | 类/接口 | 类型（class/interface/data） | 所属层级（UI/Domain/Data/External） | 核心职责（一句话） | 关键方法（列 1-3 个） | 变更频率预期（高/中/低） |
 |---|---|---|---|---|---|
@@ -337,14 +325,14 @@ FeatureUseCase --> FeatureError
 
 #### A3.3.1 Feature 端到端时序图集（必须：全景动态协作，覆盖全部流程与异常）
 
-> **目的**：给评审一个“端到端动态全景”的全集视图：本 Feature 设计里的每个关键流程都必须对应一张“端到端全景时序图”。
+> **目的**：给评审一个"端到端动态全景"的全集视图：本 Feature 设计里的每个关键流程都必须对应一张"端到端全景时序图"。
 >
 > **硬性要求（不可省略）**：
 > - **必须是 Feature 级全景**：每张时序图都要覆盖 UI→Domain→Data→External 的完整链路（不要只画某个组件内部）
 > - **必须覆盖全部关键流程**：每个关键用户流程/系统流程都要有对应端到端时序图（多流程→多时序图）
-> - **必须覆盖全部关键异常（同图）**：每个流程都必须在**同一张**时序图中用 `alt/else` 覆盖关键失败模式（至少：权限/参数校验/超时/弱网/限流/不可用/数据损坏/并发重入/取消）；**不得**把“成功/异常”拆成两张图，也不得把异常拆成多张图
+> - **必须覆盖全部关键异常（同图）**：每个流程都必须在**同一张**时序图中用 `alt/else` 覆盖关键失败模式（至少：权限/参数校验/超时/弱网/限流/不可用/数据损坏/并发重入/取消）；**不得**把"成功/异常"拆成两张图，也不得把异常拆成多张图
 > - **互校规则**：
->   - 流程图（A3.3.2）里每个流程必须能映射到这里对应的那张“端到端全景时序图”
+>   - 流程图（A3.3.2）里每个流程必须能映射到这里对应的那张"端到端全景时序图"
 >   - 异常清单（A3.4 组件 / Story）里的每个关键异常都必须能映射到这里某张时序图的 `alt/else` 分支（或反向亦然）
 
 ##### A3.3.1.0 时序图清单与覆盖矩阵（必须）
@@ -355,40 +343,34 @@ FeatureUseCase --> FeatureError
 
 ##### 时序图模板 - 端到端全景（每个流程 1 张，必须同图含正常+异常）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    
+    participant UI as 📱 UI/ViewModel
+    participant Service as ⚙️ FeatureService
+    participant Repo as 💾 Repository
+    participant External as ☁️ ExternalDependency
+    participant Logger as 📊 Logger/Analytics
 
-' TODO: [流程名] 端到端全景（把标题/参与者/调用替换成真实内容）
-' 参与者建议（按实际裁剪/补充）：User/UI, ViewModel/Presenter, UseCase, Repository, DataSource, External API/OS, Logger/Analytics
-' 要求：
-' - 同图包含正常链路 + 全部关键异常分支（用 alt/else）
-' - 每个异常分支写清“对策”（重试/退避/降级/提示/回滚/补偿/埋点/告警）
-' - 体现返回值/状态更新点/线程(主线程/IO)/缓存命中与否（如适用）
-
-participant "UI/ViewModel" as UI
-participant "FeatureService" as Service
-participant "Repository" as Repo
-participant "ExternalDependency" as External
-participant "Logger/Analytics" as Logger
-
-UI -> Service: doSomething(input)
-alt 输入非法/前置条件不满足
-  Service -> Logger: error("...", InvalidInput, {...})
-  Service --> UI: Failure(InvalidInput)
-else 外部依赖超时/限流/不可用
-  Service -> External: call(...)
-  External --> Service: error/timeout
-  Service -> Logger: error("...", ExternalFailed, {...})
-  Service --> UI: Success(fallback) ' 降级/兜底（按决策）
-else 正常
-  Service -> Repo: getOrLoad(...)
-  Repo --> Service: data
-  Service -> Logger: event("...", {...})
-  Service --> UI: Success(result)
-end
-
-@enduml
+    UI->>Service: doSomething(input)
+    
+    alt 输入非法/前置条件不满足
+        Service->>Logger: error("...", InvalidInput, {...})
+        Service-->>UI: Failure(InvalidInput)
+    else 外部依赖超时/限流/不可用
+        Service->>External: call(...)
+        External-->>Service: error/timeout
+        Service->>Logger: error("...", ExternalFailed, {...})
+        Service-->>UI: Success(fallback)
+        Note right of Service: 降级/兜底（按决策）
+    else 正常
+        Service->>Repo: getOrLoad(...)
+        Repo-->>Service: data
+        Service->>Logger: event("...", {...})
+        Service-->>UI: Success(result)
+    end
 ```
 
 #### A3.3.2 Feature 关键流程（流程图，必须）
@@ -397,42 +379,44 @@ end
 >
 > 要求：
 > - 每个关键流程一张图，覆盖正常 + **全部关键异常分支**
-> - **不得**将异常分支拆分为“异常专用流程图”；复杂异常也必须放在同一张流程图中（可用子流程/注释/分组表达，但仍需同图）
+> - **不得**将异常分支拆分为"异常专用流程图"；复杂异常也必须放在同一张流程图中（可用子流程/注释/分组表达，但仍需同图）
 > - 流程图侧重"做什么"（业务视角），时序图侧重"怎么调用"（技术视角）
 
 ##### 流程 1：[流程名称]
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start([🚀 用户触发]) --> CheckPre{前置条件?}
+    
+    CheckPre -->|❌ 不满足| Guide[提示/引导]
+    Guide --> EndFail([❌ 结束])
+    
+    CheckPre -->|✅ 满足| Execute[执行核心逻辑]
+    Execute --> CheckResult{成功?}
+    
+    CheckResult -->|✅ 是| Update[更新UI/存储]
+    Update --> EndSuccess([✅ 结束])
+    
+    CheckResult -->|❌ 否| CheckRetry{可重试?}
+    CheckRetry -->|✅ 是| Retry[重试]
+    Retry --> Execute
+    CheckRetry -->|❌ 否| Fallback[降级/提示]
+    Fallback --> EndFail
 
-start
-:用户触发;
-if (前置条件?) then (不满足)
-  :提示/引导;
-  stop
-else (满足)
-  :执行核心逻辑;
-  if (成功?) then (是)
-    :更新UI/存储;
-    stop
-  else (否)
-    if (可重试?) then (是)
-      :重试;
-      :执行核心逻辑;
-    else (否)
-      :降级/提示;
-      stop
-    endif
-  endif
-endif
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style EndSuccess fill:#E8F5E9,stroke:#388E3C
+    style EndFail fill:#FFEBEE,stroke:#D32F2F
+    style CheckPre fill:#FFF3E0,stroke:#F57C00
+    style CheckResult fill:#FFF3E0,stroke:#F57C00
+    style CheckRetry fill:#FFF3E0,stroke:#F57C00
+    style Guide fill:#FFEBEE,stroke:#D32F2F
+    style Fallback fill:#FFEBEE,stroke:#D32F2F
 ```
 
 ###### 流程 1 - 异常分支映射（必须）
 
-> 目的：确保异常流程“无遗漏、可追踪”，并能与时序图/异常清单互相校验。
+> 目的：确保异常流程"无遗漏、可追踪"，并能与时序图/异常清单互相校验。
 
 | 分支ID | 对应异常ID（EX-xxx） | 触发条件 | 对策（重试/降级/回滚/补偿） | 用户提示 | 覆盖的 NFR |
 |---|---|---|---|---|---|
@@ -440,23 +424,22 @@ endif
 
 ##### 流程 2：[流程名称]
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start([🚀 触发]) --> Process[处理]
+    Process --> End([✅ 结束])
 
-start
-:触发;
-stop
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style End fill:#E8F5E9,stroke:#388E3C
 ```
 
 #### A3.4 组件详细设计（每个组件必须）
 
 > **要求**：对 A3.1 中的每个组件，产出以下内容：
 > - **组件类图**：该组件内部的类/接口细节
-> - **组件全景时序图（同图）**：同一张 PlantUML 时序图中覆盖正常 + 关键异常（用 `alt/else`），不得拆分成功/异常两张图
-> - **组件流程图（同图，必须）**：同一张 PlantUML 流程图中覆盖正常 + 关键异常分支（不得拆分成功/异常）
+> - **组件全景时序图（同图）**：同一张时序图中覆盖正常 + 关键异常（用 `alt/else`），不得拆分成功/异常两张图
+> - **组件流程图（同图，必须）**：同一张流程图中覆盖正常 + 关键异常分支（不得拆分成功/异常）
 > - **异常清单表**：与时序图互校，确保无遗漏
 
 ##### 组件：[组件名]
@@ -470,17 +453,15 @@ stop
 
 ###### 组件类图（必须）
 
-```plantuml
-@startuml
-!theme mars
-
-' TODO: 画清该组件内部的类/接口
-class TODO_ComponentReplaceMe {
-  + placeholder: String
-  + doSomething(): Unit
-}
-
-@enduml
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    
+    class ComponentClass {
+        +placeholder: String
+        +doSomething() Unit
+    }
 ```
 
 ###### 组件类职责说明（必须）
@@ -493,55 +474,57 @@ class TODO_ComponentReplaceMe {
 
 ###### 时序图 - 全景（同图含正常+异常，必须）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    
+    participant Caller as 📱 Caller
+    participant Component as ⚙️ Component
+    participant Dependency as ☁️ Dependency
 
-' TODO: 在同一张图里用 alt/else 覆盖正常 + 关键异常（不得拆分为两张图）
-participant Caller
-participant Component
-participant Dependency
-
-Caller -> Component: call(...)
-alt 正常
-  Component -> Dependency: doWork(...)
-  Dependency --> Component: ok
-  Component --> Caller: Success(...)
-else 依赖失败/超时/取消/数据异常
-  Component -> Dependency: doWork(...)
-  Dependency --> Component: error/timeout
-  Component --> Caller: Failure(...)
-end
-
-@enduml
+    Caller->>Component: call(...)
+    
+    alt 正常
+        Component->>Dependency: doWork(...)
+        Dependency-->>Component: ok
+        Component-->>Caller: Success(...)
+    else 依赖失败/超时/取消/数据异常
+        Component->>Dependency: doWork(...)
+        Dependency-->>Component: error/timeout
+        Component-->>Caller: Failure(...)
+    end
 ```
 
 ###### 流程图 - 全景（同图含正常+异常，必须）
 
-> 目的：让组件内部关键逻辑路径“可读、可审、可落地”，并与异常清单互校。
+> 目的：让组件内部关键逻辑路径"可读、可审、可落地"，并与异常清单互校。
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start([🚀 进入组件关键流程]) --> CheckPre{前置条件/参数校验?}
+    
+    CheckPre -->|❌ 不满足| Fail[返回 Failure + 用户提示/引导]
+    Fail --> EndFail([❌ 结束])
+    
+    CheckPre -->|✅ 满足| Execute[执行核心步骤]
+    Execute --> CheckDep{依赖调用成功?}
+    
+    CheckDep -->|✅ 是| Result[产出结果/更新状态]
+    Result --> EndSuccess([✅ 结束])
+    
+    CheckDep -->|❌ 否| Handle[按决策执行重试/退避/降级/补偿]
+    Handle --> Log[记录日志/埋点]
+    Log --> EndFail
 
-start
-:进入组件关键流程;
-if (前置条件/参数校验?) then (不满足)
-  :返回 Failure + 用户提示/引导;
-  stop
-else (满足)
-  :执行核心步骤;
-  if (依赖调用成功?) then (是)
-    :产出结果/更新状态;
-    stop
-  else (否)
-    :按决策执行重试/退避/降级/补偿;
-    :记录日志/埋点;
-    stop
-  endif
-endif
-
-@enduml
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style EndSuccess fill:#E8F5E9,stroke:#388E3C
+    style EndFail fill:#FFEBEE,stroke:#D32F2F
+    style CheckPre fill:#FFF3E0,stroke:#F57C00
+    style CheckDep fill:#FFF3E0,stroke:#F57C00
+    style Fail fill:#FFEBEE,stroke:#D32F2F
+    style Handle fill:#FFF8E1,stroke:#FFC107
 ```
 
 ###### 异常清单（必须，与时序图互校）
@@ -586,7 +569,7 @@ endif
 
 #### A5.1 场景 → 应对措施对照表（必须）
 
-> 目的：把“枚举”落到“可执行对策”，并与 A3.3.2 / A3.3.1 / A3.4 的异常分支互校。
+> 目的：把"枚举"落到"可执行对策"，并与 A3.3.2 / A3.3.1 / A3.4 的异常分支互校。
 
 | 场景ID | 场景类别 | 触发条件（可复现） | 影响 | 预期行为（对用户/对系统） | 技术对策（重试/退避/降级/回滚/补偿/去重/限流） | 观测信号（日志/埋点/指标） | 映射（流程/时序/异常ID） |
 |---|---|---|---|---|---|---|---|
@@ -627,7 +610,7 @@ endif
 
 ### B0. Plan-A ↔ Plan-B 一致性与互校（必须）
 
-> **目的**：保证 Plan-A 的架构/决策在 Plan-B 的规约/契约/数据模型中有明确落点，避免“上层说一套、规约写一套”。
+> **目的**：保证 Plan-A 的架构/决策在 Plan-B 的规约/契约/数据模型中有明确落点，避免"上层说一套、规约写一套"。
 
 | Plan-A（决策/假设/约束） | Plan-B（落点） | 自检规则（必须通过） |
 |---|---|---|
@@ -813,7 +796,7 @@ android/ 或 ios/
 
 ## Story Detailed Design（L2 二层详细设计：面向开发落码，建议在 L0/L1 定稿后补齐）
 
-> 目标：在 L0（全景边界）与 L1（组件/协作）方案评审通过后，再把每个 Story 的“落码方式”写清楚；做到**不写每行代码**也能明确指导开发如何落地。
+> 目标：在 L0（全景边界）与 L1（组件/协作）方案评审通过后，再把每个 Story 的"落码方式"写清楚；做到**不写每行代码**也能明确指导开发如何落地。
 > 建议顺序：先完成 Plan-A 的 A2/A3（0/1 层设计）→ 再按需补齐本节（L2）。
 >
 > 规则：
@@ -860,18 +843,15 @@ android/ 或 ios/
 
 #### 4) 静态结构设计（类图/关系图）
 
-```plantuml
-@startuml
-!theme mars
-
-' TODO: 画清本 Story 新增/修改的核心类、接口、依赖方向
-' 要求：至少包含 UI/ViewModel/UseCase/Repository/DataSource(若有)/Error/Entity
-class TODO_StoryReplaceMe {
-  + placeholder: String
-  + execute(): Unit
-}
-
-@enduml
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    
+    class StoryComponent {
+        +placeholder: String
+        +execute() Unit
+    }
 ```
 
 ##### 关键类职责说明（必须）
@@ -886,36 +866,35 @@ class TODO_StoryReplaceMe {
 
 ##### 时序图（同图含正常 + 全部关键异常，必须）
 
-```plantuml
-@startuml
-!theme mars
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    
+    participant UI as 📱 UI/ViewModel
+    participant VM as ⚙️ ViewModel/Presenter
+    participant UC as UseCase
+    participant Repo as 💾 Repository
+    participant DS as ☁️ DataSource/External
 
-' TODO: 在同一张图里用 alt/else 覆盖正常链路 + 全部关键异常分支（不得拆分成功/异常两张图）
-' 要求：体现调用顺序、返回值、线程/协程上下文（主线程/IO）、关键状态更新点、以及每个异常分支的对策（重试/降级/回滚/补偿/提示/埋点）
-participant "UI/ViewModel" as UI
-participant "ViewModel/Presenter" as VM
-participant "UseCase" as UC
-participant "Repository" as Repo
-participant "DataSource/External" as DS
-
-UI -> VM: onAction(...)
-VM -> UC: execute(...)
-UC -> Repo: getOrDo(...)
-alt 正常
-  Repo -> DS: call(...)
-  DS --> Repo: ok
-  Repo --> UC: Success(data)
-  UC --> VM: Success(result)
-  VM --> UI: render(state)
-else 超时/限流/不可用/取消/数据损坏/并发重入...
-  Repo -> DS: call(...)
-  DS --> Repo: timeout/error
-  Repo --> UC: Failure(...)
-  UC --> VM: Success(fallback) ' 或 Failure（按决策）
-  VM --> UI: render(fallback/error)
-end
-
-@enduml
+    UI->>VM: onAction(...)
+    VM->>UC: execute(...)
+    UC->>Repo: getOrDo(...)
+    
+    alt 正常
+        Repo->>DS: call(...)
+        DS-->>Repo: ok
+        Repo-->>UC: Success(data)
+        UC-->>VM: Success(result)
+        VM-->>UI: render(state)
+    else 超时/限流/不可用/取消/数据损坏/并发重入...
+        Repo->>DS: call(...)
+        DS-->>Repo: timeout/error
+        Repo-->>UC: Failure(...)
+        UC-->>VM: Success(fallback)
+        Note right of VM: 或 Failure（按决策）
+        VM-->>UI: render(fallback/error)
+    end
 ```
 
 #### 6) 异常场景矩阵（无遗漏清单）
@@ -925,7 +904,7 @@ end
 | EX-001 |  |  |  | 是/否 |  |  |  | NFR-OBS-??? |
 
 > 校验规则（必须通过）：
-> - 上表每一条异常都能在“时序图（同图含正常+异常）”中找到对应 `alt/else` 分支；
+> - 上表每一条异常都能在"时序图（同图含正常+异常）"中找到对应 `alt/else` 分支；
 > - 时序图中的每个失败分支也必须在上表中有明确对策。
 
 #### 7) 并发 / 生命周期 / 资源管理

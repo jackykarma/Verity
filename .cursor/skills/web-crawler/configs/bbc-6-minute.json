@@ -1,0 +1,38 @@
+{
+  "name": "bbc-6-minute",
+  "description": "BBC 6 Minute English - Learning English podcast",
+  "base_url": "https://www.bbc.co.uk",
+  "list_page": {
+    "url": "/learningenglish/english/features/6-minute-english",
+    "pagination": {
+      "type": "none"
+    },
+    "item_selector": "li.course-content-item, div.widget-bbcle-coursecontentlist li, ul.course-index li",
+    "title_selector": "h2 a, a.course-item-title, .title a",
+    "link_selector": "h2 a, a.course-item-title, .title a, a",
+    "date_selector": "span.details, .date, .episode-date, h3",
+    "date_format": "%d %b %Y"
+  },
+  "detail_page": {
+    "title_selector": "h1, h3:first-of-type",
+    "content_selector": ".widget-richtext, .text-rich, article",
+    "audio_selector": "a[href$='_download.mp3'], a[href*='download.mp3']",
+    "pdf_worksheet_selector": "a[href$='_worksheet_.pdf'], a[href*='worksheet']",
+    "pdf_transcript_selector": "a[href$='_transcript_.pdf'], a[href*='transcript']",
+    "vocabulary_selector": ".vocabulary-panel, .bbcle-vocabulary"
+  },
+  "download": {
+    "audio": true,
+    "pdf_worksheet": true,
+    "pdf_transcript": true,
+    "images": false,
+    "delay_seconds": 2
+  },
+  "output": {
+    "folder_pattern": "{date}-{slug}",
+    "article_filename": "article.md",
+    "audio_filename": "audio.mp3",
+    "worksheet_filename": "worksheet.pdf",
+    "transcript_filename": "transcript.pdf"
+  }
+}

@@ -93,21 +93,20 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 
 ### 六、技术图表格式要求（必须）
 
-- **图表格式**：所有技术文档中的图表必须使用 **PlantUML 格式**
-  - 代码块标记：` ```plantuml ` 和 ` ``` `
-  - 文档标记：`@startuml` / `@enduml`
-  - 主题：统一使用 `!theme mars`
+- **图表格式**：所有技术文档中的图表必须使用 **Mermaid 格式**
+  - 代码块标记：` ```mermaid ` 和 ` ``` `
+  - 配色：必须使用 Material Design 配色方案
+  - 详细规范：参见 `.cursor/rules/mermaid-style-guide.mdc`
   - 支持的图表类型：
+    - 流程图（flowchart）
     - 类图（classDiagram）
     - 时序图（sequenceDiagram）
-    - 流程图/活动图（activityDiagram）
-    - 组件图（componentDiagram）
-    - 部署图（deploymentDiagram）
     - 状态图（stateDiagram）
-    - 用例图（useCaseDiagram）
+    - ER 图（erDiagram）
+    - 甘特图（gantt）
 
 - **禁止使用的格式**：
-  - Mermaid 格式（` ```mermaid `）
+  - PlantUML 格式（` ```plantuml `）
   - 其他图表格式（如 Graphviz、Draw.io XML 等）
 
 - **适用范围**：
@@ -117,9 +116,9 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
   - 其他技术设计文档
 
 - **理由**：
-  - 统一格式便于工具链处理和渲染
-  - PlantUML 支持更丰富的 UML 标准图表类型
-  - 与现有模板规范保持一致
+  - Mermaid 原生支持 Markdown 预览
+  - Material Design 配色美观统一
+  - 与 Cursor 编辑器兼容性更好
 
 ### 七、文档事实源与追溯原则（Workflow Governance）
 
