@@ -84,15 +84,15 @@ style NodeName fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Start([🚀 开始]) --> Input[接收输入]
+    Start([开始]) --> Input[接收输入]
     Input --> Validate{参数校验}
     
-    Validate -->|✅ 通过| Process[处理数据]
-    Validate -->|❌ 失败| Error[返回错误]
+    Validate -->|通过| Process[处理数据]
+    Validate -->|失败| Error[返回错误]
     
     Process --> Output[输出结果]
-    Output --> End([✅ 结束])
-    Error --> EndFail([❌ 结束])
+    Output --> End([结束])
+    Error --> EndFail([结束])
 
     style Start fill:#E8F5E9,stroke:#388E3C
     style End fill:#E8F5E9,stroke:#388E3C
@@ -133,10 +133,10 @@ classDiagram
 sequenceDiagram
     autonumber
     
-    actor User as 👤 用户
-    participant UI as 📱 UI
-    participant Service as ⚙️ Service
-    participant API as 🌐 API
+    actor User as 用户
+    participant UI as UI
+    participant Service as Service
+    participant API as API
 
     User->>UI: 触发操作
     UI->>Service: 调用方法
@@ -145,10 +145,10 @@ sequenceDiagram
         Service->>API: 请求数据
         API-->>Service: 返回数据
         Service-->>UI: Success
-        UI-->>User: ✅ 显示结果
+        UI-->>User: 显示结果
     else 失败
         Service-->>UI: Error
-        UI-->>User: ❌ 显示错误
+        UI-->>User: 显示错误
     end
 ```
 
@@ -157,16 +157,16 @@ sequenceDiagram
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TB
-    subgraph Presentation["🎨 表示层"]
+    subgraph Presentation["表示层"]
         UI["UI 组件"]
         ViewModel["ViewModel"]
     end
 
-    subgraph Domain["⚙️ 领域层"]
+    subgraph Domain["领域层"]
         UseCase["用例"]
     end
 
-    subgraph Data["💾 数据层"]
+    subgraph Data["数据层"]
         Repository["仓库"]
         DataSource["数据源"]
     end
@@ -186,8 +186,7 @@ flowchart TB
 ## 使用规范
 
 1. **每个图表必须包含 `%%{init}%%` 配置** - 确保样式一致
-2. **使用 emoji 增强可读性** - 如 `👤`、`📱`、`🌐`、`💾`
-3. **流程图必须覆盖所有分支和异常** - 不要遗漏错误路径
-4. **时序图使用 alt/else/opt/loop** - 完整展示交互分支
-5. **subgraph 使用中文标签** - 便于理解
-6. **节点 ID 使用英文，显示文字用中文** - 如 `API["🌐 后端服务"]`
+2. **流程图必须覆盖所有分支和异常** - 不要遗漏错误路径
+3. **时序图使用 alt/else/opt/loop** - 完整展示交互分支
+4. **subgraph 使用中文标签** - 便于理解
+5. **节点 ID 使用英文，显示文字用中文** - 如 `API["后端服务"]`
