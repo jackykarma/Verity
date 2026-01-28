@@ -138,20 +138,20 @@ classDiagram
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TB
-    subgraph FeatureBoundary["📦 本 Feature 边界"]
-        UI["🎨 UI 层"]
-        Logic["⚙️ 业务逻辑层"]
-        Data["💾 数据层"]
+    subgraph FeatureBoundary["本 Feature 边界"]
+        UI["UI 层"]
+        Logic["业务逻辑层"]
+        Data["数据层"]
     end
 
-    subgraph Reused["♻️ 复用已有模块"]
+    subgraph Reused["复用已有模块"]
         Auth["认证模块"]
         Logger["日志模块"]
     end
 
-    subgraph External["☁️ 外部依赖"]
-        API["🌐 后端 API"]
-        OS["📱 系统能力"]
+    subgraph External["外部依赖"]
+        API["后端 API"]
+        OS["系统能力"]
     end
 
     UI --> Logic
@@ -223,17 +223,17 @@ flowchart TB
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TB
-    subgraph UILayer["🎨 UI 层"]
+    subgraph UILayer["UI 层"]
         UI["UI/View"]
         VM["ViewModel/Presenter"]
     end
 
-    subgraph DomainLayer["⚙️ Domain/UseCase 层"]
+    subgraph DomainLayer["Domain/UseCase 层"]
         UC["UseCase/Interactor"]
         Policy["Policy/Strategy（可选）"]
     end
 
-    subgraph DataLayer["💾 Data 层"]
+    subgraph DataLayer["Data 层"]
         Repo["Repository"]
         DS["DataSource（Local/Remote）"]
         Mapper["Mapper/Converter（可选）"]
@@ -386,10 +386,10 @@ classDiagram
 sequenceDiagram
     autonumber
     
-    participant UI as 📱 UI/ViewModel
-    participant UC as ⚙️ UseCase
-    participant Repo as 💾 Repository
-    participant DS as ☁️ DataSource
+    participant UI as UI/ViewModel
+    participant UC as UseCase
+    participant Repo as Repository
+    participant DS as DataSource
 
     UI->>UC: execute(input)
     
@@ -419,14 +419,14 @@ sequenceDiagram
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Start([🚀 触发]) --> Check{校验?}
-    Check -->|❌| Fail[提示]
-    Fail --> EndFail([❌ 结束])
-    Check -->|✅| Execute[执行]
+    Start([触发]) --> Check{校验?}
+    Check -->|否| Fail[提示]
+    Fail --> EndFail([结束])
+    Check -->|是| Execute[执行]
     Execute --> Result{成功?}
-    Result -->|✅| Update[更新]
-    Update --> EndOK([✅ 结束])
-    Result -->|❌| Handle[降级/重试]
+    Result -->|是| Update[更新]
+    Update --> EndOK([结束])
+    Result -->|否| Handle[降级/重试]
     Handle --> EndFail
 
     style Start fill:#E8F5E9,stroke:#388E3C
@@ -484,9 +484,9 @@ classDiagram
 sequenceDiagram
     autonumber
     
-    participant Caller as 📱 Caller
-    participant Component as ⚙️ Component
-    participant Dep as ☁️ Dependency
+    participant Caller as Caller
+    participant Component as Component
+    participant Dep as Dependency
 
     Caller->>Component: call(...)
     
@@ -506,13 +506,13 @@ sequenceDiagram
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Start([🚀 开始]) --> Check{校验?}
-    Check -->|❌| Fail[Failure]
-    Fail --> EndFail([❌ 结束])
-    Check -->|✅| Execute[执行]
+    Start([开始]) --> Check{校验?}
+    Check -->|否| Fail[Failure]
+    Fail --> EndFail([结束])
+    Check -->|是| Execute[执行]
     Execute --> Result{成功?}
-    Result -->|✅| EndOK([✅ 结束])
-    Result -->|❌| Handle[降级/重试]
+    Result -->|是| EndOK([结束])
+    Result -->|否| Handle[降级/重试]
     Handle --> EndFail
 
     style Start fill:#E8F5E9,stroke:#388E3C
@@ -859,10 +859,10 @@ classDiagram
 sequenceDiagram
     autonumber
     
-    participant UI as 📱 UI
-    participant UC as ⚙️ UseCase
-    participant Repo as 💾 Repository
-    participant DS as ☁️ DataSource
+    participant UI as UI
+    participant UC as UseCase
+    participant Repo as Repository
+    participant DS as DataSource
 
     UI->>UC: execute(...)
     UC->>Repo: getData()
