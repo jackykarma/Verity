@@ -1,5 +1,5 @@
 ---
-description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /speckit.plan → /speckit.tasks → /speckit.fulldesign → /speckit.implement 使用。
+description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /speckit.plan → /speckit.tasks → /speckit.implement 使用。
 handoffs:
   - label: 澄清规格说明要求
     agent: speckit.clarify

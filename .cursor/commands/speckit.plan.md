@@ -77,7 +77,6 @@ $ARGUMENTS
    - 运行 `.specify/scripts/powershell/update-agent-context.ps1 -AgentType cursor-agent`
 
 8. **完成报告**：输出 `plan.md` 路径、Plan Version、已生成的 Story 数量，并提示下一步：
-   - （可选、需手动触发）`/speckit.fulldesign` 生成 Full Design 技术方案文档
    - `/speckit.tasks` 生成 tasks.md
 
 核心规则：

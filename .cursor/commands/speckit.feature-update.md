@@ -5,10 +5,6 @@ handoffs:
     agent: speckit.tasks
     prompt: 将 Plan 的 Story Breakdown 拆解为可执行 tasks.md
     send: true
-  - label: 生成 Full Design（已级联 plan 时）
-    agent: speckit.fulldesign
-    prompt: 基于最新 spec 与 plan 刷新 full-design.md
-    send: false
   - label: 同步 EPIC 总览
     agent: speckit.epicsync
     prompt: 将本 Feature 的 spec/plan 进展同步到 EPIC 总览
@@ -44,6 +40,18 @@ $ARGUMENTS
 ## 大纲
 
 目标：对当前 Feature 的 `spec.md` 做**增量更新**，仅重写/重算 `$ARGUMENTS` 指定范围对应的章节，其余原文保留；在「变更记录」中**追加一行**。根据需求变更范围，可**可选级联**更新 `plan.md`（见「可选级联」节）。
+
+**定位与使用场景**：
+- **feature-update**：用于 **主动需求变更**，可在 **任何时候** 执行（spec 生成后、plan 之后、implement 期间均可）
+- **适用场景**：PRD 变更、需求调整、FR/NFR 修正、边界重新定义
+- **执行方式**：用户主动指定更新范围（如"FR 与 NFR"、"边界与异常场景"）
+- **变更追溯**：在「变更记录（增量变更）」表中 **追加一行**，记录版本、变更范围、影响
+- **级联能力**：可选自动级联更新 plan.md（根据影响映射表推导）
+
+**与 clarify 的区别**：
+- clarify 是"首次交互式澄清"（AI 提问，plan 之前），feature-update 是"主动需求变更"（用户指定范围，任何时候）
+- clarify 不维护变更记录表，feature-update 维护
+- clarify 无级联能力，feature-update 可级联 plan
 
 强制约束：
 - **增量规则**：仅重写/重算指定范围对应的章节，禁止全量重写。
@@ -158,5 +166,9 @@ $ARGUMENTS
 
 ## 与 clarify 的区分
 
-- **`/speckit.clarify`**：澄清问答，按问题答案写入 spec，一般不维护变更记录。
-- **`/speckit.feature-update`**：按「范围 + 变更意图」做增量，并在变更记录中留痕；可选级联 plan。
+- **`/speckit.clarify`**：首次交互式澄清（plan 之前），AI 提问，不维护变更记录表，无级联能力。
+- **`/speckit.feature-update`**：主动需求变更（任何时候），用户指定范围，维护变更记录表，可级联 plan。
+
+**使用流程建议**：
+1. spec 初次生成后 → 运行 `/speckit.clarify` 填补模糊点
+2. plan/tasks/implement 期间需求变更 → 运行 `/speckit.feature-update` 指定范围更新
