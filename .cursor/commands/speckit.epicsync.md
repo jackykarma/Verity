@@ -12,7 +12,7 @@ $ARGUMENTS
 
 ## 大纲
 
-目标：基于当前 Feature 工件（`spec.md`、`plan.md`、`tasks.md`、`full-design.md`），增量更新其所属 EPIC 的 `epic.md` 中的 **Feature Registry（自动同步区）**。
+目标：基于当前 Feature 工件（`spec.md`、`plan.md`、`tasks.md`），增量更新其所属 EPIC 的 `epic.md` 中的 **Feature Registry（自动同步区）**。
 
 约束（强制）：
 - **增量更新**：仅更新对应 Feature 的那一行（或新增一行），不得重写 EPIC 其他章节。
@@ -21,7 +21,7 @@ $ARGUMENTS
 ## 执行步骤
 
 1. **定位 Feature 上下文**：从代码库根目录运行 `.specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly`，解析路径：
-   - `FEATURE_DIR`、`FEATURE_SPEC`、`IMPL_PLAN`、`TASKS`、`FULL_DESIGN`
+   - `FEATURE_DIR`、`FEATURE_SPEC`、`IMPL_PLAN`、`TASKS`
    - 若 `FEATURE_SPEC` 不存在：终止并提示先运行 `/speckit.feature`
 
 2. **从 Feature spec.md 读取 Epic 信息**：
@@ -35,7 +35,7 @@ $ARGUMENTS
 4. **同步内容（仅一行）**：
    - Feature 名称（来自 spec.md 标题）
    - 分支名（来自当前分支/FEATURE_DIR）
-   - Feature/Plan/Tasks/Full Design 的 Version（从各文档头部字段读取；缺失则写 N/A）
+   - Feature/Plan/Tasks 的 Version（从各文档头部字段读取；缺失则写 N/A）
    - 状态推断：
      - Spec Ready / Plan Ready / Tasks Ready / In Implement / Done（按文件存在性与 Version 填充情况推断）
    - 更新 `epic.md` 中 `BEGIN_FEATURE_REGISTRY` 与 `END_FEATURE_REGISTRY` 标记内的表格：

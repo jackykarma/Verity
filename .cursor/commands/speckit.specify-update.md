@@ -1,10 +1,6 @@
 ---
 description: 对 epic.md 做增量更新，仅重写 $ARGUMENTS 指定范围的章节，其余保留；不改动 Feature Registry。
-handoffs:
-  - label: EPIC Full Design（当 EPIC 层变更影响跨 Feature 时）
-    agent: speckit.epicfulldesign
-    prompt: EPIC 层已通过 specify-update 更新，请基于最新 epic.md 刷新 epic-full-design。
-    send: false
+handoffs: []
 ---
 
 ## 用户输入
@@ -88,7 +84,7 @@ $ARGUMENTS
 - EPIC Version（更新后）
 - 本次更新范围摘要
 
-若 EPIC 层变更影响跨 Feature，可在完成报告中 handoff 到 `/speckit.epicfulldesign`。
+若 EPIC 层变更影响跨 Feature：建议通过 CR 明确影响面，并对受影响 Feature 逐个执行 feature-update / plan-update / tasks，再运行 `/speckit.epicsync` 同步总览。
 
 ## 与现有命令的关系
 

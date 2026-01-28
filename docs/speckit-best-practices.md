@@ -59,7 +59,7 @@ specs/epics/EPIC-xxx-.../
 ├── epic.md
 ├── ux-design.md          # EPIC 级交互/视觉/动效 + 设计稿索引
 ├── design/               # 可选：截图/HTML 等设计稿文件
-├── epic-full-design.md   # 可选：EPIC 级跨 Feature 一致性检查
+├── (已移除) epic-full-design.md   # 该能力已从 speckit 流程中移除
 └── features/
     └── FEAT-xxx-.../
         ├── spec.md
@@ -226,7 +226,6 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 ### 5.8 EPIC Sync / EPIC Full Design（可选）
 
 - `/speckit.epicsync "<备注>"`（同步 Feature 状态到 epic.md Registry）
-- `/speckit.epicfulldesign "EPIC-xxx"`（可选：当跨 Feature 存在一致性冲突需要检查时）
 
 ---
 
@@ -297,7 +296,6 @@ CR 必须回答：
    - `spec.md`：`/speckit.feature-update "范围：..."`（必要时级联 plan）
    - 若 Story/验证变化：`/speckit.tasks`
 3. `/speckit.epicsync "<备注：EPIC 变更同步>"`
-4. （可选，跨 Feature 冲突或需要整体视图）`/speckit.epicfulldesign "EPIC-xxx"`
 
 #### C) 交互变更（流程/状态/反馈）
 
