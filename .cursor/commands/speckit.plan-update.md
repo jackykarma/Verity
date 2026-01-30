@@ -114,7 +114,7 @@ $ARGUMENTS
 
 - 仅对**步骤 3 确定**的 plan 章节，基于 spec、constitution、plan 既有内容做重算或重写。
 - 不得引入 plan/spec 中未出现或已推翻的决策。
-- 图表须继续使用 **PlantUML**（`@startuml` / `@enduml`，主题 `mars`），与 [speckit.plan.md](.cursor/commands/speckit.plan.md) 一致。
+- 图表须继续使用 **Mermaid**（遵循 `.cursor/rules/mermaid-style-guide.mdc` 中的 Material Design 配色规范），与 [speckit.plan.md](.cursor/commands/speckit.plan.md) 一致。
 
 ### 5. 变更记录
 
