@@ -32,7 +32,7 @@ description: "Story → Task 落地任务清单模板"
 
 - **依赖**：T???（无则写“无”）
 - **设计引用**：
-  - 模块级：`plan.md:A3.4:<模块名>:UML类图/时序-成功/时序-异常`
+  - 模块级：`plan.md:A3.3:<模块名>:UML类图/时序-成功/时序-异常`
   - 或 Story 级：`plan.md:Story Detailed Design:ST-xxx:...`
   - （若该 Story/模块设计尚未补齐，则写 `N/A` 并在 Plan 中补齐）
 - **步骤**：
