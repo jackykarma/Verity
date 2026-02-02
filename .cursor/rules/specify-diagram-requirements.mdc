@@ -1,0 +1,73 @@
+---
+description: Specify/Plan 图表内容规范——基于实际工程架构与真实代码，用于 plan.md、L2_story_detail_design.md 等设计文档
+globs: ["**/*.md"]
+alwaysApply: true
+---
+
+# Specify 图表内容要求（类图 / 时序图 / 流程图）
+
+本规则与 `.cursor/rules/mermaid-style-guide.mdc` 互补：**mermaid-style-guide** 负责视觉样式（配色、主题），本规则负责**内容与结构**要求。
+
+---
+
+## 一、首要原则
+
+- **必须**基于**本工程当前架构模式**和**真实代码**绘制架构图、类图、时序图，不可伪造。
+- **禁止**按模板示例（如 Clean Architecture 的 UseCase、Repository）生搬硬套；须按项目实际存在的类与分层绘制。
+- 项目架构不限于 MVVM/MVP/MVC/MVI/Clean Architecture，可能是自定义、混合或无名模式——以工程实际为准。
+
+---
+
+## 二、架构适配
+
+**必须按本工程既有架构与真实代码绘制**，不限定于 MVVM/MVP/MVC/MVI/Clean Architecture 等常见模式。若工程采用自定义架构、混合模式或无名模式，同样按其实际分层与类名绘制。
+
+下表仅为**常见架构示例**（非穷举、非强制）：
+
+| 项目架构（示例） | 类/participant 示例 |
+|------------------|---------------------|
+| MVVM 无 UseCase | ViewModel、Repository、DataSource、Entity、DTO |
+| MVP | View、Presenter、Model、DataSource |
+| MVC | View、Controller、Model |
+| MVI | View、Intent、Model、Reducer 等 |
+| Clean Architecture | ViewModel、UseCase、Repository 等 |
+| 自定义/混合/其他 | 按项目实际分层与真实类名 |
+
+---
+
+## 三、类图要求
+
+### 全景类图（Feature 级）
+
+- **覆盖范围**：必须覆盖所有关键类/接口，按项目架构确定。
+- **方法签名**：类与接口必须写出方法签名（方法名 + 参数 + 返回值）。
+- **依赖方向**：上层依赖下层，禁止下层反依赖上层。
+
+### 类图粒度控制
+
+**✅ 应该包含**：公共接口/抽象类、核心实现类、数据模型（Entity、DTO）、错误类型体系、公共方法签名。
+
+**❌ 不应该包含**：私有辅助方法、自动生成的 getter/setter、第三方库的类（除非自定义扩展）、Android SDK 基类。
+
+---
+
+## 四、时序图要求
+
+- **participant 命名**：必须使用**真实类名**，不可伪造类名，不可使用示例中的类名。
+- **完整性**：必须覆盖从用户触发到最终响应的完整调用链，不得遗漏关键方法调用。
+- **异常**：同图包含正常 + 关键异常（用 `alt/else`）。
+
+---
+
+## 五、流程图要求
+
+- **完整性**：覆盖从触发条件到所有可能结束状态的完整逻辑路径，不得遗漏关键分支。
+- **异常**：覆盖正常 + 异常分支。
+- **一致性**：Feature 级流程图与时序图一一对应。
+
+---
+
+## 六、职责说明
+
+- 类图后必须紧跟**关键类职责说明**表，按分层或功能分组组织。
+- 每个类的职责用简洁一句话描述核心责任。

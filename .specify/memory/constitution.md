@@ -243,7 +243,7 @@ Plan 阶段的设计输出 MUST 满足以下标准：
 3. 说明 MUST 按架构分层或功能分组组织（如：表示层 / 领域层 / 数据层）
 4. 每个类的职责用简洁的一句话描述核心责任
 
-示例格式：
+示例格式（须基于本工程实际架构与真实代码，参见 `.cursor/rules/specify-diagram-requirements.mdc`；下图仅为 Clean Architecture 风格示意，不得照搬）：
 
 ```
 [类图 Mermaid 代码块]

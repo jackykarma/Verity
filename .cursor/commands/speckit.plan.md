@@ -109,6 +109,7 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
    - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
    - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
    - **注意**：模板中所有图表示例均使用 Mermaid 格式，生成文档时必须严格遵循 `.cursor/rules/mermaid-style-guide.mdc` 配色规范
+   - 读取 `.cursor/rules/specify-diagram-requirements.mdc`，确保图表基于本工程实际架构与真实代码（禁止照搬 Clean Architecture 示意）
    - 按 `.specify/templates/plan-template.md` 填写 `Plan Level`（Lite/Standard/Deep），并确保细化粒度与 Feature 风险匹配（避免小需求过度设计）
 
 4. **根据阶段执行对应内容**：

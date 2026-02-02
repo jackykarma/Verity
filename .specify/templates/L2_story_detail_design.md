@@ -9,6 +9,7 @@
 ## 文档约定
 
 - 对每个 Story，必须同时覆盖：**需求描述**、**功能设计（类图/时序图/触发条件/系统响应）**。
+- 类图、时序图须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 - tasks.md 的每个 Task 应明确引用对应 Story 的详细设计入口（例如：`L2_story_detail_design.md:ST-001:功能设计:时序图`）。
 
 ---
@@ -45,7 +46,9 @@
 - [关键错误场景的处理策略：重试/降级/提示]
 - [资源释放与取消语义：协程取消时如何保证一致性]
 
-##### 类图
+##### 类图（按项目实际架构，与 plan 全景类图对应）
+
+> **要求**：基于本工程实际架构与真实代码，必须基于当前工程实际代码使用真实类名。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
@@ -66,7 +69,9 @@ classDiagram
 
 ##### 时序图（含正常+异常）
 
+> **架构**：基于本工程实际架构与真实代码，participant 使用真实类名。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
 > **完整性要求**：时序图必须在 Story 内部完整，覆盖该 Story 从触发到响应的完整方法调用链，包括正常流程和关键异常处理，不得遗漏核心交互步骤。
+> **participant 命名**：必须基于当前工程实际代码使用真实类名。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%

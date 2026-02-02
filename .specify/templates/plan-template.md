@@ -18,7 +18,7 @@
 >   - **Standard**：默认 — 在 Lite 基础上补齐 A3.3（组件详细设计）、Story Breakdown 与风险/预算评估
 >   - **Deep**：新契约/持久化迁移/复杂动效与性能预算/并发竞态/灰度回滚等 — 在 Standard 基础上，补齐关键 Story 的 L2 详细设计
 >
-> **图表规范**：所有 Mermaid 图表必须遵循 `.cursor/rules/mermaid-style-guide.mdc` 中定义的 Material Design 配色方案。
+> **图表规范**：样式遵循 `.cursor/rules/mermaid-style-guide.mdc`；**内容与结构**须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 
 ## 变更记录（增量变更）
 
@@ -102,10 +102,10 @@
 > |------|-----------------|---------------|
 > | **目的** | 统一业务语言，建立领域模型 | 定义技术实现的静态结构 |
 > | **视角** | 业务视角（产品/领域专家能看懂） | 技术视角（开发者能实现） |
-> | **内容** | 业务实体、值对象、聚合关系 | UI/ViewModel/UseCase/Repository 等技术类 |
+> | **内容** | 业务实体、值对象、聚合关系 | 按项目架构（Clean Architecture/MVP/MVC/MVVM 等）的技术类 |
 > | **方法** | 只写关键业务属性，不写方法 | 必须写完整的方法签名 |
-> | **示例** | `订单`、`用户`、`商品`（业务概念） | `OrderRepository`、`OrderUseCase`（技术组件） |
-> | **来源** | 来自需求分析、DDD 领域建模 | 来自架构设计、Clean Architecture |
+> | **示例** | `订单`、`用户`、`商品`（业务概念） | `OrderRepository`、`OrderUseCase` 或 Presenter/Controller 等（技术组件，依架构而定） |
+> | **来源** | 来自需求分析、DDD 领域建模 | 来自架构设计（Clean Architecture / MVP / MVC / MVVM 等） |
 > | **修改频率** | 业务需求变化时修改 | 技术方案调整时修改 |
 >
 > **使用建议**：
@@ -234,6 +234,8 @@ flowchart TB
 > - **静态结构**：用**实线箭头**（`-->`）表示依赖/调用方向（谁依赖谁）
 > - **动态协作**：用**虚线箭头**（`-..->`）表示事件/回调/异步消息
 > - **跨层约束**：明确禁止的依赖（如：UI 不得直接依赖 DataSource）
+>
+> **架构**：基于本工程实际架构与真实代码绘制，禁止照搬 Clean Architecture。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
@@ -343,6 +345,8 @@ sequenceDiagram
 >   - 其他模式：按项目既有分层与命名规范覆盖对应关键类/接口
 > - **类与接口必须写出方法签名**：方法名 + 参数 + 返回值
 > - **依赖方向必须正确**：上层依赖下层，禁止"下层反依赖上层"
+>
+> **架构**：基于本工程实际架构与真实代码，类/接口按实际架构命名, 禁止照搬例图中的Clean Arch。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
@@ -428,7 +432,7 @@ classDiagram
     EntityMapper --> DataDTO : converts
 ```
 
-###### 关键类职责说明
+###### 关键类职责说明（按 A3.2.1 要求，与项目实际架构一致）
 
 | 类/接口 | 层级 | 职责 | 关键方法 |
 |---------|------|------|----------|
@@ -445,10 +449,12 @@ classDiagram
 ##### A3.2.2 Feature 时序图集（方法调用流程，必须）
 
 > **要求**：
+> - **架构**：基于本工程实际架构与真实代码，participant 使用真实类名。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
 > - 列出 Feature 级别的所有关键流程
 > - 每个流程 1 张时序图，覆盖**类/方法级调用细节**
 > - 同图包含正常 + 关键异常（用 `alt/else`）
 > - **完整性要求**：时序图必须从 Feature 全局视角完整，覆盖从用户触发到最终响应的完整调用链，不得遗漏关键方法调用
+> - **participant 命名**：基于本工程实际架构与真实代码绘制，participant 使用真实类名，禁止照搬例图；
 
 | Seq ID | 流程名称 | 覆盖的异常（EX-xxx） |
 |--------|----------|----------------------|
@@ -591,6 +597,8 @@ flowchart TD
 
 ###### 组件类图
 
+> **架构**：基于本工程实际架构与真实代码，使用真实类名。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
+
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 classDiagram
@@ -604,6 +612,7 @@ classDiagram
 
 ###### 组件时序图（含正常+异常）
 
+> **架构**：基于本工程实际架构与真实代码，participant 使用真实类名。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
 > **完整性要求**：时序图必须在组件职责边界内完整，覆盖组件对外暴露的所有关键方法的完整调用流程（从调用入口到返回结果），不得遗漏组件内部的关键协作步骤。
 
 ```mermaid
