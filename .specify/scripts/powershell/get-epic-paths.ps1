@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# 解析 EPIC 目录路径，供 /speckit.epicuidesign、/speckit.epicuidesign-update 使用。
+# 解析 EPIC 目录路径，供 /speckit.epicuidesign、/speckit.epicuidesign-update、/speckit.epicarchdesign 使用。
 # 通过 -EpicId 或 $env:SPECIFY_EPIC 指定 EPIC（如 EPIC-002 或 EPIC-002-android-english-learning）。
 
 [CmdletBinding()]
@@ -37,4 +37,5 @@ if ($Json) {
     'EPIC_DIR: ' + $p.EPIC_DIR | Write-Output
     'EPIC_UX_DESIGN: ' + $p.EPIC_UX_DESIGN | Write-Output
     'EPIC_DESIGN_DIR: ' + $p.EPIC_DESIGN_DIR | Write-Output
+    'EPIC_ARCH: ' + $p.EPIC_ARCH | Write-Output
 }

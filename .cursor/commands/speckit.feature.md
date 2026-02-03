@@ -9,6 +9,10 @@ handoffs:
     agent: speckit.epicuidesign
     prompt: 若尚未为 EPIC 做 epic uidesign，可运行 /speckit.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后，从整个需求整体设计）；建议在任意 Feature 的 plan 之前完成
     send: false
+  - label: EPIC 架构设计（EPIC 级）
+    agent: speckit.epicarchdesign
+    prompt: 若尚未为 EPIC 做 epic arch design，可运行 /speckit.epicarchdesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后，产出 0 层/1 层架构与规范约束）；建议在任意 Feature 的 plan 之前完成，可与 epicuidesign 并行或先后
+    send: false
   - label: 制定技术方案
     agent: speckit.plan
     prompt: 为该规格说明制定方案（由 SE/TL 在 EPIC 分支产出与维护）。我正在基于……进行开发
@@ -58,5 +62,5 @@ $ARGUMENTS
 
 6. **完成报告**：输出 Feature Key、spec.md 路径、检查清单路径，并提示下一步：
 - `/speckit.clarify`（建议先做）
-- 若**尚未**为 EPIC 做 epic uidesign：**`/speckit.epicuidesign "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后，见工作流 5.3）再做 `/speckit.plan`；或直接 `/speckit.plan`（plan 会引用 EPIC 级 ux-design，若存在）
+- 若**尚未**为 EPIC 做 epic uidesign：**`/speckit.epicuidesign "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）再做 `/speckit.plan`；若**尚未**为 EPIC 做 epic arch design：**`/speckit.epicarchdesign "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后，产出 0 层/1 层架构与规范约束；可与 epicuidesign 并行或先后）。或直接 `/speckit.plan`（plan 会引用 EPIC 级 ux-design、epic-arch，若存在）
 

@@ -94,6 +94,7 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
    - `FEATURE_SPEC`（spec.md 路径）
    - `IMPL_PLAN`（plan.md 路径）
    - `SPECS_DIR`、`BRANCH`、`UX_DESIGN`、`DESIGN_DIR`（在 EPIC 工作流下为 **EPIC 级** ux-design 与 design/ 路径）
+   - `EPIC_ARCH`（在 EPIC 工作流下为 **EPIC 级** epic-arch.md 路径，若存在）
    - 对于参数中包含单引号（如 "I'm Groot"），使用转义语法：例如 'I'\''m Groot'（或尽可能使用双引号："I'm Groot"）。
 
 2. **解析阶段参数**：
@@ -105,6 +106,7 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
 
 3. **加载上下文（只加载必要部分）**：
    - 读取 `FEATURE_SPEC`（提取：Epic/Feature 元信息、FR/NFR、验收与边界场景、依赖）——**spec 需求**为方案设计的主要输入。
+   - 若 `EPIC_ARCH` 存在（**EPIC 级** epic-arch.md）：读取 epic-arch.md，提取 **0 层/1 层架构与规范约束**；**A2、A3.1 须在其约束下展开**，不得脱离 EPIC 架构另画一套（参见 plan-template 的「Plan 前置检查」）。
    - 若 `UX_DESIGN` 存在（**EPIC 级** ux-design.md，在 EPIC 工作流下由 setup-plan 输出；若为旧版 Feature 级则路径同 FEATURE_DIR/ux-design.md）：读取 ux-design.md，提取**信息架构、跨 Feature 导航、交互规则与状态、视觉规范、设计稿索引**（可按所属 Feature 过滤与本 Feature 相关部分）；按设计稿索引**参考 UI 设计稿**——形式可为 **Figma 链接**、**`DESIGN_DIR` 下截图**、**`DESIGN_DIR` 下 HTML**，用于 A2 全景、A3 组件/协作、Story 的细化与命名；在 plan 中可引用 ux-design 的页面/组件 ID 及对应路径或 Figma 链接。
    - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
    - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
@@ -121,8 +123,8 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
    - **概述**：核心需求 + 关键工程决策
    - **A0 领域概念**：词汇表 + 概念关系图
    - **A1 技术选型**：候选对比 + 决策理由（禁止空泛）
-   - **A2 Feature 全景架构**：0 层框架图 + 外部依赖清单 + 通信约束
-   - **A3.1 第一层设计**：内部框架图 + 组件清单与职责 + 组件协作时序图 + 关键设计决策
+   - **A2 Feature 全景架构**：0 层框架图 + 外部依赖清单 + 通信约束（若存在 EPIC_ARCH，须继承 epic-arch 的 0 层架构）
+   - **A3.1 第一层设计**：内部框架图 + 组件清单与职责 + 组件协作时序图 + 关键设计决策（若存在 EPIC_ARCH，须继承 epic-arch 的 1 层架构与规范约束）
    - **A3.2 第二层设计**：全景类图 + Feature 时序图集 + Feature 流程图集 + 关键设计详解（若适用）
    - **Plan-B（B0-B7）**：技术背景、架构细化、数据模型、接口规范、合规性检查、项目结构
    

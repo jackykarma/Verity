@@ -33,6 +33,7 @@
 - **EPIC**：大需求容器、统一边界、跨 Feature 验收与预算（`epic.md`）。
 - **Feature**：可交付单元，拥有完整 FR/NFR/AC（`spec.md`）。
 - **UX Design（EPIC 级）**：导航、流程、交互规则、视觉与动效清单、设计稿索引（`ux-design.md` + `design/` 或 Figma 链接）。
+- **EPIC Arch（EPIC 级）**：0 层/1 层架构与规范约束（`epic-arch.md`）；各 Feature 的 plan 的 A2/A3.1 须继承。
 - **Plan**：工程级蓝图（架构边界/契约/失败模式/NFR 预算/风险与回滚 + Story 拆分）（`plan.md`）。
 - **Story（ST-xxx）**：Feature 最小可开发单元（在 `plan.md` 的 Story Breakdown）。
 - **Task（Txxx）**：Story 的可执行落地步骤（`tasks.md`）。
@@ -44,6 +45,7 @@
 |---|---|---|
 | 范围（In/Out）、FR/NFR、验收 AC、边界/异常 | `spec.md` | UX/Plan/Tasks 只能**引用/映射**，不得改写口径 |
 | 导航/交互规则/状态、视觉规范、动效清单、设计稿索引 | `ux-design.md`（EPIC 级） | Plan 引用并在实现策略里落地（性能/功耗/降级等） |
+| **0 层/1 层架构、EPIC 级规范与约束** | **`epic-arch.md`（EPIC 级）** | **各 Feature 的 plan 的 A2/A3.1 须继承，不得脱离另画** |
 | 架构边界、契约、错误语义、失败策略、NFR 预算与测量方式、风险/回滚、Story 拆分 | `plan.md` | Tasks 只能拆解执行；Implement 不得越权改写 |
 | 执行步骤、依赖与并行、验证步骤（可执行） | `tasks.md` | Implement 的唯一执行清单 |
 
@@ -57,7 +59,7 @@
 
 - **产品（PM）**：PRD、范围与验收目标；参与 Feature spec 澄清并确认 AC。
 - **设计（UX/UI）**：EPIC 级 `ux-design.md`、设计稿索引、动效清单与说明；对交互/视觉变更提供“变更说明 + 影响面”。
-- **SE/TL（方案负责人）**：`plan.md`、`tasks.md` 的权威维护者；对变更做影响分析并驱动下游更新。
+- **SE/TL（方案负责人）**：`epic-arch.md`（EPIC 级）、`plan.md`、`tasks.md` 的权威维护者；对变更做影响分析并驱动下游更新。
 - **开发（Dev）**：严格按 `tasks.md` 实现与验证；发现设计缺口时发起变更请求（CR），不得自行修改 spec/plan 决策口径。
 
 ---
@@ -72,17 +74,19 @@
 2. **EPIC Specify**：产出 `epic.md`（边界、拆分 Feature 列表、通用能力、EPIC 级预算/验收）
 3. **Feature Specify（逐个）**：产出每个 Feature 的 `spec.md`（FR/NFR/AC/边界/依赖/实体）
 4. **EPIC UX/UI（整体）**：产出 `ux-design.md`（信息架构、交互规则、视觉/动效、设计稿索引）
-5. **Feature Clarify（逐个，可选但建议）**：补齐不可缺的澄清点
-6. **Feature Plan（逐个）**：产出 `plan.md`（工程决策、风险与 NFR 预算、Story 拆分）
-7. **Feature Tasks（逐个）**：产出 `tasks.md`（绑定 ST-xxx，带路径、步骤、验证）
-8. **Implement**：开发者在 story 分支按 `tasks.md` 执行；完成后 PR 回 EPIC 分支集成
-9. **EPIC Sync / EPIC Full Design**：保持 EPIC 总览与全局一致性
+5. **EPIC Arch Design（整体）**：产出 `epic-arch.md`（0 层/1 层架构、规范约束）；与步骤 4 均在「所有 Feature spec 完成后、任意 Feature plan 之前」执行，可并行或先后；各 Feature 的 plan 的 A2/A3.1 须继承
+6. **Feature Clarify（逐个，可选但建议）**：补齐不可缺的澄清点
+7. **Feature Plan（逐个）**：产出 `plan.md`（工程决策、风险与 NFR 预算、Story 拆分；须在 epic-arch 约束下做 A2/A3.1）
+8. **Feature Tasks（逐个）**：产出 `tasks.md`（绑定 ST-xxx，带路径、步骤、验证）
+9. **Implement**：开发者在 story 分支按 `tasks.md` 执行；完成后 PR 回 EPIC 分支集成
+10. **EPIC Sync / EPIC Full Design**：保持 EPIC 总览与全局一致性
 
 ### 3.2 推荐关卡（Definition of Ready / Done）
 
 - **进入 Plan 前（Feature DoR）**：
   - `spec.md` 的范围/FR/NFR/AC/边界齐全且可测试
   - `ux-design.md` 中存在该 Feature 的页面/流程索引与交互规则映射（若 EPIC 有 ux-design）
+  - 若 EPIC 有 `epic-arch.md`，已阅读并在其 0 层/1 层与规范约束下做 A2、A3.1
   - 关键依赖与失败模式已列出（spec/ux 中至少要有）
 
 - **进入 Implement 前（Design Freeze）**：

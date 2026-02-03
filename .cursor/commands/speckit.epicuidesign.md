@@ -25,7 +25,7 @@ $ARGUMENTS
 
 **设计稿**可选用：**Figma 链接**、**截图**（放于 `design/`，如 .png/.jpg）、**本地 HTML**（`design/*.html`）；在 ux-design.md 的「设计稿索引」中登记形式与路径/链接；可含「所属 Feature」列区分。**须在 epic.md 已存在、EPIC 根下 ux-design.md 尚不存在时运行**；若已存在，请改用 `/speckit.epicuidesign-update`。
 
-**前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行，以保证整个 EPIC 的交互与视觉设计完整、一致。
+**前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行，以保证整个 EPIC 的交互与视觉设计完整、一致。可与 **`/speckit.epicarchdesign`**（EPIC 级技术架构设计）并行或先后执行，两者均在任意 Feature 的 plan 之前完成。
 
 执行步骤：
 
@@ -47,4 +47,4 @@ $ARGUMENTS
 5. **填充 ux-design.md**：按 **epic.md 与各 feature spec** 的 FR/NFR、验收与场景、核心实体、**跨 Feature 流程与导航**，填充 ux-design-template 各章节（信息架构、**跨 Feature 导航与流程**、交互说明、视觉规范、设计稿索引；可按 **Feature 分节** 或分表），写入 `EPIC_UX_DESIGN`。  
    元信息：**Epic**、**Epic Version**、**ux-design Version**、日期；**输入**：`epic.md`、各 `features/*/spec.md`。**设计稿索引**须支持：Figma 链接、`design/xxx.png`、`design/xxx.html`；可加「所属 Feature」列。
 
-6. **完成报告**：输出 ux-design.md 路径（EPIC 根）、design 路径（若已创建），并提示下一步：对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/speckit.plan`。
+6. **完成报告**：输出 ux-design.md 路径（EPIC 根）、design 路径（若已创建），并提示下一步：若尚未做 EPIC 架构设计可运行 `/speckit.epicarchdesign "EPIC-xxx"`；对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/speckit.plan`。

@@ -38,6 +38,7 @@
 ### 前置检查清单
 
 - [ ] 已阅读 `epic.md` 的"跨 Feature 技术策略"章节
+- [ ] 若 EPIC 根下存在 **`epic-arch.md`**，已阅读并在其 **0 层/1 层架构与规范约束**下做 A2、A3.1（不得脱离 EPIC 架构另画一套）
 - [ ] 已确认本 Feature 在 Plan 执行顺序中的位置（是否有前置依赖）
 - [ ] 已检查前置 Feature 的 plan（如果存在），识别可复用组件
 - [ ] 本 Feature 需要设计的共享能力已在 EPIC 级登记为 Owner
@@ -1122,6 +1123,7 @@ android/ 或 ios/
 > - Story 类型必须标注：Functional / Design-Enabler / Infrastructure / Optimization。
 > - **工作量约束**：单个 Story 预估工作量 **≤ 10 人天**（约 2 周），建议 **3-8 人天**。
 > - **粒度判断**：若 Story 预估超过 10 人天，必须继续拆分（按层/按模块/按风险/按场景）。
+> - **UI / ViewModel / 数据访问须单独拆解**：涉及界面与业务逻辑的 Feature，须将 **UI Story**、**ViewModel Story**、**数据访问 Story** 拆成独立 Story 实现——UI Story 负责界面开发、多屏幕适配、亮暗色主题适配等；ViewModel Story 负责主流业务逻辑与状态管理；数据访问 Story 负责创建 DB、数据库表、提供数据访问接口等。三者可依依赖关系排序（通常：数据访问 → ViewModel → UI）。
 > - 这里**只做拆分与映射**，不生成 Task；Task 在 `/speckit.tasks` 阶段生成，且不得改写这里的设计决策。
 
 ### Story 拆分策略（选择合适的策略）
@@ -1213,6 +1215,28 @@ ST-003: 扩展场景 (Functional, 3-5天)
 **优点**：每个 Story 相对完整，便于验收  
 **注意**：避免场景过于零碎，保持合理粒度
 
+#### 策略 6：按 UI / ViewModel / 数据访问 拆分（Android/客户端推荐）
+
+适用于：含界面与业务逻辑的 Feature；需明确区分界面、业务逻辑与持久化职责时。
+
+- **数据访问 Story**（Infrastructure / Design-Enabler）：创建/迁移 DB、定义数据库表、实现 Repository/DataSource、提供数据访问接口（CRUD、查询等）。不包含 UI 与 ViewModel 逻辑。
+- **ViewModel Story**（Functional / Design-Enabler）：实现主流业务逻辑、状态管理、与数据层交互、错误与边界处理。不包含 UI 布局与主题、也不包含建表与数据访问实现。
+- **UI Story**（Functional）：专门开发 UI——布局与组件、多屏幕适配、亮暗色主题适配、与 ViewModel 的绑定与交互。不包含业务逻辑实现与数据库/表创建。
+
+```
+ST-001: 数据访问 - DB/表与数据接口 (Infrastructure, 3-5天)
+  └─ 建库、表结构、Repository/DataSource、数据访问 API
+  
+ST-002: ViewModel - 业务逻辑与状态 (Functional/Design-Enabler, 3-6天)
+  └─ 依赖 ST-001，主流业务逻辑、状态、错误处理
+  
+ST-003: UI - 界面与适配 (Functional, 4-6天)
+  └─ 依赖 ST-002，UI 开发、多屏适配、亮暗色主题
+```
+
+**优点**：职责清晰，便于并行与验收；UI 与数据层可独立做适配与演进。  
+**注意**：依赖顺序通常为 数据访问 → ViewModel → UI；接口契约需在数据访问/ViewModel Story 中明确，供下游消费。
+
 ### Story 拆分自检清单（必须通过）
 
 **拆分前检查**：
@@ -1231,6 +1255,11 @@ ST-003: 扩展场景 (Functional, 3-5天)
 - [ ] Infrastructure/Design-Enabler 类型的 Story 有明确的消费方？
 - [ ] Functional 类型的 Story 依赖的前置 Story 已明确？
 - [ ] Story 链路清晰？（可画 DAG 依赖图）
+
+**UI/ViewModel/数据访问拆解检查**（涉及界面与业务逻辑时）：
+- [ ] UI（界面、多屏适配、亮暗色主题）已单独拆为 UI Story？
+- [ ] ViewModel（主流业务逻辑、状态管理）已单独拆为 ViewModel Story？
+- [ ] 数据访问（DB、表、数据访问接口）已单独拆为数据访问 Story？
 
 ### Story 列表
 

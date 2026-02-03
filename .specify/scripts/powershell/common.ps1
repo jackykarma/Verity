@@ -119,16 +119,18 @@ function Get-FeaturePathsEnv {
         $featureDir = Get-FeatureDir -RepoRoot $repoRoot -Branch $currentBranch
     }
     
-    # EPIC 级 ux-design 路径（仅当 featureKey 为 epics/EPIC-xxx/features/FEAT-xxx 时）
+    # EPIC 级 ux-design、epic-arch 路径（仅当 featureKey 为 epics/EPIC-xxx/features/FEAT-xxx 时）
     $epicDir = $null
     $epicUx = $null
     $epicDesign = $null
+    $epicArch = $null
     if ($featureKey -match '^epics/(EPIC-\d{3}-[^/]+)/') {
         $epicDirName = $matches[1]
         $epicsBase = Join-Path (Join-Path $repoRoot "specs") "epics"
         $epicDir = Join-Path $epicsBase $epicDirName
         $epicUx = Join-Path $epicDir 'ux-design.md'
         $epicDesign = Join-Path $epicDir 'design'
+        $epicArch = Join-Path $epicDir 'epic-arch.md'
     }
     
     # UX_DESIGN、DESIGN_DIR：在 EPIC 工作流下指向 EPIC 级，否则为 Feature 级（兼容旧流程）
@@ -148,6 +150,7 @@ function Get-FeaturePathsEnv {
         EPIC_DIR        = $epicDir
         EPIC_UX_DESIGN  = $epicUx
         EPIC_DESIGN_DIR = $epicDesign
+        EPIC_ARCH       = $epicArch
         TASKS           = Join-Path $featureDir 'tasks.md'
         RESEARCH        = Join-Path $featureDir 'research.md'
         DATA_MODEL      = Join-Path $featureDir 'data-model.md'
@@ -172,6 +175,7 @@ function Get-EpicPathsForUidesign {
         EPIC_DIR         = $dir.FullName
         EPIC_UX_DESIGN   = Join-Path $dir.FullName 'ux-design.md'
         EPIC_DESIGN_DIR  = Join-Path $dir.FullName 'design'
+        EPIC_ARCH        = Join-Path $dir.FullName 'epic-arch.md'
     }
 }
 
