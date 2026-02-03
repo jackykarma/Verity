@@ -1,10 +1,11 @@
 ## Speckit 最佳实践使用指南（Verity 仓库）
 
-本指南提供一套在本仓库中使用 Speckit 的**端到端最佳实践**：从 EPIC/Feature 的需求沉淀，到 EPIC 级 UX/UI 设计输入，再到 Feature 的 Plan/Tasks 冻结与实现；并覆盖需求/交互/视觉/技术方案变更时的**CR（Change Request）闭环**。
+本指南提供一套在本仓库中使用 Speckit 的**端到端最佳实践**：从 EPIC/Feature 的需求沉淀，到 EPIC 级 UX/UI 与**架构（epic-arch）**设计输入，再到 Feature 的 Plan/Tasks 冻结与实现；并覆盖需求/交互/视觉/架构/技术方案变更时的**CR（Change Request）闭环**。
 
 > 相关参考：
 > - 分支与目录实践：`docs/custom-spec-dev-in-one-epic-branch.md`
 > - 工作流治理与变更判定：`docs/speckit-workflow-governance.md`
+> - 流程检查与命令前置：`docs/speckit-flow-check.md`
 > - Plan 演进式约束（章程）：`.specify/memory/constitution.md`
 > - 模板集合：`.specify/templates/`
 
@@ -16,10 +17,11 @@
 
 - **需求事实源**：`spec.md`（范围 In/Out、FR/NFR、AC、边界与异常）
 - **体验呈现事实源**：`ux-design.md`（EPIC 级：信息架构、交互规则/状态、视觉规范、动效清单、设计稿索引）
+- **EPIC 架构事实源**：`epic-arch.md`（EPIC 级：0 层/1 层架构、规范与约束；各 Feature 的 plan 的 A2/A3.1 须继承）
 - **技术决策事实源**：`plan.md`（边界/契约/失败策略/NFR预算与测量/风险回滚/Story）
 - **执行事实源**：`tasks.md`（把 Story 拆成可执行步骤与验证清单）
 
-> 经验法则：凡是"可验收/可测试"的变化，最终必须落到 `spec.md` 或 `plan.md`，不能只停留在口头或实现代码里。
+> 经验法则：凡是"可验收/可测试"的变化，最终必须落到 `spec.md` 或 `plan.md`，不能只停留在口头或实现代码里。凡涉及 EPIC 整体技术边界与分层约束的，以 `epic-arch.md` 为准。
 
 ### 1.2 变更治理：先影响分析，再增量更新
 
@@ -36,7 +38,7 @@
 
 - **产品（PM）**：范围与验收目标；确认 Feature 的 AC
 - **设计（UX/UI）**：EPIC 级 `ux-design.md` 与设计稿索引；输出动效清单/说明；提供变更说明
-- **SE/TL（方案负责人）**：维护 `plan.md`/`tasks.md`；变更影响分析与下游更新；冻结输入
+- **SE/TL（方案负责人）**：维护 `epic-arch.md`（EPIC 级）、`plan.md`/`tasks.md`；变更影响分析与下游更新；冻结输入
 - **开发（Dev）**：在 Story 分支按 `tasks.md` 实现与验证；实现期不得偷改 spec/plan
 
 ---
@@ -57,9 +59,9 @@ EPIC 根目录：
 ```text
 specs/epics/EPIC-xxx-.../
 ├── epic.md
+├── epic-arch.md          # EPIC 级 0 层/1 层架构与规范约束（各 Feature plan 的 A2/A3.1 须继承）
 ├── ux-design.md          # EPIC 级交互/视觉/动效 + 设计稿索引
 ├── design/               # 可选：截图/HTML 等设计稿文件
-├── (已移除) epic-full-design.md   # 该能力已从 speckit 流程中移除
 └── features/
     └── FEAT-xxx-.../
         ├── spec.md
@@ -94,6 +96,8 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 
 > 默认顺序是线性的，但允许"按风险回环"（clarify↔设计↔plan↔tasks），前提是遵守 SoT 与版本记录。
 
+**主线顺序摘要**：Specify(EPIC) → Feature(spec) → **EPIC UX/UI + EPIC Arch**（可并行或先后）→ Feature(plan) → Feature(tasks) → Implement → Epicsync。
+
 ### 5.1 EPIC：Specify（大需求容器）
 
 目标：产出 `epic.md`，并完成 Feature 拆分与 EPIC 级约束。
@@ -118,22 +122,22 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 
 - `/speckit.epicuidesign "EPIC-xxx"`（须在**所有** Feature `spec.md` 输出之后、任意 Feature `plan` 之前）
 
-### 5.4 EPIC：技术策略规划（新增，必须）
+### 5.4 EPIC：架构设计（epic-arch）（必须）
 
-> **目的**：在各 Feature 开始 plan 之前，识别跨 Feature 的共享技术能力，避免重复设计。
+> **目的**：在各 Feature 开始 plan 之前，产出 EPIC 级 0 层/1 层架构与规范约束，各 Feature 的 plan 的 A2/A3.1 须在其约束下继承，避免各自发明、重复设计。
 
-目标：在 `epic.md` 中填写"跨 Feature 技术策略"章节。
+目标：在 EPIC 根产出 `epic-arch.md`（0 层架构、1 层架构、规范与约束）。
 
-在 `epic.md` 的"跨 Feature 技术策略"中补齐：
-- **共享能力识别**：识别多个 Feature 都可能用到的技术组件（如 UI 框架、数据层、网络层）
-- **Owner Feature**：明确每个共享能力由哪个 Feature 负责设计
-- **Plan 执行顺序**：根据依赖关系确定 Feature plan 的先后顺序
-- **技术约束**：定义跨 Feature 必须遵守的技术约束
+- `/speckit.epicarchdesign "EPIC-xxx"`（须在**所有** Feature `spec.md` 输出之后、任意 Feature `plan` 之前；与 `epicuidesign` 可**并行或先后**执行）
+- 若 `epic-arch.md` 已存在，改用 `/speckit.epicarchdesign-update "EPIC-xxx 本次更新范围：..."` 做增量更新
+
+**epic-arch.md 与 epic.md 的关系**：
+- `epic.md` 的「跨 Feature 技术策略」与 `epic-arch.md` 应对齐或由 epic-arch 产出后补充（共享能力、Owner Feature、Plan 执行顺序、技术约束）
+- 变更时须双向同步：改 epic-arch 时提示或更新 epic.md 对应节；改 epic 范围/拆分时可能需 epicarchdesign-update
 
 **硬规则**：
-- 后续每个 Feature plan **必须先阅读此章节**
-- Owner Feature 必须**先完成 plan**，消费方 Feature 才能开始
-- 若发现新的共享需求，必须**先更新 epic.md**，再继续 Feature plan
+- 后续每个 Feature plan **必须先阅读 `epic-arch.md`**，并在其 0 层/1 层与规范约束下做 A2、A3.1
+- 若依赖其他 Feature 的共享能力，Owner Feature 须**先完成 plan**，消费方 Feature 再开始
 
 ### 5.5 Feature：Plan（按依赖顺序执行，SE/TL 在 EPIC 分支执行）
 
@@ -143,7 +147,8 @@ $env:SPECIFY_EPIC="EPIC-001-xxx"   # 或 EPIC-001，用于匹配 specs/epics/EPI
 
 **前置检查（必须）**：
 - 在开始 plan 之前，必须完成 `plan.md` 中的"Plan 前置检查"章节
-- 确认已阅读 `epic.md` 的"跨 Feature 技术策略"
+- 若 EPIC 根下存在 `epic-arch.md`，**必须已阅读**并在其 0 层/1 层与规范约束下做 A2、A3.1（不得脱离 epic-arch 另画）
+- 确认已阅读 `epic.md` 的"跨 Feature 技术策略"（与 epic-arch 对齐）
 - 若依赖其他 Feature 的共享能力，确认 Owner Feature 的 plan 已完成
 
 #### Plan 分阶段输出（推荐）
@@ -247,9 +252,10 @@ Plan Level（Lite/Standard/Deep）标识**需要达到的最终深度**，分阶
 
 - `spec.md`：范围/FR/NFR/AC/边界可测试且完整
 - `ux-design.md`：该 Feature 的页面/流程/动效索引可追溯（若 EPIC 有 ux-design）
+- **`epic-arch.md`**：若 EPIC 根下存在，已阅读并在其 0 层/1 层与规范约束下做 A2、A3.1
+- `epic.md` 的「跨 Feature 技术策略」已填写或与 epic-arch 对齐：共享能力已识别、Owner 已明确、Plan 执行顺序已确定
 - 关键依赖与失败模式已列出
-- **（新增）`epic.md` 的"跨 Feature 技术策略"已填写**：共享能力已识别、Owner 已明确、Plan 执行顺序已确定
-- **（新增）前置 Feature 的 plan 已完成**：若本 Feature 依赖其他 Feature 的共享能力，Owner Feature 必须先完成 plan
+- **前置 Feature 的 plan 已完成**：若本 Feature 依赖其他 Feature 的共享能力，Owner Feature 必须先完成 plan
 
 ### 6.2 进入 Implement 前（Design Freeze）
 
@@ -268,7 +274,7 @@ Plan Level（Lite/Standard/Deep）标识**需要达到的最终深度**，分阶
 CR 必须回答：
 - 改了什么（What）
 - 为什么（Why）
-- 影响谁（Impact：EPIC/Feature/spec/ux/plan/story/tasks/模块/指标）
+- 影响谁（Impact：EPIC/Feature/spec/ux/**epic-arch**/plan/story/tasks/模块/指标）
 - 要更新哪些产物（Update checklist）
 - 是否需要回滚（Rollback）
 
@@ -283,11 +289,14 @@ CR 必须回答：
 常用命令分层（按职责划分）：
 
 - **EPIC 需求文档（`epic.md`）**：`/speckit.specify-update "EPIC-xxx 范围：..."`
+- **EPIC 架构（`epic-arch.md`）**：`/speckit.epicarchdesign "EPIC-xxx"`（初版）、`/speckit.epicarchdesign-update "EPIC-xxx 本次更新范围：..."`（增量）
 - **EPIC 交互/视觉（`ux-design.md`）**：`/speckit.epicuidesign-update "EPIC-xxx 本次更新范围：..."`
 - **Feature 需求文档（`spec.md`）**：`/speckit.feature-update "范围：..."`（可选级联 plan）
 - **Feature 技术方案（`plan.md`）**：`/speckit.plan-update "范围：..."`
 - **Feature 任务（`tasks.md`）**：`/speckit.tasks`
 - **EPIC Registry（自动同步区）**：`/speckit.epicsync "<备注>"`（specify-update 不修改 registry）
+
+> **epic-arch 变更影响 Feature**：当 epic-arch 的 0 层/1 层或规范变更时，须对**受影响的 Feature** 设 `SPECIFY_FEATURE` 后执行 `/speckit.plan-update "范围：A2 架构、A3.1 第一层框架、Plan-B 技术规约"`。
 
 ### 7.3 变更类型与更新链路（最小重跑）
 
@@ -330,6 +339,14 @@ CR 必须回答：
 2. `/speckit.tasks`
 3. `/speckit.epicsync`
 
+#### F) EPIC 架构变更（epic-arch：0 层/1 层/规范与约束）
+
+最小链路：
+1. `epic-arch.md`：`/speckit.epicarchdesign-update "EPIC-xxx 本次更新范围：..."`
+2. 与 `epic.md` 的「跨 Feature 技术策略」同步（必要时 specify-update）
+3. 对**受影响的 Feature** 设 `SPECIFY_FEATURE` 后：`/speckit.plan-update "范围：A2、A3.1、Plan-B"` → `/speckit.tasks`
+4. `/speckit.epicsync "<备注：epic-arch 变更>"`
+
 ---
 
 ## 8. 版本与记录（强制）
@@ -338,6 +355,7 @@ CR 必须回答：
 - `plan.md`：Plan Version + 变更记录表
 - `tasks.md`：Tasks Version（建议按重大调整递增）
 - `ux-design.md`：ux-design Version + 变更记录表
+- `epic-arch.md`：epic-arch Version + 变更记录表
 
 建议规则：
 - 影响 FR/NFR/AC/设计决策 → Minor
@@ -347,7 +365,8 @@ CR 必须回答：
 
 ## 9. 常见问题与排查
 
-- **产物写错目录**：检查 `echo $env:SPECIFY_FEATURE`
+- **产物写错目录**：检查 `echo $env:SPECIFY_FEATURE`（Feature 级）、`$env:SPECIFY_EPIC`（EPIC 级）
+- **epic-arch 已存在却想重跑**：初版用 `/speckit.epicarchdesign`；若文件已存在须用 `/speckit.epicarchdesign-update "本次更新范围：..."` 做增量更新
 - **实现期发现做不下去**：不要硬扛；停下来发 CR，由 SE/TL 先修 plan/spec 再继续
 - **小需求被 Plan 重装甲拖累**：使用 `/speckit.plan` 默认只执行 Lite 阶段，按需追加 Standard/Deep
 
@@ -374,8 +393,9 @@ CR 必须回答：
   - 把后期不可控成本前移成"可审计的过程成本"，在多人协作与强约束场景下更划算。
 
 ### 10.4 和标准 Spec-Kit 的差异点（为什么会更重）
-你的版本在标准 Spec-Kit 基础上加强了三件事：
+你的版本在标准 Spec-Kit 基础上加强了几件事：
 - **EPIC 级 UX/UI 输入是一等公民**：保证跨 Feature 一致的导航/交互/视觉/动效口径。
+- **EPIC 级架构（epic-arch）是一等公民**：0 层/1 层架构与规范约束先行，各 Feature plan 的 A2/A3.1 须继承，避免各自发明。
 - **CR 变更闭环**：变更先影响分析，再按清单增量更新下游产物，避免静默漂移。
 - **Plan Level 分级**：允许小需求走 Lite，大需求走 Standard，高风险走 Deep（避免"一刀切重装甲"）。
 
@@ -426,6 +446,7 @@ Plan 支持**分阶段执行**，每个阶段逐步深入：
 - **把流程当瀑布**：一次性写完所有文档才开始做；正确做法是"风险驱动回环"，但保持 SoT 与版本记录。
 - **所有需求都强行 Deep**：导致文档负担过高；正确做法是分级启用。
 - **变更不走 CR**：会导致下游遗漏更新；正确做法是最小 CR（影响分析+更新清单）也要有。
+- **跳过 epic-arch 直接 plan**：若 EPIC 有 epic-arch.md，plan 的 A2/A3.1 须继承其 0 层/1 层与规范，不得脱离另画。
 - **UX 变更只改设计稿不改约束**：复杂动效引入性能风险时必须补齐预算/降级/验收口径。
 
 ### 10.9 如何评估是否"回本"（建议观察的信号）
