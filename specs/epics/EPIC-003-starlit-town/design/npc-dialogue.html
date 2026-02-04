@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · NPC 互动（情绪记忆）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .npc-page { max-width: 420px; margin: 0 auto; padding: 24px; min-height: 100vh; background: var(--color-mint-bg); }
+    .npc-header { text-align: center; margin-bottom: 20px; }
+    .npc-title { font-size: 1.25rem; font-weight: 700; color: var(--color-night); margin: 0 0 4px 0; }
+    .npc-avatar {
+      width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 16px;
+      background: linear-gradient(145deg, #FFF5EE 0%, #FFE0CC 100%);
+      display: flex; align-items: center; justify-content: center; font-size: 3.5rem;
+      box-shadow: var(--shadow-md);
+    }
+    .npc-name { font-size: 1.125rem; font-weight: 700; color: var(--color-primary); margin-bottom: 4px; }
+    .npc-tag { font-size: 0.75rem; color: var(--color-gray-600); }
+    .npc-bubble {
+      background: var(--color-white); border-radius: 20px 20px 20px 6px; padding: 20px;
+      box-shadow: var(--shadow-card); margin-bottom: 20px; position: relative;
+    }
+    .npc-bubble::before {
+      content: ""; position: absolute; left: 0; bottom: -8px; width: 0; height: 0;
+      border-left: 12px solid var(--color-white); border-top: 8px solid transparent;
+    }
+    .npc-bubble .memory-hint {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+      background: var(--color-starlight); border-radius: var(--radius-full);
+      font-size: 0.75rem; color: var(--color-night-soft); margin-bottom: 12px;
+    }
+    .npc-bubble p { margin: 0; font-size: 1rem; line-height: 1.6; color: var(--color-gray-800); }
+    .npc-choices { display: flex; flex-direction: column; gap: 10px; }
+    .npc-choice {
+      background: var(--color-white); border: 2px solid var(--color-gray-100); border-radius: var(--radius-md);
+      padding: 14px 18px; text-align: left; font-family: inherit; font-size: 0.9375rem;
+      cursor: pointer; transition: border-color var(--transition-fast), background var(--transition-fast);
+    }
+    .npc-choice:hover { border-color: var(--color-primary); background: var(--color-primary-bg); }
+    .npc-footer { margin-top: 20px; font-size: 0.8125rem; color: var(--color-gray-300); text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="npc-page">
+    <div class="npc-header">
+      <h1 class="npc-title">角色关系</h1>
+      <p class="page-subtitle">无好感值 · 情绪记忆「她记得你」</p>
+    </div>
+    <div class="npc-avatar">👩‍🦰</div>
+    <p class="npc-name" style="text-align:center">小樱</p>
+    <p class="npc-tag" style="text-align:center">最好朋友 · 黏人</p>
+    <div class="npc-bubble">
+      <span class="memory-hint">✨ 她记得你</span>
+      <p>你昨天帮过我找发卡，我超开心的！今天一起再去公园喂小兔子吧～</p>
+    </div>
+    <div class="npc-choices">
+      <button type="button" class="npc-choice">好呀，现在就去！</button>
+      <button type="button" class="npc-choice">等我一下，我先去商店看看</button>
+      <button type="button" class="npc-choice">明天再去吧，今天想在家休息</button>
+    </div>
+    <p class="npc-footer">不同性格：黏人 / 傲娇 / 温柔 · 反馈风格可区分</p>
+    <div class="nav-links" style="margin-top:24px">
+      <a href="town-life.html">← 小镇场景</a>
+      <a href="evening-story.html">今天的故事 →</a>
+    </div>
+  </div>
+</body>
+</html>

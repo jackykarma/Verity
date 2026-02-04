@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · 早上选衣服与小心情</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .morning-page { max-width: 420px; margin: 0 auto; padding: 24px; min-height: 100vh; background: var(--color-peach-bg); }
+    .morning-header { text-align: center; margin-bottom: 24px; }
+    .morning-title { font-size: 1.25rem; font-weight: 700; color: var(--color-night); margin: 0 0 4px 0; }
+    .morning-card { background: var(--color-white); border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-card); margin-bottom: 20px; }
+    .morning-card h3 { font-size: 0.9375rem; color: var(--color-gray-600); margin: 0 0 14px 0; font-weight: 600; }
+    .mood-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .mood-btn {
+      width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--color-gray-100);
+      background: var(--color-gray-50); font-size: 1.5rem; cursor: pointer;
+      transition: border-color var(--transition-fast), transform var(--transition-fast);
+    }
+    .mood-btn:hover, .mood-btn.active { border-color: var(--color-primary); background: var(--color-primary-bg); transform: scale(1.05); }
+    .outfit-preview {
+      height: 160px; background: linear-gradient(180deg, #F5F0FA 0%, #EDE8F2 100%);
+      border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; margin-bottom: 16px;
+    }
+    .morning-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .morning-actions .btn { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="morning-page">
+    <div class="morning-header">
+      <h1 class="morning-title">☀️ 早上好</h1>
+      <p class="page-subtitle">选好衣服和心情，开始新的一天</p>
+    </div>
+    <div class="morning-card">
+      <h3>今天的打扮</h3>
+      <div class="outfit-preview" aria-hidden="true">👗</div>
+      <button type="button" class="btn btn-secondary" style="width:100%">去衣柜换装</button>
+    </div>
+    <div class="morning-card">
+      <h3>今天的小心情</h3>
+      <div class="mood-row">
+        <button type="button" class="mood-btn" title="开心">😊</button>
+        <button type="button" class="mood-btn active" title="期待">✨</button>
+        <button type="button" class="mood-btn" title="平静">🌿</button>
+        <button type="button" class="mood-btn" title="好奇">🔮</button>
+      </div>
+    </div>
+    <div class="morning-actions">
+      <a href="map.html" class="btn btn-ghost">稍后再说</a>
+      <button type="button" class="btn btn-primary">出发去小镇</button>
+    </div>
+    <div class="nav-links" style="margin-top:24px">
+      <a href="map.html">← 地图</a>
+      <a href="dress-up.html">换装 →</a>
+    </div>
+  </div>
+</body>
+</html>

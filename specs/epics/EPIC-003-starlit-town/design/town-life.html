@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · 小镇生活场景</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .town-page { max-width: 420px; margin: 0 auto; padding: 24px; min-height: 100vh; background: linear-gradient(180deg, #E3F2FD 0%, #F0EDF5 100%); }
+    .town-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .town-back { color: var(--color-primary); text-decoration: none; font-weight: 600; }
+    .town-title { font-size: 1.25rem; font-weight: 700; color: var(--color-night); margin: 0; }
+    .town-scene {
+      height: 220px; border-radius: var(--radius-xl); margin-bottom: 20px;
+      background: linear-gradient(180deg, #BBDEFB 0%, #90CAF9 50%, #64B5F6 100%);
+      display: flex; align-items: flex-end; justify-content: center; padding-bottom: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .town-scene .scene-icon { font-size: 4rem; }
+    .town-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .town-action {
+      background: var(--color-white); border-radius: var(--radius-lg); padding: 18px;
+      text-align: center; font-weight: 600; font-size: 0.9375rem; border: none; cursor: pointer;
+      box-shadow: var(--shadow-sm); transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .town-action:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .town-action-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+    .town-events { background: var(--color-white); border-radius: var(--radius-lg); padding: 16px; box-shadow: var(--shadow-card); }
+    .town-events h3 { font-size: 0.875rem; color: var(--color-gray-600); margin: 0 0 12px 0; font-weight: 600; }
+    .event-chip {
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px;
+      background: var(--color-mint-bg); border-radius: var(--radius-md); font-size: 0.875rem;
+      margin-right: 8px; margin-bottom: 8px;
+    }
+    .event-chip .icon { font-size: 1.25rem; }
+    .town-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .town-tab {
+      padding: 8px 16px; border-radius: var(--radius-full); border: 2px solid var(--color-gray-100);
+      background: var(--color-white); color: var(--color-gray-600); font-family: inherit; font-weight: 600; font-size: 0.875rem;
+      cursor: pointer; text-decoration: none; transition: all var(--transition-fast);
+    }
+    .town-tab:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .town-tab.active { background: var(--color-primary); color: var(--color-white); border-color: var(--color-primary); }
+  </style>
+</head>
+<body>
+  <div class="town-page">
+    <div class="town-header">
+      <a href="map.html" class="town-back">← 地图</a>
+      <h1 class="town-title">🏫 学校</h1>
+      <span style="width:48px"></span>
+    </div>
+    <p class="page-subtitle" style="margin-bottom:16px">上课、小游戏 · 白天 2–3 个小事件</p>
+    <div class="town-tabs">
+      <a href="#school" class="town-tab active">学校</a>
+      <a href="#park" class="town-tab">公园</a>
+      <a href="#shop" class="town-tab">商店</a>
+      <a href="#forest" class="town-tab">神秘森林</a>
+    </div>
+    <div class="town-scene">
+      <span class="scene-icon" aria-hidden="true">🏫📚</span>
+    </div>
+    <div class="town-actions">
+      <button type="button" class="town-action">
+        <span class="town-action-icon">📖</span>
+        上课
+      </button>
+      <button type="button" class="town-action">
+        <span class="town-action-icon">🎮</span>
+        小游戏
+      </button>
+    </div>
+    <div class="town-events">
+      <h3>今天的小事件</h3>
+      <div class="event-chip"><span class="icon">✨</span> 老师表扬了你</div>
+      <div class="event-chip"><span class="icon">📝</span> 完成了一幅画</div>
+    </div>
+    <div class="nav-links" style="margin-top:24px">
+      <a href="map.html">← 地图</a>
+      <a href="npc-dialogue.html">NPC 互动 →</a>
+    </div>
+  </div>
+</body>
+</html>

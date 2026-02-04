@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · 今天的故事</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .story-page { max-width: 420px; margin: 0 auto; padding: 24px; min-height: 100vh; background: linear-gradient(180deg, #2D2640 0%, #4A4258 100%); color: var(--color-white); }
+    .story-header { text-align: center; margin-bottom: 24px; }
+    .story-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px 0; color: var(--color-starlight); }
+    .story-date { font-size: 0.875rem; opacity: 0.8; margin: 0; }
+    .story-book {
+      background: linear-gradient(180deg, #FFF8E8 0%, #FFF5E0 100%);
+      border-radius: 16px; padding: 28px 24px; margin-bottom: 24px;
+      color: var(--color-gray-800); box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .story-book h2 { font-size: 1rem; color: var(--color-primary); margin: 0 0 16px 0; font-weight: 700; }
+    .story-book p {
+      font-size: 0.9375rem; line-height: 1.75; margin: 0 0 12px 0;
+      color: var(--color-gray-800);
+    }
+    .story-book p:last-child { margin-bottom: 0; }
+    .story-source { font-size: 0.75rem; color: var(--color-gray-600); margin-top: 16px; }
+    .story-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .story-actions .btn { flex: 1; }
+    .btn-inverse { background: var(--color-white); color: var(--color-night); }
+    .btn-inverse:hover { background: var(--color-starlight); }
+  </style>
+</head>
+<body>
+  <div class="story-page">
+    <div class="story-header">
+      <h1 class="story-title">✨ 今天的故事</h1>
+      <p class="story-date">日记式 · 轻叙事 · 被记住</p>
+    </div>
+    <div class="story-book">
+      <h2>📖 二月五日</h2>
+      <p>早上你选了星星风格的衣服，心情是「期待」～ 去了学校上课，老师表扬了你；还和小樱一起在公园喂了兔子，她记得你昨天帮过她找发卡，特别开心。</p>
+      <p>晚上回到家，你给小猫起了新名字。今天真是满满的一天呀。</p>
+      <p class="story-source">根据今日事件生成 · AI 或模板</p>
+    </div>
+    <div class="story-actions">
+      <button type="button" class="btn btn-inverse">再读一遍</button>
+      <button type="button" class="btn btn-primary">明天见 ✨</button>
+    </div>
+    <div class="nav-links" style="margin-top:24px">
+      <a href="npc-dialogue.html" style="color:var(--color-starlight)">← NPC 互动</a>
+      <a href="index.html" style="color:var(--color-starlight)">设计稿索引 →</a>
+    </div>
+  </div>
+</body>
+</html>

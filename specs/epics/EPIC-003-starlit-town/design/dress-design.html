@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · 贴纸式裙子设计</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .design-page { max-width: 420px; margin: 0 auto; padding: 24px; min-height: 100vh; background: var(--color-peach-bg); }
+    .design-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .design-back { color: var(--color-primary); text-decoration: none; font-weight: 600; }
+    .design-title { font-size: 1.25rem; font-weight: 700; color: var(--color-night); margin: 0; }
+    .design-canvas {
+      height: 240px; background: linear-gradient(180deg, #FFF 0%, #F5F0FA 100%);
+      border-radius: var(--radius-xl); margin-bottom: 20px; position: relative;
+      border: 2px dashed var(--color-gray-300); display: flex; align-items: center; justify-content: center;
+    }
+    .design-canvas .dress-base { font-size: 6rem; opacity: 0.9; }
+    .design-stickers { margin-bottom: 20px; }
+    .design-stickers h3 { font-size: 0.875rem; color: var(--color-gray-600); margin: 0 0 10px 0; font-weight: 600; }
+    .design-sticker-list { display: flex; gap: 10px; flex-wrap: wrap; }
+    .design-sticker-btn {
+      width: 52px; height: 52px; border-radius: var(--radius-md); border: 2px solid var(--color-gray-100);
+      background: var(--color-white); font-size: 1.5rem; cursor: pointer;
+      transition: border-color var(--transition-fast), transform var(--transition-fast);
+    }
+    .design-sticker-btn:hover { border-color: var(--color-primary); transform: scale(1.05); }
+    .design-actions { display: flex; gap: 12px; }
+    .design-actions .btn { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="design-page">
+    <div class="design-header">
+      <a href="dress-up.html" class="design-back">← 装扮</a>
+      <h1 class="design-title">✨ 设计裙子</h1>
+      <span style="width:48px"></span>
+    </div>
+    <p class="page-subtitle" style="margin-bottom:16px">用贴纸装饰裙子，拖到裙子上即可</p>
+    <div class="design-canvas">
+      <span class="dress-base" aria-hidden="true">👗</span>
+    </div>
+    <div class="design-stickers">
+      <h3>贴纸</h3>
+      <div class="design-sticker-list">
+        <button type="button" class="design-sticker-btn">⭐</button>
+        <button type="button" class="design-sticker-btn">🌸</button>
+        <button type="button" class="design-sticker-btn">🦋</button>
+        <button type="button" class="design-sticker-btn">💫</button>
+        <button type="button" class="design-sticker-btn">🌙</button>
+        <button type="button" class="design-sticker-btn">❤️</button>
+      </div>
+    </div>
+    <div class="design-actions">
+      <button type="button" class="btn btn-ghost">清除</button>
+      <button type="button" class="btn btn-primary">穿上看看</button>
+    </div>
+    <div class="nav-links" style="margin-top:24px">
+      <a href="dress-up.html">← 装扮</a>
+      <a href="town-life.html">小镇场景 →</a>
+    </div>
+  </div>
+</body>
+</html>

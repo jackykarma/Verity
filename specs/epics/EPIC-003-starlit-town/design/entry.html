@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · 游戏入口</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .entry-page {
+      min-height: 100vh;
+      background: linear-gradient(165deg, #F0EDF5 0%, #E8E0F0 35%, #FFF8E8 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .entry-page::before {
+      content: "";
+      position: absolute;
+      top: 10%;
+      left: 5%;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245,235,184,0.5) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .entry-page::after {
+      content: "";
+      position: absolute;
+      bottom: 15%;
+      right: 8%;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(184,169,212,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .entry-card {
+      background: rgba(255,255,255,0.92);
+      border-radius: 28px;
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(45,38,64,0.1), 0 2px 8px rgba(123,107,168,0.08);
+      position: relative;
+      z-index: 1;
+    }
+    .entry-logo {
+      font-size: 2.5rem;
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+    .entry-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--color-night);
+      margin: 0 0 8px 0;
+      letter-spacing: 0.06em;
+    }
+    .entry-tagline {
+      font-size: 0.9375rem;
+      color: var(--color-gray-600);
+      margin: 0 0 32px 0;
+      line-height: 1.5;
+    }
+    .entry-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .entry-actions .btn {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 1.0625rem;
+    }
+    .entry-footer {
+      margin-top: 28px;
+      font-size: 0.8125rem;
+      color: var(--color-gray-300);
+    }
+  </style>
+</head>
+<body>
+  <div class="entry-page">
+    <div class="entry-card">
+      <div class="entry-logo" aria-hidden="true">✨</div>
+      <h1 class="entry-title">星光小镇</h1>
+      <p class="entry-tagline">我的故事，每天在发生</p>
+      <div class="entry-actions">
+        <button type="button" class="btn btn-primary">开始今天的故事</button>
+        <button type="button" class="btn btn-secondary">继续上次的进度</button>
+      </div>
+      <p class="entry-footer">治愈系生活模拟 · 无失败、无对错</p>
+    </div>
+    <div class="nav-links" style="margin-top:24px;position:relative;z-index:1">
+      <a href="index.html">← 设计稿索引</a>
+      <a href="map.html">地图导航 →</a>
+    </div>
+  </div>
+</body>
+</html>

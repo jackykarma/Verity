@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · 房间与宠物</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .room-page { max-width: 420px; margin: 0 auto; padding: 24px; min-height: 100vh; background: var(--color-mint-bg); }
+    .room-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .room-back { color: var(--color-primary); text-decoration: none; font-weight: 600; }
+    .room-title { font-size: 1.25rem; font-weight: 700; color: var(--color-night); margin: 0; }
+    .room-preview {
+      height: 180px; border-radius: var(--radius-xl); margin-bottom: 20px;
+      background: linear-gradient(135deg, #E8F5EE 0%, #C8E6C9 50%, #A5D6A7 100%);
+      box-shadow: var(--shadow-card); display: flex; align-items: center; justify-content: center;
+    }
+    .room-preview .room-icon { font-size: 4rem; }
+    .room-card { background: var(--color-white); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-card); }
+    .room-card h3 { font-size: 0.9375rem; color: var(--color-gray-600); margin: 0 0 14px 0; font-weight: 600; }
+    .wallpaper-options { display: flex; gap: 10px; flex-wrap: wrap; }
+    .wallpaper-option {
+      width: 72px; height: 72px; border-radius: var(--radius-md); border: 2px solid var(--color-gray-100);
+      cursor: pointer; transition: border-color var(--transition-fast);
+    }
+    .wallpaper-option:nth-child(1) { background: linear-gradient(135deg, #E8F5EE, #C8E6C9); }
+    .wallpaper-option:nth-child(2) { background: linear-gradient(135deg, #FFF5EE, #FFE0CC); }
+    .wallpaper-option:nth-child(3) { background: linear-gradient(135deg, #F0EDF5, #E0D8F0); }
+    .wallpaper-option:nth-child(4) { background: linear-gradient(135deg, #E3F2FD, #BBDEFB); }
+    .wallpaper-option.selected { border-color: var(--color-mint); box-shadow: 0 0 0 3px rgba(122,184,154,0.3); }
+    .pet-section { margin-top: 24px; }
+    .pet-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--color-peach-bg); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin: 0 auto 14px; }
+    .pet-name-input {
+      width: 100%; padding: 12px 16px; border: 2px solid var(--color-gray-100); border-radius: var(--radius-md);
+      font-family: inherit; font-size: 1rem; color: var(--color-gray-800);
+    }
+    .pet-name-input:focus { outline: none; border-color: var(--color-primary); }
+    .pet-name-input::placeholder { color: var(--color-gray-300); }
+    .room-actions { margin-top: 20px; }
+    .room-actions .btn { width: 100%; }
+  </style>
+</head>
+<body>
+  <div class="room-page">
+    <div class="room-header">
+      <a href="home.html" class="room-back">← 家</a>
+      <h1 class="room-title">🛏️ 房间 · 宠物</h1>
+      <span style="width:48px"></span>
+    </div>
+    <div class="room-preview">
+      <span class="room-icon" aria-hidden="true">🛏️✨</span>
+    </div>
+    <div class="room-card">
+      <h3>房间墙纸</h3>
+      <div class="wallpaper-options">
+        <button type="button" class="wallpaper-option selected" aria-label="森林绿"></button>
+        <button type="button" class="wallpaper-option" aria-label="蜜桃"></button>
+        <button type="button" class="wallpaper-option" aria-label="薰衣草"></button>
+        <button type="button" class="wallpaper-option" aria-label="天空蓝"></button>
+      </div>
+    </div>
+    <div class="room-card pet-section" id="pet">
+      <h3>给宠物起个名字</h3>
+      <div class="pet-avatar">🐱</div>
+      <input type="text" class="pet-name-input" placeholder="输入名字，在这里会这样叫你哦" maxlength="10" value="">
+    </div>
+    <div class="room-actions">
+      <button type="button" class="btn btn-primary">保存</button>
+    </div>
+    <div class="nav-links" style="margin-top:24px">
+      <a href="dress-up.html">← 装扮</a>
+      <a href="dress-design.html">设计裙子 →</a>
+    </div>
+  </div>
+</body>
+</html>

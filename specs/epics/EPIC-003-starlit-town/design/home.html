@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · 家</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .home-page { max-width: 420px; margin: 0 auto; padding: 24px; min-height: 100vh; background: linear-gradient(180deg, #FFF8E8 0%, #F0EDF5 100%); }
+    .home-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .home-back { color: var(--color-primary); text-decoration: none; font-weight: 600; }
+    .home-title { font-size: 1.25rem; font-weight: 700; color: var(--color-night); margin: 0; }
+    .home-scene {
+      background: linear-gradient(180deg, #E8E0F0 0%, #D8D0E8 50%, #C8C0D8 100%);
+      border-radius: var(--radius-xl); height: 220px; position: relative;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+      box-shadow: inset 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .home-scene .character { font-size: 5rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.08)); }
+    .home-spots {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    }
+    .home-spot {
+      background: var(--color-white); border-radius: var(--radius-lg); padding: 20px;
+      text-align: center; text-decoration: none; color: inherit; font-weight: 600; font-size: 0.9375rem;
+      box-shadow: var(--shadow-card); transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .home-spot:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .home-spot-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .home-spot span:last-child { font-size: 0.75rem; font-weight: 400; color: var(--color-gray-600); }
+  </style>
+</head>
+<body>
+  <div class="home-page">
+    <div class="home-header">
+      <a href="map.html" class="home-back">← 地图</a>
+      <h1 class="home-title">🏠 家</h1>
+      <span style="width:60px"></span>
+    </div>
+    <div class="home-scene">
+      <span class="character" aria-hidden="true">👧</span>
+    </div>
+    <div class="home-spots">
+      <a href="dress-up.html" class="home-spot">
+        <span class="home-spot-icon">👗</span>
+        <span>衣柜</span>
+        <span>换装</span>
+      </a>
+      <a href="room-pet.html" class="home-spot">
+        <span class="home-spot-icon">🛏️</span>
+        <span>卧室</span>
+        <span>墙纸</span>
+      </a>
+      <a href="room-pet.html#pet" class="home-spot">
+        <span class="home-spot-icon">🐱</span>
+        <span>宠物角</span>
+        <span>起名·互动</span>
+      </a>
+    </div>
+    <div class="nav-links" style="margin-top:24px">
+      <a href="map.html">← 地图</a>
+      <a href="dress-up.html">换装 →</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>星光小镇 · UI 视觉交互设计稿</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <style>
+    .index-page { max-width: 640px; margin: 0 auto; padding: 40px 24px; min-height: 100vh; }
+    .index-hero {
+      text-align: center; margin-bottom: 40px;
+      padding: 32px 24px; background: linear-gradient(165deg, #F0EDF5 0%, #E8E0F0 100%);
+      border-radius: var(--radius-xl); box-shadow: var(--shadow-card);
+    }
+    .index-hero h1 { font-size: 1.75rem; font-weight: 700; color: var(--color-night); margin: 0 0 8px 0; }
+    .index-hero p { margin: 0; color: var(--color-gray-600); font-size: 0.9375rem; }
+    .index-section { margin-bottom: 32px; }
+    .index-section h2 {
+      font-size: 1rem; font-weight: 700; color: var(--color-gray-600);
+      margin: 0 0 16px 0; padding-bottom: 8px; border-bottom: 2px solid var(--color-gray-100);
+    }
+    .index-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px;
+    }
+    .index-card {
+      display: block; background: var(--color-white); border-radius: var(--radius-lg);
+      padding: 20px; text-decoration: none; color: inherit; font-weight: 600;
+      box-shadow: var(--shadow-card); transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .index-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .index-card-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .index-card-desc { font-size: 0.75rem; font-weight: 400; color: var(--color-gray-600); margin-top: 4px; }
+    .index-footer { text-align: center; margin-top: 40px; font-size: 0.8125rem; color: var(--color-gray-300); }
+  </style>
+</head>
+<body>
+  <div class="index-page">
+    <div class="index-hero">
+      <h1>✨ 星光小镇</h1>
+      <p>EPIC-003 Starlit Town · UI 视觉交互设计稿</p>
+      <p style="margin-top:8px">简洁 · 美观 · 有质感 · 治愈系</p>
+    </div>
+    <div class="index-section">
+      <h2>核心流程</h2>
+      <div class="index-grid">
+        <a href="entry.html" class="index-card">
+          <span class="index-card-icon">🚪</span>
+          游戏入口
+          <span class="index-card-desc">主菜单、开始/继续</span>
+        </a>
+        <a href="map.html" class="index-card">
+          <span class="index-card-icon">🗺️</span>
+          地图导航
+          <span class="index-card-desc">家/学校/公园/商店/森林</span>
+        </a>
+        <a href="morning.html" class="index-card">
+          <span class="index-card-icon">☀️</span>
+          早上选衣
+          <span class="index-card-desc">打扮 + 小心情</span>
+        </a>
+        <a href="evening-story.html" class="index-card">
+          <span class="index-card-icon">📖</span>
+          今天的故事
+          <span class="index-card-desc">日记式总结</span>
+        </a>
+      </div>
+    </div>
+    <div class="index-section">
+      <h2>家与装扮</h2>
+      <div class="index-grid">
+        <a href="home.html" class="index-card">
+          <span class="index-card-icon">🏠</span>
+          家
+          <span class="index-card-desc">卧室·衣柜·宠物角</span>
+        </a>
+        <a href="dress-up.html" class="index-card">
+          <span class="index-card-icon">👗</span>
+          装扮
+          <span class="index-card-desc">发型/裙子/鞋子/背包·风格标签</span>
+        </a>
+        <a href="room-pet.html" class="index-card">
+          <span class="index-card-icon">🛏️🐱</span>
+          房间·宠物
+          <span class="index-card-desc">墙纸·宠物命名</span>
+        </a>
+        <a href="dress-design.html" class="index-card">
+          <span class="index-card-icon">✨</span>
+          贴纸裙子设计
+          <span class="index-card-desc">创造感·即时反馈</span>
+        </a>
+      </div>
+    </div>
+    <div class="index-section">
+      <h2>小镇生活与关系</h2>
+      <div class="index-grid">
+        <a href="town-life.html" class="index-card">
+          <span class="index-card-icon">🏫</span>
+          小镇场景
+          <span class="index-card-desc">学校/公园/商店/森林·小事件</span>
+        </a>
+        <a href="npc-dialogue.html" class="index-card">
+          <span class="index-card-icon">💬</span>
+          NPC 互动
+          <span class="index-card-desc">情绪记忆·「她记得你」</span>
+        </a>
+      </div>
+    </div>
+    <div class="index-footer">
+      EPIC-003 星光小镇 · 设计稿目录 · specs/epics/EPIC-003-starlit-town/design/
+    </div>
+  </div>
+</body>
+</html>
