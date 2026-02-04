@@ -21,6 +21,7 @@
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
 | v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 | v0.3.0 | 2025-02-05 | Deep 阶段 | Story Detailed Design（L2） | plan.md + L2_story_detail_design.md | 否 |
+| v0.3.1 | 2025-02-05 | 覆盖矩阵 | 补充 NFR-MEM-001、NFR-SEC-001（speckit.analyze A2） | Feature→Story 矩阵 | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -659,6 +660,8 @@ flowchart TD
 | FR-004 | ST-001, ST-002, ST-004 | 小事件 |
 | FR-005 | ST-002, ST-004 | 晚上总结入口 |
 | NFR-PERF-001 | ST-003, ST-004 | 响应与展示 |
+| NFR-MEM-001 | ST-003, ST-004 | 场景与事件状态内存可控 |
+| NFR-SEC-001 | ST-001, ST-002, ST-003, ST-004 | 内容符合儿童合规 |
 | NFR-REL-001 | ST-001, ST-002 | 存储一致 |
 | NFR-OBS-001 | ST-002 | 日志/埋点 |
 

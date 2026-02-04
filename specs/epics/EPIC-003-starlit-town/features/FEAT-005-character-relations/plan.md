@@ -21,6 +21,7 @@
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
 | v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 | v0.3.0 | 2025-02-05 | Deep 阶段 | Story Detailed Design（L2） | plan.md + L2_story_detail_design.md | 否 |
+| v0.3.1 | 2025-02-05 | 覆盖矩阵 | 显式补充 NFR-SEC-001 映射（speckit.analyze B3） | Feature→Story 矩阵 | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -603,6 +604,7 @@ flowchart TD
 | FR-003, FR-004 | ST-002, ST-003 | “记得我”与性格 |
 | NFR-PERF-001 | ST-003 | 响应 |
 | NFR-MEM-001 | ST-003 | 内存可控 |
+| NFR-SEC-001 | ST-001, ST-002, ST-003 | 记忆仅存本地、内容合规 |
 | NFR-OBS-001 | ST-002 | 日志/埋点 |
 | NFR-REL-001 | ST-001, ST-002 | 存储降级 |
 
