@@ -4,7 +4,7 @@
 **Feature ID**：FEAT-003
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**Plan Level**：Standard
+**Plan Level**：Deep
 **当前工作分支**：`epic/EPIC-003-starlit-town`
 **Feature 目录**：`specs/epics/EPIC-003-starlit-town/features/FEAT-003-town-life/`
 **日期**：2025-02-05
@@ -20,6 +20,7 @@
 |---|---|---|---|---|---|
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
 | v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
+| v0.3.0 | 2025-02-05 | Deep 阶段 | Story Detailed Design（L2） | plan.md + L2_story_detail_design.md | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -670,3 +671,11 @@ flowchart TD
 | ST-003 | Functional | 5 | ST-002 | 否 |
 | ST-004 | Functional | 3 | ST-002 | 否 |
 | **总计** | — | **14 人天** | — | — |
+
+---
+
+## Story Detailed Design（L2 二层详细设计：Plan Level = Deep 时执行）
+
+各 Story 的 L2 详细设计写在 **[L2_story_detail_design.md](./L2_story_detail_design.md)** 中；必须与 plan.md 同目录放置。tasks.md 的每个 Task 应明确引用对应 Story 的详细设计入口（例如：`L2_story_detail_design.md:ST-001:功能设计:时序图`）。
+
+**硬约束（Story 级设计边界）**：Story Detailed Design 只能在 A3.1.2.1/A3.3 已定义的组件边界内做细化，不得新增组件、新增 A3.2.1 未定义的核心类/接口或 A3.3 异常清单未覆盖的错误分类；若需新增须先回到 A3 修订并提升 Plan Version。
