@@ -4,7 +4,7 @@
 **Feature ID**：FEAT-001
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**Plan Level**：Lite
+**Plan Level**：Standard
 **当前工作分支**：`epic/EPIC-003-starlit-town`
 **Feature 目录**：`specs/epics/EPIC-003-starlit-town/features/FEAT-001-game-foundation/`
 **日期**：2025-02-05
@@ -20,6 +20,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
+| v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -521,6 +522,172 @@ flowchart TD
 
 ---
 
+#### A3.3 第三层：组件内部详细设计（Plan Level = Standard 时执行）
+
+##### 组件：GameStateManager
+
+- **定位**：业务层单例，持有 GameState，协调加载/保存/场景切换/阶段推进。
+- **对外接口**：getState()、loadOrNew()、enterMap()、setScene(sceneId)、advancePhase()、save()；失败通过 Promise reject 或返回值传递 StorageError。
+- **失败与降级**：存储失败时更新内存状态并提示「进度无法保存」，不阻塞 UI。
+
+###### 组件类图
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+classDiagram
+    direction TB
+    class GameStateManager {
+        -state: GameState
+        -storage: StorageService
+        -dayCycleController: DayCycleController
+        +getState(): GameState
+        +loadOrNew(): Promise~GameState~
+        +enterMap(): void
+        +setScene(sceneId: string): Promise~void~
+        +advancePhase(): Promise~boolean~
+        +save(): Promise~void~
+    }
+    GameStateManager --> StorageService : uses
+    GameStateManager --> DayCycleController : uses
+    GameStateManager --> GameState : holds
+```
+
+###### 组件时序图（含正常+异常）
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
+sequenceDiagram
+    autonumber
+    participant Caller as MapView/EntryView
+    participant GSM as GameStateManager
+    participant Storage as StorageService
+    Caller->>GSM: setScene(sceneId)
+    GSM->>GSM: 更新 state.currentSceneId
+    GSM->>Storage: set(GAME_STATE_KEY, state)
+    alt 成功
+        Storage-->>GSM: resolve
+        GSM-->>Caller: resolve
+    else 失败
+        Storage-->>GSM: reject(StorageError)
+        GSM-->>Caller: reject / 提示进度无法保存
+    end
+```
+
+###### 异常清单
+
+| 异常ID | 触发条件 | 错误类型 | 可重试 | 对策 |
+|--------|----------|----------|--------|------|
+| EX-002 | 存储不可用 | StorageError.Unavailable | 否 | 提示，内存状态已更新 |
+| EX-003 | 空间不足 | StorageError.QuotaExceeded | 是（清理后） | 按时间清理最早数据后重试或提示 |
+
+##### 组件：StorageService（IndexedDBAdapter / LocalStorageFallback）
+
+- **定位**：数据层抽象，IndexedDB 优先、localStorage 降级，供 GameStateManager 及后续 Feature 按键读写。
+- **对外接口**：get(key)、set(key, value)、isAvailable()；失败返回 Promise reject(StorageError)。
+- **失败与降级**：IndexedDB 不可用时切换 LocalStorageFallback；两者均不可用时 isAvailable() 为 false，调用方提示用户。
+
+###### 组件流程图（含正常+异常）
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start([set key, value]) --> Check{isAvailable?}
+    Check -->|否| Fail[reject Unavailable]
+    Fail --> EndFail([结束])
+    Check -->|是| Try[尝试写入]
+    Try --> Result{写入结果?}
+    Result -->|成功| EndOK([结束])
+    Result -->|QuotaExceeded| Clean[按时间清理最早数据]
+    Clean --> Retry{重试?}
+    Retry -->|成功| EndOK
+    Retry -->|失败| Prompt[reject / 提示]
+    Prompt --> EndFail
+    Result -->|其他错误| EndFail
+    style Start fill:#E8F5E9,stroke:#388E3C
+    style EndOK fill:#E8F5E9,stroke:#388E3C
+    style EndFail fill:#FFEBEE,stroke:#D32F2F
+    style Check fill:#FFF3E0,stroke:#F57C00
+```
+
+---
+
+### A4. 技术风险与消解策略（绑定 Story/Task）
+
+| 风险ID | 风险描述 | 触发条件 | 影响范围 | 严重度 | 消解策略 | 对应 Story/Task |
+|--------|----------|----------|----------|--------|----------|-----------------|
+| RISK-001 | IndexedDB 在隐私模式/旧环境不可用 | 浏览器限制 | 进度无法持久化 | Med | LocalStorageFallback + 提示「进度无法保存」 | ST-001, ST-002 |
+| RISK-002 | 存储空间不足 | 数据增长 | 写入失败 | Low | 按时间清理最早游戏日数据；提示用户 | ST-002 |
+| RISK-003 | 快速连续切换场景导致状态竞态 | 用户快速操作 | 状态不一致或重复写 | Low | 串行化 setScene/advancePhase 或防抖 | ST-003 |
+
+### A5. 边界 & 异常场景枚举
+
+- **数据边界**：currentDay ≥ 1；currentSceneId/dayPhase 枚举校验；空/非法键不写入。
+- **状态边界**：阶段仅允许 morning→daytime→evening 顺序推进；不可回退。
+- **生命周期**：页面刷新/关闭前尽量触发 save；恢复时 loadOrNew 读持久化或给默认 GameState。
+- **并发**：单页单实例；多标签同时写存储不保证，建议单页使用。
+- **用户行为**：快速连点场景/阶段 → 防抖或串行化，避免重复请求存储。
+
+#### A5.1 场景 → 应对措施对照表（必须）
+
+| 场景ID | 场景类别 | 触发条件（可复现） | 影响 | 预期行为 | 技术对策 | 设计对策 | 映射 |
+|--------|----------|-------------------|------|----------|----------|----------|------|
+| SC-001 | 数据 | 存储不可用 | 无法保存 | 提示「进度无法保存」，内存状态已更新 | LocalStorageFallback / 提示 | N/A | 流程1 / EX-002 |
+| SC-002 | 数据 | QuotaExceeded | 写入失败 | 清理最早数据重试或提示 | 按时间清理 + 重试 | 提示用户 | EX-003 |
+| SC-003 | 生命周期 | 页面刷新 | 进度丢失风险 | 恢复时从存储加载或默认 | loadOrNew 读持久化 | N/A | SEQ-001 |
+| SC-004 | 用户行为 | 快速连续切换场景 | 状态/写竞态 | 不卡顿、不重复弹提示 | 串行化或防抖 | N/A | ST-003 |
+
+### A6. 算法评估（如适用）
+
+不适用（本 Feature 无推荐/检测/分类等算法）。
+
+### A7. 功耗评估
+
+不适用（Web 浏览器环境，无独立功耗预算；见 spec NFR-POWER-001）。
+
+### A8. 性能评估（必须量化，基于场景）
+
+#### A8.1 测试设备基线
+
+| 维度 | 定义 |
+|------|------|
+| 设备/环境 | PC 或平板浏览器（Chrome/Safari/Edge），4G/WiFi RTT < 100ms |
+
+#### A8.2 性能场景与指标
+
+| 场景 | 指标 | 验收标准 (p95) |
+|------|------|----------------|
+| 首屏加载 | 从 URL 到主界面可交互 | ≤ 3s |
+| 场景切换 | 从点击到视图切换完成 | ≤ 500ms |
+
+#### A8.3 降级策略
+
+| 触发条件 | 降级策略 |
+|----------|----------|
+| 低端设备/慢网络 | 减少首屏资源体积；加载中展示进度提示 |
+| 存储慢 | 异步保存不阻塞 UI；失败提示 |
+
+### A9. 内存评估（必须量化，基于场景）
+
+| 场景 | 验收标准 | 主要来源 | 优化方向 |
+|------|----------|----------|----------|
+| 前台正常使用 | 单页内存增量 ≤ 100MB | DOM、JS 状态、少量缓存 | 避免全局缓存大对象 |
+| 长时间运行（30 分钟） | 无持续增长 | 监听器/定时器未释放 | 页面卸载时解绑 |
+| 内存泄漏检测（进出 10 次） | 回到 Baseline ±5MB | 存储/事件监听 | 单例与生命周期一致 |
+
+### A10. 安全评估（如适用）
+
+不收集个人敏感信息；本地存储仅游戏进度；符合儿童内容合规（NFR-SEC-001）。不适用额外安全评估。
+
+### A11. 兼容性评估（必须）
+
+- **系统/环境**：Chrome、Safari、Edge 等主流现代浏览器；PC 与平板。
+- **存储**：支持 IndexedDB 的环境优先；否则 localStorage 降级并提示。
+- **不兼容场景**：不支持 IndexedDB 且无 localStorage 的极旧环境 → 仅提示「进度无法保存」，允许无保存模式游玩。
+
+**兼容性结论**：本 Feature 兼容主流现代浏览器，降级路径明确，兼容性风险较低。
+
+---
+
 ## Plan-B：技术规约 & 实现约束
 
 ### B0. Plan-A ↔ Plan-B 一致性与互校（必须）
@@ -637,3 +804,85 @@ starlit-town/
 ```
 
 **结构决策**：以「表示层 / 业务层 / 数据层」对应目录或模块划分；StorageService 与键约定在 B3/B4 中已定义，实现时按此落点。
+
+---
+
+## Story Breakdown（Plan Level = Standard 时执行）
+
+### Story 列表
+
+#### ST-001：存储抽象与键约定（Infrastructure）
+
+- **类型**：Infrastructure
+- **描述**：实现 StorageService 接口及 IndexedDBAdapter、LocalStorageFallback；约定键名与 GameState 结构（B3），供本 Feature 与下游 Feature 使用。
+- **目标**：get/set/isAvailable 可用；IndexedDB 不可用时降级到 localStorage 或提示。
+- **预估工作量**：3 人天
+- **覆盖 FR/NFR**：FR-004、FR-005；NFR-REL-001、NFR-OBS-001
+- **依赖**：无
+- **可并行**：否
+- **关键风险**：是（RISK-001）
+- **验收/验证方式**：单元测试存储读写与降级路径；浏览器环境可测。
+- **交付物**：StorageService、IndexedDBAdapter、LocalStorageFallback、B3 键/结构实现。
+
+#### ST-002：GameState 持久化与 GameStateManager（Design-Enabler）
+
+- **类型**：Design-Enabler / Infrastructure
+- **描述**：GameState 数据模型与 GameStateManager 单例；loadOrNew、save、setScene、advancePhase 与 StorageService 集成；错误与提示策略。
+- **目标**：进度可保存与恢复；存储失败时提示且不阻塞。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-003、FR-004、FR-005；NFR-REL-001
+- **依赖**：ST-001
+- **可并行**：否
+- **关键风险**：是（RISK-002、RISK-003）
+- **验收/验证方式**：集成测试：保存后刷新恢复；QuotaExceeded 清理与重试。
+- **交付物**：GameState、GameStateManager、DayCycleController 与存储集成。
+
+#### ST-003：入口与地图 UI（Functional）
+
+- **类型**：Functional
+- **描述**：EntryView（开始/继续）、MapView（地图与场景切换、日阶段展示）；与 GameStateManager/DayCycleController 绑定；首屏加载与场景切换性能达标。
+- **目标**：用户可进入游戏、切换场景、推进阶段；首屏 ≤3s、切换 ≤500ms。
+- **预估工作量**：5 人天
+- **覆盖 FR/NFR**：FR-001、FR-002、FR-003；NFR-PERF-001、NFR-MEM-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：E2E 或手动：完整一日骨架；性能指标测量。
+- **交付物**：EntryView、MapView、入口与地图资源。
+
+### Story 依赖关系图
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    ST001["ST-001: 存储抽象与键约定<br/>(Infrastructure, 3天)"]
+    ST002["ST-002: GameState 持久化与 GameStateManager<br/>(Design-Enabler, 4天)"]
+    ST003["ST-003: 入口与地图 UI<br/>(Functional, 5天)"]
+    ST001 --> ST002
+    ST002 --> ST003
+    style ST001 fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
+    style ST002 fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style ST003 fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+```
+
+### Feature → Story 覆盖矩阵
+
+| FR/NFR ID | 覆盖的 Story ID | 备注 |
+|-----------|-----------------|------|
+| FR-001 | ST-003 | 入口 |
+| FR-002 | ST-003 | 场景切换 |
+| FR-003 | ST-002, ST-003 | 每日循环 + UI 推进 |
+| FR-004, FR-005 | ST-001, ST-002 | 存储与恢复 |
+| NFR-PERF-001 | ST-003 | 首屏/切换 |
+| NFR-MEM-001 | ST-003 | 单页内存 |
+| NFR-REL-001 | ST-001, ST-002 | 存储降级与提示 |
+| NFR-OBS-001 | ST-001, ST-002 | 日志/打点 |
+
+### Story 工作量汇总
+
+| Story ID | 类型 | 预估工作量（人天） | 依赖关系 | 是否并行 |
+|----------|------|-------------------|----------|----------|
+| ST-001 | Infrastructure | 3 | 无 | — |
+| ST-002 | Design-Enabler | 4 | ST-001 | 否 |
+| ST-003 | Functional | 5 | ST-002 | 否 |
+| **总计** | — | **12 人天** | — | — |

@@ -4,7 +4,7 @@
 **Feature ID**：FEAT-004
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**Plan Level**：Lite
+**Plan Level**：Standard
 **当前工作分支**：`epic/EPIC-003-starlit-town`
 **Feature 目录**：`specs/epics/EPIC-003-starlit-town/features/FEAT-004-costume-creation/`
 **日期**：2025-02-05
@@ -19,6 +19,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
+| v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -405,6 +406,64 @@ flowchart TD
 
 ---
 
+#### A3.3 第三层：组件内部详细设计（Plan Level = Standard 时执行）
+
+##### 组件：CostumeController
+
+- **定位**：协调换装、房间墙纸、宠物命名、裙子设计；读写 FEAT-001 StorageService；校验与敏感词（Validator）。
+- **失败与降级**：存储不可用时当次会话有效并提示；敏感词/超长命名提示重填或默认。
+
+##### 组件：Validator（敏感词/长度）
+
+- **定位**：宠物命名等用户输入：长度 ≤10 字、敏感词过滤；违规则返回错误类型供 UI 提示。
+
+---
+
+### A4. 技术风险与消解策略（绑定 Story/Task）
+
+| 风险ID | 风险描述 | 触发条件 | 影响范围 | 严重度 | 消解策略 | 对应 Story/Task |
+|--------|----------|----------|----------|--------|----------|-----------------|
+| RISK-001 | 存储不可用 | 浏览器限制 | 状态不持久 | Low | 当次会话有效、提示 | ST-001 |
+| RISK-002 | 敏感词/违规输入 | 用户输入 | 合规风险 | Med | Validator + 提示/默认名 | ST-002 |
+
+### A5. 边界 & 异常场景枚举
+
+- **数据边界**：未选品类用默认；宠物名 ≤10 字、敏感词过滤；贴纸/墙纸资源加载失败降级。
+- **用户行为**：命名违规则提示重填或使用默认名；存储满时提示本次未保存。
+
+#### A5.1 场景 → 应对措施对照表（必须）
+
+| 场景ID | 场景类别 | 触发条件 | 影响 | 预期行为 | 技术对策 | 设计对策 | 映射 |
+|--------|----------|----------|------|----------|----------|----------|------|
+| SC-001 | 输入 | 敏感词/超长 | 不合规 | 提示重填或默认 | Validator | 文案提示 | RISK-002 |
+| SC-002 | 存储 | 不可用/满 | 不保存 | 当次可用+提示 | 与 FEAT-001 一致 | N/A | RISK-001 |
+
+### A6. 算法评估（如适用）
+
+不适用。
+
+### A7. 功耗评估
+
+不适用（Web 环境）。
+
+### A8. 性能评估（必须量化）
+
+换装、墙纸切换、贴纸操作响应 ≤500ms；素材加载不阻塞主线程；资源可按需加载。
+
+### A9. 内存评估
+
+装扮与创造相关资源与状态增量可控；贴纸/墙纸按需加载，无显著泄漏。
+
+### A10. 安全评估（如适用）
+
+宠物命名等用户输入需合规与内容过滤（儿童适用）；敏感词过滤+长度限制（NFR-SEC-001）。
+
+### A11. 兼容性评估（必须）
+
+与 FEAT-001 存储、FEAT-002 动效、FEAT-003 场景兼容；浏览器同 EPIC。**兼容性结论**：依赖清晰，风险较低。
+
+---
+
 ## Plan-B：技术规约 & 实现约束
 
 ### B0. Plan-A ↔ Plan-B 一致性与互校（必须）
@@ -492,3 +551,101 @@ starlit-town/
 ```
 
 **结构决策**：业务逻辑（CostumeController、validation）与视图分离；存储键与 B3 一致。
+
+---
+
+## Story Breakdown（Plan Level = Standard 时执行）
+
+### Story 列表
+
+#### ST-001：存储键与数据模型（Infrastructure）
+
+- **类型**：Infrastructure
+- **描述**：装扮、房间墙纸、宠物名、裙子设计的存储键与结构（B3）；与 FEAT-001 命名空间约定一致。
+- **目标**：可读写、可恢复；键与 B3 一致。
+- **预估工作量**：2 人天
+- **覆盖 FR/NFR**：FR-006；NFR-REL-001
+- **依赖**：FEAT-001 StorageService
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：存储读写与结构测试。
+- **交付物**：B3 键与结构实现。
+
+#### ST-002：CostumeController 与 Validator（Design-Enabler）
+
+- **类型**：Design-Enabler
+- **描述**：CostumeController 协调换装/墙纸/宠物/裙子；Validator 敏感词与长度校验；与存储集成。
+- **目标**：业务逻辑集中；命名合规（≤10 字、敏感词过滤）。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-001–FR-006；NFR-SEC-001
+- **依赖**：ST-001
+- **可并行**：否
+- **关键风险**：是（RISK-002）
+- **验收/验证方式**：单元测试校验与存储集成。
+- **交付物**：CostumeController、Validator、B4.1 接口。
+
+#### ST-003：换装与风格标签 UI（Functional）
+
+- **类型**：Functional
+- **描述**：OutfitView（发型/裙子/鞋子/背包、风格标签）；与 CostumeController 绑定；即时视觉反馈。
+- **目标**：用户可完成换装并看到更新；风格标签可展示。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-001、FR-002；NFR-PERF-001、NFR-MEM-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：E2E/手动换装与保存。
+- **交付物**：OutfitView、换装资源与绑定。
+
+#### ST-004：房间墙纸、宠物命名、裙子设计 UI（Functional）
+
+- **类型**：Functional
+- **描述**：RoomPetView（墙纸、宠物命名）；DressDesignView（贴纸式裙子设计并应用）；与 CostumeController 绑定。
+- **目标**：用户可更换墙纸、为宠物命名、设计裙子并看到效果；命名合规校验。
+- **预估工作量**：5 人天
+- **覆盖 FR/NFR**：FR-003、FR-004、FR-005；NFR-PERF-001、NFR-SEC-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：墙纸/命名/贴纸操作与校验。
+- **交付物**：RoomPetView、DressDesignView、资源与绑定。
+
+### Story 依赖关系图
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    ST001["ST-001: 存储键与数据模型<br/>(Infrastructure, 2天)"]
+    ST002["ST-002: CostumeController 与 Validator<br/>(Design-Enabler, 4天)"]
+    ST003["ST-003: 换装与风格标签 UI<br/>(Functional, 4天)"]
+    ST004["ST-004: 房间/宠物/裙子设计 UI<br/>(Functional, 5天)"]
+    ST001 --> ST002
+    ST002 --> ST003
+    ST002 --> ST004
+    style ST001 fill:#FFF3E0,stroke:#F57C00
+    style ST002 fill:#E3F2FD,stroke:#1976D2
+    style ST003 fill:#E8F5E9,stroke:#388E3C
+    style ST004 fill:#E8F5E9,stroke:#388E3C
+```
+
+### Feature → Story 覆盖矩阵
+
+| FR/NFR ID | 覆盖的 Story ID | 备注 |
+|-----------|-----------------|------|
+| FR-001, FR-002 | ST-003 | 换装与风格 |
+| FR-003, FR-004, FR-005 | ST-004 | 墙纸/宠物/裙子 |
+| FR-006 | ST-001, ST-002 | 持久化 |
+| NFR-PERF-001 | ST-003, ST-004 | 响应 |
+| NFR-MEM-001 | ST-003, ST-004 | 资源按需 |
+| NFR-SEC-001 | ST-002, ST-004 | 敏感词/合规 |
+| NFR-REL-001 | ST-001, ST-002 | 存储降级 |
+
+### Story 工作量汇总
+
+| Story ID | 类型 | 预估工作量（人天） | 依赖关系 | 是否并行 |
+|----------|------|-------------------|----------|----------|
+| ST-001 | Infrastructure | 2 | FEAT-001 | — |
+| ST-002 | Design-Enabler | 4 | ST-001 | 否 |
+| ST-003 | Functional | 4 | ST-002 | 否 |
+| ST-004 | Functional | 5 | ST-002 | 否 |
+| **总计** | — | **15 人天** | — | — |

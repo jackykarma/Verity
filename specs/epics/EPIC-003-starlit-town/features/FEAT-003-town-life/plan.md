@@ -4,7 +4,7 @@
 **Feature ID**：FEAT-003
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**Plan Level**：Lite
+**Plan Level**：Standard
 **当前工作分支**：`epic/EPIC-003-starlit-town`
 **Feature 目录**：`specs/epics/EPIC-003-starlit-town/features/FEAT-003-town-life/`
 **日期**：2025-02-05
@@ -19,6 +19,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
+| v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -414,6 +415,70 @@ flowchart TD
 
 ---
 
+#### A3.3 第三层：组件内部详细设计（Plan Level = Standard 时执行）
+
+##### 组件：EventEngine
+
+- **定位**：小事件触发规则（场景活动+时间），每日 2–3 个；与 StorageService 读写当日事件。
+- **对外接口**：checkEvents(activity, time) → 可触发事件列表/触发；依赖存储键约定（B3）。
+- **失败与降级**：存储失败时当日事件可仅内存有效；不向 UI 抛未处理异常。
+
+##### 组件：TownLifeController
+
+- **定位**：协调早上流程、场景活动、小事件与总结入口；暴露 getDailySummarySnapshot() 供 FEAT-006。
+- **失败与降级**：FEAT-004/FEAT-006 未就绪时使用占位与契约约定（B4.2）。
+
+---
+
+### A4. 技术风险与消解策略（绑定 Story/Task）
+
+| 风险ID | 风险描述 | 触发条件 | 影响范围 | 严重度 | 消解策略 | 对应 Story/Task |
+|--------|----------|----------|----------|--------|----------|-----------------|
+| RISK-001 | FEAT-004/006 未就绪 | 集成期 | 选衣/故事占位 | Med | 占位 UI 与 B4.2 契约 | ST-002, ST-004 |
+| RISK-002 | 存储不可用 | 浏览器限制 | 当日状态丢失 | Low | 当次会话有效、提示 | ST-001 |
+
+### A5. 边界 & 异常场景枚举
+
+- **数据边界**：每日事件 ≤3；快照结构与 FEAT-006 契约一致；存储键命名空间独立。
+- **状态边界**：早上未完成选衣/小心情可提供「默认出门」；场景自由切换，状态可保存。
+- **用户行为**：未完成某场景活动即切换 → 允许；小事件条件不满足 → 无事件不阻塞。
+
+#### A5.1 场景 → 应对措施对照表（必须）
+
+| 场景ID | 场景类别 | 触发条件 | 影响 | 预期行为 | 技术对策 | 设计对策 | 映射 |
+|--------|----------|----------|------|----------|----------|----------|------|
+| SC-001 | 依赖 | FEAT-006 未就绪 | 总结无故事 | 简单摘要占位 | getDailySummarySnapshot 契约 | 占位列表 | B4.2 |
+| SC-002 | 存储 | 存储不可用 | 状态不持久 | 当次会话有效 | 降级提示 | N/A | RISK-002 |
+
+### A6. 算法评估（如适用）
+
+不适用（小事件规则为配置+随机，无 ML 算法）。
+
+### A7. 功耗评估
+
+不适用（Web 环境）。
+
+### A8. 性能评估（必须量化）
+
+| 场景 | 指标 | 验收标准 (p95) |
+|------|------|----------------|
+| 场景内活动响应 | 响应时间 | ≤ 500ms |
+| 小事件展示 | 主线程 | 不长时间阻塞 |
+
+### A9. 内存评估
+
+场景与事件相关状态增量可控，无显著泄漏；进出场景/日切换无持续增长。
+
+### A10. 安全评估（如适用）
+
+不收集个人敏感信息；内容符合儿童合规。N/A。
+
+### A11. 兼容性评估（必须）
+
+与 FEAT-001 存储、FEAT-002 动效、FEAT-004/006 契约兼容；浏览器同 FEAT-001。**兼容性结论**：依赖契约清晰，兼容性风险较低。
+
+---
+
 ## Plan-B：技术规约 & 实现约束
 
 ### B0. Plan-A ↔ Plan-B 一致性与互校（必须）
@@ -506,3 +571,102 @@ starlit-town/
 ```
 
 **结构决策**：业务逻辑（Controller、EventEngine）与视图（MorningView、SummaryEntryView、scenes）分离；存储键与 B3 一致。
+
+---
+
+## Story Breakdown（Plan Level = Standard 时执行）
+
+### Story 列表
+
+#### ST-001：存储键与每日快照结构（Infrastructure）
+
+- **类型**：Infrastructure
+- **描述**：本 Feature 存储键命名空间与 DailyEvent、DailySummarySnapshot 结构（B3）；与 FEAT-001 无冲突，与 FEAT-006 契约对齐。
+- **目标**：键/结构可读写；getDailySummarySnapshot() 可产出供 FEAT-006 的输入。
+- **预估工作量**：2 人天
+- **覆盖 FR/NFR**：FR-004、FR-005；NFR-REL-001
+- **依赖**：FEAT-001 StorageService
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：存储读写与快照结构单元测试。
+- **交付物**：B3 键与结构实现、快照生成逻辑。
+
+#### ST-002：EventEngine 与 TownLifeController（Design-Enabler）
+
+- **类型**：Design-Enabler
+- **描述**：EventEngine 小事件规则（每日 2–3 个）；TownLifeController 协调早上/场景活动/总结入口；与存储集成。
+- **目标**：小事件可触发；早上流程与晚上总结入口可调用。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-001、FR-004、FR-005；NFR-OBS-001
+- **依赖**：ST-001
+- **可并行**：否
+- **关键风险**：是（RISK-001）
+- **验收/验证方式**：规则与快照逻辑测试；FEAT-004/006 占位契约。
+- **交付物**：EventEngine、TownLifeController、B4.2 契约实现。
+
+#### ST-003：MorningView 与场景视图（Functional）
+
+- **类型**：Functional
+- **描述**：MorningView（选衣+小心情，调用 FEAT-004 或占位）；SceneViews（家/学校/公园/商店/森林）与活动入口；与 FEAT-001 阶段推进协同。
+- **目标**：用户可完成早上选衣与小心情并进入白天；可进入各场景并看到对应内容与活动。
+- **预估工作量**：5 人天
+- **覆盖 FR/NFR**：FR-001、FR-002、FR-003；NFR-PERF-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：E2E/手动：早上流程与场景进入。
+- **交付物**：MorningView、SceneViews、场景内容与活动反馈。
+
+#### ST-004：SummaryEntryView 与小事件展示（Functional）
+
+- **类型**：Functional
+- **描述**：晚上「今天的故事」入口（导航至 FEAT-006）；白天 2–3 小事件展示（弹窗/浮层）；与 TownLifeController、EventEngine 集成。
+- **目标**：用户可触发并看到小事件；晚上可进入总结入口。
+- **预估工作量**：3 人天
+- **覆盖 FR/NFR**：FR-004、FR-005；NFR-PERF-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：小事件触发与展示；总结入口导航。
+- **交付物**：SummaryEntryView、小事件 UI、导航至 FEAT-006。
+
+### Story 依赖关系图
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    ST001["ST-001: 存储键与快照<br/>(Infrastructure, 2天)"]
+    ST002["ST-002: EventEngine 与 Controller<br/>(Design-Enabler, 4天)"]
+    ST003["ST-003: MorningView 与场景<br/>(Functional, 5天)"]
+    ST004["ST-004: SummaryEntry 与小事件<br/>(Functional, 3天)"]
+    ST001 --> ST002
+    ST002 --> ST003
+    ST002 --> ST004
+    style ST001 fill:#FFF3E0,stroke:#F57C00
+    style ST002 fill:#E3F2FD,stroke:#1976D2
+    style ST003 fill:#E8F5E9,stroke:#388E3C
+    style ST004 fill:#E8F5E9,stroke:#388E3C
+```
+
+### Feature → Story 覆盖矩阵
+
+| FR/NFR ID | 覆盖的 Story ID | 备注 |
+|-----------|-----------------|------|
+| FR-001 | ST-002, ST-003 | 早上选衣与小心情 |
+| FR-002 | ST-003 | 各场景入口与内容 |
+| FR-003 | ST-003 | 场景活动 |
+| FR-004 | ST-001, ST-002, ST-004 | 小事件 |
+| FR-005 | ST-002, ST-004 | 晚上总结入口 |
+| NFR-PERF-001 | ST-003, ST-004 | 响应与展示 |
+| NFR-REL-001 | ST-001, ST-002 | 存储一致 |
+| NFR-OBS-001 | ST-002 | 日志/埋点 |
+
+### Story 工作量汇总
+
+| Story ID | 类型 | 预估工作量（人天） | 依赖关系 | 是否并行 |
+|----------|------|-------------------|----------|----------|
+| ST-001 | Infrastructure | 2 | FEAT-001 | — |
+| ST-002 | Design-Enabler | 4 | ST-001 | 否 |
+| ST-003 | Functional | 5 | ST-002 | 否 |
+| ST-004 | Functional | 3 | ST-002 | 否 |
+| **总计** | — | **14 人天** | — | — |

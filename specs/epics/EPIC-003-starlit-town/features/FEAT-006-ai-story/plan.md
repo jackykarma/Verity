@@ -4,7 +4,7 @@
 **Feature ID**：FEAT-006
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**Plan Level**：Lite
+**Plan Level**：Standard
 **当前工作分支**：`epic/EPIC-003-starlit-town`
 **Feature 目录**：`specs/epics/EPIC-003-starlit-town/features/FEAT-006-ai-story/`
 **日期**：2025-02-05
@@ -19,6 +19,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
+| v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -416,6 +417,68 @@ flowchart TD
 
 ---
 
+#### A3.3 第三层：组件内部详细设计（Plan Level = Standard 时执行）
+
+##### 组件：StoryController
+
+- **定位**：协调 FEAT-003/005 输入（getDailySummarySnapshot、getRelationSummary）；调用 TemplateEngine 或 AIClient；超时 5 秒降级模板；敏感词过滤与模板兜底。
+- **失败与降级**：AI 不可用/超时/限流 → 100% 模板；内容不合规 → 敏感词过滤+模板兜底。
+
+##### 组件：TemplateEngine
+
+- **定位**：模板库与选择逻辑（按 DailySummary 匹配）；无活动/有场景/有事件/有互动等条件；输出 50–150 字日记式文本。
+
+##### 组件：AIClient（可选）
+
+- **定位**：调用外部 AI 服务；超时 5 秒；失败时由 StoryController 走模板降级。
+
+---
+
+### A4. 技术风险与消解策略（绑定 Story/Task）
+
+| 风险ID | 风险描述 | 触发条件 | 影响范围 | 严重度 | 消解策略 | 对应 Story/Task |
+|--------|----------|----------|----------|--------|----------|-----------------|
+| RISK-001 | AI 不可用/超时/限流 | 网络/服务 | 无故事 | High | 超时 5 秒+100% 模板降级 | ST-002, ST-003 |
+| RISK-002 | AI 内容不合规 | 生成内容 | 儿童合规 | High | 敏感词过滤+模板兜底 | ST-002 |
+
+### A5. 边界 & 异常场景枚举
+
+- **数据边界**：当日无活动 → 默认“今天休息了一下”等模板；输入契约与 FEAT-003/005 B4.1 一致。
+- **用户行为**：故事保存失败 → 当次可展示，不强制持久化历史。
+
+#### A5.1 场景 → 应对措施对照表（必须）
+
+| 场景ID | 场景类别 | 触发条件 | 影响 | 预期行为 | 技术对策 | 设计对策 | 映射 |
+|--------|----------|----------|------|----------|----------|----------|------|
+| SC-001 | 依赖 | AI 不可用/超时 | 无内容 | 模板故事，不空白 | 5 秒超时+模板 | N/A | RISK-001 |
+| SC-002 | 安全 | 内容不合规 | 儿童风险 | 过滤+兜底 | 敏感词+模板 | N/A | RISK-002 |
+
+### A6. 算法评估（如适用）
+
+不适用（模板选择为规则匹配；若用 AI 则为外部服务，本 Feature 仅超时与降级策略）。
+
+### A7. 功耗评估
+
+不适用（Web 环境；AI 按需调用）。
+
+### A8. 性能评估（必须量化）
+
+故事展示入口响应 ≤500ms；AI 调用超时阈值 5 秒，超时则模板降级（NFR-PERF-001）。
+
+### A9. 内存评估
+
+故事与当日事件快照内存可控；无显著泄漏。
+
+### A10. 安全评估（如适用）
+
+AI 生成内容需审核或模板兜底，符合儿童合规；最小化外传数据（NFR-SEC-001）。
+
+### A11. 兼容性评估（必须）
+
+与 FEAT-003 总结入口、FEAT-003/005 输入契约兼容；浏览器同 EPIC。**兼容性结论**：依赖 B4.2 契约，兼容性风险可控。
+
+---
+
 ## Plan-B：技术规约 & 实现约束
 
 ### B0. Plan-A ↔ Plan-B 一致性与互校（必须）
@@ -496,3 +559,102 @@ starlit-town/
 ```
 
 **结构决策**：StoryController 协调输入与生成；TemplateEngine 与模板库集中管理；AIClient 可选；与 FEAT-003/005 的调用在 Controller 内完成，契约见 B4.2。
+
+---
+
+## Story Breakdown（Plan Level = Standard 时执行）
+
+### Story 列表
+
+#### ST-001：输入契约与当日数据聚合（Infrastructure）
+
+- **类型**：Infrastructure
+- **描述**：对接 FEAT-003 getDailySummarySnapshot()、FEAT-005 getRelationSummary() 或约定键；DailySummary 结构与 B4.2 一致。
+- **目标**：可获取当日事件与关系摘要，作为故事输入。
+- **预估工作量**：2 人天
+- **覆盖 FR/NFR**：FR-002；NFR-REL-001
+- **依赖**：FEAT-003、FEAT-005 契约就绪
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：契约调用与数据结构测试。
+- **交付物**：B4.2 依赖实现、输入聚合逻辑。
+
+#### ST-002：TemplateEngine 与模板库（Design-Enabler）
+
+- **类型**：Design-Enabler
+- **描述**：模板库（无活动/有场景/有事件/有互动等）；模板选择逻辑与 DailySummary 匹配；50–150 字日记式输出；敏感词过滤与兜底。
+- **目标**：无 AI 或降级时 100% 可输出合规故事。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-003、FR-004、FR-005；NFR-REL-001、NFR-SEC-001
+- **依赖**：ST-001
+- **可并行**：否
+- **关键风险**：是（RISK-001、RISK-002）
+- **验收/验证方式**：模板选择与输出、敏感词兜底测试。
+- **交付物**：TemplateEngine、模板库、过滤与兜底逻辑。
+
+#### ST-003：StoryController 与 AIClient（可选）（Design-Enabler）
+
+- **类型**：Design-Enabler
+- **描述**：StoryController 协调输入、调用 TemplateEngine 或 AIClient；超时 5 秒降级模板；AIClient 可选（外部 AI），失败即走模板。
+- **目标**：入口可触发生成；AI 故障时 100% 降级，不空白不崩溃。
+- **预估工作量**：3 人天
+- **覆盖 FR/NFR**：FR-001、FR-003、FR-004；NFR-PERF-001、NFR-REL-001、NFR-OBS-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：是（RISK-001）
+- **验收/验证方式**：超时与降级路径测试；日志/埋点。
+- **交付物**：StoryController、AIClient（可选）、B4 契约实现。
+
+#### ST-004：今天的故事视图（Functional）
+
+- **类型**：Functional
+- **描述**：故事展示视图（日记式、50–150 字）；由 FEAT-003 总结入口进入；与 StoryController 绑定；加载态与错误态。
+- **目标**：用户可在晚上进入并看到故事；响应 ≤500ms；AI 故障时仍见模板故事。
+- **预估工作量**：3 人天
+- **覆盖 FR/NFR**：FR-001、FR-003；NFR-PERF-001、NFR-MEM-001
+- **依赖**：ST-003
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：E2E/手动：入口→故事展示；降级场景。
+- **交付物**：故事视图、与 FEAT-003 入口衔接。
+
+### Story 依赖关系图
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    ST001["ST-001: 输入契约与聚合<br/>(Infrastructure, 2天)"]
+    ST002["ST-002: TemplateEngine 与模板库<br/>(Design-Enabler, 4天)"]
+    ST003["ST-003: StoryController 与 AIClient<br/>(Design-Enabler, 3天)"]
+    ST004["ST-004: 今天的故事视图<br/>(Functional, 3天)"]
+    ST001 --> ST002
+    ST002 --> ST003
+    ST003 --> ST004
+    style ST001 fill:#FFF3E0,stroke:#F57C00
+    style ST002 fill:#E3F2FD,stroke:#1976D2
+    style ST003 fill:#E3F2FD,stroke:#1976D2
+    style ST004 fill:#E8F5E9,stroke:#388E3C
+```
+
+### Feature → Story 覆盖矩阵
+
+| FR/NFR ID | 覆盖的 Story ID | 备注 |
+|-----------|-----------------|------|
+| FR-001 | ST-003, ST-004 | 入口与展示 |
+| FR-002 | ST-001 | 当日数据 |
+| FR-003, FR-004, FR-005 | ST-002, ST-003, ST-004 | 生成与降级与合规 |
+| NFR-PERF-001 | ST-003, ST-004 | 响应与超时 |
+| NFR-MEM-001 | ST-004 | 内存可控 |
+| NFR-REL-001 | ST-002, ST-003 | 100% 降级 |
+| NFR-SEC-001 | ST-002 | 敏感词与兜底 |
+| NFR-OBS-001 | ST-003 | 日志/埋点 |
+
+### Story 工作量汇总
+
+| Story ID | 类型 | 预估工作量（人天） | 依赖关系 | 是否并行 |
+|----------|------|-------------------|----------|----------|
+| ST-001 | Infrastructure | 2 | FEAT-003, FEAT-005 | — |
+| ST-002 | Design-Enabler | 4 | ST-001 | 否 |
+| ST-003 | Design-Enabler | 3 | ST-002 | 否 |
+| ST-004 | Functional | 3 | ST-003 | 否 |
+| **总计** | — | **12 人天** | — | — |

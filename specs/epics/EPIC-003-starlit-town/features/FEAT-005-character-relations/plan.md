@@ -4,7 +4,7 @@
 **Feature ID**：FEAT-005
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**Plan Level**：Lite
+**Plan Level**：Standard
 **当前工作分支**：`epic/EPIC-003-starlit-town`
 **Feature 目录**：`specs/epics/EPIC-003-starlit-town/features/FEAT-005-character-relations/`
 **日期**：2025-02-05
@@ -19,6 +19,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
+| v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -388,6 +389,64 @@ flowchart TD
 
 ---
 
+#### A3.3 第三层：组件内部详细设计（Plan Level = Standard 时执行）
+
+##### 组件：RelationController
+
+- **定位**：协调互动记录、记忆读写、反馈选取；暴露 getRelationSummary() 供 FEAT-006；存储键与 20 条/7 天策略（B3）。
+- **失败与降级**：存储不可用时当次会话有效；记忆损坏时降级为默认反馈。
+
+##### 组件：FeedbackSelector
+
+- **定位**：根据 NPC、互动历史、性格类型选取预设文案；无好感数值，仅文案与情绪表达。
+
+---
+
+### A4. 技术风险与消解策略（绑定 Story/Task）
+
+| 风险ID | 风险描述 | 触发条件 | 影响范围 | 严重度 | 消解策略 | 对应 Story/Task |
+|--------|----------|----------|----------|--------|----------|-----------------|
+| RISK-001 | 存储不可用 | 浏览器限制 | 关系不持久 | Low | 当次会话有效、提示 | ST-001 |
+| RISK-002 | 记忆数据损坏 | 异常/迁移 | 反馈异常 | Low | 降级默认反馈，不崩溃 | ST-002 |
+
+### A5. 边界 & 异常场景枚举
+
+- **数据边界**：首次见面无“记得”表述；同类型记忆最近一次覆盖；20 条/7 天策略（B3）。
+- **用户行为**：同一会话多次互动 → 覆盖同类型，累计印象参与反馈选取。
+
+#### A5.1 场景 → 应对措施对照表（必须）
+
+| 场景ID | 场景类别 | 触发条件 | 影响 | 预期行为 | 技术对策 | 设计对策 | 映射 |
+|--------|----------|----------|------|----------|----------|----------|------|
+| SC-001 | 数据 | 首次见面 | 无记忆 | 默认/初次见面反馈 | FeedbackSelector | N/A | FR-003 |
+| SC-002 | 存储 | 不可用/损坏 | 不持久或异常 | 当次有效或默认反馈 | 降级、提示 | N/A | RISK-001/002 |
+
+### A6. 算法评估（如适用）
+
+不适用（预设文案选取，无 ML）。
+
+### A7. 功耗评估
+
+不适用（Web 环境）。
+
+### A8. 性能评估（必须量化）
+
+互动与反馈展示响应 ≤500ms；记忆读写不阻塞主线程。
+
+### A9. 内存评估
+
+关系与记忆数据增量可控，无显著泄漏。
+
+### A10. 安全评估（如适用）
+
+记忆数据仅存本地；内容符合儿童合规（NFR-SEC-001）。
+
+### A11. 兼容性评估（必须）
+
+与 FEAT-001 存储、FEAT-002 动效、FEAT-003 场景、FEAT-006 契约兼容。**兼容性结论**：依赖契约清晰，风险较低。
+
+---
+
 ## Plan-B：技术规约 & 实现约束
 
 ### B0. Plan-A ↔ Plan-B 一致性与互校（必须）
@@ -473,3 +532,84 @@ starlit-town/
 ```
 
 **结构决策**：业务逻辑（RelationController、FeedbackSelector）与视图（NPCDialogueView）分离；预设文案可放在 presets 或配置；存储键与 B3 一致。
+
+---
+
+## Story Breakdown（Plan Level = Standard 时执行）
+
+### Story 列表
+
+#### ST-001：存储键与记忆数据模型（Infrastructure）
+
+- **类型**：Infrastructure
+- **描述**：互动记忆与关系状态的存储键与结构（B3）；20 条/7 天、同类型覆盖策略；与 FEAT-001 命名空间一致。
+- **目标**：可读写、可恢复；getRelationSummary() 可产出供 FEAT-006。
+- **预估工作量**：2 人天
+- **覆盖 FR/NFR**：FR-002、FR-005；NFR-REL-001
+- **依赖**：FEAT-001 StorageService
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：存储与摘要结构测试。
+- **交付物**：B3 键与结构、摘要生成逻辑。
+
+#### ST-002：RelationController 与 FeedbackSelector（Design-Enabler）
+
+- **类型**：Design-Enabler
+- **描述**：RelationController 协调互动记录、记忆读写、getRelationSummary；FeedbackSelector 按 NPC/性格/互动历史选取预设文案。
+- **目标**：互动可记录；“记得我”反馈可区分性格；与 FEAT-006 契约就绪。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-001–FR-004；NFR-OBS-001
+- **依赖**：ST-001
+- **可并行**：否
+- **关键风险**：是（RISK-002）
+- **验收/验证方式**：记忆读写与反馈选取逻辑测试；B4.1 契约。
+- **交付物**：RelationController、FeedbackSelector、预设文案结构、B4.1。
+
+#### ST-003：NPCDialogueView 与场景集成（Functional）
+
+- **类型**：Functional
+- **描述**：NPCDialogueView 展示对话与“记得我”反馈；与 FEAT-003 场景内 NPC 入口集成；与 RelationController 绑定。
+- **目标**：用户可与 NPC 互动并再次见面时看到差异化反馈。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-001、FR-003、FR-004；NFR-PERF-001、NFR-MEM-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：E2E/手动互动与再次见面反馈。
+- **交付物**：NPCDialogueView、场景内集成、预设文案展示。
+
+### Story 依赖关系图
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    ST001["ST-001: 存储键与记忆模型<br/>(Infrastructure, 2天)"]
+    ST002["ST-002: RelationController 与 FeedbackSelector<br/>(Design-Enabler, 4天)"]
+    ST003["ST-003: NPCDialogueView 与集成<br/>(Functional, 4天)"]
+    ST001 --> ST002
+    ST002 --> ST003
+    style ST001 fill:#FFF3E0,stroke:#F57C00
+    style ST002 fill:#E3F2FD,stroke:#1976D2
+    style ST003 fill:#E8F5E9,stroke:#388E3C
+```
+
+### Feature → Story 覆盖矩阵
+
+| FR/NFR ID | 覆盖的 Story ID | 备注 |
+|-----------|-----------------|------|
+| FR-001 | ST-002, ST-003 | NPC 与互动 |
+| FR-002, FR-005 | ST-001, ST-002 | 记忆与持久化 |
+| FR-003, FR-004 | ST-002, ST-003 | “记得我”与性格 |
+| NFR-PERF-001 | ST-003 | 响应 |
+| NFR-MEM-001 | ST-003 | 内存可控 |
+| NFR-OBS-001 | ST-002 | 日志/埋点 |
+| NFR-REL-001 | ST-001, ST-002 | 存储降级 |
+
+### Story 工作量汇总
+
+| Story ID | 类型 | 预估工作量（人天） | 依赖关系 | 是否并行 |
+|----------|------|-------------------|----------|----------|
+| ST-001 | Infrastructure | 2 | FEAT-001 | — |
+| ST-002 | Design-Enabler | 4 | ST-001 | 否 |
+| ST-003 | Functional | 4 | ST-002 | 否 |
+| **总计** | — | **10 人天** | — | — |

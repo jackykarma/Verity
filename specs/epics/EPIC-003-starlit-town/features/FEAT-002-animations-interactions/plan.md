@@ -4,7 +4,7 @@
 **Feature ID**：FEAT-002
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**Plan Level**：Lite
+**Plan Level**：Standard
 **当前工作分支**：`epic/EPIC-003-starlit-town`
 **Feature 目录**：`specs/epics/EPIC-003-starlit-town/features/FEAT-002-animations-interactions/`
 **日期**：2025-02-05
@@ -19,6 +19,7 @@
 | 版本 | 日期 | 变更范围（Feature/Story/Task） | 变更摘要 | 影响模块 | 是否需要回滚设计 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2025-02-05 | Feature | 初始版本 | — | 否 |
+| v0.2.0 | 2025-02-05 | Standard 阶段 | A3.3、Story Breakdown、A4–A11 | Plan-A | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -371,6 +372,97 @@ flowchart TD
 
 ---
 
+#### A3.3 第三层：组件内部详细设计（Plan Level = Standard 时执行）
+
+##### 组件：AnimationQueue
+
+- **定位**：串行执行动效任务，避免连续点击导致动效堆叠与卡顿。
+- **对外接口**：enqueue(task: () => Promise<void>): void；内部 FIFO 执行，单次仅一个 task 运行。
+- **失败与降级**：task 内异常 catch 后静默，不阻塞队列后续任务。
+
+###### 异常清单
+
+| 异常ID | 触发条件 | 错误类型 | 可重试 | 对策 |
+|--------|----------|----------|--------|------|
+| EX-001 | FeedbackConfig.level === 'off' | 配置降级 | 否 | 不触发动效，交互仍可用 |
+
+##### 组件：ClickFeedbackComponent / TransitionComponent
+
+- **定位**：对外挂载点，attach(element) 或 enter/leave(element, spec?)；内部通过 AnimationQueue 与 CSS 类名/变量应用动效。
+- **失败与降级**：资源加载失败或执行异常时 resolve 且不应用动效，不向业务抛错。
+
+---
+
+### A4. 技术风险与消解策略（绑定 Story/Task）
+
+| 风险ID | 风险描述 | 触发条件 | 影响范围 | 严重度 | 消解策略 | 对应 Story/Task |
+|--------|----------|----------|----------|--------|----------|-----------------|
+| RISK-001 | 低端设备帧率不足 | 低端/高负载 | 卡顿 | Med | FeedbackConfig 降级（reduced/off）；单次 ≤300ms | ST-002, ST-003 |
+| RISK-002 | 动效资源体积超标 | 资源合入 | 首屏变慢 | Low | 资源 ≤500KB 预算；懒加载非首屏动效 | ST-001 |
+
+### A5. 边界 & 异常场景枚举
+
+- **数据边界**：AnimationSpec 缺省时使用默认（≤500ms）；无效 element 不挂载。
+- **状态边界**：队列空时无操作；降级为 off 时 attach 仍可调用但不触发动效。
+- **用户行为**：连续快速点击 → 队列依次执行，避免堆叠。
+
+#### A5.1 场景 → 应对措施对照表（必须）
+
+| 场景ID | 场景类别 | 触发条件 | 影响 | 预期行为 | 技术对策 | 设计对策 | 映射 |
+|--------|----------|----------|------|----------|----------|----------|------|
+| SC-001 | 性能 | 低端设备 | 卡顿 | 降级或关闭动效 | FeedbackConfig reduced/off | N/A | RISK-001 |
+| SC-002 | 资源 | 资源加载失败 | 无动效 | 占位或不应用，不阻塞 | catch 静默降级 | N/A | NFR-REL-001 |
+| SC-003 | 用户行为 | 快速连点 | 堆叠卡顿 | 队列串行 | AnimationQueue | N/A | FR-001/002 |
+
+### A6. 算法评估（如适用）
+
+不适用。
+
+### A7. 功耗评估
+
+不适用（Web 环境，NFR-POWER-001）。
+
+### A8. 性能评估（必须量化）
+
+#### A8.1 测试设备基线
+
+PC/平板浏览器；目标 60fps，低端可 30fps。
+
+#### A8.2 性能场景与指标
+
+| 场景 | 指标 | 验收标准 (p95) |
+|------|------|----------------|
+| 点击反馈 | 单次动效时长 | ≤ 300ms |
+| 场景/面板切换 | 过渡动效时长 | ≤ 500ms |
+| 动效期间 | 主线程阻塞 | 不长时间阻塞；60fps 目标 |
+| 动效资源 | CSS/JS/雪碧图总体积 | ≤ 500KB |
+
+#### A8.3 降级策略
+
+| 触发条件 | 降级策略 |
+|----------|----------|
+| 低端设备/低帧率 | FeedbackConfig reduced 或 off；缩短时长或关闭 |
+| 资源加载失败 | 不应用动效，不阻塞主流程 |
+
+### A9. 内存评估
+
+| 场景 | 验收标准 | 主要来源 | 优化方向 |
+|------|----------|----------|----------|
+| 动效组件与资源 | 增量可控，无显著增长 | CSS/类名/队列任务 | 队列长度上限；资源复用 |
+
+### A10. 安全评估（如适用）
+
+无额外数据收集；动效不涉及用户输入（NFR-SEC-001）。N/A。
+
+### A11. 兼容性评估（必须）
+
+- **浏览器**：支持 CSS transition/animation 与 DOM API；不支持时降级为无动效。
+- **设备**：低端设备通过 FeedbackConfig 降级，保证可玩。
+
+**兼容性结论**：主流现代浏览器兼容；低端降级路径明确。
+
+---
+
 ## Plan-B：技术规约 & 实现约束
 
 ### B0. Plan-A ↔ Plan-B 一致性与互校（必须）
@@ -469,3 +561,85 @@ starlit-town/
 ```
 
 **结构决策**：动效组件与队列、配置服务集中置于 animations 模块；与 design-system.css 配合实现规范（FR-003）。
+
+---
+
+## Story Breakdown（Plan Level = Standard 时执行）
+
+### Story 列表
+
+#### ST-001：动效规范与资源（Infrastructure）
+
+- **类型**：Infrastructure
+- **描述**：动效规范文档与 design-system.css 变量（时长、缓动、可爱风）；动效相关资源体积 ≤500KB。
+- **目标**：各 Feature 可引用统一规范；资源预算达标。
+- **预估工作量**：2 人天
+- **覆盖 FR/NFR**：FR-003；NFR-PERF-002
+- **依赖**：无
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：资源体积测量；规范文档可读。
+- **交付物**：规范文档、design-system.css 动效变量、占位/示例资源。
+
+#### ST-002：FeedbackConfigService 与 AnimationQueue（Design-Enabler）
+
+- **类型**：Design-Enabler
+- **描述**：FeedbackConfigService（getConfig、降级 3 级）；AnimationQueue 串行执行；降级时静默不抛错。
+- **目标**：配置可读、队列不堆叠、异常不阻塞。
+- **预估工作量**：3 人天
+- **覆盖 FR/NFR**：FR-004；NFR-REL-001
+- **依赖**：ST-001
+- **可并行**：否
+- **关键风险**：是（RISK-001）
+- **验收/验证方式**：单元测试队列串行与降级路径。
+- **交付物**：FeedbackConfigService、AnimationQueue。
+
+#### ST-003：ClickFeedbackComponent 与 TransitionComponent（Functional）
+
+- **类型**：Functional
+- **描述**：ClickFeedbackComponent（attach）；TransitionComponent（enter/leave）；与 AnimationQueue 集成；单次 ≤300ms、过渡 ≤500ms。
+- **目标**：业务方可挂载统一点击与过渡动效；性能达标。
+- **预估工作量**：4 人天
+- **覆盖 FR/NFR**：FR-001、FR-002；NFR-PERF-001、NFR-MEM-001
+- **依赖**：ST-002
+- **可并行**：否
+- **关键风险**：否
+- **验收/验证方式**：接入测试；性能测量。
+- **交付物**：ClickFeedbackComponent、TransitionComponent、B4.1 接口实现。
+
+### Story 依赖关系图
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    ST001["ST-001: 动效规范与资源<br/>(Infrastructure, 2天)"]
+    ST002["ST-002: FeedbackConfigService 与 AnimationQueue<br/>(Design-Enabler, 3天)"]
+    ST003["ST-003: ClickFeedback 与 Transition<br/>(Functional, 4天)"]
+    ST001 --> ST002
+    ST002 --> ST003
+    style ST001 fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
+    style ST002 fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style ST003 fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+```
+
+### Feature → Story 覆盖矩阵
+
+| FR/NFR ID | 覆盖的 Story ID | 备注 |
+|-----------|-----------------|------|
+| FR-001 | ST-003 | 点击反馈 |
+| FR-002 | ST-003 | 过渡动效 |
+| FR-003 | ST-001 | 规范与资源 |
+| FR-004 | ST-002 | 降级配置 |
+| NFR-PERF-001 | ST-003 | 时长与帧率 |
+| NFR-PERF-002 | ST-001 | 资源体积 |
+| NFR-MEM-001 | ST-003 | 增量可控 |
+| NFR-REL-001 | ST-002, ST-003 | 降级不阻塞 |
+
+### Story 工作量汇总
+
+| Story ID | 类型 | 预估工作量（人天） | 依赖关系 | 是否并行 |
+|----------|------|-------------------|----------|----------|
+| ST-001 | Infrastructure | 2 | 无 | — |
+| ST-002 | Design-Enabler | 3 | ST-001 | 否 |
+| ST-003 | Functional | 4 | ST-002 | 否 |
+| **总计** | — | **9 人天** | — | — |
