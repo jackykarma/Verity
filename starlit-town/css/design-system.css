@@ -1,0 +1,202 @@
+/**
+ * 星光小镇 Starlit Town - UI 设计系统
+ * 治愈系、简洁、有质感，面向 7-8 岁女孩
+ */
+:root {
+  /* 主色 - 柔和紫与星光 */
+  --color-primary: #7B6BA8;
+  --color-primary-light: #B8A9D4;
+  --color-primary-bg: #F0EDF5;
+  /* 辅助色 */
+  --color-mint: #7BB89A;
+  --color-mint-bg: #E8F5EE;
+  --color-peach: #E8A87C;
+  --color-peach-bg: #FFF5EE;
+  --color-starlight: #F5EBB8;
+  --color-night: #2D2640;
+  --color-night-soft: #4A4258;
+  /* 中性 */
+  --color-white: #FFFFFF;
+  --color-gray-50: #FAFAFA;
+  --color-gray-100: #F0EEF2;
+  --color-gray-300: #C4BECB;
+  --color-gray-600: #6B6574;
+  --color-gray-800: #3D3845;
+  /* 语义 */
+  --color-success: #5A9B7A;
+  --color-success-bg: #E8F5E9;
+  --color-warm: #D4A574;
+  /* 圆角 */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+  /* 阴影 - 轻柔有质感 */
+  --shadow-sm: 0 2px 8px rgba(45, 38, 64, 0.06);
+  --shadow-md: 0 4px 16px rgba(45, 38, 64, 0.08);
+  --shadow-lg: 0 8px 28px rgba(45, 38, 64, 0.1);
+  --shadow-card: 0 4px 20px rgba(123, 107, 168, 0.12);
+  /* 动效（FEAT-002：点击 ≤300ms，过渡 ≤500ms，可爱风弹性缓动） */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --anim-duration-click: 280ms;
+  --anim-duration-transition: 400ms;
+  --anim-easing: var(--ease-out);
+  --anim-easing-bounce: var(--ease-out-bounce);
+  --transition-fast: 0.2s var(--ease-out);
+  --transition-normal: 0.3s var(--ease-out);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-gray-800);
+  background: var(--color-gray-50);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 布局 */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-night);
+  letter-spacing: 0.02em;
+  margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  margin: 0;
+}
+
+/* 主按钮 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: var(--color-white);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--color-white);
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary-light);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-gray-600);
+}
+
+/* 卡片 */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+  transition: box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: 0 6px 24px rgba(123, 107, 168, 0.15);
+}
+
+/* 标签 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.tag-sweet { background: var(--color-peach-bg); color: #B85C3A; }
+.tag-cool { background: var(--color-primary-bg); color: var(--color-primary); }
+.tag-forest { background: var(--color-mint-bg); color: #2E7D5A; }
+.tag-star { background: #FFF8E1; color: #C49B2F; }
+
+/* 导航链接（设计稿索引用） */
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.nav-links a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-bg);
+  transition: background var(--transition-fast);
+}
+
+.nav-links a:hover {
+  background: var(--color-primary-light);
+  color: var(--color-white);
+}
+
+/* 占位图标 - 简洁图形 */
+.icon-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+/* 星光装饰 */
+.star-accent {
+  color: var(--color-starlight);
+  text-shadow: 0 0 12px rgba(245, 235, 184, 0.6);
+}
