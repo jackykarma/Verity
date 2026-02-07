@@ -22,6 +22,11 @@ description: Git 提交和推送助手。自动化 Git 提交流程，遵循 Com
 - 用户说"创建提交"、"保存更改"、"上传代码"
 - 用户完成功能开发需要提交时
 - 用户说"遵循 Commitizen 规范提交"
+- 用户说"仅提交不推送"、"先 commit 稍后 push"
+
+**相关资源**:
+- 提交模板: [docs/template/commit-message-template.md](../../../docs/template/commit-message-template.md)
+- 编码规范: `.cursor/rules/git-commit-encoding.mdc`（Windows 下避免中文乱码）
 
 ## Commitizen 中文规范
 
@@ -63,6 +68,15 @@ description: Git 提交和推送助手。自动化 Git 提交流程，遵循 Com
 - **简短描述**: 不超过 50 个字符，使用祈使句，描述做了什么
 - **详细描述**: 说明为什么做这个改动，改动的影响范围（可选）
 - **Footer**: 关闭的 Issue 或 Breaking Changes（可选）
+
+### Footer 常用写法
+
+| 写法 | 用途 |
+|------|------|
+| `Closes #123` | 关闭 Issue |
+| `Fixes #456` | 修复 Bug 并关联 Issue |
+| `Refs #789` | 仅关联参考 |
+| `BREAKING CHANGE: 描述` | 不兼容改动，需单独一行 |
 
 ### 示例
 
@@ -186,7 +200,8 @@ Closes #789
 ## 🎯 操作步骤
 
 1. git add (上述文件)
-2. git commit -m "(上述提交信息)"
+2. git commit -F .git-msg.txt （Windows 下推荐；需先将上述提交信息写入 UTF-8 文件）
+   或 git commit -m "..." （Unix/Linux/macOS）
 3. git push origin <当前分支>
 
 ---
@@ -198,6 +213,10 @@ Closes #789
 
 用户确认后，按顺序执行:
 
+**5.0 准备提交信息（Windows 必做）**
+
+Windows 下含中文提交时，先将完整提交信息写入 UTF-8 编码的 `.git-msg.txt`，再执行 `git commit -F .git-msg.txt`。避免 PowerShell 编码导致乱码。
+
 **5.1 暂存文件**
 ```bash
 git add <file1> <file2> <file3>
@@ -206,6 +225,18 @@ git add .  # 如果用户要求添加所有文件
 ```
 
 **5.2 创建提交**
+
+**推荐（Windows/PowerShell）**: 含中文时优先用 `-F` 从 UTF-8 文件读取，避免乱码：
+
+```bash
+# 1. 将提交信息写入 UTF-8 文件
+# 2. 执行提交
+git commit -F .git-msg.txt
+# 提交完成后可删除 .git-msg.txt
+```
+
+**备选（Unix/Linux/macOS）**: 使用 HEREDOC 确保多行格式正确：
+
 ```bash
 git commit -m "$(cat <<'EOF'
 ✨ feat(登录): 添加指纹登录功能
@@ -220,7 +251,7 @@ EOF
 )"
 ```
 
-**注意**: 使用 HEREDOC 确保多行提交信息格式正确。
+**注意**: Windows PowerShell 下 `git commit -m "中文"` 易乱码，务必使用 `-F` 读取 UTF-8 文件。详见 `.cursor/rules/git-commit-encoding.mdc`。
 
 **5.3 推送到远程**
 ```bash
@@ -344,6 +375,28 @@ git push --force-with-lease origin <branch>
 是否需要我帮你处理?
 ```
 
+### 场景 6: 仅提交不推送
+
+用户说"仅提交"、"先 commit 不 push"时:
+
+1. 执行 `git add` 和 `git commit -F .git-msg.txt`（或 `-m`）
+2. **跳过** `git push`
+3. 向用户报告: "✅ 已提交到本地，未推送。需要推送时请告诉我。"
+
+### 场景 7: 使用 Commit 模板
+
+用户或项目已配置 `commit.template` 时:
+
+```bash
+# 查看当前模板配置
+git config commit.template
+
+# 使用模板（编辑器打开后自动载入模板内容）
+git commit
+```
+
+**本项目的模板**: `docs/template/commit-message-template.md`。可配置 `git config commit.template docs/template/commit-message-template.md`。
+
 ## 注意事项
 
 ### ✅ 最佳实践
@@ -365,11 +418,16 @@ git push --force-with-lease origin <branch>
 ### 🔐 安全检查清单
 
 推送前确认:
-- [ ] 没有 `.env` 文件
-- [ ] 没有密钥文件 (`.jks`, `.keystore`)
-- [ ] 没有 API keys 或 secrets
-- [ ] 没有本地配置文件 (不应被提交的)
+- [ ] 没有 `.env`、`.env.local`、`local.properties`
+- [ ] 没有密钥文件 (`*.jks`、`*.keystore`、`key.properties`)
+- [ ] 没有 `credentials.json`、`secrets.xml`
+- [ ] 没有 API keys、passwords、tokens
+- [ ] 没有本地配置文件（不应被提交的）
 - [ ] 没有临时文件或 IDE 配置
+
+### 📄 提交模板
+
+项目提供 [docs/template/commit-message-template.md](../../../docs/template/commit-message-template.md)，包含各类型的完整模板。可配置 `git config commit.template docs/template/commit-message-template.md`。
 
 ## 快速参考
 
@@ -421,6 +479,10 @@ git checkout -- <file>  # 放弃修改
 
 ## 错误处理
 
+### 0. 中文乱码（Windows）
+
+参见 `.cursor/rules/git-commit-encoding.mdc`。**务必使用 `git commit -F .git-msg.txt`**，勿用 `-m "中文"`。
+
 ### 1. Git 未初始化
 ```
 错误: fatal: not a git repository
@@ -454,6 +516,19 @@ git checkout -- <file>  # 放弃修改
 3. git push origin <branch>
 ```
 
+### 5. 提交信息乱码（Windows）
+```
+现象: git log 中中文显示为乱码
+
+原因: PowerShell 下 git commit -m "中文" 编码问题
+
+解决:
+1. 将提交信息写入 UTF-8 文件（如 .git-msg.txt）
+2. 使用 git commit -F .git-msg.txt
+3. 配置: git config i18n.commitEncoding utf-8
+        git config i18n.logOutputEncoding utf-8
+```
+
 ## 总结
 
 使用这个 Skill,你可以:
@@ -464,3 +539,9 @@ git checkout -- <file>  # 放弃修改
 5. 保持清晰的提交历史
 
 **记住**: 好的提交信息是代码历史的文档，也是团队协作的基础。
+
+---
+
+**相关文档**:
+- [Commit Message 模板](../../../docs/template/commit-message-template.md)
+- [Conventional Commits 规范](https://www.conventionalcommits.org/zh-hans/)

@@ -1,0 +1,8 @@
+📝 docs: 重组文档目录并更新 git-commit-push 技能
+
+- 将竞品/技术对比文档移至 docs/competitor-docs
+- 将 Mermaid 图表规范移至 docs/diagram
+- 将 Speckit 相关文档移至 docs/speckit
+- 将提交模板移至 docs/template
+- 移除 .cursor/rules/git-commit-encoding.mdc
+- 更新 git-commit-push 技能说明与工作流

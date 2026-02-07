@@ -86,6 +86,14 @@ Commit: a7f8e9d
 
 完整列表见 [SKILL.md](./SKILL.md#commitizen-中文规范)
 
+### Windows 用户（中文提交）
+
+PowerShell 下含中文的 `git commit -m "中文"` 易乱码。本 Skill 在 Windows 下会使用 `git commit -F .git-msg.txt`（从 UTF-8 文件读取）确保编码正确。详见 [git-commit-encoding](../../rules/git-commit-encoding.mdc)。
+
+### 提交模板
+
+项目提供 [docs/template/commit-message-template.md](../../../docs/template/commit-message-template.md)，可配置 `git config commit.template docs/template/commit-message-template.md`。
+
 ## 使用场景
 
 ### ✅ 适用场景
@@ -97,6 +105,7 @@ Commit: a7f8e9d
 - 文档更新
 - 依赖升级
 - 紧急热修复
+- 仅提交不推送（"先 commit 不 push"）
 
 ### 🎯 典型命令
 
