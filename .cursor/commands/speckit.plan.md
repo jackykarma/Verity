@@ -73,7 +73,7 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
 
 | 章节 | 内容 |
 |------|------|
-| **Story Detailed Design** | 每个 ST-xxx 的 L2 二层详细设计：目标/DoD、代码落点、核心接口/契约、类图、时序图、异常矩阵、并发/资源管理、测试设计 |
+| **Story Detailed Design** | **所有** ST-xxx 的 L2 二层详细设计（按 Story 序号覆盖，不得遗漏）：目标/DoD、代码落点、核心接口/契约、类图、时序图、异常矩阵、并发/资源管理、测试设计 |
 
 ---
 
@@ -145,7 +145,7 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
    #### 4.3 Deep 阶段
    
    在 Standard 基础上追加：
-   - **Story Detailed Design（L2）**：对每个 ST-xxx 产出：
+   - **Story Detailed Design（L2）**：按 Story 序号（ST-001、ST-002、…）覆盖 **所有** Story，不得遗漏；对每个 ST-xxx 产出：
      - 目标 & DoD
      - 代码落点与边界
      - 核心接口与数据契约

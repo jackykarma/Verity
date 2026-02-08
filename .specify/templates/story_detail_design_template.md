@@ -4,13 +4,23 @@
 
 **使用方式**：必须将本文档与 plan.md 置于同一目录（如同一 Feature 目录下），便于版本管理与评审时一并查看。
 
+**覆盖要求**：执行 Deep 阶段输出时，必须按 Story 序号（ST-001、ST-002、…）覆盖 plan.md 的 Story Breakdown 中**所有** Story 的详细设计，不得遗漏。
+
 ---
 
 ## 文档约定
 
+**覆盖要求**：
 - 对每个 Story，必须同时覆盖：**需求描述**、**功能设计（类图/时序图/触发条件/系统响应）**。
+- **禁止省略或引用**：所有内容须在本文档内完整书写，不得使用「见 A3」「同上」「参见 plan.md」等省略或引用方式。
+
+**图表完整性**：
+- **类图**：须为**完整详细**的类图，覆盖本 Story 涉及的全部关键类、接口与方法签名；**不得引用** plan.md 组件设计（A3）的类图。
+- **时序图**：须为**完整详细**的时序图，覆盖正常流程与所有关键异常分支；**不得引用** plan.md 组件设计的时序图。
 - 类图、时序图须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
-- tasks.md 的每个 Task 应明确引用对应 Story 的详细设计入口（例如：`L2_story_detail_design.md:ST-001:功能设计:时序图`）。
+
+**引用约定**：
+- tasks.md 的每个 Task 应明确引用对应 Story 的详细设计入口（例如：`story_detail_design.md:ST-001:功能设计:时序图`）。
 
 ---
 
@@ -46,9 +56,10 @@
 - [关键错误场景的处理策略：重试/降级/提示]
 - [资源释放与取消语义：协程取消时如何保证一致性]
 
-##### 类图（按项目实际架构，与 plan 全景类图对应）
+##### 类图（完整详细，不可引用）
 
-> **要求**：基于本工程实际架构与真实代码，必须基于当前工程实际代码使用真实类名。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
+> **完整性**：须在本文档内绘制**完整详细**的类图，覆盖本 Story 涉及的全部关键类、接口与方法签名；**不得引用** plan.md 组件设计（A3）的类图。
+> **真实代码**：基于本工程实际架构与真实代码，使用真实类名。遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
@@ -67,11 +78,11 @@ classDiagram
 |---|---|---|
 | [类名] | [做什么] | [方法1]：用途；[方法2]：用途 |
 
-##### 时序图（含正常+异常）
+##### 时序图（完整详细：正常+异常，不可引用）
 
-> **架构**：基于本工程实际架构与真实代码，participant 使用真实类名。参见 `.cursor/rules/specify-diagram-requirements.mdc`。
-> **完整性要求**：时序图必须在 Story 内部完整，覆盖该 Story 从触发到响应的完整方法调用链，包括正常流程和关键异常处理，不得遗漏核心交互步骤。
-> **participant 命名**：必须基于当前工程实际代码使用真实类名。
+> **完整性**：须在本文档内绘制**完整详细**的时序图，覆盖正常流程与**所有**关键异常分支；**不得引用** plan.md 组件设计的时序图。
+> **覆盖要求**：从触发到响应的完整方法调用链，不得遗漏核心交互步骤；须使用 `alt/else` 明确区分正常与异常分支。
+> **真实代码**：participant 使用本工程真实类名。遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
