@@ -23,11 +23,13 @@ $ARGUMENTS
 
 ### 1) 创建 EPIC 文档目录与 epic.md
 
-- 从仓库根目录执行 `.specify/scripts/powershell/create-new-epic.ps1 -Json "$ARGUMENTS"` 并解析 JSON 输出，得到：
-  - `EPIC_ID`（例如 EPIC-001）
-  - `EPIC_BRANCH`（例如 epic/EPIC-001-xxx）
-  - `EPIC_DIR`
-  - `EPIC_FILE`
+- **优先**：从仓库根目录执行脚本创建 EPIC 与 Git 分支（脚本会创建分支 `epic/EPIC-###-<short-name>` 并输出 JSON）：
+  - 执行：`pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -ShortName "<short-name>" "<EPIC 描述>"`  
+    其中 `<short-name>` 为英文短名（如 `android-gallery`），用于目录与分支名；`<EPIC 描述>` 可与用户输入一致。若环境仅支持 PowerShell 5，使用 `powershell -NoProfile -File ...`，且**不要**使用 `&&` 连接命令，应分两步：先 `cd` 到仓库根，再执行脚本。
+  - 解析 JSON 输出得到：`EPIC_ID`、`EPIC_BRANCH`、`EPIC_DIR`、`EPIC_FILE`。
+- **脚本失败时（如中文/编码导致执行失败）**：
+  - 手动创建目录 `specs/epics/EPIC-001-<short-name>/` 与 `epic.md`（见步骤 2、3）。
+  - **必须补建 Git 分支**：在仓库根执行 `git checkout -b epic/EPIC-001-<short-name>`，并在完成报告中说明“分支已补建”。
 
 ### 2) 加载 EPIC 模板并写入 epic.md
 
