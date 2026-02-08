@@ -157,8 +157,8 @@ Plan 支持分三个阶段执行，**默认执行 Lite 阶段**：
 
 | 阶段 | 参数 | 输出内容 | 适用场景 |
 |------|------|----------|----------|
-| **Lite**（默认） | 不指定 或 `--phase=lite` | A0、A1、A2、A3.1、A3.2、Plan-B、Story Breakdown | 小改动/低风险 |
-| **Standard** | `--phase=standard` | A3.3（组件详细设计）、A4-A11（风险/边界/评估） | 中等复杂度 |
+| **Lite**（默认） | 不指定 或 `--phase=lite` | A0、A1、A2、A3.1、A3.2、Plan-B | 小改动/低风险 |
+| **Standard** | `--phase=standard` | Story Breakdown、A3.3（组件详细设计）、A4-A11（风险/边界/评估） | 中等复杂度 |
 | **Deep** | `--phase=deep` | Story Detailed Design（L2 二层详细设计） | 新契约/迁移/高风险 |
 
 **执行顺序**：Lite → Standard → Deep（每个阶段基于前一阶段增量追加）
@@ -183,12 +183,12 @@ Plan 支持分三个阶段执行，**默认执行 Lite 阶段**：
 
 - **Lite 阶段**：
   - A0 领域概念、A1 技术选型、A2 Feature 全景架构
-  - A3.1 整体框架设计、A3.2 Feature 全景（类图/时序图/流程图）
+  - A3.1 整体框架设计、A3.2 Feature 全景（流程图集 + 全景类图 + 关键时序图集 + 疑难点与亮点设计详解若适用）
   - Plan-B（B0-B7：技术背景、架构、数据模型、接口、合规、项目结构）
-  - Story Breakdown（ST-xxx 列表 + 依赖关系 + FR/NFR 覆盖矩阵）
 
 - **Standard 阶段**（在 Lite 基础上追加）：
-  - A3.3 组件内部详细设计
+  - Story Breakdown（ST-xxx 列表 + 依赖关系 + FR/NFR 覆盖矩阵）
+  - A3.3 组件内部详细设计（详细类图 + 完整详细时序图 + 异常清单）
   - A4 技术风险与消解策略
   - A5 边界 & 异常场景枚举
   - A6-A9 算法/功耗/性能/内存评估

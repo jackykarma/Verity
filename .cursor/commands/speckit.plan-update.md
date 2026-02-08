@@ -86,7 +86,7 @@ $ARGUMENTS
    | 假设与约束 | A4、Plan-B（B2、B5 等） |
    | 需求追溯（Story 增删或映射变化） | Story Breakdown |
 
-2. **若 `$ARGUMENTS` 为 plan 范围**（A0、A1、A2、A3、A4、A5、A6、A7、A8、A9、Plan-B、B0–B7、Story Breakdown、概述 等），或含「因 uidesign」「因 epic uidesign」「因 uidesign 的…」：  
+2. **若 `$ARGUMENTS` 为 plan 范围**（A0、A1、A2、A3、A4、A5、A6、A7、A8、A9、A10、A11、Plan-B、B0–B7、Story Breakdown、概述 等），或含「因 uidesign」「因 epic uidesign」「因 uidesign 的…」：  
    直接以用户指定的 plan 章节为**可更新范围**；**不从 spec 推导**（与「纯技术方案变更」相同）。
 
 **plan 章节与 plan-template 的对应**（用于写回时定位）：
@@ -104,6 +104,8 @@ $ARGUMENTS
 | A7 | `### A7. 功耗评估` |
 | A8 | `### A8. 性能评估` |
 | A9 | `### A9. 内存评估` |
+| A10 | `### A10. 安全评估` |
+| A11 | `### A11. 兼容性评估` |
 | Plan-B | `## Plan-B` 或子节 `B0`–`B7` |
 | Story Breakdown | `## Story Breakdown` |
 | Story Detailed Design | `## Story Detailed Design`（按推导或指定是否涉及） |
