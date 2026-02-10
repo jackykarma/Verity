@@ -1,0 +1,1988 @@
+{
+  "version": "2.7",
+  "children": [
+    {
+      "type": "frame",
+      "id": "bi8Au",
+      "x": 0,
+      "y": 0,
+      "name": "相册 App - 主画布",
+      "width": 1800,
+      "height": 1150,
+      "fill": "#0A0A0C",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": 48,
+      "children": [
+        {
+          "type": "frame",
+          "id": "lvHYo",
+          "name": "四屏",
+          "width": "fill_container",
+          "gap": 48,
+          "children": [
+            {
+              "type": "frame",
+              "id": "y82Zz",
+              "name": "时间轴列表 (FEAT-001)",
+              "width": 390,
+              "height": 844,
+              "fill": "#0A0A0C",
+              "cornerRadius": 24,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "huC5c",
+                  "name": "顶栏毛玻璃",
+                  "width": "fill_container",
+                  "height": 56,
+                  "fill": "rgba(40,40,45,0.65)",
+                  "cornerRadius": [
+                    0,
+                    0,
+                    20,
+                    20
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 1
+                    },
+                    "fill": "rgba(255,255,255,0.18)"
+                  },
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "jqz9I",
+                      "name": "navTitle",
+                      "fill": "#FFFFFF",
+                      "content": "照片",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lmNAV",
+                      "name": "navActions",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "llYLC",
+                          "name": "searchIcon",
+                          "width": 24,
+                          "height": 24,
+                          "iconFontName": "search",
+                          "iconFontFamily": "lucide",
+                          "fill": "#FFFFFF"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "x91TQ",
+                          "name": "filterIcon",
+                          "width": 24,
+                          "height": 24,
+                          "iconFontName": "sliders-horizontal",
+                          "iconFontFamily": "lucide",
+                          "fill": "rgba(255,255,255,0.72)"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "5lYWZ",
+                  "name": "filterLabel",
+                  "fill": "rgba(255,255,255,0.5)",
+                  "content": "筛选: 仅照片/按类型",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "VIMgT",
+                  "name": "日/月/年切换",
+                  "width": "fill_container",
+                  "height": 40,
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "hNu8L",
+                      "name": "dayTab",
+                      "width": "fill_container",
+                      "height": 32,
+                      "fill": "rgba(10,132,255,0.25)",
+                      "cornerRadius": 8,
+                      "layout": "vertical",
+                      "padding": [
+                        6,
+                        12
+                      ],
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "KTIt4",
+                          "name": "dayLabel",
+                          "fill": "#0A84FF",
+                          "content": "日",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LibUo",
+                      "name": "monthTab",
+                      "width": "fill_container",
+                      "height": 32,
+                      "fill": "transparent",
+                      "cornerRadius": 8,
+                      "layout": "vertical",
+                      "padding": [
+                        6,
+                        12
+                      ],
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "szbP1",
+                          "name": "monthLabel",
+                          "fill": "rgba(255,255,255,0.72)",
+                          "content": "月",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "nhBxF",
+                      "name": "yearTab",
+                      "width": "fill_container",
+                      "height": 32,
+                      "fill": "transparent",
+                      "cornerRadius": 8,
+                      "layout": "vertical",
+                      "padding": [
+                        6,
+                        12
+                      ],
+                      "justifyContent": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cjNxl",
+                          "name": "yearLabel",
+                          "fill": "rgba(255,255,255,0.72)",
+                          "content": "年",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "AAWBV",
+                  "name": "colHint",
+                  "fill": "rgba(255,255,255,0.4)",
+                  "content": "日3/6列 · 月15列 · 年32列",
+                  "fontFamily": "Inter",
+                  "fontSize": 9,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "dA2Hl",
+                  "name": "照片网格区",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "padding": [
+                    0,
+                    12,
+                    12,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "auMhp",
+                      "name": "row1",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "Ox5Oh",
+                          "name": "thumb1",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "danielesalutari",
+                            "link": "https://unsplash.com/@danielesalutari",
+                            "author": "Daniele Salutari"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1585823151184-3d9e591ee120?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3NzJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "ZsV3S",
+                          "name": "thumb2",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "makitrenko",
+                            "link": "https://unsplash.com/@makitrenko",
+                            "author": "Mykyta Kravčenko"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1681779195059-9829d1d48748?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3NzN8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "7H9KB",
+                          "name": "thumb3",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "sergei_gussev",
+                            "link": "https://unsplash.com/@sergei_gussev",
+                            "author": "Sergei Gussev"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1683041132892-0fe990b3afc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3NzN8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mGmbT",
+                      "name": "row2",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "VVtas",
+                          "name": "thumb4",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "realfish",
+                            "link": "https://unsplash.com/@realfish",
+                            "author": "realfish"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1719840195557-b87e064766e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3NzR8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "k6n3k",
+                          "name": "thumb5",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "vinhthang",
+                            "link": "https://unsplash.com/@vinhthang",
+                            "author": "Vinh Thang"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1643990083739-f2c1a4ee3127?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3NzR8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "2Yukj",
+                          "name": "thumb6",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "areumdown",
+                            "link": "https://unsplash.com/@areumdown",
+                            "author": "Nikki Son"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1649212921970-5bec004b153d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3NzV8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DX4rI",
+                      "name": "row3",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "IVagy",
+                          "name": "t7",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "photographeks",
+                            "link": "https://unsplash.com/@photographeks",
+                            "author": "Erika Ang"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1673421462227-1f0bd053b495?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE5OTV8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "PuxUn",
+                          "name": "t8",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "lucajns",
+                            "link": "https://unsplash.com/@lucajns",
+                            "author": "Luca J"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1609605988071-0d1cfd25044e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE5OTV8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "7Nddh",
+                          "name": "t9",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "blckbch",
+                            "link": "https://unsplash.com/@blckbch",
+                            "author": "Tekeyah Whit"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1706001659622-0e7bcacc91e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE5OTZ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z9aGy",
+                      "name": "row4",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "4awsy",
+                          "name": "t10",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "5tep5",
+                            "link": "https://unsplash.com/@5tep5",
+                            "author": "Aleksandr Popov"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1533193256116-fcaf17cfb3b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE5OTZ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "YcGAN",
+                          "name": "t11",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "shootdelicious",
+                            "link": "https://unsplash.com/@shootdelicious",
+                            "author": "Eiliv Aceron"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1533920379810-6bedac961555?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE5OTd8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "pVX2C",
+                          "name": "t12",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "heppoko_yama",
+                            "link": "https://unsplash.com/@heppoko_yama",
+                            "author": "yamasa-n"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1638684954441-82d8dfec031b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE5OTd8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 120
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "saLQq",
+                  "name": "日期分组条",
+                  "width": "fill_container",
+                  "fill": "rgba(35,35,40,0.55)",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "rgba(255,255,255,0.12)"
+                  },
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "umxit",
+                      "name": "dateLabel",
+                      "fill": "rgba(255,255,255,0.9)",
+                      "content": "今天 · 2026年2月8日",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "meeeK",
+                  "name": "日期分组条-昨天",
+                  "width": "fill_container",
+                  "fill": "rgba(35,35,40,0.55)",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "rgba(255,255,255,0.12)"
+                  },
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "8108Y",
+                      "name": "dateLabelYesterday",
+                      "fill": "rgba(255,255,255,0.9)",
+                      "content": "昨天 · 2026年2月7日",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "c48TC",
+                  "name": "快滑条容器",
+                  "width": 28,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "padding": [
+                    8,
+                    0
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 3,
+                      "id": "v9vDN",
+                      "name": "快滑条thumb",
+                      "fill": "rgba(255,255,255,0.4)",
+                      "width": 6,
+                      "height": 40
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "La9W6",
+                  "name": "快滑条左侧日期",
+                  "width": 72,
+                  "height": 32,
+                  "fill": "rgba(35,35,40,0.8)",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "rgba(255,255,255,0.2)"
+                  },
+                  "layout": "vertical",
+                  "padding": [
+                    4,
+                    8
+                  ],
+                  "justifyContent": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "rsgBy",
+                      "name": "dateHintText",
+                      "fill": "#FFFFFF",
+                      "content": "2026年2月8日",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Dm2jS",
+                  "name": "底部导航毛玻璃",
+                  "width": "fill_container",
+                  "height": 64,
+                  "fill": "rgba(40,40,45,0.7)",
+                  "cornerRadius": [
+                    20,
+                    20,
+                    0,
+                    0
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "left": 1
+                    },
+                    "fill": "rgba(255,255,255,0.2)"
+                  },
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "justifyContent": "space_around",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "48q2F",
+                      "name": "tabPhotos",
+                      "width": 64,
+                      "height": 48,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "7G3IQ",
+                          "name": "tabPhotosIcon",
+                          "width": 26,
+                          "height": 26,
+                          "iconFontName": "images",
+                          "iconFontFamily": "lucide",
+                          "fill": "#0A84FF"
+                        },
+                        {
+                          "type": "text",
+                          "id": "2QmsY",
+                          "name": "tabPhotosLabel",
+                          "fill": "#0A84FF",
+                          "content": "照片",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qTpaQ",
+                      "name": "tabAlbums",
+                      "width": 64,
+                      "height": 48,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "91Qtz",
+                          "name": "tabAlbumsIcon",
+                          "width": 26,
+                          "height": 26,
+                          "iconFontName": "folder",
+                          "iconFontFamily": "lucide",
+                          "fill": "rgba(255,255,255,0.5)"
+                        },
+                        {
+                          "type": "text",
+                          "id": "30fui",
+                          "name": "tabAlbumsLabel",
+                          "fill": "rgba(255,255,255,0.5)",
+                          "content": "图集",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JJsvj",
+                      "name": "tabSearch",
+                      "width": 64,
+                      "height": 48,
+                      "layout": "vertical",
+                      "gap": 4,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "aC0i5",
+                          "name": "tabSearchIcon",
+                          "width": 26,
+                          "height": 26,
+                          "iconFontName": "search",
+                          "iconFontFamily": "lucide",
+                          "fill": "rgba(255,255,255,0.5)"
+                        },
+                        {
+                          "type": "text",
+                          "id": "NiVdy",
+                          "name": "tabSearchLabel",
+                          "fill": "rgba(255,255,255,0.5)",
+                          "content": "搜索",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HNNJy",
+              "name": "图集管理 (FEAT-002)",
+              "width": 390,
+              "height": 844,
+              "fill": "#0A0A0C",
+              "cornerRadius": 24,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "zsvTI",
+                  "name": "顶栏毛玻璃",
+                  "width": "fill_container",
+                  "height": 56,
+                  "fill": "rgba(40,40,45,0.65)",
+                  "cornerRadius": [
+                    0,
+                    0,
+                    20,
+                    20
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 1
+                    },
+                    "fill": "rgba(255,255,255,0.18)"
+                  },
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "fF1CT",
+                      "name": "albumNavTitle",
+                      "fill": "#FFFFFF",
+                      "content": "图集",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "k8ZdA",
+                      "name": "albumAddBtn",
+                      "width": 36,
+                      "height": 36,
+                      "fill": "rgba(10,132,255,0.3)",
+                      "cornerRadius": 18,
+                      "padding": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "3bETO",
+                          "name": "albumAddIcon",
+                          "width": 20,
+                          "height": 20,
+                          "iconFontName": "plus",
+                          "iconFontFamily": "lucide",
+                          "fill": "#0A84FF"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WClsC",
+                  "name": "图集列表",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": [
+                    16,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "wnAUX",
+                      "name": "albumRow1",
+                      "width": "fill_container",
+                      "height": 72,
+                      "fill": "rgba(28,28,30,0.5)",
+                      "cornerRadius": 12,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "rgba(255,255,255,0.06)"
+                      },
+                      "gap": 16,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "uRkVc",
+                          "name": "albumCover1",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "its_arunprakash",
+                            "link": "https://unsplash.com/@its_arunprakash",
+                            "author": "Arun Prakash"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1644908045675-571ecfaaf764?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTh8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": 56,
+                          "height": 56
+                        },
+                        {
+                          "type": "frame",
+                          "id": "UqwPC",
+                          "name": "albumInfo1",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rRjrn",
+                              "name": "albumName1",
+                              "fill": "#FFFFFF",
+                              "content": "最近项目",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dxJCY",
+                              "name": "albumCount1",
+                              "fill": "rgba(255,255,255,0.5)",
+                              "content": "128 张 · 系统图集",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wjQjn",
+                      "name": "albumRow2",
+                      "width": "fill_container",
+                      "height": 72,
+                      "fill": "rgba(28,28,30,0.5)",
+                      "cornerRadius": 12,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "rgba(255,255,255,0.06)"
+                      },
+                      "gap": 16,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "7rJWj",
+                          "name": "albumCover2",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "jirasek_photos",
+                            "link": "https://unsplash.com/@jirasek_photos",
+                            "author": "Jan Jirásek"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1735226241137-fad2240744d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTh8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": 56,
+                          "height": 56
+                        },
+                        {
+                          "type": "frame",
+                          "id": "YWDEA",
+                          "name": "albumInfo2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "35bgw",
+                              "name": "albumName2",
+                              "fill": "#FFFFFF",
+                              "content": "收藏",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "dcRF9",
+                              "name": "albumCount2",
+                              "fill": "rgba(255,255,255,0.5)",
+                              "content": "42 张 · 用户图集",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "zolCU",
+                      "name": "albumRow3",
+                      "width": "fill_container",
+                      "height": 72,
+                      "fill": "rgba(28,28,30,0.5)",
+                      "cornerRadius": 12,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "rgba(255,255,255,0.06)"
+                      },
+                      "gap": 16,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 8,
+                          "id": "EsMSy",
+                          "name": "ac3",
+                          "fill": "#2C2C2E",
+                          "width": 56,
+                          "height": 56
+                        },
+                        {
+                          "type": "frame",
+                          "id": "XWwDx",
+                          "name": "ai3",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "justifyContent": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "A3UXj",
+                              "name": "an3",
+                              "fill": "#FFFFFF",
+                              "content": "我的旅行",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "IH6of",
+                              "name": "ac3sub",
+                              "fill": "rgba(255,255,255,0.5)",
+                              "content": "18 张 · 用户图集 · 可删",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "1dUys",
+                  "name": "媒体类型筛选",
+                  "width": "fill_container",
+                  "height": 36,
+                  "gap": 8,
+                  "padding": [
+                    4,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "8y2FX",
+                      "name": "mtAll",
+                      "fill": "#0A84FF",
+                      "content": "全部",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SVzIj",
+                      "name": "mtVideo",
+                      "fill": "rgba(255,255,255,0.6)",
+                      "content": "视频",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "jUa8W",
+                      "name": "mtGif",
+                      "fill": "rgba(255,255,255,0.6)",
+                      "content": "GIF",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "KFhnj",
+                      "name": "mtLive",
+                      "fill": "rgba(255,255,255,0.6)",
+                      "content": "实况照片",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "e9d3R",
+                      "name": "mtDolby",
+                      "fill": "rgba(255,255,255,0.6)",
+                      "content": "杜比视频",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "m9luF",
+                  "name": "底部导航毛玻璃",
+                  "width": "fill_container",
+                  "height": 64,
+                  "fill": "rgba(40,40,45,0.7)",
+                  "cornerRadius": [
+                    20,
+                    20,
+                    0,
+                    0
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1
+                    },
+                    "fill": "rgba(255,255,255,0.2)"
+                  },
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "justifyContent": "space_around",
+                  "alignItems": "center"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "x6SUL",
+              "name": "搜索 (FEAT-003)",
+              "width": 390,
+              "height": 844,
+              "fill": "#0A0A0C",
+              "cornerRadius": 24,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "HvRgz",
+                  "name": "顶栏毛玻璃",
+                  "width": "fill_container",
+                  "height": 56,
+                  "fill": "rgba(40,40,45,0.65)",
+                  "cornerRadius": [
+                    0,
+                    0,
+                    20,
+                    20
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 1
+                    },
+                    "fill": "rgba(255,255,255,0.18)"
+                  },
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "8lRfE",
+                      "name": "搜索框毛玻璃",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "rgba(50,50,55,0.6)",
+                      "cornerRadius": 12,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "rgba(255,255,255,0.15)"
+                      },
+                      "gap": 12,
+                      "padding": [
+                        8,
+                        16
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "TxeTu",
+                          "name": "searchBarIcon",
+                          "width": 20,
+                          "height": 20,
+                          "iconFontName": "search",
+                          "iconFontFamily": "lucide",
+                          "fill": "rgba(255,255,255,0.5)"
+                        },
+                        {
+                          "type": "text",
+                          "id": "CNYGO",
+                          "name": "searchBarPlaceholder",
+                          "fill": "rgba(255,255,255,0.45)",
+                          "content": "自然语言或关键词、日期、图集搜索…",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "TuxAH",
+                  "name": "筛选条件",
+                  "width": "fill_container",
+                  "height": 44,
+                  "gap": 8,
+                  "padding": [
+                    8,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "pRonB",
+                      "name": "filterChip1",
+                      "height": 28,
+                      "fill": "rgba(10,132,255,0.25)",
+                      "cornerRadius": 14,
+                      "padding": [
+                        6,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "b6Gkj",
+                          "name": "filterChip1Text",
+                          "fill": "#0A84FF",
+                          "content": "日期",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "0Dlaw",
+                      "name": "filterChip2",
+                      "height": 28,
+                      "fill": "rgba(44,44,46,0.8)",
+                      "cornerRadius": 14,
+                      "padding": [
+                        6,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "OV9hu",
+                          "name": "filterChip2Text",
+                          "fill": "rgba(255,255,255,0.72)",
+                          "content": "图集",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "s7fvi",
+                      "name": "keywordChip",
+                      "height": 28,
+                      "fill": "rgba(44,44,46,0.8)",
+                      "cornerRadius": 14,
+                      "padding": [
+                        6,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "KmWG7",
+                          "name": "keywordChipText",
+                          "fill": "rgba(255,255,255,0.72)",
+                          "content": "关键词",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hdpjw",
+                  "name": "搜索结果网格",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": [
+                    12,
+                    20
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "wxtcn",
+                      "name": "searchRow1",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "sDwdI",
+                          "name": "sr1",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "thesologirlstravelguide",
+                            "link": "https://unsplash.com/@thesologirlstravelguide",
+                            "author": "Alexa West"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1573790387438-4da905039392?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTh8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "mdAFh",
+                          "name": "sr2",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "lianamikah",
+                            "link": "https://unsplash.com/@lianamikah",
+                            "author": "Liana Mikah"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1528741319675-fab004a2248d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTl8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "zHxg3",
+                          "name": "sr3",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "uneebo_office_design",
+                            "link": "https://unsplash.com/@uneebo_office_design",
+                            "author": "Uneebo Office Design"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1594235046256-90e5572fd5f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTl8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "4UKuF",
+                      "name": "searchRow2",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "ucUk2",
+                          "name": "sr4",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "champetsfamily",
+                            "link": "https://unsplash.com/@champetsfamily",
+                            "author": "Cham Pets Family"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1761203431092-d5693957be10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "KZU0f",
+                          "name": "sr5",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "matt_shalvatis",
+                            "link": "https://unsplash.com/@matt_shalvatis",
+                            "author": "Matt Shalvatis"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1526393646763-c5158f1c5133?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTB8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "g3jg3",
+                          "name": "sr6",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "aburgosphoto",
+                            "link": "https://unsplash.com/@aburgosphoto",
+                            "author": "Alfredo Burgos"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1702827677392-b19529fcf262?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTF8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "gGJHs",
+                      "name": "searchRow3",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "aMqN4",
+                          "name": "sr7",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "howardbouchevereau",
+                            "link": "https://unsplash.com/@howardbouchevereau",
+                            "author": "Howard Bouchevereau"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjIwMDJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "C51Yr",
+                          "name": "sr8",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "aahubs",
+                            "link": "https://unsplash.com/@aahubs",
+                            "author": "Aaron Huber"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1523995669073-7f16bd0e82f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjIwMDJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "aJPMf",
+                          "name": "sr9",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "akramhuseyn",
+                            "link": "https://unsplash.com/@akramhuseyn",
+                            "author": "Akram Huseyn"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1689180822802-a50a2d7436c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjIwMDJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "6tAVe",
+                      "name": "searchRow4",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "WfcVh",
+                          "name": "sr10",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "arturokst",
+                            "link": "https://unsplash.com/@arturokst",
+                            "author": "Arturo Castaneyra"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1506749547535-fe88ffa57a7a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjIwMDN8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "5WFJB",
+                          "name": "sr11",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "pablomerchanm",
+                            "link": "https://unsplash.com/@pablomerchanm",
+                            "author": "Pablo Merchán Montes"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1515088167831-556650cef41d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjIwMDN8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 10,
+                          "id": "noANr",
+                          "name": "sr12",
+                          "metadata": {
+                            "type": "unsplash",
+                            "username": "hermansyah",
+                            "link": "https://unsplash.com/@hermansyah",
+                            "author": "Hermansyah"
+                          },
+                          "fill": {
+                            "type": "image",
+                            "enabled": true,
+                            "url": "https://images.unsplash.com/photo-1506477331477-33d5d8b3dc85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjIwMDR8&ixlib=rb-4.1.0&q=80&w=1080",
+                            "mode": "fill"
+                          },
+                          "width": "fill_container",
+                          "height": 110
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "gfbix",
+                      "name": "空状态说明",
+                      "width": "fill_container",
+                      "fill": "transparent",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "padding": 24,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "VcoIK",
+                          "name": "emptyStateText",
+                          "fill": "rgba(255,255,255,0.45)",
+                          "content": "无匹配结果时显示空状态提示（FEAT-003 AC-005）",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "lbAGS",
+                  "name": "底部导航毛玻璃",
+                  "width": "fill_container",
+                  "height": 64,
+                  "fill": "rgba(40,40,45,0.7)",
+                  "cornerRadius": [
+                    20,
+                    20,
+                    0,
+                    0
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1
+                    },
+                    "fill": "rgba(255,255,255,0.2)"
+                  },
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "justifyContent": "space_around",
+                  "alignItems": "center"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "sx39g",
+              "name": "大图浏览 (FEAT-004)",
+              "width": 390,
+              "height": 844,
+              "fill": "#0A0A0C",
+              "cornerRadius": 24,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "unaOg",
+                  "name": "大图区域",
+                  "metadata": {
+                    "type": "unsplash",
+                    "username": "0leil",
+                    "link": "https://unsplash.com/@0leil",
+                    "author": "Quentin Schulz"
+                  },
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "https://images.unsplash.com/photo-1673189912029-4761a695a887?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTF8&ixlib=rb-4.1.0&q=80&w=1080",
+                    "mode": "fill"
+                  },
+                  "width": "fill_container",
+                  "height": "fill_container"
+                },
+                {
+                  "type": "frame",
+                  "id": "xQLgF",
+                  "name": "顶部毛玻璃",
+                  "width": "fill_container",
+                  "height": 52,
+                  "fill": "rgba(0,0,0,0.35)",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "rgba(255,255,255,0.12)"
+                  },
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "jpPuH",
+                      "name": "viewerBack",
+                      "width": 28,
+                      "height": 28,
+                      "iconFontName": "chevron-left",
+                      "iconFontFamily": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "umm7T",
+                      "name": "viewerTitle",
+                      "fill": "rgba(255,255,255,0.9)",
+                      "content": "来自时间轴 · 2026年2月8日 · 1/24",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "7qrGa",
+                      "name": "viewerMore",
+                      "width": 24,
+                      "height": 24,
+                      "iconFontName": "ellipsis",
+                      "iconFontFamily": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "fW9uk",
+                      "name": "sourceHint",
+                      "fill": "rgba(255,255,255,0.5)",
+                      "content": "支持图片/实况图/视频 · 缩放/滑动切换",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "TbOXw",
+                  "name": "缩图轴",
+                  "width": "fill_container",
+                  "height": 72,
+                  "fill": "rgba(40,40,45,0.75)",
+                  "cornerRadius": [
+                    16,
+                    16,
+                    0,
+                    0
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1
+                    },
+                    "fill": "rgba(255,255,255,0.15)"
+                  },
+                  "gap": 8,
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "QZbup",
+                      "name": "ts1",
+                      "metadata": {
+                        "type": "unsplash",
+                        "username": "xaviercoiffic",
+                        "link": "https://unsplash.com/@xaviercoiffic",
+                        "author": "Xavier  Coiffic"
+                      },
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1529348915581-73628f0cf212?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTF8&ixlib=rb-4.1.0&q=80&w=1080",
+                        "mode": "fill"
+                      },
+                      "width": 48,
+                      "height": 48,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 2,
+                        "fill": "#0A84FF"
+                      }
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "HHYC6",
+                      "name": "ts2",
+                      "metadata": {
+                        "type": "unsplash",
+                        "username": "karynaviktori",
+                        "link": "https://unsplash.com/@karynaviktori",
+                        "author": "Karyna Chorna"
+                      },
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1730573247682-e497c809a4ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                        "mode": "fill"
+                      },
+                      "width": 48,
+                      "height": 48
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "s9q7X",
+                      "name": "ts3",
+                      "metadata": {
+                        "type": "unsplash",
+                        "username": "tim0at0unsplash",
+                        "link": "https://unsplash.com/@tim0at0unsplash",
+                        "author": "Tim Photoguy"
+                      },
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1623201136896-092f404e18d9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTJ8&ixlib=rb-4.1.0&q=80&w=1080",
+                        "mode": "fill"
+                      },
+                      "width": 48,
+                      "height": 48
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "RYmLG",
+                      "name": "ts4",
+                      "metadata": {
+                        "type": "unsplash",
+                        "username": "nate_dumlao",
+                        "link": "https://unsplash.com/@nate_dumlao",
+                        "author": "Nathan Dumlao"
+                      },
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1583165278997-0250ea5d72e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTN8&ixlib=rb-4.1.0&q=80&w=1080",
+                        "mode": "fill"
+                      },
+                      "width": 48,
+                      "height": 48
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 6,
+                      "id": "HRcq9",
+                      "name": "ts5",
+                      "metadata": {
+                        "type": "unsplash",
+                        "username": "europeana",
+                        "link": "https://unsplash.com/@europeana",
+                        "author": "Europeana"
+                      },
+                      "fill": {
+                        "type": "image",
+                        "enabled": true,
+                        "url": "https://images.unsplash.com/photo-1748202621870-2bb836ea620a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NDM0ODN8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzA1NjE3OTN8&ixlib=rb-4.1.0&q=80&w=1080",
+                        "mode": "fill"
+                      },
+                      "width": 48,
+                      "height": 48
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xb4Pn",
+                  "name": "底部导航毛玻璃",
+                  "width": "fill_container",
+                  "height": 64,
+                  "fill": "rgba(40,40,45,0.7)",
+                  "cornerRadius": [
+                    20,
+                    20,
+                    0,
+                    0
+                  ],
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1
+                    },
+                    "fill": "rgba(255,255,255,0.2)"
+                  },
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "justifyContent": "space_around",
+                  "alignItems": "center"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "gWjz8",
+          "name": "动效与毛玻璃说明",
+          "width": "fill_container",
+          "fill": "rgba(28,28,30,0.9)",
+          "cornerRadius": 16,
+          "stroke": {
+            "align": "inside",
+            "thickness": 1,
+            "fill": "rgba(255,255,255,0.12)"
+          },
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "yTmzv",
+              "name": "motionTitle",
+              "fill": "#FFFFFF",
+              "content": "Apple Music 风格规范",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "ia5b7",
+              "name": "motion1",
+              "fill": "rgba(255,255,255,0.85)",
+              "content": "• 毛玻璃：顶栏、底栏、搜索框、快滑条已用半透明+高光边；实现时需叠加 Backdrop Blur 才有真实毛玻璃质感。",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "pj7Qp",
+              "name": "motion2",
+              "fill": "rgba(255,255,255,0.85)",
+              "content": "• 过渡：页面切换、列表进入大图使用共享元素 + 淡入淡出，时长 300–350ms",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "enf1i",
+              "name": "motion3",
+              "fill": "rgba(255,255,255,0.85)",
+              "content": "• 圆角：卡片 12px、按钮 8–16px、屏幕外框 24px",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "YT5TV",
+              "name": "motion4",
+              "fill": "rgba(255,255,255,0.85)",
+              "content": "• 主色：背景 #0A0A0C / #1C1C1E，强调 #0A84FF",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
