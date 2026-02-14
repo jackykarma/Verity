@@ -3,7 +3,7 @@
 本文档与 **plan.md** 配套使用：Plan Level = Deep 时，各 Story 的 L2 详细设计在此文档中编写。
 
 **Feature**：FEAT-004 大图浏览  
-**Plan Version**：v0.1.4  
+**Plan Version**：v0.1.5  
 **覆盖 Story**：ST-001～ST-004
 
 ---
@@ -180,12 +180,12 @@ sequenceDiagram
 **核心实现思路**：
 - PhotoViewerScreen 接收 MediaViewerContext（itemList, currentIndex, source）；HorizontalPager 初始 page=currentIndex，beyondViewportPageCount=1 预加载邻页。
 - 共享元素：Modifier.sharedElement(key = "image-${item.id}") 与 FEAT-001 列表端一致；进入时同步 load 当前页。
-- PhotoViewerViewModel：LoadPage(index) → BigImageLoader.load → State.currentBitmap；OnPageChanged(index) → load(index)。
+- PhotoViewerViewModel：Init(context) 触发加载当前页；OnPageChanged(index) 触发邻页 load；内部 loadPage(index) 调用 BigImageLoader.load → State.loadedBitmaps。
 
 **关键类与职责划分**：
 - PhotoViewerScreen：HorizontalPager、zoomable、sharedElement
-- PhotoViewerViewModel：LoadPage、OnPageChanged、State 管理
-- PhotoViewerUiState：currentIndex、bitmaps、itemList
+- PhotoViewerViewModel：Init、OnPageChanged、OnThumbClick、State 管理
+- PhotoViewerUiState：currentIndex、loadedBitmaps、itemList
 
 ##### 类图（完整详细）
 
@@ -212,14 +212,15 @@ classDiagram
     class PhotoViewerUiState {
         +itemList: List~MediaItem~
         +currentIndex: Int
-        +bitmaps: Map~Int, Bitmap~
+        +loadedBitmaps: Map~Int, Bitmap~
         +errorIndex: Int?
     }
 
     class PhotoViewerIntent {
         <<sealed>>
-        LoadPage(index)
-        OnPageChanged(index)
+        Init(context: MediaViewerContext)
+        OnPageChanged(index: Int)
+        OnThumbClick(index: Int)
     }
 
     PhotoViewerScreen --> PhotoViewerViewModel : uses
@@ -232,10 +233,10 @@ classDiagram
 | 类/接口 | 核心职责 | 关键方法说明 |
 |---------|----------|--------------|
 | PhotoViewerScreen | 大图 UI | HorizontalPager、ZoomableImage、sharedElement |
-| PhotoViewerViewModel | 大图 MVI | LoadPage、OnPageChanged |
-| PhotoViewerUiState | 大图状态 | itemList、currentIndex、bitmaps |
+| PhotoViewerViewModel | 大图 MVI | Init、OnPageChanged、OnThumbClick（内部 loadPage） |
+| PhotoViewerUiState | 大图状态 | itemList、currentIndex、loadedBitmaps |
 
-##### 时序图（完整详细：进入大图 LoadPage）
+##### 时序图（完整详细：进入大图 Init）
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
@@ -248,11 +249,11 @@ sequenceDiagram
     participant Loader as BigImageLoader
 
     Nav->>UI: PhotoViewerScreen(context)
-    UI->>VM: onIntent(LoadPage(currentIndex))
+    UI->>VM: onIntent(Init(context))
     VM->>Loader: load(uri, width, height)
     alt 成功
         Loader-->>VM: Bitmap
-        VM->>VM: State.copy(bitmaps += index -> bitmap)
+        VM->>VM: State.copy(loadedBitmaps += index -> bitmap)
         VM-->>UI: State
         UI->>UI: 展示大图，共享元素过渡
     else EX-001 失败
@@ -266,8 +267,8 @@ sequenceDiagram
 
 | 触发条件 | 系统响应（正常流程） | 异常处理 |
 |----------|----------------------|----------|
-| 进入大图 | LoadPage(currentIndex) → 展示 | EX-001：占位 |
-| OnPageChanged | LoadPage(newIndex) | 同上 |
+| 进入大图 | Init(context) → loadPage(currentIndex) → 展示 | EX-001：占位 |
+| OnPageChanged | loadPage(newIndex)、recycle 离屏 | 同上 |
 
 ##### 异常矩阵
 
@@ -534,3 +535,11 @@ sequenceDiagram
 | ImageDecoder | ST-001 | ST-001 类图 | 数据层 |
 
 **自检**：上述矩阵包含 A3.2.2 全景类图中的全部 7 个类，无遗漏。
+
+---
+
+## 变更记录
+
+| 日期 | 变更摘要 |
+|------|----------|
+| 2026-02-14 | 对齐 plan：PhotoViewerIntent 统一为 Init/OnPageChanged/OnThumbClick；PhotoViewerUiState.bitmaps→loadedBitmaps；Plan Version v0.1.5 |

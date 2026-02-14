@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Verity"
 include(":app")
+include(":feature-gallery")

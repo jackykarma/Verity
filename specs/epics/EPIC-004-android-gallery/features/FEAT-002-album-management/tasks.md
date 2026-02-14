@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-002
 **Feature Version**：v0.1.2（来自 `spec.md`）
-**Plan Version**：v0.1.4（来自 `plan.md`）
+**Plan Version**：v0.1.5（来自 `plan.md`）
 **Tasks Version**：v0.1.1
 **输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`、`story_detail_design.md`）
 
@@ -36,11 +36,11 @@
 
 **目标**：对齐版本、冻结设计输入，避免 Implement 期返工
 
-- [ ] T001 在 `specs/epics/EPIC-004-android-gallery/features/FEAT-002-album-management/` 中核对 `spec.md`、`plan.md` 的 Version 字段一致性并补齐变更记录
+- [x] T001 在 `specs/epics/EPIC-004-android-gallery/features/FEAT-002-album-management/` 中核对 `spec.md`、`plan.md` 的 Version 字段一致性并补齐变更记录
   - **依赖**：无
   - **设计引用**：N/A
   - **步骤**：
-    - 1) 确认 `Feature Version`（v0.1.2）、`Plan Version`（v0.1.4）已填写
+    - 1) 确认 `Feature Version`（v0.1.2）、`Plan Version`（v0.1.5）已填写
     - 2) 确认 Plan 的 Story Breakdown 已完成（ST-001～ST-004）
     - 3) 确认 FEAT-001 的 MediaRepository、MediaViewerContext 已实现
   - **验证**：
@@ -53,7 +53,7 @@
 
 **目标**：本 Feature 与 FEAT-001 共处 `:feature-gallery`，无需新增模块；确认 FEAT-001 已完成并可用
 
-- [ ] T010 确认 feature-gallery 模块已包含 FEAT-001 的 MediaRepository、MediaViewerContext、MediaItem；在 `feature-gallery/build.gradle.kts` 中补充 Room 依赖（若尚未添加）
+- [x] T010 确认 feature-gallery 模块已包含 FEAT-001 的 MediaRepository、MediaViewerContext、MediaItem；在 `feature-gallery/build.gradle.kts` 中补充 Room 依赖（若尚未添加）
   - **依赖**：T001
   - **设计引用**：plan.md:B7、依赖 FEAT-001
   - **步骤**：
@@ -71,7 +71,7 @@
 
 **验证方式**：单元测试 DAO、Repository；Migration 测试；NFR-REL-001 增删失败明确提示
 
-- [ ] T020 [P] [ST-001] 在 `feature-gallery/.../domain/Album.kt` 中定义 Album 实体（id, name, source: 系统/用户, coverUri 等）
+- [x] T020 [P] [ST-001] 在 `feature-gallery/.../domain/Album.kt` 中定义 Album 实体（id, name, source: 系统/用户, coverUri 等）
   - **依赖**：T010
   - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:领域概念
   - **步骤**：
@@ -81,7 +81,7 @@
     - [ ] 编译通过
   - **产物**：`domain/Album.kt`
 
-- [ ] T021 [P] [ST-001] 在 `feature-gallery/.../domain/AlbumRepository.kt` 中定义 AlbumRepository 接口（getAllAlbums、createAlbum、deleteAlbum、addMediaToAlbum、removeMediaFromAlbum）
+- [x] T021 [P] [ST-001] 在 `feature-gallery/.../domain/AlbumRepository.kt` 中定义 AlbumRepository 接口（getAllAlbums、createAlbum、deleteAlbum、addMediaToAlbum、removeMediaFromAlbum）
   - **依赖**：T010
   - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:B4.1:AlbumRepository
   - **步骤**：
@@ -90,7 +90,7 @@
     - [ ] 接口与 plan 一致
   - **产物**：`domain/AlbumRepository.kt`
 
-- [ ] T022 [ST-001] 在 `feature-gallery/.../data/album/` 中创建 AlbumEntity、AlbumDao、album_media 关联表，以及 AlbumDatabase
+- [x] T022 [ST-001] 在 `feature-gallery/.../data/album/` 中创建 AlbumEntity、AlbumDao、album_media 关联表，以及 AlbumDatabase
   - **依赖**：T020
   - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:B7:AlbumEntity、AlbumDao
   - **步骤**：
@@ -102,7 +102,7 @@
     - [ ] Migration 测试
   - **产物**：`data/album/AlbumEntity.kt`、`AlbumDao.kt`、`AlbumDatabase.kt`
 
-- [ ] T023 [ST-001] 在 `feature-gallery/.../data/album/AlbumRepositoryImpl.kt` 中实现 AlbumRepositoryImpl：合并系统 bucket（MediaStore BUCKET_ID/BUCKET_DISPLAY_NAME）与用户图集；实现 getAllAlbums、createAlbum、deleteAlbum、addMediaToAlbum、removeMediaFromAlbum
+- [x] T023 [ST-001] 在 `feature-gallery/.../data/album/AlbumRepositoryImpl.kt` 中实现 AlbumRepositoryImpl：合并系统 bucket（MediaStore BUCKET_ID/BUCKET_DISPLAY_NAME）与用户图集；实现 getAllAlbums、createAlbum、deleteAlbum、addMediaToAlbum、removeMediaFromAlbum
   - **依赖**：T021、T022、FEAT-001 MediaRepository/MediaStoreDataSource
   - **设计引用**：story_detail_design.md:ST-001:功能设计:时序图；plan.md:A3:方案选型（系统 bucket + Room）
   - **步骤**：
@@ -126,7 +126,7 @@
 
 **验证方式**：UI 测试
 
-- [ ] T030 [ST-002] 在 `feature-gallery/.../album/AlbumListViewModel.kt` 中实现 AlbumListViewModel（MVI）：加载图集列表、CreateAlbum、DeleteAlbum Intent
+- [x] T030 [ST-002] 在 `feature-gallery/.../album/AlbumListViewModel.kt` 中实现 AlbumListViewModel（MVI）：加载图集列表、CreateAlbum、DeleteAlbum Intent
   - **依赖**：T023
   - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:AlbumListViewModel
   - **步骤**：
@@ -137,7 +137,7 @@
     - [ ] ViewModel 单元测试或 UI 验证
   - **产物**：`album/AlbumListViewModel.kt`
 
-- [ ] T031 [ST-002] 在 `feature-gallery/.../album/AlbumListScreen.kt` 中实现 AlbumListScreen：图集列表 UI（系统+用户），新增入口、「+」按钮
+- [x] T031 [ST-002] 在 `feature-gallery/.../album/AlbumListScreen.kt` 中实现 AlbumListScreen：图集列表 UI（系统+用户），新增入口、「+」按钮
   - **依赖**：T030
   - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:AlbumListScreen、ux-design
   - **步骤**：
@@ -147,7 +147,7 @@
     - [ ] 图集列表正确展示
   - **产物**：`album/AlbumListScreen.kt`
 
-- [ ] T032 [ST-002] 在 `feature-gallery/.../album/CreateAlbumDialog.kt` 中实现 CreateAlbumDialog：输入图集名称、取消/创建按钮
+- [x] T032 [ST-002] 在 `feature-gallery/.../album/CreateAlbumDialog.kt` 中实现 CreateAlbumDialog：输入图集名称、取消/创建按钮
   - **依赖**：T030
   - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:CreateAlbumDialog、ux-design:创建图集弹窗
   - **步骤**：
@@ -167,7 +167,7 @@
 
 **验证方式**：UI 测试类型筛选；NFR-PERF-001
 
-- [ ] T040 [ST-003] 扩展 MediaRepository（或 MediaStoreDataSource）支持按 albumId 筛选：selection 增加 `_ID IN (SELECT media_id FROM album_media WHERE album_id=?)`；支持 mediaTypeFilter 参数（图片、视频、GIF、实况、杜比）
+- [x] T040 [ST-003] 扩展 MediaRepository（或 MediaStoreDataSource）支持按 albumId 筛选：selection 增加 `_ID IN (SELECT media_id FROM album_media WHERE album_id=?)`；支持 mediaTypeFilter 参数（图片、视频、GIF、实况、杜比）
   - **依赖**：T023、FEAT-001 MediaRepository
   - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:MediaRepository 按 albumId 筛选
   - **步骤**：
@@ -178,7 +178,7 @@
     - [ ] 图集内列表正确加载
   - **产物**：`data/MediaRepositoryImpl.kt` 或 `MediaStoreDataSource.kt` 更新
 
-- [ ] T041 [ST-003] 在 `feature-gallery/.../album/AlbumDetailViewModel.kt` 中实现 AlbumDetailViewModel：加载图集内媒体列表、MediaTypeFilter 切换（图片、视频、GIF、实况、杜比）
+- [x] T041 [ST-003] 在 `feature-gallery/.../album/AlbumDetailViewModel.kt` 中实现 AlbumDetailViewModel：加载图集内媒体列表、MediaTypeFilter 切换（图片、视频、GIF、实况、杜比）
   - **依赖**：T040
   - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:AlbumDetailViewModel、FR-006
   - **步骤**：
@@ -188,7 +188,7 @@
     - [ ] 类型筛选后列表正确
   - **产物**：`album/AlbumDetailViewModel.kt`
 
-- [ ] T042 [ST-003] 在 `feature-gallery/.../album/AlbumDetailScreen.kt` 中实现 AlbumDetailScreen：复用 FEAT-001 网格（LazyVerticalGrid + Coil）；日/月/年切换改为 MediaTypeFilter Tab；点击进入大图，构造 MediaViewerContext(source="album")
+- [x] T042 [ST-003] 在 `feature-gallery/.../album/AlbumDetailScreen.kt` 中实现 AlbumDetailScreen：复用 FEAT-001 网格（LazyVerticalGrid + Coil）；日/月/年切换改为 MediaTypeFilter Tab；点击进入大图，构造 MediaViewerContext(source="album")
   - **依赖**：T041
   - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:AlbumDetailScreen、B4.1:MediaViewerContext
   - **步骤**：
@@ -210,7 +210,7 @@
 
 **验证方式**：端到端测试添加/移出；NFR-REL-001
 
-- [ ] T050 [ST-004] 在 `feature-gallery/.../album/MediaPickerSheet.kt` 中实现 MediaPickerSheet：BottomSheet + 多选网格，从媒体库选择照片
+- [x] T050 [ST-004] 在 `feature-gallery/.../album/MediaPickerSheet.kt` 中实现 MediaPickerSheet：BottomSheet + 多选网格，从媒体库选择照片
   - **依赖**：T042
   - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:MediaPickerSheet、ux-design:选图面板
   - **步骤**：
@@ -220,7 +220,7 @@
     - [ ] 多选可选、确认返回
   - **产物**：`album/MediaPickerSheet.kt`
 
-- [ ] T051 [ST-004] 在 AlbumDetailViewModel 中实现 AddMediaToAlbum、RemoveMediaFromAlbum；AlbumDetailScreen 中「添加照片」打开 MediaPickerSheet，「移出」从当前列表移除
+- [x] T051 [ST-004] 在 AlbumDetailViewModel 中实现 AddMediaToAlbum、RemoveMediaFromAlbum；AlbumDetailScreen 中「添加照片」打开 MediaPickerSheet，「移出」从当前列表移除
   - **依赖**：T050、T023
   - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:FR-004
   - **步骤**：
@@ -240,7 +240,7 @@
 
 **目标**：主导航集成、空态与错误处理
 
-- [ ] T060 在 app 或导航层注册 AlbumListScreen、AlbumDetailScreen 路由，并接入主导航（图集入口）
+- [x] T060 在 app 或导航层注册 AlbumListScreen、AlbumDetailScreen 路由，并接入主导航（图集入口）
   - **依赖**：T031、T042
   - **设计引用**：plan.md:ux-design、主导航
   - **步骤**：
@@ -250,7 +250,7 @@
     - [ ] 可从主导航进入图集
   - **产物**：导航配置
 
-- [ ] T061 图集列表空态、图集内空态、媒体库不可用时的降级提示
+- [x] T061 图集列表空态、图集内空态、媒体库不可用时的降级提示
   - **依赖**：T031、T042
   - **设计引用**：plan.md:外部依赖策略、NFR-REL-001
   - **步骤**：

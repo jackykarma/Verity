@@ -2,7 +2,7 @@
 
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-004
-**Feature Version**：v0.1.0（来自 `spec.md`）
+**Feature Version**：v0.1.3（来自 `spec.md`）
 **Plan Version**：v0.1.5
 **Plan Level**：Deep
 **当前工作分支**：`epic/EPIC-004-android-gallery`
@@ -20,6 +20,7 @@
 | v0.1.3 | 2026-02-12 | A0.3、A3.2.2、概述 | DDD 与 7 大原则对应表、关键类职责 DDD/原则列、前置检查对齐 | 对齐 epic-arch | 否 |
 | v0.1.4 | 2026-02-14 | Deep 阶段 | Story Detailed Design（L2）：ST-001～ST-004，见 story_detail_design.md | Story Detailed Design | 否 |
 | v0.1.5 | 2026-02-14 | Story 依赖图、A3 | 移除 Story 依赖图节点标签的 `<br/>`；修正 VideoPlayerComponent 节点 `\n` | Mermaid 渲染 | 否 |
+| v0.1.6 | 2026-02-14 | Feature Version | 对齐 spec 事实源，Feature Version v0.1.0→v0.1.3 | 文档头 | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 

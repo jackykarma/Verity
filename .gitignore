@@ -15,3 +15,7 @@
 .cxx
 local.properties
 .git-msg.txt
+*.log
+.env*
+*.class
+*.jar
