@@ -3,8 +3,8 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-003
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.3
-**Plan Level**：Standard
+**Plan Version**：v0.1.4
+**Plan Level**：Deep
 **当前工作分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-003-search/`
 **日期**：2026-02-12
@@ -18,6 +18,7 @@
 | v0.1.1 | 2026-02-12 | Standard 阶段 | A3.3、Story Breakdown、A4-A11 | 全文 | 否 |
 | v0.1.2 | 2026-02-12 | A0.3、A3.2.2、概述 | DDD 与 7 大原则对应表、关键类职责 DDD/原则列、前置检查对齐 | 对齐 epic-arch | 否 |
 | v0.1.3 | 2026-02-12 | A3.2.1、A3.2.2 | 流程 1 执行搜索流程图与全景类图 Mermaid 语法修复，消除 Invalid Mermaid Codes | 流程图、类图渲染 | 否 |
+| v0.1.4 | 2026-02-14 | Deep 阶段 | Story Detailed Design（L2）：ST-001～ST-002，见 story_detail_design.md | Story Detailed Design | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -831,3 +832,11 @@ flowchart TD
 | ST-001 | Infrastructure | 5 | FEAT-001, FEAT-002 |
 | ST-002 | Functional | 4 | ST-001 |
 | **总计** | — | **9 人天** | — |
+
+---
+
+## Story Detailed Design（Plan Level = Deep 时执行）
+
+各 Story 的 L2 二层详细设计已写入 **[story_detail_design.md](./story_detail_design.md)**，覆盖 ST-001～ST-002，包含：目标与 DoD、代码落点与边界、核心接口与契约、类图、时序图（含正常+异常）、异常矩阵、并发/生命周期/资源管理、验证与测试设计。
+
+tasks.md 的 Task 应引用：`story_detail_design.md:ST-xxx:功能设计:时序图` 等入口。

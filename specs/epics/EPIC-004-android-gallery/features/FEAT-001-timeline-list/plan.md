@@ -3,8 +3,8 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-001
 **Feature Version**：v0.1.2（来自 `spec.md`）
-**Plan Version**：v0.1.6
-**Plan Level**：Standard
+**Plan Version**：v0.1.7
+**Plan Level**：Deep
 **当前工作分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-001-timeline-list/`
 **日期**：2026-02-12
@@ -21,6 +21,7 @@
 | v0.1.4 | 2026-02-12 | A3.2.4                   | 疑难点 4 双指捏合与日/月/年视图切换、疑难点 5 点击进入大图共享元素过渡实现方案 | FR-003, FR-006       | 否        |
 | v0.1.5 | 2026-02-12 | A0.3、A3.2.2              | DDD 与面向对象 7 大原则对应表、关键类职责 DDD/原则列            | 对齐 epic-arch         | 否        |
 | v0.1.6 | 2026-02-12 | A2.1.1、A3.2.2            | 明确时间轴单屏、日/月/年为 viewMode 三种展示模式               | 澄清界面结构           | 否        |
+| v0.1.7 | 2026-02-14 | Deep 阶段                 | Story Detailed Design（L2）：ST-001～ST-005，见 story_detail_design.md | Story Detailed Design | 否        |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -1328,3 +1329,11 @@ flowchart TD
 | ST-004   | Optimization   | 3         | ST-003         | 否             |
 | ST-005   | Functional     | 2         | ST-002, ST-003 | 可与 ST-004 并行  |
 | **总计**   | —              | **19 人天** | —              | 实际日历约 15–17 天 |
+
+---
+
+## Story Detailed Design（Plan Level = Deep 时执行）
+
+各 Story 的 L2 二层详细设计已写入 **[story_detail_design.md](./story_detail_design.md)**，覆盖 ST-001～ST-005，包含：目标与 DoD、代码落点与边界、核心接口与契约、类图、时序图（含正常+异常）、异常矩阵、并发/生命周期/资源管理、验证与测试设计。
+
+tasks.md 的 Task 应引用：`story_detail_design.md:ST-xxx:功能设计:时序图` 等入口。
