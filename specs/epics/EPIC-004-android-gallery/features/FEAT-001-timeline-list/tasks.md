@@ -2,15 +2,15 @@
 
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-001
-**Feature Version**：v0.1.2（来自 `spec.md`）
-**Plan Version**：v0.1.6（来自 `plan.md`）
-**Tasks Version**：v0.1.0
-**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`）
+**Feature Version**：v0.1.3（来自 `spec.md`）
+**Plan Version**：v0.1.7（来自 `plan.md`）
+**Tasks Version**：v0.1.1
+**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`、`story_detail_design.md`）
 
 > 规则：
 > - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
-> - 设计引用指向 plan.md 对应章节。
+> - 若 plan 含 Story Detailed Design（L2）：每个 Task 必须提供**设计引用**（指向 story_detail_design.md 对应 ST-xxx 的小节/图表/异常矩阵）。
 
 ## Task 行格式（首行必须严格遵循）
 
@@ -40,7 +40,7 @@
   - **依赖**：无
   - **设计引用**：N/A
   - **步骤**：
-    - 1) 确认 `Feature Version`（v0.1.2）、`Plan Version`（v0.1.6）已填写
+    - 1) 确认 `Feature Version`（v0.1.3）、`Plan Version`（v0.1.7）已填写
     - 2) 确认 Plan 的 Story Breakdown 已完成（ST-001～ST-005）
   - **验证**：
     - [ ] tasks.md 中 `Plan Version` 与 plan.md 一致
@@ -113,7 +113,7 @@
 
 - [ ] T030 [P] [ST-001] 在 `feature-gallery/.../domain/MediaItem.kt` 中创建 MediaItem 实体（id, contentUri, dateTaken, mimeType 等，不可变 data class）
   - **依赖**：T020
-  - **设计引用**：plan.md:A0.1:MediaItem、A3.1.2.1:组件清单
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:A0.1:MediaItem
   - **步骤**：
     - 1) 定义 MediaItem data class，含 plan 约定字段
     - 2) 确保不可变
@@ -123,7 +123,7 @@
 
 - [ ] T031 [P] [ST-001] 在 `feature-gallery/.../domain/MediaRepository.kt` 中定义 MediaRepository 接口（getMediaPager(viewMode, filter): Flow<PagingData<MediaItem>>）
   - **依赖**：T020
-  - **设计引用**：plan.md:B4.1:MediaRepository 接口、A3.1.2.1
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:B4.1:MediaRepository 接口
   - **步骤**：
     - 1) 定义接口方法签名
     - 2) 按 plan 不暴露 DataSource
@@ -133,7 +133,7 @@
 
 - [ ] T032 [ST-001] 在 `feature-gallery/.../data/MediaStoreDataSource.kt` 中实现 MediaStore ContentResolver 封装，支持 query、投影、排序、分页参数
   - **依赖**：T030、T031
-  - **设计引用**：plan.md:A3.1.2.2:时序图、A3.1.2.1:MediaStoreDataSource
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:时序图、异常矩阵；plan.md:A3.3:MediaStoreDataSource
   - **步骤**：
     - 1) 实现 load 方法，查询 MediaStore
     - 2) 处理 READ_MEDIA_IMAGES 权限拒绝（SecurityException → 降级）
@@ -144,7 +144,7 @@
 
 - [ ] T033 [ST-001] 在 `feature-gallery/.../data/MediaRepositoryImpl.kt` 中实现 MediaRepository，组合 MediaStoreDataSource，使用 Paging 3 返回 Flow<PagingData<MediaItem>>
   - **依赖**：T032、T031
-  - **设计引用**：plan.md:A3.1.2.2:时序图、A1:Paging 3
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:时序图；plan.md:A1:Paging 3
   - **步骤**：
     - 1) 实现 getMediaPager，委托 DataSource
     - 2) 配置 PagingSource、Pager
@@ -166,7 +166,7 @@
 
 - [ ] T040 [P] [ST-002] 在 `feature-gallery/.../domain/MediaViewerContext.kt` 中定义 MediaViewerContext 值对象（itemList, currentIndex, source）
   - **依赖**：T033
-  - **设计引用**：plan.md:B4.1:MediaViewerContext 契约
+  - **设计引用**：story_detail_design.md:ST-002:功能设计:类图；plan.md:B4.1:MediaViewerContext 契约
   - **步骤**：
     - 1) 定义 data class，不可变
     - 2) source 为 "timeline"/"album"/"search"
@@ -176,7 +176,7 @@
 
 - [ ] T041 [P] [ST-002] 在 `feature-gallery/.../timeline/TimelineIntent.kt` 中定义 sealed TimelineIntent（LoadTimeline、ChangeViewMode、ChangeFilter、OnPhotoClick、OnThumbDrag）
   - **依赖**：T020
-  - **设计引用**：plan.md:A3.2.2:TimelineIntent
+  - **设计引用**：story_detail_design.md:ST-002:功能设计:类图；plan.md:A3.2.2:TimelineIntent
   - **步骤**：
     - 1) 按 plan 定义各 Intent
   - **验证**：
@@ -185,7 +185,7 @@
 
 - [ ] T042 [P] [ST-002] 在 `feature-gallery/.../timeline/TimelineUiState.kt` 中定义 TimelineUiState（items, viewMode, filter, showPermissionPrompt, dateLabelForThumb, focusedItemIndex 等）
   - **依赖**：T020
-  - **设计引用**：plan.md:A3.2.2:TimelineUiState
+  - **设计引用**：story_detail_design.md:ST-002:功能设计:类图；plan.md:A3.2.2:TimelineUiState
   - **步骤**：
     - 1) 定义 data class，含视图切换焦点保持所需字段
   - **验证**：
@@ -194,7 +194,7 @@
 
 - [ ] T043 [ST-002] 在 `feature-gallery/.../timeline/TimelineViewModel.kt` 中实现 TimelineViewModel：处理 LoadTimeline、ChangeViewMode、ChangeFilter、OnPhotoClick、OnThumbDrag；实现 recordFocusedItem、scrollToFocusedItemInNewViewMode 以支持视图切换焦点保持
   - **依赖**：T041、T042、T033、T040
-  - **设计引用**：plan.md:A3.2.1:流程 2、A3.2.2:TimelineViewModel、ST-002 描述
+  - **设计引用**：story_detail_design.md:ST-002:功能设计:时序图；plan.md:A3.2.1:流程 2、A3.2.4:疑难点 3
   - **步骤**：
     - 1) 注入 MediaRepository
     - 2) 实现 MVI reduce 逻辑
@@ -216,7 +216,7 @@
 
 - [ ] T050 [ST-003] 在 `feature-gallery/.../timeline/TimelineScreen.kt` 中实现 TimelineScreen Compose UI：LazyVerticalGrid + 分组标题；日/月/年 SegmentedBar；多语言日期格式化（今天/昨天/完整日期、月、年）
   - **依赖**：T043
-  - **设计引用**：plan.md:A3.2.1:流程 1、spec:日期显示与快滑条规范
+  - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:A3.2.1:流程 1、spec:日期显示与快滑条规范
   - **步骤**：
     - 1) 使用 LazyVerticalGrid 展示分组媒体项
     - 2) 日/月/年 Tab 切换
@@ -227,7 +227,7 @@
 
 - [ ] T051 [ST-003] 在 `feature-gallery/.../timeline/` 中实现快滑条组件：thumb 位于列表右侧，左侧显示当前滑动位置对应行的日期气泡
   - **依赖**：T050
-  - **设计引用**：plan.md:spec:快滑条规范、FR-004
+  - **设计引用**：story_detail_design.md:ST-003:快滑条:布局结构；plan.md:A3.2.4:疑难点 1、spec:快滑条规范
   - **步骤**：
     - 1) 快滑条 thumb 右侧
     - 2) 左侧日期气泡，格式与当前 viewMode 一致
@@ -257,7 +257,7 @@
 
 - [ ] T060 [ST-004] 在 `feature-gallery/` 中集成 Coil，在 TimelineScreen 网格项使用 AsyncImage + ContentUri 加载缩图
   - **依赖**：T052
-  - **设计引用**：plan.md:A1:Coil、B4.2:Coil ImageLoader
+  - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:A1:Coil、A3.2.4:疑难点 2
   - **步骤**：
     - 1) 添加 Coil 依赖
     - 2) AsyncImage(contentUri)，placeholder 策略
@@ -267,7 +267,7 @@
 
 - [ ] T061 [ST-004] 调优 Paging pageSize、prefetchDistance；验证滚动无白块
   - **依赖**：T060
-  - **设计引用**：plan.md:ST-004、NFR-PERF-002
+  - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:A3.1:快滑条跳页与 Paging 3 配合、NFR-PERF-002
   - **步骤**：
     - 1) 调整 Pager 参数
     - 2) 手动滚动验证无白块
@@ -288,7 +288,7 @@
 
 - [ ] T070 [ST-005] 在 `feature-gallery/.../timeline/TimelineScreen.kt` 中实现点击照片：构建 MediaViewerContext(itemList, currentIndex, source="timeline")，导航至大图路由
   - **依赖**：T052、T043
-  - **设计引用**：plan.md:B4.1:MediaViewerContext、A3.2.1:流程、ST-005
+  - **设计引用**：story_detail_design.md:ST-005:功能设计；plan.md:B4.1:MediaViewerContext、A3.2.4:疑难点 5
   - **步骤**：
     - 1) 点击时从 ViewModel 获取 itemList（LazyPagingItems.snapshot 或 ViewModel 维护）
     - 2) 构建 MediaViewerContext

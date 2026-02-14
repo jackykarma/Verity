@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature 类型**：Product Feature
 **Feature ID**：FEAT-001
-**Feature Version**：v0.1.3
+**Feature Version**：v0.1.4
 **EPIC 分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-001-timeline-list/`
 **创建时间**：2026-02-08
@@ -76,11 +76,11 @@
 
 #### 功耗（Power）
 
-- **NFR-POWER-001**：列表滚动与缩图加载不导致异常功耗增长；常规浏览场景下功耗在可接受范围内。[需在 Plan 阶段细化]
+- **NFR-POWER-001**：列表滚动与缩图加载不导致异常功耗增长；常规浏览场景下功耗在可接受范围内（见 plan A7 功耗评估，可合入 T061 验证）。
 
 #### 内存（Memory）
 
-- **NFR-MEM-001**：列表滑动过程中内存占用可控，缩图缓存与回收策略避免 OOM。[需在 Plan 阶段细化]
+- **NFR-MEM-001**：列表滑动过程中内存占用可控，缩图缓存与回收策略避免 OOM（见 plan A9 内存评估、T061 验收）。
 
 #### 安全与隐私（Security/Privacy）
 
@@ -125,7 +125,10 @@
 | FR-006 | ST-005 | T070 | 进入大图 |
 | FR-007 | ST-003 | T050 | 日期显示与多语言 |
 | NFR-PERF-001/002/003 | ST-002, ST-004 | T043, T060, T061 | 流畅、即滑即现、视图切换动画 |
+| NFR-POWER-001 | — | 可合入 T061 验证 | 列表滚动功耗 |
+| NFR-MEM-001 | ST-004 | T061 | 内存 profiling |
 | NFR-SEC-001 | — | T032, T080 | 权限与存储规范 |
+| NFR-OBS-001 | — | 本期可不实现 | 埋点后续引入 |
 | NFR-REL-001 | ST-001 | T032, T033, T080 | 降级与不崩溃 |
 
 ## 变更记录（增量变更）
@@ -136,3 +139,4 @@
 | v0.1.1 | 2026-02-08 | 日期显示、快滑条 | 日视图：今天/昨天/完整日期；月视图按月份、年视图按年份；多语言日期格式；快滑条 thumb 右侧、左侧显示当前行日期 | FR-004, FR-007, AC | 否 |
 | v0.1.2 | 2026-02-12 | FR、NFR、验收 | 日/月/年视图切换：自然过渡动画；视觉焦点保持，不跳至新视图顶部 | FR-002, NFR-PERF-003, AC-001 | 否 |
 | v0.1.3 | 2026-02-14 | 需求追溯 | 补齐需求追溯表：Story ID、任务 ID 与 plan/tasks 一致 | 需求追溯表 | 否 |
+| v0.1.4 | 2026-02-14 | NFR、需求追溯 | 替换 NFR-POWER/MEM 占位表述；补齐 NFR-OBS/POWER/MEM 追溯行 | NFR 章节、需求追溯表 | 否 |

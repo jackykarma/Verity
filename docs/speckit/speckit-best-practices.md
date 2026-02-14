@@ -196,6 +196,7 @@ Plan 支持分三个阶段执行，**默认执行 Lite 阶段**：
 
 - **Deep 阶段**（在 Standard 基础上追加）：
   - Story Detailed Design（L2）：每个 ST-xxx 的详细落码设计
+  - **L1→L2 覆盖**：所有 Story 的 L2 类图合起来须覆盖 A3.2.2 全景类图；story_detail_design 末尾须填写「L1 类覆盖矩阵」。详见 `docs/speckit/story-l2-l1-coverage.md`。
 
 #### Plan Level 与分阶段的关系
 

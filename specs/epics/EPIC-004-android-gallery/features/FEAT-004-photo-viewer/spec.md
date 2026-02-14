@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature 类型**：Product Feature
 **Feature ID**：FEAT-004
-**Feature Version**：v0.1.1
+**Feature Version**：v0.1.2
 **EPIC 分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-004-photo-viewer/`
 **创建时间**：2026-02-08
@@ -65,7 +65,7 @@
 
 #### 功耗（Power）
 
-- **NFR-POWER-001**：大图与视频播放不导致异常功耗。[需在 Plan 阶段细化]
+- **NFR-POWER-001**：大图与视频播放不导致异常功耗（见 plan 功耗评估，可合入 ST-004 或阶段 5 验收）。
 
 #### 内存（Memory）
 
@@ -113,7 +113,11 @@
 | FR-005 | ST-002, ST-003 | T023, T030 | 缩放与滑动切换 |
 | FR-006 | ST-002 | T022, T050 | 上下文保持、入口 |
 | NFR-PERF-001/002 | ST-002, ST-003 | T023, T030 | 进入无黑图、滑动丝滑 |
+| NFR-POWER-001 | — | 可合入 ST-004 或阶段 5 验收 | 大图与视频播放功耗 |
 | NFR-MEM-001 | ST-001 | T012 | LruCache、recycle、profiling |
+| NFR-SEC-001 | — | 复用 FEAT-001 | 存储与隐私规范 |
+| NFR-OBS-001 | — | 本期可不实现 | 埋点后续引入 |
+| NFR-REL-001 | ST-001, ST-004 | T012, T041 | 损坏/不支持时占位或提示 |
 
 ## 变更记录（增量变更）
 
@@ -121,3 +125,4 @@
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-02-08 | 全文 | 初版，自 EPIC-004 拆分 | — | 否 |
 | v0.1.1 | 2026-02-14 | 需求追溯 | 补齐需求追溯表：Story ID、任务 ID 与 plan/tasks 一致 | 需求追溯表 | 否 |
+| v0.1.2 | 2026-02-14 | 需求追溯、NFR | 补齐 NFR-SEC/OBS/POWER/REL 追溯行；替换 NFR-POWER 占位表述 | 需求追溯表、NFR 章节 | 否 |

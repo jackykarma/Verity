@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-001
 **Feature Version**：v0.1.2（来自 `spec.md`）
-**Plan Version**：v0.1.7
+**Plan Version**：v0.1.8
 **Plan Level**：Deep
 **当前工作分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-001-timeline-list/`
@@ -22,6 +22,7 @@
 | v0.1.5 | 2026-02-12 | A0.3、A3.2.2              | DDD 与面向对象 7 大原则对应表、关键类职责 DDD/原则列            | 对齐 epic-arch         | 否        |
 | v0.1.6 | 2026-02-12 | A2.1.1、A3.2.2            | 明确时间轴单屏、日/月/年为 viewMode 三种展示模式               | 澄清界面结构           | 否        |
 | v0.1.7 | 2026-02-14 | Deep 阶段                 | Story Detailed Design（L2）：ST-001～ST-005，见 story_detail_design.md | Story Detailed Design | 否        |
+| v0.1.8 | 2026-02-14 | A3.2 Story 依赖图         | 移除 Story 依赖图中节点标签的 `<br/>`，改为单行文本 | Mermaid 渲染          | 否        |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -1285,11 +1286,11 @@ feature-gallery/              # 新增：相册模块（一期含时间轴）
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    ST001["ST-001: 数据访问<br/>(Infrastructure, 4天)"]
-    ST002["ST-002: ViewModel MVI<br/>(Functional, 5天)"]
-    ST003["ST-003: 列表 UI<br/>(Functional, 5天)"]
-    ST004["ST-004: 缩图优化<br/>(Optimization, 3天)"]
-    ST005["ST-005: 进入大图<br/>(Functional, 2天)"]
+    ST001["ST-001: 数据访问 (Infrastructure, 4天)"]
+    ST002["ST-002: ViewModel MVI (Functional, 5天)"]
+    ST003["ST-003: 列表 UI (Functional, 5天)"]
+    ST004["ST-004: 缩图优化 (Optimization, 3天)"]
+    ST005["ST-005: 进入大图 (Functional, 2天)"]
 
     ST001 --> ST002
     ST002 --> ST003

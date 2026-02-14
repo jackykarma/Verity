@@ -10,6 +10,14 @@
 
 ## ST-001 Detailed Design：BigImageLoader 与采样解码
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| BigImageLoader | 接口定义，load/recycle 契约 |
+| BigImageLoaderImpl | 实现类，LruCache + ImageDecoder 组合 |
+| ImageDecoder | 采样解码与 BitmapFactory 封装 |
+
 #### 1) 需求及描述
 
 - **需求描述**：BigImageLoader 接口、BigImageLoaderImpl、ImageDecoder；BitmapFactory + inSampleSize；LruCache 50MB；recycle 离屏。
@@ -146,6 +154,15 @@ sequenceDiagram
 
 ## ST-002 Detailed Design：大图 UI 与 HorizontalPager
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| PhotoViewerScreen | 表示层，大图全屏 UI、HorizontalPager |
+| PhotoViewerViewModel | 应用层 MVI 状态管理 |
+| PhotoViewerUiState | UI 状态 |
+| PhotoViewerIntent | 用户意图密封类（Init） |
+
 #### 1) 需求及描述
 
 - **需求描述**：PhotoViewerScreen、PhotoViewerViewModel；HorizontalPager + beyondViewportPageCount；共享元素过渡；缩放 zoomable；接收 MediaViewerContext。
@@ -266,6 +283,13 @@ sequenceDiagram
 
 ## ST-003 Detailed Design：滑动切换、预加载、缩图轴
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| PhotoViewerScreen | 本 Story 扩展缩图轴 UI |
+| PhotoViewerViewModel | OnPageChanged、OnThumbClick Intent 处理；预加载与回收逻辑 |
+
 #### 1) 需求及描述
 
 - **需求描述**：OnPageChanged 预加载邻页、回收离屏；ThumbnailStrip 焦点居中；缩图轴点击切换。
@@ -363,6 +387,14 @@ sequenceDiagram
 ---
 
 ## ST-004 Detailed Design：视频、实况图与多格式支持
+
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| PhotoViewerScreen | 本 Story 扩展 VideoPlayerComponent、LivePhotoComponent、GIF 管线 |
+| PhotoViewerViewModel | 按 MediaViewerType 路由到不同展示组件 |
+| BigImageLoader | 静态图/GIF 首帧仍使用 BigImageLoader |
 
 #### 1) 需求及描述
 
@@ -484,3 +516,21 @@ sequenceDiagram
 
 - **格式测试**：MP4、MOV、GIF、HEIC 等
 - **占位**：不支持格式展示占位
+
+---
+
+## L1 类覆盖矩阵（必须填写）
+
+> 全部 Story 输出完成后，填写本矩阵。每个 A3.2.2 全景类图中的类必须至少被一个 Story 覆盖。
+
+| L1 类（来自 plan A3.2.2） | 覆盖的 Story | 覆盖的 L2 类图位置 | 备注 |
+|---------------------------|--------------|---------------------|------|
+| PhotoViewerScreen | ST-002, ST-003, ST-004 | ST-002 类图（主） | 表示层 |
+| PhotoViewerViewModel | ST-002, ST-003, ST-004 | ST-002 类图（主） | 应用层 |
+| PhotoViewerUiState | ST-002 | ST-002 类图 | 应用层 |
+| PhotoViewerIntent | ST-002, ST-003 | ST-002 类图 | 应用层 |
+| BigImageLoader | ST-001, ST-004 | ST-001 类图（主） | 接口 |
+| BigImageLoaderImpl | ST-001 | ST-001 类图 | 数据层 |
+| ImageDecoder | ST-001 | ST-001 类图 | 数据层 |
+
+**自检**：上述矩阵包含 A3.2.2 全景类图中的全部 7 个类，无遗漏。

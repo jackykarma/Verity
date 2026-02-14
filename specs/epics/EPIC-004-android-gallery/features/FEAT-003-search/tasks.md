@@ -2,15 +2,15 @@
 
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-003
-**Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.3（来自 `plan.md`）
-**Tasks Version**：v0.1.0
-**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`）
+**Feature Version**：v0.1.1（来自 `spec.md`）
+**Plan Version**：v0.1.4（来自 `plan.md`）
+**Tasks Version**：v0.1.1
+**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`、`story_detail_design.md`）
 
 > 规则：
 > - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
-> - 设计引用指向 plan.md 对应章节。
+> - 若 plan 含 Story Detailed Design（L2）：每个 Task 必须提供**设计引用**（指向 story_detail_design.md 对应 ST-xxx 的小节/图表/异常矩阵）。
 
 ## Task 行格式（首行必须严格遵循）
 
@@ -40,7 +40,7 @@
   - **依赖**：无
   - **设计引用**：N/A
   - **步骤**：
-    - 1) 确认 `Feature Version`（v0.1.0）、`Plan Version`（v0.1.3）已填写
+    - 1) 确认 `Feature Version`（v0.1.1）、`Plan Version`（v0.1.4）已填写
     - 2) 确认 Plan 的 Story Breakdown 已完成（ST-001、ST-002）
     - 3) 确认 FEAT-001、FEAT-002 的 MediaRepository、AlbumRepository 已实现
   - **验证**：
@@ -57,7 +57,7 @@
 
 - [ ] T010 [P] [ST-001] 在 `feature-gallery/.../search/SearchCondition.kt` 中定义 SearchCondition 值对象（keyword, dateFrom, dateTo, albumId）
   - **依赖**：T001
-  - **设计引用**：plan.md:A3.3:SearchCondition 关键数据结构
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:A3.3:SearchCondition
   - **步骤**：
     - 1) 定义 data class，不可变
     - 2) keyword: String?；dateFrom: Long?；dateTo: Long?；albumId: Long?
@@ -67,7 +67,7 @@
 
 - [ ] T011 [ST-001] 在 `feature-gallery/.../search/SearchQueryParser.kt` 中实现 SearchQueryParser（无 Android 依赖的领域组件）：规则解析自然语言（日期、图集、keyword）；解析失败降级为 keyword 或 Result.failure(ParseFailed)；需注入 AlbumRepository 获取图集列表用于 matchAlbumKeyword
   - **依赖**：T010、FEAT-002 AlbumRepository
-  - **设计引用**：plan.md:A3.3:SearchQueryParser、流程 1 解析时序
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:时序图；plan.md:A3.3:SearchQueryParser
   - **步骤**：
     - 1) 实现 parse(queryText: String, albums: List<Album>): Result<SearchCondition>
     - 2) 日期规则：如 "昨天"、"2025年1月" 等
@@ -79,7 +79,7 @@
 
 - [ ] T012 [ST-001] 在 `feature-gallery/.../data/` 中实现 SearchMediaPagingSource 或扩展 MediaStoreDataSource：根据 SearchCondition 构建 selection/selectionArgs；支持 keyword（DISPLAY_NAME LIKE）、dateFrom/dateTo（DATE_TAKEN）、albumId（BUCKET_ID 或 _ID IN album_media）
   - **依赖**：T010、FEAT-001 MediaStoreDataSource、FEAT-002 AlbumDao
-  - **设计引用**：plan.md:A3.3:组件 2、技术实现路径、SearchMediaPagingSource 类图
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:A3.3:SearchMediaPagingSource
   - **步骤**：
     - 1) 实现 buildSelection(condition): Pair<String, Array<String>>
     - 2) 用户图集 albumId：albumMediaDao.getMediaIdsByAlbumId，再 _ID IN (...)
@@ -90,7 +90,7 @@
 
 - [ ] T013 [ST-001] 在 `feature-gallery/.../data/MediaRepositoryImpl.kt` 中扩展 MediaRepository 接口与实现：增加 search(condition: SearchCondition): Flow<PagingData<MediaItem>>；使用 SearchMediaPagingSource；在 `feature-gallery/.../domain/MediaRepository.kt` 中补充 search 方法签名
   - **依赖**：T012、T011
-  - **设计引用**：plan.md:A3.3:MediaRepository.search、组件 2
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:时序图；plan.md:A3.3:MediaRepository.search
   - **步骤**：
     - 1) domain/MediaRepository 增加 search(condition): Flow<PagingData<MediaItem>>
     - 2) MediaRepositoryImpl 实现，Pager + SearchMediaPagingSource
@@ -111,7 +111,7 @@
 
 - [ ] T020 [P] [ST-002] 在 `feature-gallery/.../search/SearchIntent.kt` 中定义 sealed SearchIntent（SearchQuery、SelectDateRange、SelectAlbum、ClearCondition、OnPhotoClick 等）
   - **依赖**：T013
-  - **设计引用**：plan.md:A3:SearchViewModel
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:SearchViewModel
   - **步骤**：
     - 1) 定义各 Intent
   - **验证**：
@@ -120,7 +120,7 @@
 
 - [ ] T021 [P] [ST-002] 在 `feature-gallery/.../search/SearchUiState.kt` 中定义 SearchUiState（queryText, condition, items, showRefinePrompt, isLoading 等）
   - **依赖**：T013
-  - **设计引用**：plan.md:A3:SearchUiState
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:SearchUiState
   - **步骤**：
     - 1) 定义 data class
   - **验证**：
@@ -129,7 +129,7 @@
 
 - [ ] T022 [ST-002] 在 `feature-gallery/.../search/SearchViewModel.kt` 中实现 SearchViewModel：接收 SearchIntent；调用 SearchQueryParser.parse；调用 MediaRepository.search(condition)；debounce 300–500ms 再触发搜索；condition 变化时 flatMapLatest 重新 search
   - **依赖**：T020、T021、T011、T013
-  - **设计引用**：plan.md:A3.3:debounce、Pager 配置
+  - **设计引用**：story_detail_design.md:ST-002:功能设计:时序图；plan.md:A3.3:debounce
   - **步骤**：
     - 1) 注入 MediaRepository、SearchQueryParser、AlbumRepository
     - 2) 用户输入 debounce 后 parse，成功则 search，失败则 showRefinePrompt
@@ -140,7 +140,7 @@
 
 - [ ] T023 [ST-002] 在 `feature-gallery/.../search/SearchScreen.kt` 中实现 SearchScreen：搜索框、条件 Chip（日期、图集）；结果网格复用 FEAT-001 的 LazyVerticalGrid + Paging + Coil；无结果时空态提示；点击照片构建 MediaViewerContext(source="search") 进入大图
   - **依赖**：T022
-  - **设计引用**：plan.md:ST-002、ux-design、B4.1:MediaViewerContext
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:ux-design、B4.1:MediaViewerContext
   - **步骤**：
     - 1) 搜索框 + 条件 Chip
     - 2) 结果网格复用 FEAT-001 模式

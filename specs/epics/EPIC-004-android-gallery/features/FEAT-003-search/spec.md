@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature 类型**：Product Feature
 **Feature ID**：FEAT-003
-**Feature Version**：v0.1.1
+**Feature Version**：v0.1.2
 **EPIC 分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-003-search/`
 **创建时间**：2026-02-08
@@ -60,11 +60,11 @@
 
 #### 功耗（Power）
 
-- **NFR-POWER-001**：搜索与结果列表浏览不导致异常功耗。[需在 Plan 阶段细化]
+- **NFR-POWER-001**：搜索与结果列表浏览不导致异常功耗（见 plan 功耗评估，可合入 ST-002 验收）。
 
 #### 内存（Memory）
 
-- **NFR-MEM-001**：搜索索引与结果列表内存占用可控。[需在 Plan 阶段细化]
+- **NFR-MEM-001**：搜索索引与结果列表内存占用可控（见 plan 内存评估，可合入 ST-002 验收）。
 
 #### 安全与隐私（Security/Privacy）
 
@@ -104,6 +104,8 @@
 | FR-002 | ST-001, ST-002 | T010～T013, T020～T023 | 关键词/日期/图集条件 |
 | FR-003 | ST-002 | T023 | 结果列表、进入大图 |
 | NFR-PERF-001/002 | ST-002 | T023 | 响应与列表流畅、缩图即滑即现 |
+| NFR-POWER-001 | — | 可合入 ST-002 验收 | 搜索与列表功耗 |
+| NFR-MEM-001 | — | 可合入 ST-002 验收 | 索引与列表内存 |
 | NFR-SEC-001 | — | 复用 FEAT-001 | 存储与隐私规范 |
 | NFR-OBS-001 | — | 本期可不实现 | 埋点后续引入 |
 | NFR-REL-001 | ST-001, ST-002 | T013, T031 | 失败提示、不崩溃 |
@@ -114,3 +116,4 @@
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-02-08 | 全文 | 初版，自 EPIC-004 拆分 | — | 否 |
 | v0.1.1 | 2026-02-14 | 需求追溯 | 补齐需求追溯表：Story ID、任务 ID 与 plan/tasks 一致；补全 NFR-SEC/OBS/REL 追溯行 | 需求追溯表 | 否 |
+| v0.1.2 | 2026-02-14 | NFR、需求追溯 | 替换 NFR-POWER/MEM 占位表述；补齐 NFR-POWER/MEM 追溯行 | NFR 章节、需求追溯表 | 否 |

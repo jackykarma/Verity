@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-004
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.4
+**Plan Version**：v0.1.5
 **Plan Level**：Deep
 **当前工作分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-004-photo-viewer/`
@@ -19,6 +19,7 @@
 | v0.1.2 | 2026-02-12 | A1、A3.2.4 | 进入过渡 Compose 实现（SharedTransitionLayout、sharedElement）、疑难点 1 共享元素过渡 cross-ref | NFR-PERF-001 | 否 |
 | v0.1.3 | 2026-02-12 | A0.3、A3.2.2、概述 | DDD 与 7 大原则对应表、关键类职责 DDD/原则列、前置检查对齐 | 对齐 epic-arch | 否 |
 | v0.1.4 | 2026-02-14 | Deep 阶段 | Story Detailed Design（L2）：ST-001～ST-004，见 story_detail_design.md | Story Detailed Design | 否 |
+| v0.1.5 | 2026-02-14 | Story 依赖图、A3 | 移除 Story 依赖图节点标签的 `<br/>`；修正 VideoPlayerComponent 节点 `\n` | Mermaid 渲染 | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -338,7 +339,7 @@ flowchart TB
         PhotoViewerScreen["PhotoViewerScreen"]
         ThumbnailStrip["ThumbnailStrip"]
         PhotoViewerViewModel["PhotoViewerViewModel"]
-        VideoPlayerComponent["VideoPlayerComponent\n(视频加载与播放)"]
+        VideoPlayerComponent["VideoPlayerComponent (视频加载与播放)"]
     end
 
     subgraph DomainLayer[":feature-gallery（领域层）"]
@@ -1151,10 +1152,10 @@ feature-gallery/
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    ST001["ST-001: BigImageLoader<br/>(Infrastructure, 5天)"]
-    ST002["ST-002: 大图 UI<br/>(Functional, 5天)"]
-    ST003["ST-003: 滑动+缩图轴<br/>(Functional, 4天)"]
-    ST004["ST-004: 视频/实况图<br/>(Functional, 4天)"]
+    ST001["ST-001: BigImageLoader (Infrastructure, 5天)"]
+    ST002["ST-002: 大图 UI (Functional, 5天)"]
+    ST003["ST-003: 滑动+缩图轴 (Functional, 4天)"]
+    ST004["ST-004: 视频/实况图 (Functional, 4天)"]
     
     ST001 --> ST002
     ST002 --> ST003

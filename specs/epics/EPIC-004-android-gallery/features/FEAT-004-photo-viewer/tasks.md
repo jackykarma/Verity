@@ -2,15 +2,15 @@
 
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-004
-**Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.3（来自 `plan.md`）
-**Tasks Version**：v0.1.0
-**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`）
+**Feature Version**：v0.1.1（来自 `spec.md`）
+**Plan Version**：v0.1.4（来自 `plan.md`）
+**Tasks Version**：v0.1.1
+**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`、`story_detail_design.md`）
 
 > 规则：
 > - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
-> - 设计引用指向 plan.md 对应章节。
+> - 若 plan 含 Story Detailed Design（L2）：每个 Task 必须提供**设计引用**（指向 story_detail_design.md 对应 ST-xxx 的小节/图表/异常矩阵）。
 
 ## Task 行格式（首行必须严格遵循）
 
@@ -40,7 +40,7 @@
   - **依赖**：无
   - **设计引用**：N/A
   - **步骤**：
-    - 1) 确认 `Feature Version`（v0.1.0）、`Plan Version`（v0.1.3）已填写
+    - 1) 确认 `Feature Version`（v0.1.1）、`Plan Version`（v0.1.4）已填写
     - 2) 确认 Plan 的 Story Breakdown 已完成（ST-001～ST-004）
     - 3) 确认 FEAT-001 的 MediaViewerContext、进入大图导航已实现
   - **验证**：
@@ -57,7 +57,7 @@
 
 - [ ] T010 [P] [ST-001] 在 `feature-gallery/.../data/loader/ImageDecoder.kt` 中实现 ImageDecoder：BitmapFactory + inSampleSize 根据目标 width/height 计算采样率
   - **依赖**：T001
-  - **设计引用**：plan.md:ST-001、A3.1.2.1:BigImageLoaderImpl
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:ST-001
   - **步骤**：
     - 1) 从 ContentResolver 读取 InputStream
     - 2) 计算 inSampleSize
@@ -68,7 +68,7 @@
 
 - [ ] T011 [ST-001] 在 `feature-gallery/.../data/loader/BigImageLoader.kt` 中定义 BigImageLoader 接口（load(uri, width, height): Bitmap?、recycle(bitmap): Unit）
   - **依赖**：T001
-  - **设计引用**：plan.md:A3.1.2.1:BigImageLoader
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:A3.1.2.1:BigImageLoader
   - **步骤**：
     - 1) 定义接口方法
   - **验证**：
@@ -77,7 +77,7 @@
 
 - [ ] T012 [ST-001] 在 `feature-gallery/.../data/loader/BigImageLoaderImpl.kt` 中实现 BigImageLoaderImpl：LruCache 50MB；组合 ImageDecoder；load 时先查 cache，未命中则 decode 并 put；recycle 离屏 Bitmap 并 remove 出 cache
   - **依赖**：T010、T011
-  - **设计引用**：plan.md:ST-001、A3.1.2.2:时序图
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:时序图；plan.md:ST-001
   - **步骤**：
     - 1) LruCache<Uri, Bitmap> 约 50MB
     - 2) load 流程：cache.get → decode → cache.put
@@ -100,7 +100,7 @@
 
 - [ ] T020 [P] [ST-002] 在 `feature-gallery/.../viewer/PhotoViewerIntent.kt` 中定义 sealed PhotoViewerIntent（Init、OnPageChanged、OnThumbClick 等）
   - **依赖**：T012
-  - **设计引用**：plan.md:A3:PhotoViewerViewModel
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:PhotoViewerViewModel
   - **步骤**：
     - 1) 定义各 Intent
   - **验证**：
@@ -109,7 +109,7 @@
 
 - [ ] T021 [P] [ST-002] 在 `feature-gallery/.../viewer/PhotoViewerUiState.kt` 中定义 PhotoViewerUiState（itemList, currentIndex, images: Map<Int, Bitmap>, isLoading 等）
   - **依赖**：T012
-  - **设计引用**：plan.md:A3:PhotoViewerViewModel
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:PhotoViewerViewModel
   - **步骤**：
     - 1) 定义 data class
   - **验证**：
@@ -118,7 +118,7 @@
 
 - [ ] T022 [ST-002] 在 `feature-gallery/.../viewer/PhotoViewerViewModel.kt` 中实现 PhotoViewerViewModel：接收 MediaViewerContext；预加载窗口 [current-1, current+1]；调用 BigImageLoader.load；OnPageChanged 时 recycle 离屏、更新预加载、load 新邻页
   - **依赖**：T020、T021、T012
-  - **设计引用**：plan.md:A3.1.2.2:时序图、A3.2.1:流程 1
+  - **设计引用**：story_detail_design.md:ST-002:功能设计:时序图；plan.md:A3.2.1:流程 1
   - **步骤**：
     - 1) Init(context) 计算预加载窗口
     - 2) load 当前页 + 邻页
@@ -129,7 +129,7 @@
 
 - [ ] T023 [ST-002] 在 `feature-gallery/.../viewer/PhotoViewerScreen.kt` 中实现 PhotoViewerScreen：接收 MediaViewerContext；HorizontalPager + beyondViewportPageCount；共享元素过渡（Modifier.sharedElement，key="image-${item.id}" 与列表侧一致）；zoomable 缩放；展示当前页 Bitmap
   - **依赖**：T022
-  - **设计引用**：plan.md:A3.2.1:流程 1、A1:进入过渡、疑难点 5 共享元素
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A1:进入过渡、疑难点 5 共享元素
   - **步骤**：
     - 1) HorizontalPager 展示 itemList
     - 2) 共享元素过渡 300–350ms，key 与 FEAT-001 列表侧一致
@@ -150,7 +150,7 @@
 
 - [ ] T030 [ST-003] 在 PhotoViewerViewModel 中完善 OnPageChanged 预加载逻辑：离屏 recycle、邻页 load；确保 beyondViewportPageCount 与预加载窗口一致
   - **依赖**：T023
-  - **设计引用**：plan.md:A3.2.1:流程 2、ST-003
+  - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:A3.2.1:流程 2
   - **步骤**：
     - 1) 滑动时立即 recycle 离屏
     - 2) 加载新邻页
@@ -160,7 +160,7 @@
 
 - [ ] T031 [ST-003] 在 `feature-gallery/.../viewer/ThumbnailStrip.kt` 中实现 ThumbnailStrip：底部缩图轴、LazyRow + Coil 缩图；focusIndex 居中（scrollToItem）；点击切换当前页
   - **依赖**：T023
-  - **设计引用**：plan.md:A3.1.2.1:ThumbnailStrip、FR-001
+  - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:A3.1.2.1:ThumbnailStrip、FR-001
   - **步骤**：
     - 1) LazyRow 展示 itemList 缩图
     - 2) focusIndex 变化时 animateScrollToItem 使焦点居中
@@ -181,7 +181,7 @@
 
 - [ ] T040 [ST-004] 在 `feature-gallery/.../viewer/VideoPlayerComponent.kt` 中实现 VideoPlayerComponent：ExoPlayer/Media3 播放视频；接收 uri、自动播放或点击播放
   - **依赖**：T023
-  - **设计引用**：plan.md:A3.1.2.1:VideoPlayerComponent、A3.2.1:流程 3、FR-004
+  - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:A3.1.2.1:VideoPlayerComponent、FR-004
   - **步骤**：
     - 1) 添加 Media3 依赖
     - 2) 实现 VideoPlayerComponent Composable
@@ -192,7 +192,7 @@
 
 - [ ] T041 [ST-004] 在 PhotoViewerScreen 中按 MediaItem 类型分流：Image 静态图 → BigImageLoader；GIF → Coil 或 ImageDecoder 管线；Video → VideoPlayerComponent；LivePhoto → 首帧 BigImageLoader + 视频段 VideoPlayerComponent
   - **依赖**：T040、T023
-  - **设计引用**：plan.md:A3.2.1:流程 3、FR-002、FR-003、FR-004
+  - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:FR-002、FR-003、FR-004
   - **步骤**：
     - 1) 根据 mimeType/类型选择展示组件
     - 2) 实况图：HEIC 首帧 + 视频段（videoUri 或 motionPhotoVideoOffset）

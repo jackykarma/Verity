@@ -10,6 +10,15 @@
 
 ## ST-001 Detailed Design：Room 数据库与图集数据访问
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| AlbumRepository | 接口定义，本 Story 实现全部 CRUD 契约 |
+| AlbumRepositoryImpl | 实现类，合并系统 bucket 与用户图集 |
+| AlbumDao | Room DAO 接口 |
+| Album | 领域实体，本 Story 定义并产出 |
+
 #### 1) 需求及描述
 
 - **需求描述**：实现 AlbumDatabase、AlbumEntity、AlbumDao、album_media 关联表；AlbumRepositoryImpl 合并系统 bucket（MediaStore）与用户图集（Room）；getAllAlbums、createAlbum、deleteAlbum、addMediaToAlbum、removeMediaFromAlbum。
@@ -178,6 +187,13 @@ sequenceDiagram
 
 ## ST-002 Detailed Design：图集列表 UI 与创建/删除
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| AlbumListScreen | 表示层，图集列表 UI |
+| AlbumListViewModel | 应用层 MVI 状态管理 |
+
 #### 1) 需求及描述
 
 - **需求描述**：AlbumListScreen、AlbumListViewModel、CreateAlbumDialog；图集列表展示、新增图集、删除用户图集（系统图集无删除入口）。
@@ -305,6 +321,13 @@ sequenceDiagram
 
 ## ST-003 Detailed Design：图集内列表与按类型筛选
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| AlbumDetailScreen | 表示层，图集内照片列表 UI |
+| AlbumDetailViewModel | 应用层 MVI 状态管理，依赖 AlbumRepository、MediaRepository |
+
 #### 1) 需求及描述
 
 - **需求描述**：AlbumDetailScreen、AlbumDetailViewModel；MediaRepository 按 albumId 筛选；MediaTypeFilter（图片、视频、GIF、实况、杜比）；复用 FEAT-001 网格+进入大图。
@@ -428,6 +451,14 @@ sequenceDiagram
 
 ## ST-004 Detailed Design：选图面板与添加/移出照片
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| AlbumDetailViewModel | 本 Story 扩展 AddMediaToAlbum、RemoveMedia Intent 处理 |
+| AlbumRepository | addMediaToAlbum、removeMediaFromAlbum 方法 |
+| AlbumDetailScreen | 内含 MediaPickerSheet，触发添加/移出 |
+
 #### 1) 需求及描述
 
 - **需求描述**：MediaPickerSheet（BottomSheet + 多选网格）；添加照片、移出照片；失败 Toast。
@@ -525,3 +556,22 @@ sequenceDiagram
 ##### 验证与测试设计
 
 - **端到端测试**：选图添加→图集内列表更新；移出→列表更新
+
+---
+
+## L1 类覆盖矩阵（必须填写）
+
+> 全部 Story 输出完成后，填写本矩阵。每个 A3.2.2 全景类图中的类必须至少被一个 Story 覆盖。
+
+| L1 类（来自 plan A3.2.2） | 覆盖的 Story | 覆盖的 L2 类图位置 | 备注 |
+|---------------------------|--------------|---------------------|------|
+| AlbumListScreen | ST-002 | ST-002 类图 | 表示层 |
+| AlbumDetailScreen | ST-003, ST-004 | ST-003 类图（主） | 表示层 |
+| AlbumListViewModel | ST-002 | ST-002 类图 | 应用层 |
+| AlbumDetailViewModel | ST-003, ST-004 | ST-003 类图（主） | 应用层 |
+| AlbumRepository | ST-001, ST-004 | ST-001 类图（主） | 接口 |
+| AlbumRepositoryImpl | ST-001 | ST-001 类图 | 数据层 |
+| Album | ST-001 | ST-001 类图 | 领域层 |
+| AlbumDao | ST-001 | ST-001 类图 | 数据层 |
+
+**自检**：上述矩阵包含 A3.2.2 全景类图中的全部 8 个类，无遗漏。

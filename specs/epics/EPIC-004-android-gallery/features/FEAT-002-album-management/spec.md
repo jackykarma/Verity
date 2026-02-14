@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature 类型**：Product Feature
 **Feature ID**：FEAT-002
-**Feature Version**：v0.1.2
+**Feature Version**：v0.1.3
 **EPIC 分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-002-album-management/`
 **创建时间**：2026-02-08
@@ -76,11 +76,11 @@
 
 #### 功耗（Power）
 
-- **NFR-POWER-001**：图集浏览与增删操作不导致异常功耗。[需在 Plan 阶段细化]
+- **NFR-POWER-001**：图集浏览与增删操作不导致异常功耗（见 plan 功耗评估，可于 ST-003/ST-004 验证中纳入）。
 
 #### 内存（Memory）
 
-- **NFR-MEM-001**：图集列表与图集内列表内存占用可控。[需在 Plan 阶段细化]
+- **NFR-MEM-001**：图集列表与图集内列表内存占用可控（见 plan 内存评估，可于 ST-003/ST-004 验证中纳入）。
 
 #### 安全与隐私（Security/Privacy）
 
@@ -124,6 +124,10 @@
 | FR-005 | ST-003 | T040～T042 | 按图集浏览、进入大图 |
 | FR-006 | ST-003 | T040～T042 | 按媒体类型查看 |
 | NFR-PERF-001 | ST-003 | T042 | 即滑即现无白块 |
+| NFR-POWER-001 | — | 可于 ST-003/ST-004 验证中纳入 | 图集浏览功耗 |
+| NFR-MEM-001 | — | 可于 ST-003/ST-004 验证中纳入 | 列表内存占用 |
+| NFR-SEC-001 | — | 复用 FEAT-001 | 存储与隐私规范 |
+| NFR-OBS-001 | — | 本期可不实现 | 埋点后续引入 |
 | NFR-REL-001 | ST-001, ST-004 | T023, T051, T061 | 增删失败提示、降级 |
 
 ## 变更记录（增量变更）
@@ -133,3 +137,4 @@
 | v0.1.0 | 2026-02-08 | 全文 | 初版，自 EPIC-004 拆分 | — | 否 |
 | v0.1.1 | 2026-02-08 | 媒体类型查看 | 图集内支持按媒体类型查看：图片、视频、GIF、实况照片、杜比视频等 | FR-006, AC-005, AC-006 | 否 |
 | v0.1.2 | 2026-02-14 | 需求追溯 | 补齐需求追溯表：Story ID、任务 ID 与 plan/tasks 一致 | 需求追溯表 | 否 |
+| v0.1.3 | 2026-02-14 | 需求追溯、NFR | 补齐 NFR-SEC/OBS/POWER/MEM 追溯行；替换 NFR 占位表述 | 需求追溯表、NFR 章节 | 否 |

@@ -2,15 +2,15 @@
 
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-002
-**Feature Version**：v0.1.1（来自 `spec.md`）
-**Plan Version**：v0.1.3（来自 `plan.md`）
-**Tasks Version**：v0.1.0
-**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`）
+**Feature Version**：v0.1.2（来自 `spec.md`）
+**Plan Version**：v0.1.4（来自 `plan.md`）
+**Tasks Version**：v0.1.1
+**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md`、`story_detail_design.md`）
 
 > 规则：
 > - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
-> - 设计引用指向 plan.md 对应章节。
+> - 若 plan 含 Story Detailed Design（L2）：每个 Task 必须提供**设计引用**（指向 story_detail_design.md 对应 ST-xxx 的小节/图表/异常矩阵）。
 
 ## Task 行格式（首行必须严格遵循）
 
@@ -40,7 +40,7 @@
   - **依赖**：无
   - **设计引用**：N/A
   - **步骤**：
-    - 1) 确认 `Feature Version`（v0.1.1）、`Plan Version`（v0.1.3）已填写
+    - 1) 确认 `Feature Version`（v0.1.2）、`Plan Version`（v0.1.4）已填写
     - 2) 确认 Plan 的 Story Breakdown 已完成（ST-001～ST-004）
     - 3) 确认 FEAT-001 的 MediaRepository、MediaViewerContext 已实现
   - **验证**：
@@ -73,7 +73,7 @@
 
 - [ ] T020 [P] [ST-001] 在 `feature-gallery/.../domain/Album.kt` 中定义 Album 实体（id, name, source: 系统/用户, coverUri 等）
   - **依赖**：T010
-  - **设计引用**：plan.md:领域概念、B7:Album
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:领域概念
   - **步骤**：
     - 1) 定义 Album 领域模型
     - 2) 区分系统图集与用户图集（source 或 isUserCreated）
@@ -83,7 +83,7 @@
 
 - [ ] T021 [P] [ST-001] 在 `feature-gallery/.../domain/AlbumRepository.kt` 中定义 AlbumRepository 接口（getAllAlbums、createAlbum、deleteAlbum、addMediaToAlbum、removeMediaFromAlbum）
   - **依赖**：T010
-  - **设计引用**：plan.md:B4.1:AlbumRepository、ST-001
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:B4.1:AlbumRepository
   - **步骤**：
     - 1) 定义接口方法签名
   - **验证**：
@@ -92,7 +92,7 @@
 
 - [ ] T022 [ST-001] 在 `feature-gallery/.../data/album/` 中创建 AlbumEntity、AlbumDao、album_media 关联表，以及 AlbumDatabase
   - **依赖**：T020
-  - **设计引用**：plan.md:B7:AlbumEntity、AlbumDao、AlbumDatabase、ST-001
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:类图；plan.md:B7:AlbumEntity、AlbumDao
   - **步骤**：
     - 1) 创建 AlbumEntity、AlbumMediaCrossRef（album_media）
     - 2) 创建 AlbumDao（CRUD、getMediaIdsByAlbumId 等）
@@ -104,7 +104,7 @@
 
 - [ ] T023 [ST-001] 在 `feature-gallery/.../data/album/AlbumRepositoryImpl.kt` 中实现 AlbumRepositoryImpl：合并系统 bucket（MediaStore BUCKET_ID/BUCKET_DISPLAY_NAME）与用户图集；实现 getAllAlbums、createAlbum、deleteAlbum、addMediaToAlbum、removeMediaFromAlbum
   - **依赖**：T021、T022、FEAT-001 MediaRepository/MediaStoreDataSource
-  - **设计引用**：plan.md:ST-001、A3:方案选型（系统 bucket + Room）
+  - **设计引用**：story_detail_design.md:ST-001:功能设计:时序图；plan.md:A3:方案选型（系统 bucket + Room）
   - **步骤**：
     - 1) 查询 MediaStore 获取系统图集
     - 2) 查询 Room 获取用户图集
@@ -128,7 +128,7 @@
 
 - [ ] T030 [ST-002] 在 `feature-gallery/.../album/AlbumListViewModel.kt` 中实现 AlbumListViewModel（MVI）：加载图集列表、CreateAlbum、DeleteAlbum Intent
   - **依赖**：T023
-  - **设计引用**：plan.md:A3:AlbumListViewModel、ST-002
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:AlbumListViewModel
   - **步骤**：
     - 1) 注入 AlbumRepository
     - 2) 实现 LoadAlbums、CreateAlbum、DeleteAlbum
@@ -139,7 +139,7 @@
 
 - [ ] T031 [ST-002] 在 `feature-gallery/.../album/AlbumListScreen.kt` 中实现 AlbumListScreen：图集列表 UI（系统+用户），新增入口、「+」按钮
   - **依赖**：T030
-  - **设计引用**：plan.md:A3:AlbumListScreen、ux-design
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:A3:AlbumListScreen、ux-design
   - **步骤**：
     - 1) LazyColumn 或网格展示图集
     - 2) 用户图集显示删除入口，系统图集不显示
@@ -149,7 +149,7 @@
 
 - [ ] T032 [ST-002] 在 `feature-gallery/.../album/CreateAlbumDialog.kt` 中实现 CreateAlbumDialog：输入图集名称、取消/创建按钮
   - **依赖**：T030
-  - **设计引用**：plan.md:CreateAlbumDialog、ux-design:创建图集弹窗
+  - **设计引用**：story_detail_design.md:ST-002:功能设计；plan.md:CreateAlbumDialog、ux-design:创建图集弹窗
   - **步骤**：
     - 1) 弹窗 UI，名称输入
     - 2) 创建成功后关闭并刷新列表
@@ -169,7 +169,7 @@
 
 - [ ] T040 [ST-003] 扩展 MediaRepository（或 MediaStoreDataSource）支持按 albumId 筛选：selection 增加 `_ID IN (SELECT media_id FROM album_media WHERE album_id=?)`；支持 mediaTypeFilter 参数（图片、视频、GIF、实况、杜比）
   - **依赖**：T023、FEAT-001 MediaRepository
-  - **设计引用**：plan.md:疑难点、ST-003、MediaRepository 按 albumId 筛选
+  - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:MediaRepository 按 albumId 筛选
   - **步骤**：
     - 1) 在 MediaRepository 增加 getMediaPagerByAlbum(albumId, mediaTypeFilter) 或扩展 getMediaPager 参数
     - 2) 用户图集：先 albumMediaDao.getMediaIdsByAlbumId，再 ContentResolver query _ID IN (...)
@@ -180,7 +180,7 @@
 
 - [ ] T041 [ST-003] 在 `feature-gallery/.../album/AlbumDetailViewModel.kt` 中实现 AlbumDetailViewModel：加载图集内媒体列表、MediaTypeFilter 切换（图片、视频、GIF、实况、杜比）
   - **依赖**：T040
-  - **设计引用**：plan.md:AlbumDetailViewModel、ST-003、FR-006
+  - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:AlbumDetailViewModel、FR-006
   - **步骤**：
     - 1) 调用 MediaRepository.getMediaPagerByAlbum(albumId, mediaTypeFilter)
     - 2) 支持 MediaTypeFilter 切换
@@ -190,7 +190,7 @@
 
 - [ ] T042 [ST-003] 在 `feature-gallery/.../album/AlbumDetailScreen.kt` 中实现 AlbumDetailScreen：复用 FEAT-001 网格（LazyVerticalGrid + Coil）；日/月/年切换改为 MediaTypeFilter Tab；点击进入大图，构造 MediaViewerContext(source="album")
   - **依赖**：T041
-  - **设计引用**：plan.md:AlbumDetailScreen、FR-005、FR-006、B4.1:MediaViewerContext
+  - **设计引用**：story_detail_design.md:ST-003:功能设计；plan.md:AlbumDetailScreen、B4.1:MediaViewerContext
   - **步骤**：
     - 1) 网格展示图集内照片
     - 2) 类型筛选项（Tab/Chip）
@@ -212,7 +212,7 @@
 
 - [ ] T050 [ST-004] 在 `feature-gallery/.../album/MediaPickerSheet.kt` 中实现 MediaPickerSheet：BottomSheet + 多选网格，从媒体库选择照片
   - **依赖**：T042
-  - **设计引用**：plan.md:MediaPickerSheet、ST-004、ux-design:选图面板
+  - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:MediaPickerSheet、ux-design:选图面板
   - **步骤**：
     - 1) BottomSheet 展示媒体库（可复用 MediaRepository 或独立查询）
     - 2) 多选模式，确认后返回选中的 MediaItem 列表
@@ -222,7 +222,7 @@
 
 - [ ] T051 [ST-004] 在 AlbumDetailViewModel 中实现 AddMediaToAlbum、RemoveMediaFromAlbum；AlbumDetailScreen 中「添加照片」打开 MediaPickerSheet，「移出」从当前列表移除
   - **依赖**：T050、T023
-  - **设计引用**：plan.md:ST-004、FR-004
+  - **设计引用**：story_detail_design.md:ST-004:功能设计；plan.md:FR-004
   - **步骤**：
     - 1) 添加：MediaPickerSheet 确认后调用 AlbumRepository.addMediaToAlbum
     - 2) 移出：调用 AlbumRepository.removeMediaFromAlbum

@@ -147,6 +147,7 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
    在 Standard 基础上追加：
    - **Story Detailed Design（L2）**：按 Story 序号（ST-001、ST-002、…）覆盖 **所有** Story，不得遗漏；对每个 ST-xxx 产出：
      - 目标 & DoD
+     - 本 Story 覆盖的 L1 类（来自 A3.2.2 全景类图）
      - 代码落点与边界
      - 核心接口与数据契约
      - 技术路径实现说明 + 类图 + 关键类职责
@@ -154,6 +155,7 @@ Plan 支持通过 `$ARGUMENTS` 指定输出阶段，**若不指定参数则默�
      - 异常矩阵
      - 并发/生命周期/资源管理
      - 验证与测试设计
+   - **L1 类覆盖矩阵**：在 story_detail_design.md 末尾必须填写「L1 类覆盖矩阵」，确保 A3.2.2 全景类图中的每个类至少被一个 Story 覆盖；所有 Story 类图并集 ≥ L1 全景类图；详见 `docs/speckit/story-l2-l1-coverage.md`。
 
 5. **写入 `IMPL_PLAN`**：
    - **Lite 阶段**：覆盖写入 plan.md

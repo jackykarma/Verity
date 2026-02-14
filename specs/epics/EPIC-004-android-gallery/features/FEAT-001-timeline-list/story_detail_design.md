@@ -10,6 +10,16 @@
 
 ## ST-001 Detailed Design：数据库与媒体库数据访问基础设施
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| MediaRepository | 接口定义，本 Story 实现 getMediaPager 契约 |
+| MediaRepositoryImpl | 实现类，构建 Pager 与 DataSource 工厂 |
+| MediaStoreDataSource | 数据源，执行 MediaStore 查询与分页 |
+| MediaItem | 数据模型，本 Story 定义并产出 |
+| TimelineError | 错误类型体系，权限/查询异常时使用 |
+
 #### 1) 需求及描述
 
 - **需求描述**：实现 MediaStoreDataSource、MediaRepositoryImpl，基于 Paging 3 分页加载媒体项，支持 viewMode（日/月/年）与 filter 条件。作为时间轴的数据基础，供 TimelineViewModel 消费。
@@ -170,6 +180,15 @@ sequenceDiagram
 
 ## ST-002 Detailed Design：TimelineViewModel 与 MVI 状态管理
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| TimelineViewModel | 应用层 MVI 状态管理，处理 Intent 与 Repository |
+| TimelineIntent | 用户意图密封类 |
+| TimelineUiState | UI 状态不可变数据类 |
+| MediaViewerContext | 进入大图上下文契约，本 Story 构建 |
+
 #### 1) 需求及描述
 
 - **需求描述**：实现 TimelineViewModel、TimelineIntent、TimelineUiState；处理 LoadTimeline、ChangeViewMode、ChangeFilter、OnPhotoClick、OnThumbDrag；实现视图切换时视觉焦点保持（recordFocusedItem、scrollToFocusedItemInNewViewMode）。
@@ -321,6 +340,12 @@ sequenceDiagram
 
 ## ST-003 Detailed Design：时间轴列表 UI（LazyVerticalGrid、日/月/年分段、快滑条、筛选）
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| TimelineScreen | 表示层单屏，本 Story 实现 Compose UI |
+
 #### 1) 需求及描述
 
 - **需求描述**：TimelineScreen Compose UI；LazyVerticalGrid + 分组标题；日/月/年 SegmentedBar；快滑条（thumb 右侧、日期气泡左侧）；筛选入口；多语言日期格式化。
@@ -448,6 +473,12 @@ sequenceDiagram
 
 ## ST-004 Detailed Design：缩图加载与即滑即现优化
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| （无新增 L1 类） | 本 Story 为优化型，在 TimelineScreen 内集成 Coil/AsyncImage，细化 MediaItem 在 UI 的加载策略；L1 类由 ST-003 主覆盖 |
+
 #### 1) 需求及描述
 
 - **需求描述**：集成 Coil；AsyncImage + ContentUri；Paging pageSize/prefetchDistance 调优；placeholder 策略；无白块验证。
@@ -574,6 +605,14 @@ sequenceDiagram
 
 ## ST-005 Detailed Design：进入大图导航与 MediaViewerContext
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| MediaViewerContext | 本 Story 负责构建并传递给 FEAT-004；TimelineViewModel、TimelineScreen 协作完成导航 |
+| TimelineViewModel | OnPhotoClick Intent 处理、navigateToViewer 状态 |
+| TimelineScreen | LaunchedEffect 触发导航、sharedElement 过渡 |
+
 #### 1) 需求及描述
 
 - **需求描述**：点击照片时构建 MediaViewerContext（itemList, currentIndex, source），导航至大图路由（FEAT-004 承接）；可选共享元素过渡（Modifier.sharedElement）。
@@ -688,3 +727,24 @@ sequenceDiagram
 
 - **端到端测试**：点击照片→大图屏幕显示对应项
 - **共享元素**：过渡动画 300–350ms（若实现）
+
+---
+
+## L1 类覆盖矩阵（必须填写）
+
+> 全部 Story 输出完成后，填写本矩阵。每个 A3.2.2 全景类图中的类必须至少被一个 Story 覆盖。
+
+| L1 类（来自 plan A3.2.2） | 覆盖的 Story | 覆盖的 L2 类图位置 | 备注 |
+|---------------------------|--------------|---------------------|------|
+| TimelineScreen | ST-003, ST-005 | ST-003 类图（主） | 表示层 |
+| TimelineViewModel | ST-002, ST-005 | ST-002 类图（主） | 应用层 |
+| TimelineUiState | ST-002 | ST-002 类图 | 应用层 |
+| TimelineIntent | ST-002 | ST-002 类图 | 应用层 |
+| MediaRepository | ST-001 | ST-001 类图 | 接口 |
+| MediaRepositoryImpl | ST-001 | ST-001 类图 | 数据层 |
+| MediaStoreDataSource | ST-001 | ST-001 类图 | 数据层 |
+| MediaItem | ST-001 | ST-001 类图 | 领域层 |
+| MediaViewerContext | ST-002, ST-005 | ST-002 类图（主） | 领域层 |
+| TimelineError | ST-001 | ST-001 类图 | 领域层 |
+
+**自检**：上述矩阵包含 A3.2.2 全景类图中的全部 10 个类，无遗漏。

@@ -10,6 +10,14 @@
 
 ## ST-001 Detailed Design：MediaRepository.search 扩展与 SearchQueryParser
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| MediaRepository | 本 Story 扩展 search(condition) 方法 |
+| SearchQueryParser | 领域服务，解析自然语言/条件为 SearchCondition |
+| SearchCondition | 值对象，结构化查询条件 |
+
 #### 1) 需求及描述
 
 - **需求描述**：MediaRepository 增加 search(condition: SearchCondition)；MediaStoreDataSource 或 SearchMediaPagingSource 支持 selection/selectionArgs；SearchQueryParser 规则解析（日期、图集、keyword）；解析失败降级为 keyword LIKE。
@@ -162,6 +170,15 @@ sequenceDiagram
 
 ## ST-002 Detailed Design：搜索 UI 与结果列表
 
+#### 0) 本 Story 覆盖的 L1 类（来自 plan A3.2.2）
+
+| L1 类 | 覆盖说明 |
+|-------|----------|
+| SearchScreen | 表示层，搜索 UI |
+| SearchViewModel | 应用层 MVI 状态管理 |
+| SearchUiState | UI 状态 |
+| SearchIntent | 用户意图密封类 |
+
 #### 1) 需求及描述
 
 - **需求描述**：SearchScreen、SearchViewModel；搜索框、条件 Chip（日期、图集）；结果网格复用 FEAT-001；进入大图 MediaViewerContext source="search"。
@@ -299,3 +316,21 @@ sequenceDiagram
 
 - **UI 测试**：搜索框输入、条件 Chip 选择、结果网格渲染
 - **端到端**：输入自然语言→结果展示；点击进入大图
+
+---
+
+## L1 类覆盖矩阵（必须填写）
+
+> 全部 Story 输出完成后，填写本矩阵。每个 A3.2.2 全景类图中的类必须至少被一个 Story 覆盖。
+
+| L1 类（来自 plan A3.2.2） | 覆盖的 Story | 覆盖的 L2 类图位置 | 备注 |
+|---------------------------|--------------|---------------------|------|
+| SearchScreen | ST-002 | ST-002 类图 | 表示层 |
+| SearchViewModel | ST-002 | ST-002 类图 | 应用层 |
+| SearchUiState | ST-002 | ST-002 类图 | 应用层 |
+| SearchIntent | ST-002 | ST-002 类图 | 应用层 |
+| SearchQueryParser | ST-001 | ST-001 类图 | 领域层 |
+| SearchCondition | ST-001 | ST-001 类图 | 领域层 |
+| MediaRepository | ST-001 | ST-001 类图（search 扩展） | 接口扩展 |
+
+**自检**：上述矩阵包含 A3.2.2 全景类图中的全部 7 个类/扩展，无遗漏。

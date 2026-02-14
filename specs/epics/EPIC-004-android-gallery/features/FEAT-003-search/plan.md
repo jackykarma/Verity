@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature ID**：FEAT-003
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.4
+**Plan Version**：v0.1.5
 **Plan Level**：Deep
 **当前工作分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-003-search/`
@@ -19,6 +19,7 @@
 | v0.1.2 | 2026-02-12 | A0.3、A3.2.2、概述 | DDD 与 7 大原则对应表、关键类职责 DDD/原则列、前置检查对齐 | 对齐 epic-arch | 否 |
 | v0.1.3 | 2026-02-12 | A3.2.1、A3.2.2 | 流程 1 执行搜索流程图与全景类图 Mermaid 语法修复，消除 Invalid Mermaid Codes | 流程图、类图渲染 | 否 |
 | v0.1.4 | 2026-02-14 | Deep 阶段 | Story Detailed Design（L2）：ST-001～ST-002，见 story_detail_design.md | Story Detailed Design | 否 |
+| v0.1.5 | 2026-02-14 | Story 依赖图 | 移除 Story 依赖图节点标签的 `<br/>` | Mermaid 渲染 | 否 |
 
 ## Plan 前置检查（必须，在开始设计前完成）
 
@@ -806,8 +807,8 @@ feature-gallery/
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    ST001["ST-001: Parser + search 扩展<br/>(Infrastructure, 5天)"]
-    ST002["ST-002: 搜索 UI<br/>(Functional, 4天)"]
+    ST001["ST-001: Parser + search 扩展 (Infrastructure, 5天)"]
+    ST002["ST-002: 搜索 UI (Functional, 4天)"]
     
     ST001 --> ST002
     

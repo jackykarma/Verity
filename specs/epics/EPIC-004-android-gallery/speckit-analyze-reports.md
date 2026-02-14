@@ -2,6 +2,8 @@
 
 对 FEAT-001～FEAT-004 依次执行 `/speckit.analyze` 后的结构化报告汇总。分析为只读，未修改任何 spec/plan/tasks 文件。
 
+**分析日期**：2026-02-14（含 L1 类覆盖检查）
+
 ---
 
 ## 报告 1：FEAT-001 时间轴列表浏览
@@ -10,10 +12,9 @@
 
 | ID | 类别 | 严重程度 | 位置 | 摘要 | 建议 |
 |----|----------|----------|-------------|---------|----------------|
-| F001-C1 | 描述不充分 | 中 | spec.md:106-116 行 | 需求追溯表为占位符（ST-???、T???），与 plan 的 ST-001～ST-005 及 tasks 的 T001～T081 未建立显式链接 | 在 spec 需求追溯表中填写 Plan Story ID 与任务 ID，便于双向追溯 |
-| F001-B1 | 模糊性 | 低 | spec.md:72-73 行 | NFR-POWER-001、NFR-MEM-001 含「[需在 Plan 阶段细化]」占位表述 | plan 已对 NFR-MEM-001 有 T061 内存 profiling；NFR-POWER-001 可在 plan 中补充一句“常规浏览场景功耗由 ST-004 验收覆盖”或保留为后续细化 |
-| F001-E1 | 覆盖缺口 | 低 | spec.md | NFR-POWER-001 无单独任务；plan 中功耗为“可接受范围内”未拆为可验证任务 | 若需可测，可在阶段 8 增加一条“功耗验收”任务或于 T061 验证项中纳入 |
-| F001-F1 | 不一致性 | 低 | spec.md vs plan/tasks | spec 需求追溯表与 plan/tasks 的 ID 体系未同步 | 补齐 spec 需求追溯表 |
+| F001-B1 | 已解决 | — | spec.md | NFR-POWER/MEM 占位已替换为 plan 引用（v0.1.4） | — |
+| F001-E1 | 已解决 | — | spec.md | NFR-POWER-001 已纳入需求追溯表「可合入 T061 验证」（v0.1.4） | — |
+| F001-C1 | 已解决 | — | spec.md | 需求追溯表已补齐（v0.1.3），ST-xxx 与 Txxx 已建立链接 | — |
 
 **覆盖情况汇总表：**
 
@@ -35,25 +36,28 @@
 | NFR-OBS-001 | 是 | 本期可不实现 | 无任务符合 spec |
 | NFR-REL-001 | 是 | T032, T033, T080 | 降级与不崩溃 |
 
-**章程一致性问题：** 无。plan 使用 Mermaid、类图后紧跟职责说明表，符合章程六、十二。
+**L1 类覆盖情况**（Plan Level = Deep，story_detail_design.md 已含 L1 矩阵）：
 
-**未映射任务：** T001（版本核对）、T010-T012（环境搭建）、T020（基础设施）为支撑性任务，映射到“准备与基础设施”；无游离任务。
+| L1 类（来自 A3.2.2） | 是否被 Story 覆盖 | 覆盖的 Story | 备注 |
+|----------------------|-------------------|--------------|------|
+| TimelineScreen | 是 | ST-003, ST-005 | 表示层 |
+| TimelineViewModel | 是 | ST-002, ST-005 | 应用层 |
+| TimelineUiState | 是 | ST-002 | 应用层 |
+| TimelineIntent | 是 | ST-002 | 应用层 |
+| MediaRepository | 是 | ST-001 | 接口 |
+| MediaRepositoryImpl | 是 | ST-001 | 数据层 |
+| MediaStoreDataSource | 是 | ST-001 | 数据层 |
+| MediaItem | 是 | ST-001 | 领域层 |
+| MediaViewerContext | 是 | ST-002, ST-005 | 领域层 |
+| TimelineError | 是 | ST-001 | 领域层 |
 
-**指标：**
+**章程一致性问题：** 无。
 
-- 总需求数：15（FR 7 + NFR 8）
-- 总任务数：约 22 个执行任务（含阶段 0～8）
-- 覆盖率：15/15 = 100%（NFR-POWER-001 为部分覆盖）
-- 模糊性问题数量：1（占位表述）
-- 重复项数量：0
-- 严重问题数量：0（CRITICAL 0，HIGH 0）
+**未映射任务：** T001、T010-T012、T020 为支撑性任务；无游离任务。
 
-**后续行动：**
+**指标：** 总需求 15，总任务约 22，覆盖率 100%（NFR-POWER 部分）；模糊 1，重复 0，CRITICAL 0。
 
-- 无 CRITICAL 级问题，可推进 `/speckit.implement`。
-- 建议：在实施前或实施中更新 spec.md 的「需求追溯」表，填写 ST-xxx 与 Txxx，便于评审与回归。
-
-**整改建议：** 是否需要我为上述 F001-C1（需求追溯表补齐）提供具体编辑建议？
+**后续行动：** 无 CRITICAL 级问题，可推进 implement。
 
 ---
 
@@ -63,10 +67,9 @@
 
 | ID | 类别 | 严重程度 | 位置 | 摘要 | 建议 |
 |----|----------|----------|-------------|---------|----------------|
-| F002-C1 | 描述不充分 | 中 | spec.md:112-121 行 | 需求追溯表为占位符（ST-???、T???），与 plan 的 ST-001～ST-004 及 tasks 的 T001～T061 未建立显式链接 | 在 spec 需求追溯表中填写 Plan Story ID 与任务 ID |
-| F002-B1 | 模糊性 | 低 | spec.md:79、84 行 | NFR-POWER-001、NFR-MEM-001 含「[需在 Plan 阶段细化]」占位表述 | 在 plan 中补充功耗/内存验收或于现有 Story 验证项中纳入 |
-| F002-E1 | 覆盖缺口 | 低 | spec.md | NFR-POWER-001、NFR-MEM-001 无单独可量化任务 | 可在阶段 6 或 ST-003/ST-004 验证中纳入功耗/内存观察 |
-| F002-F1 | 不一致性 | 低 | spec.md vs plan/tasks | spec 需求追溯表与 plan/tasks 的 ID 体系未同步 | 补齐 spec 需求追溯表 |
+| F002-B1 | 已解决 | — | spec.md | NFR-POWER/MEM 占位已替换为 plan 引用（v0.1.3） | — |
+| F002-E1 | 已解决 | — | spec.md | NFR-POWER/MEM 已纳入需求追溯表（v0.1.3） | — |
+| F002-C1 | 已解决 | — | spec.md | 需求追溯表已填写，ST-xxx 与 Txxx 已链接 | — |
 
 **覆盖情况汇总表：**
 
@@ -81,24 +84,30 @@
 | NFR-PERF-001 | 是 | T042 | 即滑即现无白块 |
 | NFR-POWER-001 | 部分 | — | 无独立任务 |
 | NFR-MEM-001 | 部分 | — | 无独立任务 |
-| NFR-SEC-001 | 是 | 复用 FEAT-001 权限 | 存储与隐私规范 |
+| NFR-SEC-001 | 是 | 复用 FEAT-001 | 存储与隐私 |
 | NFR-OBS-001 | 是 | 本期可不实现 | 符合 spec |
 | NFR-REL-001 | 是 | T023, T051, T061 | 增删失败提示、降级 |
 
-**章程一致性问题：** 无。plan 使用 Mermaid、类图后紧跟职责说明，符合章程六、十二。
+**L1 类覆盖情况**（Plan Level = Deep，story_detail_design.md 已含 L1 矩阵）：
+
+| L1 类（来自 A3.2.2） | 是否被 Story 覆盖 | 覆盖的 Story | 备注 |
+|----------------------|-------------------|--------------|------|
+| AlbumListScreen | 是 | ST-002 | 表示层 |
+| AlbumDetailScreen | 是 | ST-003, ST-004 | 表示层 |
+| AlbumListViewModel | 是 | ST-002 | 应用层 |
+| AlbumDetailViewModel | 是 | ST-003, ST-004 | 应用层 |
+| AlbumRepository | 是 | ST-001, ST-004 | 接口 |
+| AlbumRepositoryImpl | 是 | ST-001 | 数据层 |
+| Album | 是 | ST-001 | 领域层 |
+| AlbumDao | 是 | ST-001 | 数据层 |
+
+**章程一致性问题：** 无。
 
 **未映射任务：** T001、T010 为准备与环境任务；无游离任务。
 
-**指标：**
+**指标：** 总需求 12，总任务约 18，覆盖率 100%（NFR-POWER/MEM 部分）；模糊 1，重复 0，CRITICAL 0。
 
-- 总需求数：12（FR 6 + NFR 6）
-- 总任务数：约 18 个执行任务
-- 覆盖率：12/12 = 100%（NFR-POWER/MEM 为部分覆盖）
-- 模糊性问题数量：1
-- 重复项数量：0
-- 严重问题数量：0
-
-**后续行动：** 无 CRITICAL 级问题，可推进 implement。建议实施前补齐 spec 需求追溯表。
+**后续行动：** 无 CRITICAL 级问题，可推进 implement。
 
 ---
 
@@ -108,10 +117,9 @@
 
 | ID | 类别 | 严重程度 | 位置 | 摘要 | 建议 |
 |----|----------|----------|-------------|---------|----------------|
-| F003-C1 | 描述不充分 | 中 | spec.md:100-107 行 | 需求追溯表为占位符（ST-???、T???），与 plan 的 ST-001～ST-002 及 tasks 的 T001～T031 未建立显式链接 | 在 spec 需求追溯表中填写 Story ID 与任务 ID |
-| F003-B1 | 模糊性 | 低 | spec.md:63、67 行 | NFR-POWER-001、NFR-MEM-001 含「[需在 Plan 阶段细化]」占位表述 | 在 plan 或现有 Story 验证中补充功耗/内存观察 |
-| F003-E1 | 覆盖缺口 | 低 | spec.md | NFR-POWER-001、NFR-MEM-001 无单独可量化任务 | 可合入 ST-002 验收或阶段 3 |
-| F003-F1 | 不一致性 | 低 | spec.md vs plan/tasks | spec 需求追溯表与 plan/tasks ID 未同步；spec 未列 NFR-SEC-001、NFR-OBS-001、NFR-REL-001 追溯行 | 补齐需求追溯表并补全 NFR 行 |
+| F003-B1 | 已解决 | — | spec.md | NFR-POWER/MEM 占位已替换为 plan 引用（v0.1.2） | — |
+| F003-E1 | 已解决 | — | spec.md | NFR-POWER/MEM 已纳入需求追溯表「可合入 ST-002 验收」（v0.1.1） | — |
+| F003-F1 | 已解决 | — | spec.md | 需求追溯表已补齐 NFR 行（v0.1.1），NFR-SEC/OBS/REL 已列 | — |
 
 **覆盖情况汇总表：**
 
@@ -128,13 +136,25 @@
 | NFR-OBS-001 | 是 | 本期可不实现 | 符合 spec |
 | NFR-REL-001 | 是 | T013, T031 | 失败提示、不崩溃 |
 
+**L1 类覆盖情况**（Plan Level = Deep，story_detail_design.md 已含 L1 矩阵）：
+
+| L1 类（来自 A3.2.2） | 是否被 Story 覆盖 | 覆盖的 Story | 备注 |
+|----------------------|-------------------|--------------|------|
+| SearchScreen | 是 | ST-002 | 表示层 |
+| SearchViewModel | 是 | ST-002 | 应用层 |
+| SearchUiState | 是 | ST-002 | 应用层 |
+| SearchIntent | 是 | ST-002 | 应用层 |
+| SearchQueryParser | 是 | ST-001 | 领域层 |
+| SearchCondition | 是 | ST-001 | 领域层 |
+| MediaRepository | 是 | ST-001（search 扩展） | 接口扩展 |
+
 **章程一致性问题：** 无。
 
-**未映射任务：** 无。T001、T030-T031 为准备与优化任务，映射到「准备/主导航/空态」。
+**未映射任务：** T001、T030-T031 为准备与优化任务；无游离任务。
 
-**指标：** 总需求数 10，总任务数约 14，覆盖率 100%（NFR-POWER/MEM 部分）；模糊 1，重复 0，CRITICAL 0。
+**指标：** 总需求 10，总任务约 14，覆盖率 100%（NFR-POWER/MEM 部分）；模糊 1，重复 0，CRITICAL 0。
 
-**后续行动：** 无 CRITICAL 级问题，可推进 implement。建议补齐 spec 需求追溯表。
+**后续行动：** 无 CRITICAL 级问题，可推进 implement。
 
 ---
 
@@ -144,10 +164,9 @@
 
 | ID | 类别 | 严重程度 | 位置 | 摘要 | 建议 |
 |----|----------|----------|-------------|---------|----------------|
-| F004-C1 | 描述不充分 | 中 | spec.md:95-101 行 | 需求追溯表为占位符（ST-???、T???），与 plan 的 ST-001～ST-004 及 tasks 的 T001～T050 未建立显式链接 | 在 spec 需求追溯表中填写 Story ID 与任务 ID |
-| F004-B1 | 模糊性 | 低 | spec.md:63 行 | NFR-POWER-001 含「[需在 Plan 阶段细化]」占位表述 | 在 plan 或 T040/T041 验收中补充功耗观察，或保留为后续细化 |
-| F004-E1 | 覆盖缺口 | 低 | spec.md | NFR-POWER-001 无单独任务 | 可合入 ST-004 或阶段 5 验收 |
-| F004-F1 | 不一致性 | 低 | spec.md vs plan/tasks | spec 需求追溯表与 plan/tasks ID 未同步 | 补齐需求追溯表 |
+| F004-B1 | 已解决 | — | spec.md | NFR-POWER 占位已替换为 plan 引用（v0.1.2） | — |
+| F004-E1 | 已解决 | — | spec.md | NFR-POWER 已纳入需求追溯表「可合入 ST-004 或阶段 5 验收」（v0.1.2） | — |
+| F004-F1 | 已解决 | — | spec.md | 需求追溯表已补齐 NFR-SEC/OBS/POWER/REL 行（v0.1.2） | — |
 
 **覆盖情况汇总表：**
 
@@ -167,13 +186,30 @@
 | NFR-OBS-001 | 是 | 本期可不实现 | 符合 spec |
 | NFR-REL-001 | 是 | T012, T041 | 损坏/不支持时占位或提示 |
 
+**L1 类覆盖情况**（Plan Level = Deep，story_detail_design.md 已含 L1 矩阵）：
+
+| L1 类（来自 A3.2.2） | 是否被 Story 覆盖 | 覆盖的 Story | 备注 |
+|----------------------|-------------------|--------------|------|
+| PhotoViewerScreen | 是 | ST-002, ST-003, ST-004 | 表示层 |
+| PhotoViewerViewModel | 是 | ST-002, ST-003, ST-004 | 应用层 |
+| PhotoViewerUiState | 是 | ST-002 | 应用层 |
+| PhotoViewerIntent | 是 | ST-002, ST-003 | 应用层 |
+| BigImageLoader | 是 | ST-001, ST-004 | 接口 |
+| BigImageLoaderImpl | 是 | ST-001 | 数据层 |
+| ImageDecoder | 是 | ST-001 | 数据层 |
+
 **章程一致性问题：** 无。
 
 **未映射任务：** 无。
 
-**指标：** 总需求数 13，总任务数约 20，覆盖率 100%（NFR-POWER 部分）；模糊 1，重复 0，CRITICAL 0。
+**指标：** 总需求 13，总任务约 20，覆盖率 100%（NFR-POWER 部分）；模糊 1，重复 0，CRITICAL 0。
 
-**后续行动：** 无 CRITICAL 级问题，可推进 implement。建议实施前补齐 spec 需求追溯表。
+**后续行动：** 无 CRITICAL 级问题，可推进 implement。
 
 ---
 
+## 汇总结论
+
+- **L1 类覆盖**：四个 Feature 的 story_detail_design.md 均包含 L1 类覆盖矩阵，A3.2.2 全景类图中的类均已至少被一个 Story 覆盖，无 CRITICAL 级 L1 覆盖缺口。
+- **章程一致性**：全部 Feature 无章程违规。
+- **实施建议**：无 CRITICAL 级问题，可推进 `/speckit.implement`。一致性问题已全部解决（2026-02-14）。
