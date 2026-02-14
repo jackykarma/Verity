@@ -252,12 +252,14 @@
 >
 > 开发者可手工补充「备注」列，但不要修改表头与 `BEGIN/END` 标记。
 
+<!-- BEGIN_FEATURE_REGISTRY -->
 | Feature           | 分支 | Feature Version | Plan Version | Tasks Version | 状态       | 备注 |
 | ----------------- | ---- | --------------- | ------------ | ------------- | ----------- | ---- |
-| 时间轴列表浏览    | —    | v0.1.0          | —            | —             | Spec Ready  | FEAT-001-timeline-list |
-| 图集管理          | —    | v0.1.0          | —            | —             | Spec Ready  | FEAT-002-album-management |
-| 搜索              | —    | v0.1.0          | —            | —             | Spec Ready  | FEAT-003-search |
-| 大图浏览          | —    | v0.1.0          | —            | —             | Spec Ready  | FEAT-004-photo-viewer |
+| 时间轴列表浏览 (FEAT-001) | epic/EPIC-004-android-gallery | v0.1.1 | v0.1.0 | N/A | Plan Ready | FEAT-001-timeline-list |
+| 图集管理 (FEAT-002) | epic/EPIC-004-android-gallery | v0.1.1 | v0.1.0 | N/A | Plan Ready | FEAT-002-album-management |
+| 搜索 (FEAT-003) | epic/EPIC-004-android-gallery | v0.1.0 | v0.1.0 | N/A | Plan Ready | FEAT-003-search |
+| 大图浏览 (FEAT-004) | epic/EPIC-004-android-gallery | v0.1.0 | v0.1.0 | N/A | Plan Ready | FEAT-004-photo-viewer |
+<!-- END_FEATURE_REGISTRY -->
 
 ## 变更记录（增量变更）
 

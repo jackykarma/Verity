@@ -4,7 +4,7 @@
 
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Epic Version**：v0.1.9（来自 `epic.md`）
-**epic-arch Version**：v0.1.0
+**epic-arch Version**：v0.1.1
 **创建/更新日期**：2026-02-12
 **输入**：`epic.md`、各 `features/*/spec.md`、现有工程代码、`.specify/memory/constitution.md`、用户架构约束
 
@@ -172,6 +172,29 @@ flowchart TB
 
 ## 规范与约束（所有 Feature plan 必须遵守）
 
+### DDD 设计要点（所有 Feature plan 须在 A0/A3 中显式对齐）
+
+| 概念 | 定义 | 本 EPIC 落地示例 | 设计约束 |
+|------|------|------------------|----------|
+| **实体 (Entity)** | 具身份标识、生命周期，可通过 id 区分 | MediaItem（id）、Album（id） | 不可变优先；identity 由领域定义，非 DB 主键语义 |
+| **值对象 (Value Object)** | 无 identity，由属性值全等判定相等 | TimelineViewMode、FilterCondition、MediaViewerContext、SearchCondition | 不可变；可 `data class`；可包含领域校验逻辑 |
+| **聚合 (Aggregate)** | 一组强一致性边界的实体与值对象，以聚合根为唯一入口 | 媒体项以 MediaItem 为根；图集以 Album 为根，Album 维护 mediaIds | 跨聚合不直接引用，通过 id；Repository 按聚合根提供接口 |
+| **领域服务 (Domain Service)** | 跨实体/聚合、无状态的业务逻辑 | TimelineGroupingService（按 viewMode 分组）、SearchQueryParser（解析自然语言→SearchCondition） | 无 Android 依赖；接口定义在领域层 |
+| **Repository** | 聚合的集合抽象，屏蔽存储细节 | MediaRepository、AlbumRepository | 接口在领域层，实现注入；返回领域对象，非 DTO |
+| **限界上下文 (Bounded Context)** | 领域模型与术语的边界 | 媒体库（时间轴/图集/搜索）、大图浏览、图集管理 | 跨上下文通过明确契约（如 MediaViewerContext）交互 |
+
+### 面向对象 7 大原则（设计须显式遵循）
+
+| 原则 | 含义 | 本 EPIC 落地要求 |
+|------|------|------------------|
+| **SRP 单一职责** | 类仅有一个引起变化的原因 | ViewModel 仅编排；DataSource 仅查询；分组逻辑抽到 DomainService；UI 仅渲染与发 Intent |
+| **OCP 开闭** | 对扩展开放、对修改封闭 | Repository 接口扩展 `search()` 而非改 `getMediaPager` 签名；FilterCondition 用 sealed 扩展新类型；错误用 sealed 不 if-else 扩散 |
+| **LSP 里氏替换** | 子类型可替换基类型 | MediaRepositoryImpl 可替换 MediaRepository；AlbumRepositoryImpl 可替换 AlbumRepository；实现不破坏接口契约 |
+| **ISP 接口隔离** | 多个特定接口优于一个通用接口 | MediaRepository（媒体查询）与 AlbumRepository（图集 CRUD）分离；BigImageLoader（加载）与媒体查询分离；避免上帝接口 |
+| **DIP 依赖倒置** | 依赖抽象，不依赖具体 | ViewModel 依赖 MediaRepository 接口；Repository 接口在领域层，DataSource 在数据层；Hilt 注入实现 |
+| **迪米特法则** | 最少知识，不链式穿透 | UI 不直连 DataSource；ViewModel 不暴露 Paging 内部；跨 Feature 通过 MediaViewerContext 等契约传递，不传递 Repository |
+| **合成复用** | 组合优于继承 | ViewModel 组合 Repository、UseCase；MediaRepositoryImpl 组合 DataSource；避免为复用而深继承，优先委派与组合 |
+
 ### 技术栈
 
 | 项目         | 约定                              |
@@ -222,3 +245,4 @@ flowchart TB
 | 版本     | 日期         | 变更范围 | 变更摘要                                       | 影响 Feature / plan |
 | ------ | ---------- | ---- | ------------------------------------------ | ----------------- |
 | v0.1.0 | 2026-02-12 | 初始   | 初版：插件化 + DDD + MVI + Compose，Kotlin 2.1.21 | —                 |
+| v0.1.1 | 2026-02-12 | 规范与约束 | 新增 DDD 设计要点、面向对象 7 大原则章节，明确落地要求 | 各 Feature plan   |
