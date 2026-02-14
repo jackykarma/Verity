@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature 类型**：Product Feature
 **Feature ID**：FEAT-002
-**Feature Version**：v0.1.1
+**Feature Version**：v0.1.2
 **EPIC 分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-002-album-management/`
 **创建时间**：2026-02-08
@@ -117,13 +117,14 @@
 
 | FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
 |---|---|---|---|
-| FR-001 | ST-??? | T??? |  |
-| FR-002 | ST-??? | T??? |  |
-| FR-003 | ST-??? | T??? |  |
-| FR-004 | ST-??? | T??? |  |
-| FR-005 | ST-??? | T??? |  |
-| FR-006 | ST-??? | T??? |  |
-| NFR-PERF-001 / NFR-REL-001 | ST-??? | T??? |  |
+| FR-001 | ST-001 | T020～T023 | 图集列表（系统+用户） |
+| FR-002 | ST-002 | T030～T032 | 新增图集 |
+| FR-003 | ST-002 | T030～T031 | 删除用户图集 |
+| FR-004 | ST-004 | T050～T051 | 添加/移出照片 |
+| FR-005 | ST-003 | T040～T042 | 按图集浏览、进入大图 |
+| FR-006 | ST-003 | T040～T042 | 按媒体类型查看 |
+| NFR-PERF-001 | ST-003 | T042 | 即滑即现无白块 |
+| NFR-REL-001 | ST-001, ST-004 | T023, T051, T061 | 增删失败提示、降级 |
 
 ## 变更记录（增量变更）
 
@@ -131,3 +132,4 @@
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-02-08 | 全文 | 初版，自 EPIC-004 拆分 | — | 否 |
 | v0.1.1 | 2026-02-08 | 媒体类型查看 | 图集内支持按媒体类型查看：图片、视频、GIF、实况照片、杜比视频等 | FR-006, AC-005, AC-006 | 否 |
+| v0.1.2 | 2026-02-14 | 需求追溯 | 补齐需求追溯表：Story ID、任务 ID 与 plan/tasks 一致 | 需求追溯表 | 否 |

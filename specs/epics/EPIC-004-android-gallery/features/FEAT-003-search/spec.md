@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature 类型**：Product Feature
 **Feature ID**：FEAT-003
-**Feature Version**：v0.1.0
+**Feature Version**：v0.1.1
 **EPIC 分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-003-search/`
 **创建时间**：2026-02-08
@@ -100,13 +100,17 @@
 
 | FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
 |---|---|---|---|
-| FR-001 | ST-??? | T??? |  |
-| FR-002 | ST-??? | T??? |  |
-| FR-003 | ST-??? | T??? |  |
-| NFR-PERF-001/002 | ST-??? | T??? |  |
+| FR-001 | ST-001, ST-002 | T011, T022 | 自然语言检索、Parser |
+| FR-002 | ST-001, ST-002 | T010～T013, T020～T023 | 关键词/日期/图集条件 |
+| FR-003 | ST-002 | T023 | 结果列表、进入大图 |
+| NFR-PERF-001/002 | ST-002 | T023 | 响应与列表流畅、缩图即滑即现 |
+| NFR-SEC-001 | — | 复用 FEAT-001 | 存储与隐私规范 |
+| NFR-OBS-001 | — | 本期可不实现 | 埋点后续引入 |
+| NFR-REL-001 | ST-001, ST-002 | T013, T031 | 失败提示、不崩溃 |
 
 ## 变更记录（增量变更）
 
 | 版本 | 日期 | 变更范围 | 变更摘要 | 影响 | 是否需要回滚 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-02-08 | 全文 | 初版，自 EPIC-004 拆分 | — | 否 |
+| v0.1.1 | 2026-02-14 | 需求追溯 | 补齐需求追溯表：Story ID、任务 ID 与 plan/tasks 一致；补全 NFR-SEC/OBS/REL 追溯行 | 需求追溯表 | 否 |

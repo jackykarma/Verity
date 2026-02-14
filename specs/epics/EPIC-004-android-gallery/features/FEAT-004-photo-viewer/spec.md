@@ -3,7 +3,7 @@
 **Epic**：EPIC-004 - Android 端相册 App 一期
 **Feature 类型**：Product Feature
 **Feature ID**：FEAT-004
-**Feature Version**：v0.1.0
+**Feature Version**：v0.1.1
 **EPIC 分支**：`epic/EPIC-004-android-gallery`
 **Feature 目录**：`specs/epics/EPIC-004-android-gallery/features/FEAT-004-photo-viewer/`
 **创建时间**：2026-02-08
@@ -106,12 +106,18 @@
 
 | FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
 |---|---|---|---|
-| FR-001～FR-006 | ST-??? | T??? |  |
-| NFR-PERF-001/002 | ST-??? | T??? |  |
-| NFR-MEM-001 | ST-??? | T??? |  |
+| FR-001 | ST-003 | T031 | 缩图轴快速切换 |
+| FR-002 | ST-004 | T040～T041 | 单张/多张、实况图与视频 |
+| FR-003 | ST-001, ST-004 | T010～T012, T041 | 图片格式 |
+| FR-004 | ST-004 | T040, T041 | 视频格式 |
+| FR-005 | ST-002, ST-003 | T023, T030 | 缩放与滑动切换 |
+| FR-006 | ST-002 | T022, T050 | 上下文保持、入口 |
+| NFR-PERF-001/002 | ST-002, ST-003 | T023, T030 | 进入无黑图、滑动丝滑 |
+| NFR-MEM-001 | ST-001 | T012 | LruCache、recycle、profiling |
 
 ## 变更记录（增量变更）
 
 | 版本 | 日期 | 变更范围 | 变更摘要 | 影响 | 是否需要回滚 |
 |---|---|---|---|---|---|
 | v0.1.0 | 2026-02-08 | 全文 | 初版，自 EPIC-004 拆分 | — | 否 |
+| v0.1.1 | 2026-02-14 | 需求追溯 | 补齐需求追溯表：Story ID、任务 ID 与 plan/tasks 一致 | 需求追溯表 | 否 |
