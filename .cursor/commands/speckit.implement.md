@@ -53,6 +53,7 @@ $ARGUMENTS
     - **若存在**：读取 quickstart.md 获取集成场景
 
    **强制约束（不可越权）**：
+    - Implement 阶段必须**严格遵守** `plan.md` 中 **Plan-A（工程决策与风险评估）** 与 **Plan-B（技术规约与实现约束）** 的设计方案；不得在代码实现中擅自偏离或改写上述决策与约束。
     - Implement 阶段 **不得**擅自改写 `plan.md` 的工程决策与 Story Breakdown，也不得改写 `spec.md` 的 FR/NFR/AC。
     - 若发现设计缺口或必须变更：停止 Implement，提交变更提案（PR/Issue/评论，包含证据与影响范围；建议使用 `.specify/templates/change-request-template.md` 作为 CR 模板），由 SE/TL 在 EPIC 分支先更新 plan/spec（走增量变更并提升 Version），再重新生成 tasks.md（必要时）后继续。
 
