@@ -36,7 +36,7 @@ class AlbumMediaPagingSource(
                     MediaStore.Images.Media.DATE_TAKEN,
                     MediaStore.Images.Media.MIME_TYPE
                 )
-                val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC LIMIT $limit OFFSET $offset"
+                val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
                 val (selection, selectionArgs) = buildSelection(offset, limit)
                     ?: return@withContext LoadResult.Page(emptyList(), null, null)
                 val cursor = contentResolver.query(uri, projection, selection, selectionArgs, sortOrder)
@@ -46,12 +46,26 @@ class AlbumMediaPagingSource(
                     val dateIdx = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
                     val mimeIdx = it.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
                     val list = mutableListOf<MediaItem>()
-                    while (it.moveToNext()) {
-                        val id = it.getLong(idIdx)
-                        val dateTaken = it.getLong(dateIdx)
-                        val mimeType = it.getString(mimeIdx) ?: "image/*"
-                        val contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                        list.add(MediaItem(id = id, contentUri = contentUri, dateTaken = dateTaken, mimeType = mimeType))
+                    if (albumId < 0) {
+                        var skipped = 0
+                        while (skipped < offset && it.moveToNext()) skipped++
+                        var collected = 0
+                        while (collected < limit && it.moveToNext()) {
+                            val id = it.getLong(idIdx)
+                            val dateTaken = it.getLong(dateIdx)
+                            val mimeType = it.getString(mimeIdx) ?: "image/*"
+                            val contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                            list.add(MediaItem(id = id, contentUri = contentUri, dateTaken = dateTaken, mimeType = mimeType))
+                            collected++
+                        }
+                    } else {
+                        while (it.moveToNext()) {
+                            val id = it.getLong(idIdx)
+                            val dateTaken = it.getLong(dateIdx)
+                            val mimeType = it.getString(mimeIdx) ?: "image/*"
+                            val contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                            list.add(MediaItem(id = id, contentUri = contentUri, dateTaken = dateTaken, mimeType = mimeType))
+                        }
                     }
                     val nextKey = if (list.size < limit) null else offset + limit
                     LoadResult.Page(data = list, prevKey = (offset - limit).takeIf { it >= 0 }, nextKey = nextKey)

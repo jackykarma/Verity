@@ -9,12 +9,33 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import com.jacky.verity.ui.theme.GalleryAccent
+import com.jacky.verity.ui.theme.GalleryBackground
+import com.jacky.verity.ui.theme.GallerySurface
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80
+)
+
+/** 相册 Pencil 设计稿：深色背景 + 强调色 #FA243C（design/README.md、ux-design.md） */
+private val GalleryDarkColorScheme = darkColorScheme(
+    primary = GalleryAccent,
+    onPrimary = Color.White,
+    primaryContainer = GalleryAccent.copy(alpha = 0.3f),
+    onPrimaryContainer = Color.White,
+    secondary = GalleryAccent.copy(alpha = 0.8f),
+    onSecondary = Color.White,
+    background = GalleryBackground,
+    onBackground = Color.White,
+    surface = GallerySurface,
+    onSurface = Color.White,
+    surfaceVariant = GallerySurface.copy(alpha = 0.8f),
+    onSurfaceVariant = Color.White.copy(alpha = 0.8f),
+    outline = Color.White.copy(alpha = 0.2f)
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -41,12 +62,11 @@ fun VerityTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !darkTheme -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            dynamicLightColorScheme(context)
         }
-
-        darkTheme -> DarkColorScheme
+        darkTheme -> GalleryDarkColorScheme
         else -> LightColorScheme
     }
 

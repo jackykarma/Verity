@@ -31,7 +31,7 @@ class SearchMediaPagingSource(
                 MediaStore.Images.Media.MIME_TYPE,
                 MediaStore.Images.Media.DISPLAY_NAME
             )
-            val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC LIMIT $limit OFFSET $offset"
+            val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
             val cursor = contentResolver.query(uri, projection, selection, args, sortOrder)
                 ?: return LoadResult.Error(IllegalStateException("ContentResolver.query returned null"))
             try {
@@ -40,12 +40,16 @@ class SearchMediaPagingSource(
                 val dateIdx = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
                 val mimeIdx = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
                 val nameIdx = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-                while (cursor.moveToNext()) {
+                var skipped = 0
+                while (skipped < offset && cursor.moveToNext()) skipped++
+                var collected = 0
+                while (collected < limit && cursor.moveToNext()) {
                     val id = cursor.getLong(idIdx)
                     val dateTaken = cursor.getLong(dateIdx)
                     val mimeType = cursor.getString(mimeIdx) ?: "image/*"
                     val contentUri: Uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
                     list.add(MediaItem(id = id, contentUri = contentUri, dateTaken = dateTaken, mimeType = mimeType))
+                    collected++
                 }
                 val nextKey = if (list.size < limit) null else offset + limit
                 LoadResult.Page(data = list, prevKey = (offset - limit).takeIf { it >= 0 }, nextKey = nextKey)

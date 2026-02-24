@@ -1,9 +1,13 @@
 package com.jacky.verity
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,6 +15,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,7 +23,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -44,7 +52,31 @@ import com.jacky.verity.gallery.search.SearchViewModelFactory
 import com.jacky.verity.gallery.viewer.PhotoViewerScreen
 import com.jacky.verity.gallery.viewer.PhotoViewerViewModel
 import com.jacky.verity.gallery.viewer.PhotoViewerViewModelFactory
+import com.jacky.verity.ui.theme.GalleryFrosted
 import com.jacky.verity.ui.theme.VerityTheme
+
+private fun ComponentActivity.hasMediaPermission(permissions: Array<String>): Boolean =
+    permissions.all { ContextCompat.checkSelfPermission(this, it) == android.content.pm.PackageManager.PERMISSION_GRANTED }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AppTopBar(
+    onAlbumsClick: () -> Unit,
+    onSearchClick: () -> Unit
+) {
+    TopAppBar(
+        title = { Text("相册") },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = GalleryFrosted),
+        actions = {
+            IconButton(onClick = onAlbumsClick) {
+                Text("图集")
+            }
+            IconButton(onClick = onSearchClick) {
+                Text("搜索")
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -57,23 +89,32 @@ class MainActivity : ComponentActivity() {
         val albumRepo = AlbumRepositoryImpl(albumDao, contentResolver)
         val searchVmFactory = SearchViewModelFactory(mediaRepo, albumRepo)
         setContent {
-            VerityTheme {
+            VerityTheme(darkTheme = true) {
                 val navController = rememberNavController()
                 var pendingViewerContext by remember { mutableStateOf<MediaViewerContext?>(null) }
+                val mediaPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+                } else {
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+                }
+                val activity = LocalContext.current as ComponentActivity
+                val hasMediaPermission = remember { mutableStateOf(activity.hasMediaPermission(mediaPermissions)) }
+                val permissionLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestMultiplePermissions()
+                ) { granted ->
+                    hasMediaPermission.value = granted.values.all { it }
+                }
+                LaunchedEffect(Unit) {
+                    if (!activity.hasMediaPermission(mediaPermissions)) {
+                        permissionLauncher.launch(mediaPermissions)
+                    }
+                }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                        topBar = {
-                        @Suppress("OPT_IN_USAGE")
-                        TopAppBar(
-                            title = { Text("相册") },
-                            actions = {
-                                IconButton(onClick = { navController.navigate("albums") }) {
-                                    Text("图集")
-                                }
-                                IconButton(onClick = { navController.navigate("search") }) {
-                                    Text("搜索")
-                                }
-                            }
+                    topBar = {
+                        AppTopBar(
+                            onAlbumsClick = { navController.navigate("albums") },
+                            onSearchClick = { navController.navigate("search") }
                         )
                     }
                 ) { innerPadding ->
@@ -86,8 +127,13 @@ class MainActivity : ComponentActivity() {
                             val timelineVm: TimelineViewModel = viewModel(
                                 factory = TimelineViewModelFactory(mediaRepo)
                             )
+                            val hasPermission by remember { hasMediaPermission }
                             TimelineScreen(
                                 viewModel = timelineVm,
+                                hasMediaPermission = hasPermission,
+                                onRequestPermission = {
+                                    permissionLauncher.launch(mediaPermissions)
+                                },
                                 onNavigateToViewer = { ctx ->
                                     pendingViewerContext = ctx
                                     navController.navigate("viewer")

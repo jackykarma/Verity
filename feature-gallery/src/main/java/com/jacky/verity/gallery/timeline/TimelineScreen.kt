@@ -34,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -63,12 +64,14 @@ private fun columnsFor(viewMode: TimelineViewMode): Int = when (viewMode) {
 @Composable
 fun TimelineScreen(
     viewModel: TimelineViewModel,
+    hasMediaPermission: Boolean = true,
+    onRequestPermission: (() -> Unit)? = null,
     onNavigateToViewer: ((MediaViewerContext) -> Unit)? = null
 ) {
     val state by viewModel.state.collectAsState()
-    val pagingItems = viewModel.mediaPagerFlow.collectAsLazyPagingItems()
     val listState = rememberLazyGridState()
     val scope = rememberCoroutineScope()
+    val showPermissionPrompt = !hasMediaPermission
 
     LaunchedEffect(state.navigateToViewer) {
         state.navigateToViewer?.let { ctx ->
@@ -85,135 +88,163 @@ fun TimelineScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.weight(1f)
-            ) {
-                listOf(
-                    TimelineViewMode.Day to "日",
-                    TimelineViewMode.Month to "月",
-                    TimelineViewMode.Year to "年"
-                ).forEach { (mode, label) ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
-                        onClick = {
-                            val snapshot = pagingItems.itemSnapshotList.toList().filterNotNull()
-                            val focused = state.lastVisibleItemIndex?.let { i ->
-                                snapshot.getOrNull(i)
-                            }
-                            viewModel.onIntent(
-                                TimelineIntent.ChangeViewMode(mode, focused, snapshot)
-                            )
-                        },
-                        selected = state.viewMode == mode
-                    ) {
-                        Text(label)
-                    }
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            SuggestionChip(
-                onClick = { viewModel.onIntent(TimelineIntent.ChangeFilter(FilterCondition())) },
-                label = { Text("全部") }
-            )
-            SuggestionChip(
-                onClick = {
-                    viewModel.onIntent(
-                        TimelineIntent.ChangeFilter(FilterCondition(mediaTypeFilter = MediaTypeFilter.Image))
-                    )
-                },
-                label = { Text("仅照片") }
-            )
-        }
-
-        if (state.showPermissionPrompt) {
+        if (showPermissionPrompt) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    "需要存储权限以查看照片",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        } else {
-            val itemCount = pagingItems.itemCount
-            val isLoading = pagingItems.loadState.refresh is androidx.paging.LoadState.Loading
-            if (!isLoading && itemCount == 0) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        "暂无照片",
+                        "需要存储权限以查看照片和视频",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-            } else {
-            Row(modifier = Modifier.fillMaxSize()) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(columnsFor(state.viewMode)),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize(),
-                    state = listState
-                ) {
-                    items(
-                        count = pagingItems.itemCount,
-                        key = { index -> pagingItems.peek(index)?.id ?: index.toLong() }
-                    ) { index ->
-                        val item = pagingItems[index]
-                        if (item != null) {
-                            val snapshot = pagingItems.itemSnapshotList.toList().filterNotNull()
-                            TimelinePhotoItem(
-                                item = item,
-                                index = index,
-                                itemList = snapshot,
-                                onPhotoClick = {
-                                    viewModel.onIntent(
-                                        TimelineIntent.OnPhotoClick(item, index, snapshot)
-                                    )
-                                },
-                                onVisible = {
-                                    viewModel.onIntent(TimelineIntent.ReportVisibleIndex(index))
-                                }
-                            )
+                    onRequestPermission?.let { request ->
+                        androidx.compose.material3.Button(onClick = request) {
+                            Text("授权")
                         }
                     }
                 }
-                FastScrollBar(
-                    listState = listState,
-                    totalItemCount = pagingItems.itemCount,
-                    dateLabel = state.dateLabelForThumb,
-                    onThumbDrag = { targetIndex ->
-                        val idx = targetIndex.coerceIn(0, (pagingItems.itemCount - 1).coerceAtLeast(0))
-                        scope.launch { listState.animateScrollToItem(idx) }
-                    }
+            }
+        } else {
+            // 仅在已授权时订阅 Paging，避免无权限时首次加载失败导致列表一直为空
+            TimelineGridContent(
+                viewModel = viewModel,
+                state = state,
+                listState = listState,
+                scope = scope,
+                onNavigateToViewer = onNavigateToViewer
+            )
+        }
+    }
+}
+
+@Composable
+private fun TimelineGridContent(
+    viewModel: TimelineViewModel,
+    state: TimelineUiState,
+    listState: androidx.compose.foundation.lazy.grid.LazyGridState,
+    scope: kotlinx.coroutines.CoroutineScope,
+    onNavigateToViewer: ((MediaViewerContext) -> Unit)?
+) {
+    val pagingItems = viewModel.mediaPagerFlow.collectAsLazyPagingItems()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.weight(1f)) {
+            listOf(
+                TimelineViewMode.Day to "日",
+                TimelineViewMode.Month to "月",
+                TimelineViewMode.Year to "年"
+            ).forEach { (mode, label) ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                    onClick = {
+                        val snapshot = pagingItems.itemSnapshotList.toList().filterNotNull()
+                        val focused = state.lastVisibleItemIndex?.let { i -> snapshot.getOrNull(i) }
+                        viewModel.onIntent(TimelineIntent.ChangeViewMode(mode, focused, snapshot))
+                    },
+                    selected = state.viewMode == mode
+                ) {
+                    Text(label)
+                }
+            }
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        SuggestionChip(
+            onClick = { viewModel.onIntent(TimelineIntent.ChangeFilter(FilterCondition())) },
+            label = { Text("全部") }
+        )
+        SuggestionChip(
+            onClick = {
+                viewModel.onIntent(
+                    TimelineIntent.ChangeFilter(FilterCondition(mediaTypeFilter = MediaTypeFilter.Image))
                 )
+            },
+            label = { Text("仅照片") }
+        )
+        SuggestionChip(
+            onClick = {
+                viewModel.onIntent(
+                    TimelineIntent.ChangeFilter(FilterCondition(mediaTypeFilter = MediaTypeFilter.Video))
+                )
+            },
+            label = { Text("仅视频") }
+        )
+    }
+
+    val itemCount = pagingItems.itemCount
+    val isLoading = pagingItems.loadState.refresh is androidx.paging.LoadState.Loading
+    if (!isLoading && itemCount == 0) {
+        Box(
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "暂无照片",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        Row(modifier = Modifier.fillMaxSize()) {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columnsFor(state.viewMode)),
+                contentPadding = PaddingValues(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                state = listState
+            ) {
+                items(
+                    count = pagingItems.itemCount,
+                    key = { index -> pagingItems.peek(index)?.id ?: index.toLong() }
+                ) { index ->
+                    val item = pagingItems[index]
+                    if (item != null) {
+                        val snapshot = pagingItems.itemSnapshotList.toList().filterNotNull()
+                        TimelinePhotoItem(
+                            item = item,
+                            index = index,
+                            itemList = snapshot,
+                            onPhotoClick = {
+                                viewModel.onIntent(
+                                    TimelineIntent.OnPhotoClick(item, index, snapshot)
+                                )
+                            },
+                            onVisible = {
+                                viewModel.onIntent(TimelineIntent.ReportVisibleIndex(index))
+                            }
+                        )
+                    }
+                }
             }
-            }
+            FastScrollBar(
+                listState = listState,
+                totalItemCount = pagingItems.itemCount,
+                dateLabel = state.dateLabelForThumb,
+                onThumbDrag = { targetIndex ->
+                    val idx = targetIndex.coerceIn(0, (pagingItems.itemCount - 1).coerceAtLeast(0))
+                    scope.launch { listState.animateScrollToItem(idx) }
+                }
+            )
         }
     }
 }
@@ -232,7 +263,7 @@ private fun TimelinePhotoItem(
             .aspectRatio(1f)
             .clickable(onClick = onPhotoClick)
             .onGloballyPositioned { onVisible() },
-        shape = CardDefaults.shape,
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         AsyncImage(
