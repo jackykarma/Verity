@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -30,14 +31,17 @@ class TimelineViewModel(
     private val _state = MutableStateFlow(TimelineUiState())
     val state: StateFlow<TimelineUiState> = _state.asStateFlow()
 
-    /** 随 viewMode/filter 变化的 Paging Flow，供 UI collectAsLazyPagingItems */
-    val mediaPagerFlow = _state.map { s ->
-        repository.getMediaPager(s.viewMode, s.filter)
-    }.flatMapLatest { it }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = PagingData.empty()
-    )
+    /** 仅随 viewMode/filter 变化，避免 ReportVisibleIndex 等触发 Paging 重启导致 OOM */
+    val mediaPagerFlow = _state
+        .map { s -> s.viewMode to s.filter }
+        .distinctUntilChanged()
+        .flatMapLatest { (viewMode, filter) ->
+            repository.getMediaPager(viewMode, filter)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagingData.empty()
+        )
 
     fun onIntent(intent: TimelineIntent) {
         _state.value = reduce(_state.value, intent)
@@ -68,10 +72,11 @@ class TimelineViewModel(
         is TimelineIntent.OnThumbDrag -> current
         is TimelineIntent.ClearScrollTarget -> current.copy(pendingScrollToItem = null, navigateToViewer = null)
         is TimelineIntent.ReportVisibleIndex -> current.copy(lastVisibleItemIndex = intent.firstVisibleItemIndex)
+        is TimelineIntent.UpdateDateLabel -> current.copy(dateLabelForThumb = intent.label)
     }
 
     /**
-     * 根据新 viewMode 对 itemList 分组，返回 focus 项在扁平列表（含分组头）中的显示索引。
+     * 返回焦点项在扁平列表中的索引，用于切换 viewMode 后保持滚动位置。
      */
     private fun scrollToFocusedItemInNewViewMode(
         focusedItem: MediaItem?,
@@ -79,14 +84,8 @@ class TimelineViewModel(
         itemList: List<MediaItem>
     ): Int? {
         if (focusedItem == null || itemList.isEmpty()) return null
-        val groups = groupByViewMode(itemList, newMode)
-        var displayIndex = 0
-        for ((_, items) in groups) {
-            val idx = items.indexOfFirst { it.id == focusedItem.id }
-            if (idx >= 0) return displayIndex + idx
-            displayIndex += 1 + items.size
-        }
-        return null
+        val flatIndex = itemList.indexOfFirst { it.id == focusedItem.id }
+        return if (flatIndex >= 0) flatIndex else null
     }
 
     private fun groupByViewMode(items: List<MediaItem>, mode: TimelineViewMode): List<Pair<String, List<MediaItem>>> {

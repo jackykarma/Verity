@@ -1,9 +1,12 @@
 package com.jacky.verity.gallery.viewer
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,7 +24,7 @@ import com.jacky.verity.gallery.domain.MediaItem
 
 /**
  * 底部缩图轴（plan A3.1.2.1 / ST-003）。
- * LazyRow + Coil 缩图，focusIndex 居中，点击切换。
+ * 毛玻璃底栏（半透明 surface）；LazyRow + Coil 缩图，焦点居中，当前项高亮边框。
  */
 @Composable
 fun ThumbnailStrip(
@@ -35,30 +38,38 @@ fun ThumbnailStrip(
     LaunchedEffect(focusIndex) {
         listState.animateScrollToItem(focusIndex)
     }
-    LazyRow(
-        state = listState,
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.75f))
     ) {
-        items(
-            count = items.size,
-            key = { it }
-        ) { index ->
-            val isSelected = index == focusIndex
-            AsyncImage(
-                model = items[index].contentUri,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .then(
-                        if (isSelected) Modifier.background(MaterialTheme.colorScheme.primaryContainer)
-                        else Modifier
-                    )
-                    .clickable { onItemClick(index) }
-            )
+        LazyRow(
+            state = listState,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+        ) {
+            items(
+                count = items.size,
+                key = { it }
+            ) { index ->
+                val isSelected = index == focusIndex
+                AsyncImage(
+                    model = items[index].contentUri,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .then(
+                            if (isSelected) Modifier.border(
+                                2.dp,
+                                MaterialTheme.colorScheme.primary,
+                                RoundedCornerShape(4.dp)
+                            ) else Modifier
+                        )
+                        .clickable { onItemClick(index) }
+                )
+            }
         }
     }
 }

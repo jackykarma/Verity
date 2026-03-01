@@ -8,9 +8,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -64,18 +69,24 @@ private fun AppTopBar(
     onAlbumsClick: () -> Unit,
     onSearchClick: () -> Unit
 ) {
-    TopAppBar(
-        title = { Text("相册") },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = GalleryFrosted),
-        actions = {
-            IconButton(onClick = onAlbumsClick) {
-                Text("图集")
+    Column {
+        TopAppBar(
+            title = { Text("相册") },
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = GalleryFrosted),
+            actions = {
+                IconButton(onClick = onAlbumsClick) {
+                    Text("图集")
+                }
+                IconButton(onClick = onSearchClick) {
+                    Text("搜索")
+                }
             }
-            IconButton(onClick = onSearchClick) {
-                Text("搜索")
-            }
-        }
-    )
+        )
+        HorizontalDivider(
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outline
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,24 +132,29 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = "timeline",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .background(MaterialTheme.colorScheme.background)
                     ) {
                         composable("timeline") {
-                            val timelineVm: TimelineViewModel = viewModel(
-                                factory = TimelineViewModelFactory(mediaRepo)
-                            )
-                            val hasPermission by remember { hasMediaPermission }
-                            TimelineScreen(
-                                viewModel = timelineVm,
-                                hasMediaPermission = hasPermission,
-                                onRequestPermission = {
-                                    permissionLauncher.launch(mediaPermissions)
-                                },
-                                onNavigateToViewer = { ctx ->
-                                    pendingViewerContext = ctx
-                                    navController.navigate("viewer")
-                                }
-                            )
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                val timelineVm: TimelineViewModel = viewModel(
+                                    factory = TimelineViewModelFactory(mediaRepo)
+                                )
+                                val hasPermission by remember { hasMediaPermission }
+                                TimelineScreen(
+                                    viewModel = timelineVm,
+                                    hasMediaPermission = hasPermission,
+                                    onRequestPermission = {
+                                        permissionLauncher.launch(mediaPermissions)
+                                    },
+                                    onNavigateToViewer = { ctx ->
+                                        pendingViewerContext = ctx
+                                        navController.navigate("viewer")
+                                    }
+                                )
+                            }
                         }
                         composable("albums") {
                             val albumListVm: AlbumListViewModel = viewModel(

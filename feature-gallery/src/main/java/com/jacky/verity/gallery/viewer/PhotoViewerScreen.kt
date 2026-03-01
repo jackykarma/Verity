@@ -6,6 +6,7 @@ import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -26,6 +27,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.asImageBitmap
+import java.text.SimpleDateFormat
+import java.util.Locale
 import androidx.activity.compose.BackHandler
 import com.jacky.verity.gallery.domain.MediaViewerContext
 import androidx.compose.foundation.Image
@@ -74,7 +77,40 @@ fun PhotoViewerScreen(
 
     BackHandler { onNavigateBack() }
 
+    val sourceLabel = when (context.source) {
+        "timeline" -> "时间轴"
+        "album" -> "图集"
+        "search" -> "搜索"
+        else -> context.source
+    }
+    val currentItem = items.getOrNull(state.currentIndex)
+    val dateLabel = currentItem?.let {
+        SimpleDateFormat("yyyy年M月d日", Locale.getDefault()).format(java.util.Date(it.dateTaken))
+    } ?: ""
+    val positionLabel = "${state.currentIndex + 1}/${items.size}"
+
     Column(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = "来自$sourceLabel${if (dateLabel.isNotEmpty()) " · $dateLabel" else ""} · $positionLabel",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterStart)
+            )
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            ) {
+                Icon(
+                    painter = painterResource(android.R.drawable.ic_menu_revert),
+                    contentDescription = "返回"
+                )
+            }
+        }
         Box(modifier = Modifier.weight(1f)) {
             HorizontalPager(
             state = pagerState,
@@ -114,24 +150,13 @@ fun PhotoViewerScreen(
                 }
             }
         }
-
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(android.R.drawable.ic_menu_revert),
-                    contentDescription = "返回"
-                )
-            }
         }
 
         ThumbnailStrip(
             items = items,
             focusIndex = state.currentIndex,
-            onItemClick = { viewModel.onIntent(PhotoViewerIntent.OnThumbClick(it)) }
+            onItemClick = { viewModel.onIntent(PhotoViewerIntent.OnThumbClick(it)) },
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

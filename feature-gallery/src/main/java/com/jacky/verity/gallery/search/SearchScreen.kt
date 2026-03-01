@@ -23,6 +23,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,19 +81,46 @@ private fun SearchContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(24.dp)
     ) {
         OutlinedTextField(
             value = state.queryText,
             onValueChange = { onIntent(SearchIntent.SearchQuery(it)) },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("自然语言或关键词") },
+            placeholder = { Text("自然语言或关键词、日期、图集搜索…") },
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 cursorColor = MaterialTheme.colorScheme.primary
             )
         )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = !state.condition.keyword.isNullOrBlank(),
+                onClick = { },
+                label = { Text("关键词") }
+            )
+            FilterChip(
+                selected = state.condition.dateFrom != null || state.condition.dateTo != null,
+                onClick = {
+                    val hasDate = state.condition.dateFrom != null || state.condition.dateTo != null
+                    if (hasDate) {
+                        onIntent(SearchIntent.SelectDateRange(null, null))
+                    } else {
+                        val now = System.currentTimeMillis()
+                        val weekAgo = now - 7 * 24 * 60 * 60 * 1000L
+                        onIntent(SearchIntent.SelectDateRange(weekAgo, now))
+                    }
+                },
+                label = { Text("日期") }
+            )
+        }
 
         if (state.albums.isNotEmpty()) {
             Text(
@@ -193,7 +221,7 @@ private fun SearchContent(
                                             )
                                         )
                                     },
-                                shape = RoundedCornerShape(8.dp)
+                                shape = RoundedCornerShape(12.dp)
                             ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)

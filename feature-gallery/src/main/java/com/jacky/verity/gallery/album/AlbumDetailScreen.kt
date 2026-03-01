@@ -42,6 +42,16 @@ import com.jacky.verity.gallery.domain.MediaTypeFilter
 import com.jacky.verity.gallery.domain.MediaViewerContext
 import kotlinx.coroutines.flow.Flow
 
+/** 设计稿：类型筛选项「全部」「图片」「视频」「GIF」「实况照片」「杜比视频」 */
+private fun MediaTypeFilter.displayLabel(): String = when (this) {
+    MediaTypeFilter.All -> "全部"
+    MediaTypeFilter.Image -> "图片"
+    MediaTypeFilter.Video -> "视频"
+    MediaTypeFilter.Gif -> "GIF"
+    MediaTypeFilter.LivePhoto -> "实况照片"
+    MediaTypeFilter.DolbyVideo -> "杜比视频"
+}
+
 /**
  * 图集详情界面（FEAT-002 ST-003）。
  * 网格展示图集内照片，MediaTypeFilter Tab，点击进入大图。
@@ -92,7 +102,7 @@ fun AlbumDetailScreen(
                     Tab(
                         selected = state.mediaTypeFilter == filter,
                         onClick = { viewModel.onIntent(AlbumDetailIntent.ChangeMediaTypeFilter(filter)) },
-                        text = { Text(filter.name) }
+                        text = { Text(filter.displayLabel()) }
                     )
                 }
             }
@@ -113,7 +123,7 @@ fun AlbumDetailScreen(
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 120.dp),
-                contentPadding = PaddingValues(8.dp),
+                contentPadding = PaddingValues(24.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.fillMaxSize().padding(padding)

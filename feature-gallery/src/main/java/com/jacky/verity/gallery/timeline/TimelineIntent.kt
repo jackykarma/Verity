@@ -24,4 +24,6 @@ sealed class TimelineIntent {
     data object ClearScrollTarget : TimelineIntent()
     /** UI 上报当前可见首项索引，用于视图切换焦点保持 */
     data class ReportVisibleIndex(val firstVisibleItemIndex: Int) : TimelineIntent()
+    /** UI 上报快滑条日期气泡文案（与当前可见位置一致） */
+    data class UpdateDateLabel(val label: String) : TimelineIntent()
 }

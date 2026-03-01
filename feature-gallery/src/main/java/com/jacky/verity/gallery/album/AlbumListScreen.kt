@@ -1,5 +1,6 @@
 package com.jacky.verity.gallery.album
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -81,7 +82,7 @@ fun AlbumListScreen(
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 160.dp),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(24.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
@@ -123,6 +124,7 @@ private fun AlbumCard(
             .fillMaxWidth()
             .aspectRatio(1f)
             .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(),
         elevation = CardDefaults.cardElevation()
     ) {
@@ -139,6 +141,14 @@ private fun AlbumCard(
                     }
                 }
             }
+            Text(
+                text = when (album.type) {
+                    AlbumType.System -> "系统图集"
+                    AlbumType.User -> "用户图集"
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Box(
                 modifier = Modifier
                     .weight(1f)

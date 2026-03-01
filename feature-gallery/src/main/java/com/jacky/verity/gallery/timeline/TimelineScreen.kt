@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -33,13 +34,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -54,6 +62,66 @@ private fun columnsFor(viewMode: TimelineViewMode): Int = when (viewMode) {
     TimelineViewMode.Day -> 6
     TimelineViewMode.Month -> 15
     TimelineViewMode.Year -> 32
+}
+
+/** 格式化为分组标题或快滑条气泡：今天/昨天 · yyyy年M月d日（与 design/README 一致） */
+private fun formatDateLabel(dateTakenMs: Long?, viewMode: TimelineViewMode): String {
+    if (dateTakenMs == null) return ""
+    val cal = Calendar.getInstance()
+    cal.timeInMillis = dateTakenMs
+    val today = Calendar.getInstance()
+    today.set(Calendar.HOUR_OF_DAY, 0)
+    today.set(Calendar.MINUTE, 0)
+    today.set(Calendar.SECOND, 0)
+    today.set(Calendar.MILLISECOND, 0)
+    val calDay = cal.clone() as Calendar
+    calDay.set(Calendar.HOUR_OF_DAY, 0)
+    calDay.set(Calendar.MINUTE, 0)
+    calDay.set(Calendar.SECOND, 0)
+    calDay.set(Calendar.MILLISECOND, 0)
+    val fullDate = SimpleDateFormat("yyyy年M月d日", Locale.getDefault()).format(cal.time)
+    val diffDays = ((today.timeInMillis - calDay.timeInMillis) / (24 * 60 * 60 * 1000)).toInt()
+    val prefix = when {
+        diffDays == 0 -> "今天"
+        diffDays == 1 -> "昨天"
+        else -> ""
+    }
+    return if (prefix.isEmpty()) fullDate else "$prefix · $fullDate"
+}
+
+/** 时间轴行：分组标题或照片项（用于带分组头的网格） */
+private sealed class TimelineRow {
+    data class Header(val label: String) : TimelineRow()
+    data class Photo(val item: MediaItem, val originalIndex: Int) : TimelineRow()
+}
+
+private fun buildTimelineRows(snapshot: List<MediaItem>, viewMode: TimelineViewMode): List<TimelineRow> {
+    if (snapshot.isEmpty()) return emptyList()
+    val cal = Calendar.getInstance()
+    val groupKey: (Long) -> String = when (viewMode) {
+        TimelineViewMode.Day -> { ts ->
+            cal.timeInMillis = ts
+            "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.MONTH)}-${cal.get(Calendar.DAY_OF_MONTH)}"
+        }
+        TimelineViewMode.Month -> { ts ->
+            cal.timeInMillis = ts
+            "${cal.get(Calendar.YEAR)}-${cal.get(Calendar.MONTH)}"
+        }
+        TimelineViewMode.Year -> { ts ->
+            cal.timeInMillis = ts
+            "${cal.get(Calendar.YEAR)}"
+        }
+    }
+    val indexed = snapshot.mapIndexed { index, item -> item to index }
+    val groups = indexed.groupBy { groupKey(it.first.dateTaken) }.toList()
+        .sortedByDescending { (_, list) -> list.maxOf { it.first.dateTaken } }
+    val rows = mutableListOf<TimelineRow>()
+    for ((_, groupItems) in groups) {
+        val firstDate = groupItems.first().first.dateTaken
+        rows.add(TimelineRow.Header(formatDateLabel(firstDate, viewMode)))
+        groupItems.forEach { (item, idx) -> rows.add(TimelineRow.Photo(item, idx)) }
+    }
+    return rows
 }
 
 /**
@@ -134,6 +202,7 @@ private fun TimelineGridContent(
 ) {
     val pagingItems = viewModel.mediaPagerFlow.collectAsLazyPagingItems()
 
+    Column(modifier = Modifier.fillMaxSize()) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -142,19 +211,27 @@ private fun TimelineGridContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         SingleChoiceSegmentedButtonRow(modifier = Modifier.weight(1f)) {
-            listOf(
+            val modes = listOf(
                 TimelineViewMode.Day to "日",
                 TimelineViewMode.Month to "月",
                 TimelineViewMode.Year to "年"
-            ).forEach { (mode, label) ->
+            )
+            for (idx in modes.indices) {
+                val (mode, label) = modes[idx]
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                    shape = SegmentedButtonDefaults.itemShape(index = idx, count = modes.size),
                     onClick = {
                         val snapshot = pagingItems.itemSnapshotList.toList().filterNotNull()
                         val focused = state.lastVisibleItemIndex?.let { i -> snapshot.getOrNull(i) }
                         viewModel.onIntent(TimelineIntent.ChangeViewMode(mode, focused, snapshot))
                     },
-                    selected = state.viewMode == mode
+                    selected = state.viewMode == mode,
+                    colors = SegmentedButtonDefaults.colors(
+                        activeContainerColor = MaterialTheme.colorScheme.primary,
+                        activeContentColor = MaterialTheme.colorScheme.onPrimary,
+                        inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 ) {
                     Text(label)
                 }
@@ -166,8 +243,14 @@ private fun TimelineGridContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Text(
+            "筛选:",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         SuggestionChip(
             onClick = { viewModel.onIntent(TimelineIntent.ChangeFilter(FilterCondition())) },
             label = { Text("全部") }
@@ -194,7 +277,10 @@ private fun TimelineGridContent(
     val isLoading = pagingItems.loadState.refresh is androidx.paging.LoadState.Loading
     if (!isLoading && itemCount == 0) {
         Box(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -204,18 +290,35 @@ private fun TimelineGridContent(
             )
         }
     } else {
-        Row(modifier = Modifier.fillMaxSize()) {
+        val cols = columnsFor(state.viewMode)
+        val snapshot = pagingItems.itemSnapshotList.toList().filterNotNull()
+        val firstVisibleIndex = listState.firstVisibleItemIndex
+        val dateLabel = formatDateLabel(
+            snapshot.getOrNull(firstVisibleIndex)?.dateTaken,
+            state.viewMode
+        )
+
+        LaunchedEffect(firstVisibleIndex) {
+            viewModel.onIntent(TimelineIntent.ReportVisibleIndex(firstVisibleIndex))
+        }
+
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
             LazyVerticalGrid(
-                columns = GridCells.Fixed(columnsFor(state.viewMode)),
+                columns = GridCells.Fixed(cols),
                 contentPadding = PaddingValues(24.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.weight(1f).fillMaxSize(),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 state = listState
             ) {
                 items(
-                    count = pagingItems.itemCount,
-                    key = { index -> pagingItems.peek(index)?.id ?: index.toLong() }
+                    count = itemCount,
+                    key = { i -> pagingItems.peek(i)?.id ?: i.toLong() }
                 ) { index ->
                     val item = pagingItems[index]
                     if (item != null) {
@@ -225,27 +328,24 @@ private fun TimelineGridContent(
                             index = index,
                             itemList = snapshot,
                             onPhotoClick = {
-                                viewModel.onIntent(
-                                    TimelineIntent.OnPhotoClick(item, index, snapshot)
-                                )
+                                viewModel.onIntent(TimelineIntent.OnPhotoClick(item, index, snapshot))
                             },
-                            onVisible = {
-                                viewModel.onIntent(TimelineIntent.ReportVisibleIndex(index))
-                            }
+                            onVisible = {}
                         )
                     }
                 }
             }
             FastScrollBar(
                 listState = listState,
-                totalItemCount = pagingItems.itemCount,
-                dateLabel = state.dateLabelForThumb,
+                totalItemCount = itemCount,
+                dateLabel = dateLabel,
                 onThumbDrag = { targetIndex ->
-                    val idx = targetIndex.coerceIn(0, (pagingItems.itemCount - 1).coerceAtLeast(0))
+                    val idx = targetIndex.coerceIn(0, (itemCount - 1).coerceAtLeast(0))
                     scope.launch { listState.animateScrollToItem(idx) }
                 }
             )
         }
+    }
     }
 }
 
@@ -272,6 +372,7 @@ private fun TimelinePhotoItem(
                 .crossfade(true)
                 .build(),
             contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -286,6 +387,7 @@ private fun FastScrollBar(
 ) {
     val trackWidth = 24.dp
     val bubbleWidth = 56.dp
+    val thumbHeight = 40.dp
     Row(
         modifier = Modifier
             .width(bubbleWidth + trackWidth)
@@ -304,7 +406,7 @@ private fun FastScrollBar(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .width(trackWidth)
                 .fillMaxHeight()
@@ -312,12 +414,14 @@ private fun FastScrollBar(
         ) {
             val firstVisible = listState.firstVisibleItemIndex
             val max = (totalItemCount - 1).coerceAtLeast(0)
-            val thumbOffset = if (max > 0) firstVisible.toFloat() / max else 0f
+            val thumbOffsetFraction = if (max > 0) firstVisible.toFloat() / max else 0f
+            val trackHeightDp = maxHeight
+            val thumbTopDp = (thumbOffsetFraction * (trackHeightDp - thumbHeight).value).coerceIn(0f, (trackHeightDp - thumbHeight).value.coerceAtLeast(0f)).dp
             Box(
                 modifier = Modifier
-                    .size(trackWidth, 40.dp)
+                    .size(trackWidth, thumbHeight)
                     .align(Alignment.TopCenter)
-                    .padding(top = (thumbOffset * 100).dp.coerceIn(0.dp, 100.dp))
+                    .padding(top = thumbTopDp)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
             )
         }
