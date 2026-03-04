@@ -249,9 +249,13 @@
 
 
 
+<!-- BEGIN_FEATURE_REGISTRY -->
+
 | Feature     | 分支            | Feature Version | Plan Version | Tasks Version | 状态         | 备注  |
 | ----------- | ------------- | --------------- | ------------ | ------------- | ---------- | --- |
 | [Feature A] | 001-feature-a | v0.1.0          | v0.1.0       | v0.1.0        | Plan Ready |     |
+
+<!-- END_FEATURE_REGISTRY -->
 
 
 

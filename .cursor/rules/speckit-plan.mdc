@@ -1,0 +1,72 @@
+---
+description: "当用户输入 /speckit.plan 时触发：产出某个 Feature 的 plan.md（技术规约与实现约束）"
+alwaysApply: false
+---
+
+# /speckit.plan — Feature 技术规约
+
+## 触发
+
+用户输入 `/speckit.plan`。作用于当前 Feature（由 `$env:SPECIFY_FEATURE` 或分支确定）。
+
+## 目的
+
+产出当前 Feature 目录下的 `plan.md` **初版**（§一~§八 技术规约），Story 索引表留空待回填。
+
+## 前置条件
+
+1. 本 Feature 的 `spec.md` 已完成（Spec Ready）
+2. `epic-plan.md` 已存在（若为单 Feature EPIC 可省略，其内容合并到 plan.md）
+3. 本 Feature 在 epic.md「跨 Feature 技术策略」中的执行顺序已到（前置 Feature 的 plan 已完成）
+4. 若 EPIC 级 `ux-design.md` 已产出，作为可选输入
+
+## 脚本
+
+先运行 `.specify/scripts/powershell/setup-plan.ps1` 创建 plan.md 文件（从模板复制）。
+
+## 输入（必须阅读）
+
+1. **本 Feature 的 `spec.md`**：FR/NFR/依赖/约束/边界场景
+2. **`epic-plan.md`**：EPIC 级技术约束（plan 不得违反）
+3. **`epic.md`「跨 Feature 技术策略」**：共享能力识别与 Owner
+4. **前置 Feature 的 `plan.md`**（若有）：可复用组件与接口
+5. **`ux-design.md`**（若已产出）：UI/交互约束
+6. **`.specify/templates/plan-template.md`**：模板结构
+7. **`.specify/memory/constitution.md`**：章程约束
+8. **现有工程代码**：实际架构、模块、技术栈
+
+## 输出
+
+`plan.md` 初版，覆盖以下章节：
+
+| 章节 | 内容 | 状态 |
+|------|------|------|
+| 前置检查 | 已阅读 epic-plan/跨 Feature 技术策略 | 填写 |
+| 概述 | 核心需求 + 关键技术决策 | 填写 |
+| §一 一致性互校 | 与设计说明书的对应关系 | **占位**（epic-design 完成后回填） |
+| §二 技术背景 | 语言/框架/存储/测试/平台 | 填写 |
+| §三 架构约束 | 分层/线程/错误/日志 | 填写 |
+| §四 数据模型 | 存储形态/物理结构/迁移 | 填写 |
+| §五 接口与契约 | 对外接口/依赖接口/契约工件 | 填写 |
+| §六 合规性检查 | Implement 前的检查项 | 填写 |
+| §七 项目结构 | Feature 文档目录 | 填写 |
+| §八 源代码结构 | 代码目录结构 | 填写 |
+| Story 索引表 | 与 EPIC 设计说明书 Story 对应 | **留空**（epic-design §十二 完成后回填） |
+| 复杂度跟踪 | 仅有违规项时填写 | 按需 |
+
+## 行为约束
+
+- **演进式设计**：基于现有代码分析，不得从零设计理想方案（constitution §一、§二）
+- **差距分析**：需求映射→差距分析→演进设计（constitution §四）
+- **不得违反 epic-plan**：技术栈、分层、线程模型等必须与 EPIC 级约束一致
+- **共享能力复用**：若 Owner 是其他 Feature，必须复用而非另起炉灶
+- **模板结构保护**：不得增删章节
+- **§一 占位处理**：明确标注「待 EPIC 设计说明书完成后回填」
+- **Story 索引表留空**：明确标注「待 epic-design.md §十二 Story 拆解完成后回填」
+
+## 完成后
+
+提示用户：
+1. 评审 plan.md
+2. 所有 Feature 的 plan 完成后 → 运行 `/speckit.epicdesign`
+3. epic-design §十二 完成后需回填 plan.md 的 Story 索引表和 §一 一致性互校

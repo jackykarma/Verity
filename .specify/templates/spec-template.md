@@ -102,7 +102,7 @@
 
 ## 需求追溯（预留，Story 拆解后填写）
 
-> 说明：此表在 **EPIC 软件设计说明书的 Story 拆解（§九）完成后**填写，用于确保 FR/NFR 被 Story 覆盖；Implement 不得擅自改写 FR/NFR。
+> 说明：此表在 **EPIC 软件设计说明书的 Story 拆解（§十二）完成后**填写，用于确保 FR/NFR 被 Story 覆盖；Implement 不得擅自改写 FR/NFR。
 
 | FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
 |---|---|---|---|

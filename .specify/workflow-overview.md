@@ -53,7 +53,7 @@ flowchart TD
 | **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规约事实源 | `spec.md`、`epic-plan.md`、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、`epic-plan.md`、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
-| **回填** | 各 `plan.md` Story 索引表、各 `spec.md` 需求追溯表 | — | `epic-design.md` §九 | — |
+| **回填** | 各 `plan.md` Story 索引表、各 `spec.md` 需求追溯表 | — | `epic-design.md` §十二 | — |
 | **Task 拆解** | 各 `tasks.md` | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |
 | **实现** | 代码 | — | `tasks.md` | Implement Ready |
 | **验证** | 验证报告 | 实现↔设计一致性事实源 | 代码、设计文档 | Verify Pass |
@@ -79,20 +79,36 @@ flowchart TD
 
 ### 4.1 单 Feature EPIC（EPIC 仅含一个 Feature）
 
-| 产物 | 裁剪规则 |
-|------|----------|
-| `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节） |
-| `epic-design.md` | 仅需 **Lite** 级（0/1 层架构 + 组件清单 + 全景类图 + Story 拆解） |
-| `story_detail_design.md` | 视复杂度，简单 Story 可仅写概要 |
+| 产物 | 裁剪规则 | 预估文档量 |
+|------|----------|-----------|
+| `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节） | 节省 ~140 行 |
+| `epic-design.md` | 仅需 **Lite** 级：§一～§五 + §十二 Story 拆解 + §十三 L2 索引；§六～§十一 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
+| `key-func-design.md` | 无疑难点/亮点可省略，在 epic-design.md §六标注「本 EPIC 无关键疑难点/亮点，省略」 | 可省 ~100 行 |
+| `key-diagram.md` | 仅需骨架类图 + 1 个 Feature 子类图 + 1 张关键时序图 | ~80 行（vs 完整 185+） |
+| `story_detail_design.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
 
 ### 4.2 纯修复/小改动（预估 ≤ 3 人天）
 
-| 产物 | 裁剪规则 |
-|------|----------|
-| `epic-plan.md` | **可跳过** |
-| `ux-design.md` | **可跳过** |
-| `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图** |
-| `story_detail_design.md` | **可跳过** |
+| 产物 | 裁剪规则 | 预估文档量 |
+|------|----------|-----------|
+| `epic-plan.md` | **可跳过** | 0 |
+| `ux-design.md` | **可跳过** | 0 |
+| `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十二 + 跳过其余） | ~200 行 |
+| `key-func-design.md` | **可跳过** | 0 |
+| `key-diagram.md` | 仅需关键变更涉及的类图片段 | ~50 行 |
+| `story_detail_design.md` | **可跳过** | 0 |
+| Gate 评审 | Gate 0~4 可合并为一轮快速评审，Gate 5~6 按需 | — |
+
+### 4.3 各档位预估总文档量（参考）
+
+| 档位 | 适用场景 | Feature 数 | 预估总文档量 | 典型编写时间 |
+|------|----------|-----------|-------------|-------------|
+| **快速通道** | 纯修复/≤3人天 | 1 | ~600-800 行 | 0.5-1 天 |
+| **单 Feature Lite** | 单 Feature EPIC | 1 | ~1200-1500 行 | 1-2 天 |
+| **Standard** | 多 Feature/中等风险 | 2-3 | ~3000-4000 行 | 2-4 天 |
+| **Deep** | 高风险/高不确定性 | 3+ | ~5000+ 行 | 3-5 天 |
+
+> **选择原则**：文档量应与 EPIC 风险和复杂度匹配。若写文档的时间超过实际编码时间的 50%，说明选择了过重的档位。
 
 ### 判断流程
 
@@ -100,14 +116,16 @@ flowchart TD
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
     Check{EPIC 规模?}
-    Check -->|"纯修复/≤3人天"| FastTrack["快速通道<br/>精简产出"]
-    Check -->|单 Feature| SingleFeat["合并 epic-plan → plan<br/>Lite 级设计说明书"]
-    Check -->|多 Feature / 高风险| FullTrack["完整流程<br/>Standard 或 Deep 级"]
+    Check -->|"纯修复/≤3人天"| FastTrack["快速通道<br/>~600-800 行<br/>精简产出"]
+    Check -->|单 Feature| SingleFeat["合并 epic-plan → plan<br/>Lite 级设计说明书<br/>~1200-1500 行"]
+    Check -->|多 Feature / 中等风险| Standard["Standard 流程<br/>~3000-4000 行"]
+    Check -->|多 Feature / 高风险| Deep["Deep 流程<br/>~5000+ 行"]
 
     style Check fill:#FFF3E0,stroke:#F57C00
     style FastTrack fill:#E8F5E9,stroke:#388E3C
     style SingleFeat fill:#E8F5E9,stroke:#388E3C
-    style FullTrack fill:#E3F2FD,stroke:#1976D2
+    style Standard fill:#E3F2FD,stroke:#1976D2
+    style Deep fill:#E3F2FD,stroke:#1976D2
 ```
 
 详见 `constitution.md` §八。
@@ -131,13 +149,14 @@ flowchart TD
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
     Step1["create-new-epic.ps1<br/>创建 EPIC 分支 + 目录"] --> Step2["create-new-feature.ps1<br/>创建 Feature 目录"]
+    Step1 --> Step1b["init-epic-files.ps1<br/>初始化 EPIC 级设计文件模板"]
     Step2 --> Step3["/speckit.specify<br/>产出各 Feature spec.md"]
     Step3 --> Step4["/speckit.epicplan<br/>产出 epic-plan.md"]
     Step3 --> Step5["/speckit.epicuidesign<br/>产出 ux-design.md"]
     Step4 --> Step6["/speckit.plan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
     Step5 -.-> Step6
-    Step6 --> Step7["/speckit.epicdesign<br/>产出 epic-design.md<br/>+ story_detail_design.md"]
-    Step7 --> Step8["回填 plan.md Story 索引表<br/>回填 spec.md 需求追溯表"]
+    Step6 --> Step7["/speckit.epicdesign<br/>产出 epic-design.md<br/>+ key-func-design.md<br/>+ key-diagram.md<br/>+ story_detail_design.md"]
+    Step7 --> Step8["/speckit.backfill<br/>回填 plan.md Story 索引表<br/>回填 spec.md 需求追溯表<br/>回填 plan.md §一 互校"]
     Step7 --> Step9["/speckit.epicsync<br/>同步 epic.md Feature Registry"]
     Step8 --> Step10["/speckit.tasks<br/>产出各 Feature tasks.md"]
     Step9 --> Step10
@@ -146,6 +165,7 @@ flowchart TD
     Step12 --> Step13([交付 / 合并主分支])
 
     style Step1 fill:#E8F5E9,stroke:#388E3C
+    style Step1b fill:#E8F5E9,stroke:#388E3C
     style Step13 fill:#E8F5E9,stroke:#388E3C
     style Step8 fill:#FFF3E0,stroke:#F57C00
     style Step9 fill:#FFF3E0,stroke:#F57C00
@@ -154,17 +174,18 @@ flowchart TD
 | 步骤 | 命令 | 产出物 | 执行次数 |
 |------|------|--------|----------|
 | 1 | `create-new-epic.ps1` | EPIC 分支 + EPIC 目录 + `epic.md` | 每个 EPIC 一次 |
+| 1b | `init-epic-files.ps1` | EPIC 级设计文件模板（epic-plan/ux-design/epic-design/key-\*/gate-log） | 每个 EPIC 一次（可选，也可由命令自动创建） |
 | 2 | `create-new-feature.ps1` | Feature 目录 + `spec.md`（空模板） | 每个 Feature 一次 |
 | 3 | `/speckit.specify` | 各 Feature `spec.md`（填充内容） | 每个 Feature 一次 |
 | 4 | `/speckit.epicplan` | `epic-plan.md` | 每个 EPIC 一次 |
 | 5 | `/speckit.epicuidesign` | `ux-design.md` | 每个 EPIC 一次（可选，与步骤 4 并行） |
 | 6 | `/speckit.plan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
-| 7 | `/speckit.epicdesign` | `epic-design.md` + 各 `story_detail_design.md` | 每个 EPIC 一次 |
-| 8 | 手动回填 | `plan.md` Story 索引表 + `spec.md` 需求追溯表 | — |
+| 7 | `/speckit.epicdesign` | `epic-design.md` + `key-func-design.md` + `key-diagram.md` + 各 `story_detail_design.md` | 每个 EPIC 一次（分 Gate 逐阶段） |
+| 8 | `/speckit.backfill` | `plan.md` Story 索引表 + `spec.md` 需求追溯表 + `plan.md` §一互校 | Gate 5 通过后一次 |
 | 9 | `/speckit.epicsync` | `epic.md` Feature Registry 更新 | 按需 |
 | 10 | `/speckit.tasks` | 各 Feature `tasks.md` | 每个 Feature 一次 |
 | 11 | `/speckit.implement` | 代码 | 按 Task 逐个执行 |
-| 12 | `/speckit.verify` | 验证报告 | 按需 |
+| 12 | `/speckit.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
 
 ---
 
@@ -264,4 +285,4 @@ flowchart TD
 | 交互/视觉/动效 | `ux-design.md` | `plan.md`（UI 约束） → `epic-design.md`（类图/时序） → `tasks.md` |
 | EPIC 级技术约束 | `epic-plan.md` | 各 `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
 | Feature 级技术方案 | `plan.md` | `epic-design.md` → `story_detail_design.md` → `tasks.md` |
-| Story 拆解调整 | `epic-design.md` §九 | `story_detail_design.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
+| Story 拆解调整 | `epic-design.md` §十二 | `story_detail_design.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |

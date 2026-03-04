@@ -1,0 +1,78 @@
+---
+description: "当用户输入 /speckit.tasks 时触发：产出某个 Feature 的 tasks.md（Story → Task 落地任务清单）"
+alwaysApply: false
+---
+
+# /speckit.tasks — Task 拆解
+
+## 触发
+
+用户输入 `/speckit.tasks`。作用于当前 Feature。
+
+## 目的
+
+将 EPIC 设计说明书中的 Story 拆解为可执行的 Task 清单，产出当前 Feature 目录下的 `tasks.md`。
+
+## 前置条件
+
+1. 本 Feature 的 `spec.md` 和 `plan.md`（含回填后的 Story 索引表）已完成
+2. `epic-design.md` 已通过 Design Ready（所有 Gate 通过）
+3. 本 Feature 的 `story_detail_design.md` 已完成（若有 L2 设计）
+4. plan.md 的 Story 索引表和 spec.md 的需求追溯表已回填
+
+## 输入（必须阅读）
+
+1. **本 Feature 的 `plan.md`**：技术规约、接口契约、Story 索引表
+2. **`epic-design.md`**：Story 拆解（§十二）、组件清单（§五）、技术风险（§八）
+3. **`key-diagram.md`**：类图/时序图（Task 需引用对应设计）
+4. **本 Feature 的 `story_detail_design.md`**：L2 详细设计（Task 的设计引用来源）
+5. **本 Feature 的 `spec.md`**：FR/NFR（Task 验证须追溯）
+6. **`.specify/templates/tasks-template.md`**：模板结构
+
+## 输出
+
+`tasks.md`，包含以下内容：
+
+### Task 行格式
+
+```text
+- [ ] T001 [P?] [ST-001] <带路径的任务标题>
+```
+
+- 复选框 `- [ ]`（完成后改 `- [x]`）
+- 任务 ID（T001、T002…全局递增）
+- `[P]` 标记可并行任务
+- `[ST-xxx]` 绑定 Story ID
+- 路径使用 **Android/Kotlin 工程的真实路径**
+
+### 每个 Task 必须包含
+
+- **依赖**：T??? 或"无"
+- **设计引用**：指向 `epic-design.md` 或 `story_detail_design.md:ST-xxx:功能设计:类图/时序图`
+- **步骤**：编号步骤列表
+- **验证**：可执行的验证清单（含 NFR 阈值）
+- **产物**：涉及的文件
+
+### 阶段组织
+
+- 阶段 0：准备（版本对齐、冻结设计输入）
+- 阶段 1：环境搭建（目录/依赖/工具链）
+- 阶段 2：核心基础（阻塞性前置，阻塞所有 Story）
+- 阶段 3+：每个 Story 一个阶段（Tech Story → User Story 按优先级）
+- 依赖关系与执行顺序总结
+
+## 行为约束
+
+- **禁止改写技术决策**：Task 只拆解与执行既定设计，不得新增未决策的方案
+- **设计引用必填**：每个 Task 必须有明确的设计引用
+- **Story 绑定**：每个 Task 必须绑定 `[ST-xxx]`
+- **真实路径**：使用 Android 工程实际文件路径（如 `app/src/main/java/...`），不用 Python 示例路径
+- **模板结构保护**：不得增删模板已定义的章节
+- **独立可验证**：每个 Story 完成后可独立测试
+
+## 完成后
+
+提示用户：
+1. 评审 tasks.md
+2. 运行 `/speckit.epicsync` 更新 Feature Registry 状态为 Tasks Ready
+3. 逐个 Task 运行 `/speckit.implement` 实现代码

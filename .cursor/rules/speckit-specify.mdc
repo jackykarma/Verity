@@ -1,0 +1,55 @@
+---
+description: "当用户输入 /speckit.specify 时触发：为某个 Feature 填充 spec.md（Feature 规格说明）"
+alwaysApply: false
+---
+
+# /speckit.specify — Feature 规格说明
+
+## 触发
+
+用户输入 `/speckit.specify` 并附带 Feature 描述（`$ARGUMENTS`）。
+
+## 目的
+
+基于用户输入与 EPIC 上下文，填充当前 Feature 目录下的 `spec.md`。
+
+## 前置条件
+
+1. 当前处于 EPIC 分支（`epic/EPIC-xxx-...`）
+2. Feature 目录已创建（由 `create-new-feature.ps1` 完成）
+3. Feature 目录下存在空的 `spec.md`（从模板复制）
+4. `epic.md` 已存在且 Feature 已在 Feature 列表中登记
+
+## 输入（必须阅读）
+
+1. **`epic.md`**：获取 EPIC 背景、范围、约束、该 Feature 的边界说明
+2. **`spec.md`（当前 Feature）**：获取模板结构（已由脚本从 `.specify/templates/spec-template.md` 复制）
+3. **`$ARGUMENTS`**：用户对 Feature 的描述
+
+## 输出
+
+填充后的 `spec.md`，覆盖模板中所有章节：
+
+- 背景与价值（从 epic.md Feature 边界说明 + 用户描述推导）
+- 依赖关系
+- 验收与场景（核心用户旅程 + 边界与异常场景）
+- FR / NFR（每条必须可测试/可量化）
+- 验收标准（AC，引用 FR/NFR ID）
+- 核心实体（如涉及数据）
+- 假设与约束
+- 需求追溯表 **留空**（待 Story 拆解后回填）
+- 变更记录（初始版本 v0.1.0）
+
+## 行为约束
+
+- **模板结构保护**：不得增删模板已定义的章节（constitution §九）
+- **FR 可测试性**：每条 FR 必须可验证，禁止"提升体验"等模糊表述
+- **NFR 可量化**：每条 NFR 必须有数值阈值和验收方式
+- **范围一致**：Feature 的 In/Out Scope 不得超出 epic.md 中该 Feature 的边界说明
+- **状态更新**：填充完成后将 `spec.md` 头部状态改为「就绪（可进入 Plan）」
+
+## 完成后
+
+提示用户：
+1. 评审 spec.md 内容
+2. 若所有 Feature 的 spec.md 均完成 → 可进入 `/speckit.epicplan` 或 `/speckit.epicuidesign`

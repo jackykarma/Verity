@@ -1,0 +1,50 @@
+---
+description: "当用户输入 /speckit.epicuidesign 时触发：产出 EPIC 级 UX 设计 ux-design.md"
+alwaysApply: false
+---
+
+# /speckit.epicuidesign — EPIC UX 设计
+
+## 触发
+
+用户输入 `/speckit.epicuidesign`，可附带 EPIC 标识或范围说明。
+
+## 目的
+
+产出 EPIC 根目录下的 `ux-design.md`，定义跨 Feature 的整体交互与视觉规范。
+
+## 前置条件
+
+1. `epic.md` 已存在
+2. **所有 Feature 的 `spec.md` 已完成**（Spec Ready）
+3. 可与 `/speckit.epicplan` 并行执行
+4. 非技术 Feature（纯后台/数据/SDK）可跳过
+
+## 输入（必须阅读）
+
+1. **`epic.md`**：背景、范围、Feature 列表
+2. **所有 Feature 的 `spec.md`**：用户旅程、FR、边界场景
+3. **`.specify/templates/ux-design-template.md`**：模板结构
+
+## 输出
+
+EPIC 根目录下的 `ux-design.md`，覆盖模板全部章节：
+
+- **信息架构**：跨 Feature 导航、页面层级、主要界面清单
+- **交互说明**：核心流程交互规则、状态定义、反馈方式、异常/边界交互对策
+- **视觉规范**：布局、组件、动效/过渡、响应与适配
+- **设计稿索引**：Figma/截图/HTML 索引，映射 FR/流程
+- **变更记录**：初始版本 v0.1.0
+
+## 行为约束
+
+- **EPIC 级整体视角**：从整个 EPIC 需求整体设计，保证跨 Feature 一致性
+- **模板结构保护**：不得增删章节
+- 作为各 Feature `plan.md` 和 `epic-design.md` 的**可选输入**（UI/交互约束）
+
+## 完成后
+
+提示用户：
+1. 评审 ux-design.md
+2. 补充设计稿（Figma/截图/HTML）到 `design/` 目录
+3. 后续 `/speckit.plan` 和 `/speckit.epicdesign` 可引用此文件作为 UI 约束输入

@@ -1,0 +1,114 @@
+---
+description: "当用户输入 /speckit.epicdesign 时触发：产出 EPIC 软件设计说明书 epic-design.md 及配套文件（分 Gate 逐阶段产出）"
+alwaysApply: false
+---
+
+# /speckit.epicdesign — EPIC 软件设计说明书
+
+## 触发
+
+用户输入 `/speckit.epicdesign`，可附带 EPIC 标识或指定 Gate 阶段（如 `Gate 0`、`Gate 1`）。
+
+## 目的
+
+产出 EPIC 根目录下的设计文件组：
+
+| 文件 | 内容 |
+|------|------|
+| `epic-design.md` | 设计总览（各章节摘要/引用/Gate 确认） |
+| `key-func-design.md` | §六 关键功能疑难点/亮点设计策略、方案流程图、Feature 流程图集 |
+| `key-diagram.md` | §七 全景骨架类图、Feature 子类图（含方法签名）、关键时序图 |
+| `features/FEAT-xxx/story_detail_design.md` | §十三 各 Story 落码级 L2 详细设计 |
+
+## 前置条件
+
+1. `epic.md` 已存在
+2. `epic-plan.md` 已存在
+3. **所有 Feature 的 `plan.md` 初版已完成**（Plan Ready）
+4. `ux-design.md`（若已产出）作为可选输入
+
+## 输入（必须阅读）
+
+1. **`epic.md`**：背景、范围、Feature 列表、跨 Feature 技术策略
+2. **`epic-plan.md`**：EPIC 级技术约束
+3. **所有 Feature 的 `spec.md`**：FR/NFR/边界/验收
+4. **所有 Feature 的 `plan.md`**：技术规约、接口契约、数据模型
+5. **`ux-design.md`**（若有）：UI/交互约束
+6. **模板文件**：
+   - `.specify/templates/epic-design-doc-template.md`
+   - `.specify/templates/key-func-design-template.md`
+   - `.specify/templates/key-diagram-template.md`
+   - `.specify/templates/story_detail_design_template.md`
+7. **`.specify/memory/constitution.md`**：章程约束
+8. **`.cursor/rules/specify-diagram-requirements.mdc`**：图表内容要求
+9. **`.cursor/rules/mermaid-style-guide.mdc`**：图表样式规范
+10. **现有工程代码**：实际架构、类、方法
+
+## 分阶段产出（Gate 机制，必须严格遵守）
+
+**核心规则：每个 Gate 完成后必须停止，等待用户确认后才能继续下一阶段。**
+
+### Gate 0（§一～§四）：零层架构
+
+- §一 简介、§二 需求概述、§三 领域模型、§四 零层架构
+- 产出文件：`epic-design.md` 对应章节
+- **停止并等待确认**
+
+### Gate 1（§五）：一层架构
+
+- 框架图（须标注代码工程模块名）、组件清单与职责、组件协作流程图、技术方案选型
+- 产出文件：`epic-design.md` §五
+- **停止并等待确认**
+
+### Gate 2（§六 + `key-func-design.md`）：关键设计策略
+
+- §六 关键设计疑难点/亮点（设计决策与方案分析）
+- `key-func-design.md`（完整内容：方案流程图 + Feature 流程图集）
+- 产出文件：`key-func-design.md`（完整内容）+ `epic-design.md` §六
+- **停止并等待确认**
+
+### Gate 3（§七 + `key-diagram.md`）：全景类图与关键时序
+
+- §七 图表概览（摘要索引）
+- `key-diagram.md`（完整内容：骨架类图、Feature 子类图含方法签名、关键时序图）
+- 产出文件：`key-diagram.md`（完整内容）+ `epic-design.md` §七摘要
+- **停止并等待确认**
+
+### Gate 4（§八～§十一）：质量与契约
+
+- 技术风险与评估（量化）、接口设计、数据库设计、埋点技术方案
+- 产出文件：`epic-design.md` §八～§十一
+- **停止并等待确认**
+
+### Gate 5（§十二）：Story 拆解
+
+- 拆解策略、Story 列表（按 Feature 分组）、依赖关系图、覆盖矩阵、工作量汇总
+- 产出文件：`epic-design.md` §十二
+- **停止并等待确认**
+- **Gate 5 通过后**提示用户运行 `/speckit.backfill` 执行回填（自动完成以下 3 项）：
+  - 回填各 Feature 的 `plan.md` Story 索引表
+  - 回填各 Feature 的 `spec.md` 需求追溯表
+  - 回填 `plan.md` §一 一致性互校
+
+### Gate 6（§十三）：L2 详细设计
+
+- 按 Story 逐个产出 L2 详细设计
+- 产出文件：各 Feature 的 `story_detail_design.md`，`epic-design.md` §十三索引表
+- **每个 Story 的 L2 完成后单独确认**，全部完成后整体确认
+
+## 行为约束
+
+- **基于真实代码**：类图/时序图必须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）
+- **Mermaid 样式**：所有图表遵循 Material Design 配色（`.cursor/rules/mermaid-style-guide.mdc`）
+- **演进式设计**：不得从零设计理想方案（constitution §二）
+- **模板结构保护**：不得增删模板已定义的章节（constitution §九）
+- **禁止跨 Gate 提前生成**：当前 Gate 未通过时，后续章节保持占位状态
+- **L2 完整性**：story_detail_design.md 中每个 Story 的类图/时序图必须完整书写，不得引用其他文档
+
+## 完成后
+
+提示用户：
+1. 所有 Gate 通过 → Design Ready
+2. 确认回填已完成（plan.md Story 索引表 + spec.md 需求追溯表）
+3. 运行 `/speckit.epicsync` 更新 epic.md Feature Registry
+4. 逐个 Feature 运行 `/speckit.tasks` 产出任务清单

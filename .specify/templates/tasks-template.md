@@ -45,9 +45,13 @@ description: "Story → Task 落地任务清单模板"
 
 ## 路径约定（按 plan.md 的结构决策为准）
 
-- **单一项目**：仓库根目录下的 `src/`、`tests/`
-- **Web 应用**：`backend/`、`frontend/`
-- **移动端**：`android/`、`ios/`（可选 `api/`）
+- **Android 移动端**（默认）：
+  - 源码：`app/src/main/java/[包路径]/`（按分层组织：`ui/`、`domain/`、`data/`）
+  - 单元测试：`app/src/test/java/[包路径]/`
+  - 仪器测试：`app/src/androidTest/java/[包路径]/`
+  - 资源：`app/src/main/res/`
+- **多模块项目**：按 `:feature:xxx`、`:core:data` 等模块名替换 `app/`
+- **其他项目类型**：按实际工程结构
 
 <!--
 ============================================================================
@@ -170,14 +174,14 @@ description: "Story → Task 落地任务清单模板"
 
 ### ST-002 测试（可选——仅在要求测试时添加）
 
-- [ ] T200 [P] [ST-002] 端点契约测试，路径：tests/contract/test_[名称].py
-- [ ] T201 [P] [ST-002] 用户流程集成测试，路径：tests/integration/test_[名称].py
+- [ ] T200 [P] [ST-002] ViewModel 单元测试，路径：`app/src/test/java/[包路径]/[Feature]ViewModelTest.kt`
+- [ ] T201 [P] [ST-002] Repository 集成测试，路径：`app/src/androidTest/java/[包路径]/[Feature]RepositoryTest.kt`
 
 ### ST-002 实现
 
-- [ ] T202 [P] [ST-002] 创建 [实体] 模型，路径：src/models/[entity].py
-- [ ] T203 [ST-002] 实现 [服务]，路径：src/services/[service].py
-- [ ] T204 [ST-002] 实现 [端点/功能]，路径：src/[目录]/[文件].py
+- [ ] T202 [P] [ST-002] 创建 [实体] Entity/DTO，路径：`app/src/main/java/[包路径]/data/model/[Entity].kt`
+- [ ] T203 [ST-002] 实现 Repository，路径：`app/src/main/java/[包路径]/data/repository/[Feature]Repository.kt`
+- [ ] T204 [ST-002] 实现 ViewModel，路径：`app/src/main/java/[包路径]/ui/[feature]/[Feature]ViewModel.kt`
 - [ ] T205 [ST-002] 与 ST-001 的组件集成（如有需要）
 
 **检查点**：至此，ST-001 和 ST-002 均应能独立运行
@@ -192,14 +196,14 @@ description: "Story → Task 落地任务清单模板"
 
 ### ST-003 测试（可选——仅在要求测试时添加）
 
-- [ ] T300 [P] [ST-003] 端点契约测试，路径：tests/contract/test_[名称].py
-- [ ] T301 [P] [ST-003] 用户流程集成测试，路径：tests/integration/test_[名称].py
+- [ ] T300 [P] [ST-003] Screen/Composable UI 测试，路径：`app/src/androidTest/java/[包路径]/ui/[feature]/[Feature]ScreenTest.kt`
+- [ ] T301 [P] [ST-003] UseCase 单元测试，路径：`app/src/test/java/[包路径]/domain/[Feature]UseCaseTest.kt`
 
 ### ST-003 实现
 
-- [ ] T302 [P] [ST-003] 创建 [实体] 模型，路径：src/models/[entity].py
-- [ ] T303 [ST-003] 实现 [服务]，路径：src/services/[service].py
-- [ ] T304 [ST-003] 实现 [端点/功能]，路径：src/[目录]/[文件].py
+- [ ] T302 [P] [ST-003] 创建 [实体] Entity/DTO，路径：`app/src/main/java/[包路径]/data/model/[Entity].kt`
+- [ ] T303 [ST-003] 实现 UseCase/业务逻辑，路径：`app/src/main/java/[包路径]/domain/[Feature]UseCase.kt`
+- [ ] T304 [ST-003] 实现 Compose Screen，路径：`app/src/main/java/[包路径]/ui/[feature]/[Feature]Screen.kt`
 
 **检查点**：所有 Story 至此应均可独立运行
 
@@ -249,8 +253,8 @@ description: "Story → Task 落地任务清单模板"
 
 ```bash
 # 批量启动 ST-001 的可并行任务（示例）：
-任务："[ST-001] 编写验证，路径：tests/..."
-任务："[ST-001] 实现模块A，路径：src/..."
+任务："[ST-001] 编写 ViewModel 单元测试，路径：app/src/test/java/.../FeatureViewModelTest.kt"
+任务："[ST-001] 创建 Entity 数据模型，路径：app/src/main/java/.../data/model/Feature.kt"
 ```
 
 ---

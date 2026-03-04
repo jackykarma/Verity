@@ -1,0 +1,58 @@
+---
+description: "当用户输入 /speckit.implement 时触发：按 Task 逐个实现代码"
+alwaysApply: false
+---
+
+# /speckit.implement — 代码实现
+
+## 触发
+
+用户输入 `/speckit.implement`，可附带 Task ID（如 `T101`）或 Story ID（如 `ST-001`）。
+
+## 目的
+
+按 `tasks.md` 中的 Task 逐个实现代码，确保实现与设计一致。
+
+## 前置条件
+
+1. 本 Feature 的 `tasks.md` 已完成（Implement Ready）
+2. 目标 Task 的前置依赖 Task 已完成（`- [x]` 状态）
+3. 合规性检查已通过（plan.md §六）
+
+## 输入（必须阅读）
+
+1. **本 Feature 的 `tasks.md`**：当前 Task 的步骤、验证、设计引用
+2. **Task 指向的设计引用**：
+   - `epic-design.md` 对应章节（架构/类图/时序图）
+   - `key-diagram.md` 对应类图/时序图
+   - `story_detail_design.md:ST-xxx` 对应 L2 详细设计
+3. **本 Feature 的 `plan.md`**：技术约束、接口契约、数据模型
+4. **`epic-plan.md`**：EPIC 级技术约束（不得违反）
+5. **现有工程代码**：被修改的文件及其上下文
+
+## 执行流程
+
+1. **定位 Task**：找到 tasks.md 中对应的 Task（未完成的 `- [ ]`）
+2. **阅读设计引用**：完整阅读 Task 指向的设计文档章节
+3. **检查依赖**：确认前置 Task 已完成
+4. **按步骤实现**：逐步执行 Task 中列出的步骤
+5. **执行验证**：按 Task 验证清单检查实现
+6. **标记完成**：将 tasks.md 中该 Task 改为 `- [x]`
+7. **提交代码**：按 Task 或逻辑分组粒度提交（在 EPIC 分支上）
+
+## 行为约束
+
+- **不得擅自改写设计**：实现必须与设计说明书/plan.md 一致；若发现设计问题，须走 CR 变更流程
+- **不得擅自改写 FR/NFR**：spec.md 中的需求是实现的验收标准
+- **遵循 EPIC 技术约束**：分层/线程/错误处理/命名等必须与 epic-plan.md 一致
+- **演进式实现**：基于现有代码扩展，不得大规模重写（constitution §二）
+- **最小改动原则**：能用 3 行代码解决的不要写 300 行（constitution §五）
+- **每次只实现一个 Task**：不跳 Task、不跨 Story
+
+## 完成后
+
+提示用户：
+1. 当前 Task 已完成，tasks.md 已更新
+2. 建议执行下一个 Task（按依赖顺序）
+3. Story 所有 Task 完成后建议运行验证
+4. 所有 Story 完成后 → 运行 `/speckit.verify`

@@ -129,7 +129,7 @@ function Extract-PlanField {
     )
     if (-not (Test-Path $PlanFile)) { return '' }
     # Lines like **Language/Version**: Python 3.12
-    $regex = "^\*\*$([Regex]::Escape($FieldPattern))\*\*: (.+)$"
+    $regex = "^\*\*$([Regex]::Escape($FieldPattern))\*\*[:\x{FF1A}]\s*(.+)$"
     Get-Content -LiteralPath $PlanFile -Encoding utf8 | ForEach-Object {
         if ($_ -match $regex) { 
             $val = $Matches[1].Trim()
