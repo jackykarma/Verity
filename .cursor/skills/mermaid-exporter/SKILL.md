@@ -11,7 +11,7 @@ description: 将 Markdown 文件中的所有 Mermaid 图表导出为 PNG 图片�
 
 - 自动识别所有 Mermaid 代码块
 - 提取图表标题（中文名称）
-- 高质量 PNG 图片导出
+- 4K 分辨率（3840×2160）高质量 PNG 导出
 - 智能文件命名（使用中文标题）
 - 支持所有 Mermaid 图表类型（流程图、时序图、类图等）
 
@@ -134,16 +134,17 @@ flowchart LR
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
 | `--output-dir` | 指定输出目录 | `文件名-images/` 子目录 |
-| `--width` | 图片宽度 | 1920 |
-| `--height` | 图片高度 | 1080 |
+| `--width` | 图片宽度 | 3840（4K） |
+| `--height` | 图片高度 | 2160（4K） |
 | `--theme` | Mermaid 主题 | default |
 | `--background` | 背景颜色 | white |
 
 **示例**：
 ```bash
+# 默认即为 4K，也可自定义尺寸
 python scripts/export_mermaid.py docs/design.md \
   --output-dir ./images/ \
-  --width 2560 \
+  --width 3840 --height 2160 \
   --theme dark
 ```
 
@@ -177,13 +178,15 @@ python scripts/export_mermaid.py ./docs/ --recursive
 
 ### 图片质量不佳
 
-**解决方案**:
-```bash
-# 提高分辨率
-python scripts/export_mermaid.py design.md --width 3840 --height 2160
+**说明**：默认已使用 4K（3840×2160）分辨率导出。
 
-# 使用 puppeteer 配置（高质量）
+**可选**：若需更高缩放或自定义尺寸：
+```bash
+# 使用缩放倍率（在 4K 基础上再放大）
 python scripts/export_mermaid.py design.md --scale 2
+
+# 自定义分辨率
+python scripts/export_mermaid.py design.md --width 3840 --height 2160
 ```
 
 ## 高级用法

@@ -17,7 +17,7 @@ from typing import List, Tuple, Optional
 class MermaidExporter:
     """Mermaid 图表导出器"""
 
-    def __init__(self, width: int = 1920, height: int = 1080, 
+    def __init__(self, width: int = 3840, height: int = 2160, 
                  theme: str = 'default', background: str = 'white', scale: int = 1):
         self.width = width
         self.height = height
@@ -274,8 +274,8 @@ def main():
     
     parser.add_argument('path', help='Markdown 文件或目录路径')
     parser.add_argument('--output-dir', '-o', help='输出目录（默认：Markdown 文件同级目录）')
-    parser.add_argument('--width', '-w', type=int, default=1920, help='图片宽度（默认：1920）')
-    parser.add_argument('--height', '-H', type=int, default=1080, help='图片高度（默认：1080）')
+    parser.add_argument('--width', '-w', type=int, default=3840, help='图片宽度（默认：3840，4K）')
+    parser.add_argument('--height', '-H', type=int, default=2160, help='图片高度（默认：2160，4K）')
     parser.add_argument('--theme', '-t', default='default', 
                         choices=['default', 'dark', 'forest', 'neutral'],
                         help='Mermaid 主题（默认：default）')
