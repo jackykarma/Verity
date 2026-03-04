@@ -1,5 +1,5 @@
 ---
-描述：基于 plan.md 的 Story Breakdown（ST-xxx）与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序的 tasks.md 文件（Story → Task），严禁改写 Plan 的技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
+描述：基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、plan.md 的技术规约与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序的 tasks.md 文件（Story → Task），严禁改写设计方案的技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
 交接项：
   - 标签：一致性分析
     执行主体：speckit.analyze
@@ -25,51 +25,52 @@ $ARGUMENTS
 
 ## 大纲
 
-执行主体：**SE/TL（或架构师）**。开发者应将 `tasks.md` 视为只读执行清单；如需调整任务边界/顺序/验证方式，提交变更提案（PR/Issue/评论）并由 SE/TL 更新后再继续实现（建议使用 `.specify/templates/change-request-template.md` 作为 CR 模板，补齐影响分析与更新清单）。
+执行主体：**SE/TL（或架构师）**。开发者应将 `tasks.md` 视为只读执行清单；如需调整任务边界/顺序/验证方式，提交变更提案（PR/Issue/评论）并由 SE/TL 更新后再继续实现（建议使用 `.specify/templates/change-request-template.md` 作为 CR 模板）。
 
-1. **环境搭建**：从代码库根目录运行 `.specify/scripts/powershell/check-prerequisites.ps1 -Json` 脚本，并解析 FEATURE_DIR（功能目录）和 AVAILABLE_DOCS（可用文档列表）。所有路径必须为绝对路径。对于参数中包含单引号的情况（如 "I'm Groot"），需使用转义语法：例如 'I'\''m Groot'（若可行，也可使用双引号："I'm Groot"）。
+1. **环境搭建**：从代码库根目录运行 `.specify/scripts/powershell/check-prerequisites.ps1 -Json` 脚本，并解析 FEATURE_DIR（功能目录）和 AVAILABLE_DOCS（可用文档列表）。所有路径必须为绝对路径。
 
-2. **加载设计文档**：从 FEATURE_DIR 中读取以下文档：
+2. **加载设计文档**：从 FEATURE_DIR 及 EPIC 目录中读取以下文档：
     - **必需文档**：
-        - plan.md（Plan-A/Plan-B + **Story Breakdown：ST-xxx**）
+        - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§5 Story 列表、依赖关系、FR/NFR 覆盖矩阵）、**L2 详细设计**（§6）、**全景类图与关键时序**（§4）、**架构图**（§1、§2）
+        - plan.md（**技术规约与实现约束**：架构约束、数据模型、接口规范、项目结构、源代码结构）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
-    - **可选文档**：data-model.md（实体定义）、contracts/（API 接口端点）、research.md（决策记录）、quickstart.md（测试场景）
+    - **可选文档**：epic-plan.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
     - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。
 
 3. **执行任务生成流程**：
-    - 加载 plan.md 并提取技术栈、库、项目结构信息
-    - 从 plan.md 的 **Story Breakdown** 提取 Story 列表（ST-xxx），包括：类型、目标、依赖、覆盖 FR/NFR、验收/验证方式（高层）
-    - 从 spec.md 提取 FR/NFR 与 AC（验收标准），用于约束每个 Story 的任务与验证
-    - 若存在 data-model.md：提取实体并映射至对应 Story（按 plan.md 的模块/流程/Story 目标推断）
+    - 加载 plan.md 并提取技术栈、技术规约、项目结构信息
+    - 从 **EPIC 软件设计说明书**的 **§5 Story 拆解** 提取 Story 列表（ST-xxx），包括：类型、目标、依赖、覆盖 FR/NFR、验收/验证方式
+    - 从 spec.md 提取 FR/NFR 与 AC（验收标准）
+    - 若存在 data-model.md：提取实体并映射至对应 Story
     - 若存在 contracts/ 目录：将接口端点映射至对应 Story
     - 若存在 research.md：提取决策信息并纳入环境搭建阶段任务
     - 按 Story 组织生成任务（详见下文「任务生成规则」）
     - 生成展示 Story 完成顺序的依赖关系章节（Story/Task 双层）
     - 为每个 Story 生成并行执行示例（仅列 [P] 任务）
-    - 验证任务完整性（每个 Story 均包含完成所需任务，且验证方式明确；不得遗漏 NFR 相关验证）
+    - 验证任务完整性
 
 4. **生成 tasks.md 文件**：以 `.specify/templates/tasks-template.md` 为模板填充内容，包含：
-    - 从 plan.md 中提取的正确功能名称
-    - 阶段 0：准备（版本/输入冻结检查，避免 Implement 期改设计）
+    - 从设计说明书中提取的正确功能名称
+    - 阶段 0：准备（版本/输入冻结检查）
     - 阶段 1：环境搭建任务（项目初始化）
-    - 阶段 2：核心基础（阻塞性前置条件，阻塞所有 Story）
-    - 阶段 3+：每个 Story 对应一个阶段（按 plan.md 中 Story 的依赖与优先级组织）
-    - 每个阶段包含：Story 目标、任务列表、依赖关系、验证方式（含 NFR 指标阈值）
+    - 阶段 2：核心基础（阻塞性前置条件）
+    - 阶段 3+：每个 Story 对应一个阶段
+    - 每个阶段包含：Story 目标、任务列表、依赖关系、验证方式
     - 最后阶段：优化与跨领域关注点
     - 所有任务必须遵循严格的清单格式（详见下文「任务生成规则」）
     - 每个任务需标注清晰的文件路径
-    - 若 plan.md 包含模块级/Story 级详细设计：每个 Task 必须提供 **设计引用**（指向 plan.md 中对应模块的 `A3.3` UML 图或 Story 的 L2 详细设计小节）
+    - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` 中对应的 §4 全景类图/时序图 或 §6.x ST-xxx L2 详细设计，或 `story_detail_design.md`）
     - 展示 Story 完成顺序的依赖关系章节
     - 每个 Story 的并行执行示例
-    - 增量交付策略（先交付关键 Story 集合，再逐步扩展）
+    - 增量交付策略
 
 5. **报告输出**：输出生成的 tasks.md 文件路径及汇总信息：
     - 任务总数
     - 各 Story（ST-xxx）对应的任务数量
     - 识别出的可并行执行机会
-    - 每个 Story 的验证方式摘要（含指标阈值）
-    - 建议的 MVP 范围（通常仅包含关键 Story 集合，如 ST-001）
-    - 格式验证：确认所有任务均遵循清单格式（复选框、任务ID、[ST-xxx] 标签、文件路径）
+    - 每个 Story 的验证方式摘要
+    - 建议的 MVP 范围
+    - 格式验证
 
 任务生成上下文：$ARGUMENTS
 
@@ -77,7 +78,7 @@ $ARGUMENTS
 
 ## 任务生成规则
 
-**核心要求**：任务必须按 Story（ST-xxx）组织，以支持独立实施和验证；Story 来自 plan.md，不得擅自发明新 Story。
+**核心要求**：任务必须按 Story（ST-xxx）组织，以支持独立实施和验证；Story 来自 **EPIC 软件设计说明书**的 §5 Story 拆解，不得擅自发明新 Story。
 
 **测试任务可选**：仅当功能规格中明确要求，或用户指定采用测试驱动开发（TDD）方式时，才生成测试任务。
 
@@ -93,11 +94,8 @@ $ARGUMENTS
 
 1. **复选框**：必须以 `- [ ]`（Markdown 复选框格式）开头
 2. **任务ID**：按执行顺序编排的序列号（T001、T002、T003……）
-3. **[P] 标记**：仅当任务可并行执行时添加（涉及不同文件，且不依赖未完成的任务）
-4. **[ST-xxx] 标签**：Story 阶段的任务必填（与 plan.md 的 Story Breakdown 对齐）
-    - 阶段 0/1/2：可不填
-    - Story 阶段：必须包含 [ST-xxx]
-    - 优化阶段：按需（如属于某个 Optimization Story，则仍需标注）
+3. **[P] 标记**：仅当任务可并行执行时添加
+4. **[ST-xxx] 标签**：Story 阶段的任务必填（与 EPIC 设计说明书的 Story 拆解对齐）
 5. **描述内容**：清晰的操作指令 + 精确的文件路径
 
 **示例**：
@@ -105,42 +103,38 @@ $ARGUMENTS
 - ✅ 正确格式：`- [ ] T001 按实施计划创建项目结构`
 - ✅ 正确格式：`- [ ] T005 [P] 在 src/middleware/auth.py 中实现认证中间件`
 - ✅ 正确格式：`- [ ] T012 [P] [ST-001] 在 src/models/user.py 中创建用户模型`
-- ✅ 正确格式：`- [ ] T014 [ST-001] 在 src/services/user_service.py 中实现用户服务`
 - ❌ 错误格式：`- [ ] 创建用户模型`（缺少任务ID和 [ST-xxx] 标签）
-- ❌ 错误格式：`T001 [ST-001] 创建模型`（缺少复选框）
-- ❌ 错误格式：`- [ ] [ST-001] 创建用户模型`（缺少任务ID）
-- ❌ 错误格式：`- [ ] T001 [ST-001] 创建模型`（缺少文件路径）
+
+### 设计引用规则
+
+每个 Task 必须包含 **设计引用**，指向 EPIC 软件设计说明书中的对应设计：
+
+```text
+设计引用：epic-design.md:§4 全景类图/时序图
+设计引用：epic-design.md:§6.1 ST-001 L2 详细设计
+设计引用：story_detail_design.md:ST-002
+```
 
 ### 任务组织规则
 
-1. **基于 Story（plan.md）** - 核心组织维度：
+1. **基于 Story（EPIC 设计说明书 §5）** - 核心组织维度：
     - 每个 Story（ST-xxx）对应一个独立阶段
-    - 将相关组件映射至对应 Story：
-        - 模块/模型/服务/接口/埋点/性能或功耗优化等
-        - 若要求生成测试任务：该 Story 专属的验证任务
-    - 标注 Story 间依赖（以 plan.md 为准，不得自行重排）
+    - 标注 Story 间依赖（以设计说明书为准）
 
 2. **基于接口契约**：
     - 将每个契约/接口端点映射至其服务对应的 Story
-    - 若生成测试任务：在对应 Story 阶段中，先添加可并行的契约/集成验证任务 [P]，再生成实现任务
 
 3. **基于数据模型**：
-    - 将每个实体映射至其所属 Story（可多个）
-    - 若实体服务于多个 Story：归入最早依赖的 Story 阶段或基础阶段，并标注依赖
-    - 实体关系与状态机 → 对应 Story 的实现与验证任务
+    - 将每个实体映射至其所属 Story
 
 4. **基于环境搭建/基础设施**：
     - 共享基础设施 → 环境搭建阶段（第 1 阶段）
     - 基础/阻塞性任务 → 核心基础阶段（第 2 阶段）
-    - Story 专属的环境配置 → 归入对应 Story 的阶段并标注依赖
 
 ### 阶段结构
 
 - **第 0 阶段**：准备（版本/输入冻结检查）
 - **第 1 阶段**：环境搭建（项目初始化）
-- **第 2 阶段**：核心基础（阻塞性前置条件 - 必须在所有 Story 前完成）
+- **第 2 阶段**：核心基础（阻塞性前置条件）
 - **第 3 阶段及以后**：按依赖与优先级组织的 Story（ST-001、ST-002…）
-    - 每个 Story 内部顺序：验证任务（若有）→ 关键实现 → 集成 → 指标验收（NFR）
-    - 每个阶段需形成完整、可独立验证的增量交付单元
-- **最终阶段**：优化与跨领域关注点（或对应 Optimization Story）
-```
+- **最终阶段**：优化与跨领域关注点

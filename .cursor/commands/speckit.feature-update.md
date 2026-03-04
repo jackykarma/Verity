@@ -3,7 +3,7 @@ description: 对当前 Feature 的 spec.md 做增量更新，仅重写 $ARGUMENT
 handoffs:
   - label: 生成任务（已级联 plan 时）
     agent: speckit.tasks
-    prompt: 将 Plan 的 Story Breakdown 拆解为可执行 tasks.md
+    prompt: 将 EPIC 设计说明书的 Story 拆解为可执行 tasks.md
     send: true
   - label: 同步 EPIC 总览
     agent: speckit.epicsync
@@ -128,14 +128,14 @@ $ARGUMENTS
 
 由本次 **spec 更新范围** 推导 **受影响的 plan 章节**；**凡受影响的都必须纳入**，不得漏掉。
 
-| 本次 feature-update 的 spec 范围 | 受影响的 plan 范围 |
-|----------------------------------|---------------------|
-| FR、NFR、验收标准、验收与场景 | 概述、A4 技术风险与消解策略、A5 边界与异常场景枚举、A6 算法评估、A7 功耗评估、A8 性能评估、A9 内存评估、Story Breakdown |
-| 边界与异常场景 | A4、A5、Story Breakdown（若涉及新/删 Story 或验收变化） |
-| 依赖关系 | A2 Feature 全景架构（尤 A2.2 外部依赖、A2.3 通信与交互约束）、A3 若涉及对外模块/接口 |
-| 核心实体 | A0 领域概念、A3 Feature 内部设计、B3 数据模型 |
-| 假设与约束 | A4、Plan-B（B2 架构细化、B5 合规性检查等） |
-| 需求追溯（Story 增删或映射变化） | Story Breakdown（Story 列表、Feature→Story 覆盖矩阵） |
+| 本次 feature-update 的 spec 范围 | 受影响的 plan 范围 | 是否建议更新 EPIC 设计说明书 |
+|----------------------------------|---------------------|------------------------------|
+| FR、NFR、验收标准、验收与场景 | §二 技术背景、§四 数据模型、§五 接口规范、Story 索引表 | 是（`/speckit.epicdesign-update`） |
+| 边界与异常场景 | §五 接口规范、§八 源代码结构 | 若涉及新/删 Story 则是 |
+| 依赖关系 | §五 接口规范 | 视情况 |
+| 核心实体 | §四 数据模型 | 是（全景类图） |
+| 假设与约束 | §三 架构约束、§六 合规性检查、§八 源代码结构 | 视情况 |
+| 需求追溯（Story 增删或映射变化） | Story 索引表 | 是（Story 拆解） |
 
 若一次 feature-update 涉及多个 spec 范围，取**并集**：所有被映射到的 plan 章节均纳入本次 plan 增量更新。
 

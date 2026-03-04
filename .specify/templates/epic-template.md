@@ -125,13 +125,13 @@
 
 > **目的**：在各 Feature 开始 plan 设计之前，识别跨 Feature 的共享技术能力，避免重复设计，统一技术口径。
 >
-> **时机**：在所有 Feature `spec.md` 完成之后、任意 Feature `plan.md` 开始之前填写。建议先运行 **`/speckit.epicarchdesign`** 产出 EPIC 根下 `epic-arch.md`（0 层/1 层架构与规范约束），再填写本节并与 epic-arch 对齐。
+> **时机**：在所有 Feature `spec.md` 完成之后、任意 Feature `plan.md` 开始之前填写。建议先运行 **EPIC Plan 阶段** 产出 EPIC 根下 `epic-plan.md`（EPIC 级技术规约与约束），再填写本节并与 epic-plan 对齐。
 >
 > **强制规则**：
 >
-> - 后续每个 Feature 在开始 plan 之前，**必须先阅读本章节**；若 EPIC 根下存在 **`epic-arch.md`**，**必须先阅读**并在其 0 层/1 层与规范约束下做 A2、A3.1
+> - 后续每个 Feature 在开始 plan 之前，**必须先阅读本章节**；若 EPIC 根下存在 **`epic-plan.md`**，**必须先阅读**并在其技术规约与约束下编写 plan
 > - 若 Feature plan 中需要设计的组件已在此登记为"由其他 Feature 提供"，则**必须复用**，不得另起炉灶
-> - 若发现新的共享需求，必须**先更新本章节**（必要时同步 epic-arch.md），再继续 Feature plan
+> - 若发现新的共享需求，必须**先更新本章节**（必要时同步 epic-plan.md），再继续 Feature plan
 
 ### 共享能力识别（跨 Feature 技术组件）
 

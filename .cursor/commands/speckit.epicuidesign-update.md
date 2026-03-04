@@ -7,11 +7,15 @@ handoffs:
     send: false
   - label: 更新 plan（仅视觉/ux 影响 plan 或需补充 ux-derived 的 plan 范围时）
     agent: speckit.plan-update
-    prompt: 范围：A2 架构、A3 内部设计、Story Breakdown（因 epic uidesign 视觉/交互 变更）；对受影响的 Feature 设置 SPECIFY_FEATURE 后执行
+    prompt: 范围：§四 数据模型、§五 接口规范（因 epic uidesign 视觉/交互 变更）；对受影响的 Feature 设置 SPECIFY_FEATURE 后执行
     send: false
-  - label: 生成任务（plan 已或即将更新时）
+  - label: 更新 EPIC 设计说明书（当视觉变更影响架构或 Story 设计时）
+    agent: speckit.epicdesign-update
+    prompt: 范围：全景类图/时序、Story 拆解（因 epic uidesign 视觉/交互 变更）
+    send: false
+  - label: 生成任务（设计已或即将更新时）
     agent: speckit.tasks
-    prompt: 将 Plan 的 Story Breakdown 拆解为可执行 tasks.md
+    prompt: 将 EPIC 设计说明书的 Story 拆解为可执行 tasks.md
     send: true
 ---
 
@@ -25,7 +29,7 @@ $ARGUMENTS
 
 ## 大纲
 
-目标：对 **EPIC 根** 下 `ux-design.md` 做**增量更新**，仅重写 `$ARGUMENTS` 指定范围对应的章节，其余保留；在「变更记录」中**追加一行**。按**实际影响**评估：若影响**某 Feature** 的 spec 范围则 handoff `/speckit.feature-update`（对**受影响的 Feature** 设 `SPECIFY_FEATURE` 后执行，可级联 plan）；若影响视觉设计则写回 ux-design.md（及设计稿索引）；**两者可同时发生**。上述任一导致**某 Feature** 的 plan 的 A2/A3/Story 等变化时，handoff `/speckit.plan-update`（对受影响 Feature 设 `SPECIFY_FEATURE`），再 handoff `/speckit.tasks`。
+目标：对 **EPIC 根** 下 `ux-design.md` 做**增量更新**，仅重写 `$ARGUMENTS` 指定范围对应的章节，其余保留；在「变更记录」中**追加一行**。按**实际影响**评估：若影响**某 Feature** 的 spec 范围则 handoff `/speckit.feature-update`（对**受影响的 Feature** 设 `SPECIFY_FEATURE` 后执行，可级联 plan）；若影响视觉设计则写回 ux-design.md（及设计稿索引）；**两者可同时发生**。上述任一导致**某 Feature** 的 plan（技术规约）或 EPIC 设计说明书变化时，handoff `/speckit.plan-update` 和/或 `/speckit.epicdesign-update`，再 handoff `/speckit.tasks`。
 
 执行步骤：
 
@@ -68,11 +72,15 @@ $ARGUMENTS
   `/speckit.feature-update 范围：FR 与 NFR、验收标准（因 epic uidesign 交互/视觉 变更）`  
   并 级联 plan；若有多个 Feature 受影响，逐一对该 Feature 执行。
 
-- **若「影响视觉」且某 Feature 的 plan 的 A2/A3/Story 等会变**：在完成报告中输出建议命令，例如：对**受影响的 Feature** 设置 `SPECIFY_FEATURE` 后  
-  `/speckit.plan-update 范围：A2 架构、A3 内部设计、Story Breakdown（因 epic uidesign 视觉/交互 变更）`。  
-  若同时「影响 spec」且用户已跑 feature-update 级联 plan，仍可再跑 plan-update 以补齐 ux-derived 范围；**顺序：先 feature-update，再 plan-update**。
+- **若「影响视觉」且某 Feature 的 plan（技术规约）会变**：在完成报告中输出建议命令，例如：对**受影响的 Feature** 设置 `SPECIFY_FEATURE` 后
+  `/speckit.plan-update 范围：§四 数据模型、§五 接口规范（因 epic uidesign 视觉/交互 变更）`。
 
-- **当 plan 已更新**（不论通过 feature-update 级联或 plan-update）：建议对受影响 Feature 运行 `/speckit.tasks` 重新生成 tasks。
+- **若「影响视觉」且 EPIC 设计说明书（架构/类图/时序/Story 拆解）会变**：建议运行
+  `/speckit.epicdesign-update 范围：全景类图/时序、Story 拆解（因 epic uidesign 视觉/交互 变更）`。
+
+  若同时「影响 spec」且用户已跑 feature-update 级联 plan，仍可再跑 plan-update 以补齐 ux-derived 范围；**顺序：先 feature-update，再 plan-update，再 epicdesign-update**。
+
+- **当 plan 或设计说明书已更新**：建议对受影响 Feature 运行 `/speckit.tasks` 重新生成 tasks。
 
 ### 8. 完成报告
 

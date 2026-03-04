@@ -119,18 +119,18 @@ function Get-FeaturePathsEnv {
         $featureDir = Get-FeatureDir -RepoRoot $repoRoot -Branch $currentBranch
     }
     
-    # EPIC 级 ux-design、epic-arch 路径（仅当 featureKey 为 epics/EPIC-xxx/features/FEAT-xxx 时）
+    # EPIC 级 ux-design、epic-plan、设计说明书路径（仅当 featureKey 为 epics/EPIC-xxx/features/FEAT-xxx 时）
     $epicDir = $null
     $epicUx = $null
     $epicDesign = $null
-    $epicArch = $null
+    $epicPlan = $null
     if ($featureKey -match '^epics/(EPIC-\d{3}-[^/]+)/') {
         $epicDirName = $matches[1]
         $epicsBase = Join-Path (Join-Path $repoRoot "specs") "epics"
         $epicDir = Join-Path $epicsBase $epicDirName
         $epicUx = Join-Path $epicDir 'ux-design.md'
         $epicDesign = Join-Path $epicDir 'design'
-        $epicArch = Join-Path $epicDir 'epic-arch.md'
+        $epicPlan = Join-Path $epicDir 'epic-plan.md'
     }
     
     # UX_DESIGN、DESIGN_DIR：在 EPIC 工作流下指向 EPIC 级，否则为 Feature 级（兼容旧流程）
@@ -150,7 +150,7 @@ function Get-FeaturePathsEnv {
         EPIC_DIR        = $epicDir
         EPIC_UX_DESIGN  = $epicUx
         EPIC_DESIGN_DIR = $epicDesign
-        EPIC_ARCH       = $epicArch
+        EPIC_PLAN       = $epicPlan
         TASKS           = Join-Path $featureDir 'tasks.md'
         RESEARCH        = Join-Path $featureDir 'research.md'
         DATA_MODEL      = Join-Path $featureDir 'data-model.md'
@@ -159,7 +159,7 @@ function Get-FeaturePathsEnv {
     }
 }
 
-# 解析 EPIC 标识并返回 EPIC 根路径，供 /speckit.epicuidesign、/speckit.epicuidesign-update 使用。
+# 解析 EPIC 标识并返回 EPIC 根路径，供 /speckit.epicuidesign、/speckit.epicuidesign-update、/speckit.epicplan、/speckit.epicdesign 使用。
 # $EpicIdOrArg：如 "EPIC-002"、"EPIC-002-android-english-learning" 或 "EPIC-002 范围：整体"；可从 $env:SPECIFY_EPIC 或 $ARGUMENTS 传入。
 function Get-EpicPathsForUidesign {
     param([string]$EpicIdOrArg)
@@ -175,7 +175,7 @@ function Get-EpicPathsForUidesign {
         EPIC_DIR         = $dir.FullName
         EPIC_UX_DESIGN   = Join-Path $dir.FullName 'ux-design.md'
         EPIC_DESIGN_DIR  = Join-Path $dir.FullName 'design'
-        EPIC_ARCH        = Join-Path $dir.FullName 'epic-arch.md'
+        EPIC_PLAN        = Join-Path $dir.FullName 'epic-plan.md'
     }
 }
 

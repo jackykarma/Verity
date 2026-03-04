@@ -12,9 +12,9 @@ description: "Story → Task 落地任务清单模板"
 **输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md` 以及可选工件）
 
 > 规则：
-> - Task 只能拆解与执行 Plan 的既定 Story；**禁止**在 tasks.md 里改写 Plan 的技术决策或新增未决策的方案。
+> - Task 只能拆解与执行 **EPIC 软件设计说明书** 与 **plan.md** 中既定的 Story；**禁止**在 tasks.md 里改写技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
-> - 若 plan.md 已包含 Story 二层详细设计（Story Detailed Design / L2）：每个 Task 必须提供**设计引用**（指向 story_detail_design.md 对应 ST-xxx 的小节/图表/异常矩阵）。
+> - 每个 Task 必须提供**设计引用**：指向 EPIC 软件设计说明书（或各 Feature 的 story_detail_design.md）中对应 ST-xxx 的小节/类图/时序图。
 
 ## Task 行格式（首行必须严格遵循）
 
@@ -32,9 +32,9 @@ description: "Story → Task 落地任务清单模板"
 
 - **依赖**：T???（无则写“无”）
 - **设计引用**：
-  - 模块级：`plan.md:A3.3:<组件名>:详细类图/完整详细时序图`
+  - 设计说明书：`epic-design.md:§4 全景类图/时序图` 或 `epic-design.md:§6.x ST-xxx L2`
   - 或 Story 级：`story_detail_design.md:ST-xxx:功能设计:类图/时序图`
-  - （若该 Story/模块设计尚未补齐，则写 `N/A` 并在 Plan 中补齐）
+  - （若该 Story/模块设计尚未补齐，则写 `N/A` 并在 EPIC 软件设计说明书中补齐）
 - **步骤**：
   - 1) …
   - 2) …
@@ -71,11 +71,11 @@ description: "Story → Task 落地任务清单模板"
 
 **目标**：对齐版本、冻结设计输入，避免 Implement 期返工
 
-- [ ] T001 在 `specs/[###-feature-short-name]/` 中核对 `spec.md`、`plan.md` 的 Version 字段一致性并补齐变更记录
+- [ ] T001 在 `specs/[###-feature-short-name]/` 中核对 `spec.md`、`plan.md`、EPIC 软件设计说明书（若存在）的 Version 字段一致性并补齐变更记录
   - **依赖**：无
   - **步骤**：
     - 1) 确认 `Feature Version`、`Plan Version` 已填写
-    - 2) 确认 Plan 的 Story Breakdown 已完成（ST-xxx）
+    - 2) 确认 EPIC 软件设计说明书中的 Story 拆解已完成（ST-xxx），且 plan.md 的 Story 索引表已对齐
   - **验证**：
     - [ ] tasks.md 中 `Plan Version` 与 plan.md 一致
   - **产物**：`spec.md`、`plan.md`、`tasks.md`
@@ -121,12 +121,12 @@ description: "Story → Task 落地任务清单模板"
 
 核心基础任务示例（可根据项目调整）：
 
-- [ ] T020 搭建/校准公共基础设施（按 Plan-B 的架构约束）
+- [ ] T020 搭建/校准公共基础设施（按 epic-plan 与 plan.md 的架构约束）
   - **依赖**：T012
   - **步骤**：
     - 1) …
   - **验证**：
-    - [ ] 与 Plan-B 约束一致（分层/错误处理/日志规范）
+    - [ ] 与 epic-plan 及 plan.md 约束一致（分层/错误处理/日志规范）
   - **产物**：基础设施代码
 
 **检查点**：基础层就绪——用户故事实现可并行启动
