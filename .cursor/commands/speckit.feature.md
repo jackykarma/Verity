@@ -5,13 +5,13 @@ handoffs:
     agent: speckit.clarify
     prompt: 澄清规格说明的相关要求
     send: true
-  - label: 交互与视觉设计（EPIC 级）
+  - label: 交互与视觉设计（EPIC 级，可选）
     agent: speckit.epicuidesign
-    prompt: 若尚未为 EPIC 做 epic uidesign，可运行 /speckit.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后，从整个需求整体设计）；建议在任意 Feature 的 plan 之前完成
+    prompt: 若 UX/视觉稿已就绪且尚未运行，可运行 /speckit.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；本步骤可选——若 UX 尚未就绪可跳过
     send: false
   - label: EPIC 技术规约（EPIC 级）
     agent: speckit.epicplan
-    prompt: 若尚未为 EPIC 做 epic plan，可运行 /speckit.epicplan "EPIC-xxx"（须在所有 Feature 的 spec 输出之后，产出 EPIC 级技术约束与规约）；建议在任意 Feature 的 plan 之前完成，可与 epicuidesign 并行或先后
+    prompt: 运行 /speckit.epicplan "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有）→ epicplan → 各 Feature plan
     send: false
   - label: 制定技术方案
     agent: speckit.plan
@@ -62,5 +62,7 @@ $ARGUMENTS
 
 6. **完成报告**：输出 Feature Key、spec.md 路径、检查清单路径，并提示下一步：
 - `/speckit.clarify`（建议先做）
-- 若**尚未**为 EPIC 做 epic uidesign：**`/speckit.epicuidesign "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）再做 `/speckit.plan`；若**尚未**为 EPIC 做 epic plan：**`/speckit.epicplan "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后，产出 EPIC 级技术约束与规约；可与 epicuidesign 并行或先后）。或直接 `/speckit.plan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
+- 若 UX/视觉稿已就绪且尚未运行：**`/speckit.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
+- 若尚未做 EPIC 技术规约：**`/speckit.epicplan "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → epicplan → 各 Feature plan
+- 或直接 `/speckit.plan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
 

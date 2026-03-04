@@ -25,7 +25,11 @@ $ARGUMENTS
 
 **设计稿**可选用：**Figma 链接**、**截图**（放于 `design/`，如 .png/.jpg）、**本地 HTML**（`design/*.html`）；在 ux-design.md 的「设计稿索引」中登记形式与路径/链接；可含「所属 Feature」列区分。**须在 epic.md 已存在、EPIC 根下 ux-design.md 尚不存在时运行**；若已存在，请改用 `/speckit.epicuidesign-update`。
 
-**前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行，以保证整个 EPIC 的交互与视觉设计完整、一致。可与 **`/speckit.epicplan`**（EPIC 级技术规约）并行或先后执行，两者均在任意 Feature 的 plan 之前完成。
+**本命令是可选步骤**：并非所有 EPIC 在技术方案阶段都具备完整 UX/视觉稿。若 UX 设计尚未就绪，可跳过本命令直接进入 `/speckit.epicplan`；后续 UX 就绪后再运行本命令，并通过 `/speckit.epicuidesign-update` 增量同步。
+
+**前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行，以保证整个 EPIC 的交互与视觉设计完整、一致。
+
+**推荐顺序**：epicuidesign（若有） → epicplan → 各 Feature plan。若先做 epicuidesign 再做 epicplan，epicplan 可参考 UX 结论校准技术约束。
 
 执行步骤：
 

@@ -1,9 +1,13 @@
 ---
 description: "生成 Feature 级技术规约与实现约束，在 epic-plan.md 的 EPIC 级约束下编写。详细架构设计（0/1 层架构、全景类图、时序、Story 拆解、L2 设计）在 /speckit.epicdesign 阶段产出。"
 handoffs:
+  - label: 审批关卡（plan-ready，在所有 Feature plan 完成后）
+    agent: speckit.gate
+    prompt: plan-ready 关卡——冻结 epic-plan 与各 plan 后进入设计说明书阶段
+    send: false
   - label: 输出 EPIC 软件设计说明书
     agent: speckit.epicdesign
-    prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解、L2 设计）
+    prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
     send: true
   - label: 同步 EPIC 总览（可选）
     agent: speckit.epicsync
@@ -75,7 +79,7 @@ $ARGUMENTS
    - `plan.md` 路径
    - Plan Version
    - 已生成的章节清单
-   - **下一步提示**：运行 `/speckit.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解、L2 设计）
+   - **下一步提示**：若所有 Feature plan 已完成 → `/speckit.gate plan-ready`（审批关卡）→ `/speckit.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
 
 核心规则：
 - **文档格式要求（强制）**：所有技术图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`

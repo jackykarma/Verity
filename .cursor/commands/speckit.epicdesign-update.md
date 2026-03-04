@@ -27,7 +27,7 @@ $ARGUMENTS
 
 1. **环境与路径**：从仓库根运行 `.specify/scripts/powershell/get-epic-paths.ps1 -EpicId "EPIC-xxx" -Json`，解析得到 `EPIC_DIR`。设计说明书路径为 `EPIC_DIR/epic-design.md`。若设计说明书**不存在**：**终止**并提示先运行 `/speckit.epicdesign`。
 
-2. **解析 `$ARGUMENTS`**：确定本次要重写的章节（0 层架构、1 层架构、关键功能设计、全景类图/时序、Story 拆解、某个 ST-xxx 的 L2 设计等），与 `.specify/templates/epic-design-doc-template.md` 对应。
+2. **解析 `$ARGUMENTS`**：确定本次要重写的章节（0 层架构、1 层架构、关键功能设计、全景类图/时序、Story 拆解、L2 索引等），与 `.specify/templates/epic-design-doc-template.md` 对应。若涉及某个 ST-xxx 的 L2 设计，更新对应 Feature 的 `story_detail_design.md`（L2 详细设计统一在 story_detail_design.md 中，epic-design.md §6 仅为索引表）。
 
 3. **加载上下文**：读取设计说明书、epic-plan.md、相关 feature spec/plan、constitution、设计说明书模板；必要时分析现有代码。
 

@@ -148,6 +148,8 @@ $ARGUMENTS
 - 若仅存在LOW/MEDIUM级问题：用户可继续推进，但需提供优化建议
 - 给出明确的命令建议：例如，“运行 /speckit.feature 生成/细化 Feature spec.md”、“运行 /speckit.plan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
 
+- 若本 Feature 属于多 Feature EPIC：建议完成所有 Feature 的 analyze 后运行 /speckit.epicanalyze 做跨 Feature 一致性分析
+
 ### 8. 提供整改建议
 
 向用户询问：“是否需要我为排名前N的问题提供具体的整改编辑建议？”（**请勿自动执行**整改操作。）

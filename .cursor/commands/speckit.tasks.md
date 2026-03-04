@@ -5,6 +5,10 @@
     执行主体：speckit.analyze
     提示语：运行项目一致性分析
     发送状态：是
+  - 标签：审批关卡（tasks-ready）
+    执行主体：speckit.gate
+    提示语：tasks-ready 关卡——冻结 tasks 后进入实施
+    发送状态：否
   - 标签：项目实施
     执行主体：speckit.implement
     提示语：分阶段启动实施工作
@@ -59,7 +63,7 @@ $ARGUMENTS
     - 最后阶段：优化与跨领域关注点
     - 所有任务必须遵循严格的清单格式（详见下文「任务生成规则」）
     - 每个任务需标注清晰的文件路径
-    - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` 中对应的 §4 全景类图/时序图 或 §6.x ST-xxx L2 详细设计，或 `story_detail_design.md`）
+    - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` 中的 §4 全景类图/时序图，或各 Feature 的 `story_detail_design.md:ST-xxx:功能设计:类图/时序图`）
     - 展示 Story 完成顺序的依赖关系章节
     - 每个 Story 的并行执行示例
     - 增量交付策略
@@ -111,8 +115,8 @@ $ARGUMENTS
 
 ```text
 设计引用：epic-design.md:§4 全景类图/时序图
-设计引用：epic-design.md:§6.1 ST-001 L2 详细设计
-设计引用：story_detail_design.md:ST-002
+设计引用：story_detail_design.md:ST-001:功能设计:类图
+设计引用：story_detail_design.md:ST-002:功能设计:时序图
 ```
 
 ### 任务组织规则

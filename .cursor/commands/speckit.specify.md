@@ -5,6 +5,10 @@ handoffs:
     agent: speckit.feature
     prompt: 为某个 Feature 创建文档目录与 spec.md。Feature 描述如下……
     send: false
+  - label: 审批关卡（spec-ready，在所有 Feature spec 完成后）
+    agent: speckit.gate
+    prompt: spec-ready 关卡——冻结各 spec 后进入 epicuidesign/epicplan 阶段
+    send: false
 ---
 
 ## 用户输入

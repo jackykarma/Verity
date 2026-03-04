@@ -1,6 +1,14 @@
 ---
 description: "**EPIC 级**软件设计说明书。在 epic-plan.md 及各 Feature plan.md 完成后运行；基于 epic.md、epic-plan.md、各 feature spec/plan 及**现有工程代码**，产出 EPIC 级设计说明书（0 层/1 层架构图、全景类图与关键时序、Story 拆解、L2 详细设计）。供人类评审与后续 tasks/implement 阶段 AI 编码引用。"
 handoffs:
+  - label: 审批关卡（design-ready）
+    agent: speckit.gate
+    prompt: design-ready 关卡——冻结设计说明书后进入 tasks 拆解
+    send: false
+  - label: EPIC 级跨 Feature 分析（建议在 design-ready 关卡前）
+    agent: speckit.epicanalyze
+    prompt: 运行跨 Feature 一致性与质量分析
+    send: false
   - label: 生成任务（Story → Task）
     agent: speckit.tasks
     prompt: 将设计说明书中的 Story 拆解为可执行 tasks.md
@@ -21,11 +29,11 @@ $ARGUMENTS
 
 ## 设计深度说明
 
-| 深度 | 参数 | 输出内容 | 适用场景 |
-|------|------|----------|----------|
-| **Lite** | `--depth=lite` | §1-§2（0 层/1 层架构）+ §4（全景类图/时序）+ §5（Story 拆解） | 小改动/低风险 |
-| **Standard**（默认） | `--depth=standard` 或不指定 | Lite + §3（关键功能与疑难设计）+ §6 L2 概要 | 中等复杂度 |
-| **Deep** | `--depth=deep` | Standard + §6 所有 Story 的完整 L2 详细设计（类图/时序/触发条件） | 高风险/高不确定性 |
+| 深度 | 参数 | epic-design.md 输出 | story_detail_design.md 输出 | 适用场景 |
+|------|------|---------------------|-------------------------------|----------|
+| **Lite** | `--depth=lite` | §1-§2 + §4 + §5 + §6 索引表 | 各 Story 占位（标题+状态=待设计） | 小改动/低风险 |
+| **Standard**（默认） | `--depth=standard` 或不指定 | Lite + §3 | 各 Story 概要（需求/DoD + 简要功能设计） | 中等复杂度 |
+| **Deep** | `--depth=deep` | 同 Standard | 各 Story 完整详细设计（类图/时序/触发条件） | 高风险/高不确定性 |
 
 ## 大纲
 
@@ -70,22 +78,29 @@ $ARGUMENTS
    #### Standard（默认：+ 疑难设计 + L2 概要）
    在 Lite 基础上追加：
    - **§3 关键功能与疑难功能设计**
-   - **§6 L2 详细设计**（每个 Story 的概要：需求/DoD + 简要功能设计说明）
+   - **§6 L2 索引表**（指向各 Feature 的 `story_detail_design.md`）
+   - 在各 Feature 目录下创建/更新 `story_detail_design.md`，每个 Story 写入概要（需求/DoD + 简要功能设计说明）
 
    #### Deep（+ 完整 L2）
    在 Standard 基础上：
-   - **§6 L2 详细设计** 补齐所有 Story 的完整类图、时序图、触发条件与系统响应（可写在本文档内或引用 story_detail_design.md）
+   - 在各 Feature 的 `story_detail_design.md` 中补齐所有 Story 的完整类图、时序图、触发条件与系统响应
+   - `epic-design.md` 的 §6 始终只保留索引表
 
-5. **写入设计说明书**：输出到 `EPIC_DIR/epic-design.md`（或按项目约定的路径）。
+5. **写入设计说明书与 L2 详细设计**：
+   - `epic-design.md` 输出到 `EPIC_DIR/epic-design.md`（§6 仅为索引表）
+   - 各 Feature 的 `story_detail_design.md` 输出到 `EPIC_DIR/features/FEAT-xxx-.../story_detail_design.md`（按 `.specify/templates/story_detail_design_template.md` 模板）
+   - L2 详细设计**统一写在 `story_detail_design.md`**，不写在 `epic-design.md` 中
 
 6. **更新各 Feature plan.md 的 Story 索引表**：若各 Feature 的 plan.md 中有 Story 索引表，提示更新以对齐本设计说明书中的 Story 拆解。
 
-7. **完成报告**：输出设计说明书路径、当前深度、已生成的章节，并提示下一步：
-   - Lite 完成后：提示 `/speckit.epicdesign --depth=standard` 或 `/speckit.tasks`
-   - Standard 完成后：提示 `/speckit.epicdesign --depth=deep` 或 `/speckit.tasks`
-   - Deep 完成后：提示 `/speckit.tasks`
+7. **完成报告**：输出设计说明书路径、各 Feature 的 story_detail_design.md 路径、当前深度、已生成的章节，并提示下一步：
+   - Lite 完成后：提示 `/speckit.epicdesign --depth=standard` 或进入审批流程
+   - Standard 完成后：提示 `/speckit.epicdesign --depth=deep` 或进入审批流程
+   - Deep 完成后：进入审批流程
+   - **审批流程**：`/speckit.epicanalyze`（跨 Feature 分析）→ `/speckit.gate design-ready`（审批关卡）→ `/speckit.tasks`
 
 核心规则：
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`
 - 图表内容须基于本工程**实际架构与真实代码**，遵循 `.cursor/rules/specify-diagram-requirements.mdc`
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
+- **L2 详细设计统一分文件**：`epic-design.md` 的 §6 仅为索引表，详细设计写在各 Feature 的 `story_detail_design.md` 中

@@ -1,5 +1,14 @@
 ---
 description: "执行实施计划，处理并执行 tasks.md 中定义的所有任务（开发者在 Story 分支执行；严格遵循 EPIC 分支冻结的 spec/plan/epic-design/tasks）"
+handoffs:
+  - label: 实现验证
+    agent: speckit.verify
+    prompt: 验证代码实现是否符合设计方案
+    send: true
+  - label: 完成审批关卡
+    agent: speckit.gate
+    prompt: implement-done 关卡
+    send: false
 ---
 
 ## 用户输入
@@ -31,7 +40,8 @@ $ARGUMENTS
 3. 加载并分析实施上下文：
     - **必填**：读取 tasks.md 获取完整任务列表和执行计划
     - **必填**：读取 plan.md 获取**技术规约与实现约束**
-    - **必填**：读取 **EPIC 软件设计说明书**（`epic-design.md`）获取**架构设计、全景类图、关键时序、Story L2 详细设计**——这是代码实现的**设计事实源**
+    - **必填**：读取 **EPIC 软件设计说明书**（`epic-design.md`）获取**架构设计、全景类图、关键时序、Story 拆解**——这是代码实现的**架构事实源**
+    - **必填**：读取各 Feature 的 **`story_detail_design.md`** 获取 **Story L2 详细设计（类图、时序图、触发条件）**——这是代码实现的**详细设计事实源**
     - **必填**：读取 spec.md 获取 FR/NFR 与验收边界
     - **若存在**：读取 epic-plan.md 获取 EPIC 级技术约束
     - **若存在**：读取 data-model.md 获取实体及关系
@@ -76,7 +86,7 @@ $ARGUMENTS
 6. 按照任务计划执行实施流程：
     - **分阶段执行**：完成一个阶段后再进入下一个阶段
     - **遵循依赖关系**：顺序任务按序执行，并行任务 [P] 可同时执行
-    - **引用设计**：实现每个 Task 时，先读取其**设计引用**指向的 epic-design.md 章节（类图、时序图、L2 设计），确保实现与设计一致
+    - **引用设计**：实现每个 Task 时，先读取其**设计引用**指向的 `epic-design.md` 章节（架构图、全景类图/时序）或 `story_detail_design.md` 的对应 ST-xxx（L2 类图、时序图），确保实现与设计一致
     - **基于文件的协调规则**：影响同一文件的任务必须顺序执行
     - **验证检查点**：每个阶段完成后执行验证项
 
@@ -98,5 +108,9 @@ $ARGUMENTS
     - 检查已实现功能是否匹配 `spec.md` 的 FR/NFR/AC
     - 确认实施过程符合 `plan.md` 的技术规约与 `epic-design.md` 的设计方案
     - 输出最终状态，汇总已完成的工作
+
+10. **关卡检查提示**：
+    - 若 `EPIC_DIR/gate-log.md` 存在且 `tasks-ready` 关卡**未通过**：输出警告（非阻塞，由用户决定是否继续）
+    - 完成后提示下一步：运行 `/speckit.verify` 进行独立验证 → `/speckit.gate implement-done` 通过完成关卡
 
 注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/speckit.tasks` 重新生成任务列表。

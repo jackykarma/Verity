@@ -31,6 +31,8 @@ $ARGUMENTS
 
 **前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行，以保证规约设计输入完整（epic 目标 + 各 feature 需求）。须遵循 `.specify/memory/constitution.md` 的演进式设计原则。
 
+**与 epicuidesign 的关系**：`/speckit.epicuidesign` 是**可选**步骤（并非所有 EPIC 在技术方案阶段都具备完整 UX/视觉稿）。若 EPIC 根下已存在 `ux-design.md`，本命令**应读取**其交互规则与视觉约束，以校准 UX 相关的技术规约（如动效性能预算、UI 线程约束等）。推荐顺序：epicuidesign（若有） → epicplan → 各 Feature plan。
+
 执行步骤：
 
 1. **环境与路径**：从仓库根目录运行（通过 `SPECIFY_EPIC` 或 `$ARGUMENTS` 中的 EPIC 标识定位 EPIC，如 `EPIC-002`）：
@@ -48,6 +50,7 @@ $ARGUMENTS
    - 读取各 `EPIC_DIR/features/*/spec.md`（FR/NFR、依赖、核心实体）
    - 读取 `.specify/memory/constitution.md`（MUST/SHOULD 约束）
    - 读取 `.specify/templates/epic-plan-template.md`（作为结构与输出格式）
+   - 若 `EPIC_DIR/ux-design.md` 存在：读取其交互规则与视觉约束，用于校准 UX 相关技术规约（如动效性能预算、UI 线程约束、组件复杂度等）
    - **分析现有工程代码**：架构分层、模块划分、包组织、现有框架，确保规约与现有工程一致
 
 4. **填充 epic-plan.md**：按 **epic.md、各 feature spec、constitution、现有代码**，填充 epic-plan-template 各章节，写入 `EPIC_PLAN`。必须包含：

@@ -1,10 +1,12 @@
 # L2 Story 详细设计（二层详细设计）
 
-本文档与 **plan.md** 配套使用：当 Plan Level = Deep 时，各 Story 的 L2 详细设计在此文档中编写；plan.md 中通过「Story Detailed Design」章节引用本文档。
+本文档与 **EPIC 软件设计说明书**（`epic-design.md`）配套使用：`epic-design.md` 的 §6 为 L2 索引表，指向本文档中各 Story 的详细设计。本文档由 `/speckit.epicdesign` 在各 Feature 目录下生成，是 `tasks.md` 和 `/speckit.implement` 的**详细设计事实源**。
 
-**使用方式**：必须将本文档与 plan.md 置于同一目录（如同一 Feature 目录下），便于版本管理与评审时一并查看。
+**使用方式**：置于 Feature 目录下（`specs/epics/EPIC-xxx/features/FEAT-xxx/story_detail_design.md`），便于 Feature 级独立评审。
 
-**覆盖要求**：执行 Deep 阶段输出时，必须按 Story 序号（ST-001、ST-002、…）覆盖 plan.md 的 Story Breakdown 中**所有** Story 的详细设计，不得遗漏。
+**覆盖要求**：
+- **Standard 深度**：各 Story 写入概要（需求/DoD + 简要功能设计说明）
+- **Deep 深度**：所有 Story 必须补齐完整详细设计（类图/时序图/触发条件/系统响应），不得遗漏
 
 ---
 

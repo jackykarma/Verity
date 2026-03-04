@@ -32,9 +32,9 @@ description: "Story → Task 落地任务清单模板"
 
 - **依赖**：T???（无则写“无”）
 - **设计引用**：
-  - 设计说明书：`epic-design.md:§4 全景类图/时序图` 或 `epic-design.md:§6.x ST-xxx L2`
-  - 或 Story 级：`story_detail_design.md:ST-xxx:功能设计:类图/时序图`
-  - （若该 Story/模块设计尚未补齐，则写 `N/A` 并在 EPIC 软件设计说明书中补齐）
+  - 架构级：`epic-design.md:§4 全景类图/时序图`
+  - Story 级：`story_detail_design.md:ST-xxx:功能设计:类图/时序图`
+  - （若该 Story 的 L2 设计尚未补齐，则写 `N/A` 并在对应 Feature 的 story_detail_design.md 中补齐）
 - **步骤**：
   - 1) …
   - 2) …

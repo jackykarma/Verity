@@ -227,30 +227,23 @@ flowchart TD
 
 ---
 
-## 六、二层 Story 详细设计（L2）
+## 六、二层 Story 详细设计（L2）索引
 
-> **说明**：各 Story 的 L2 详细设计可写在本文档本节（按 Story 序号分小节），或写在各 Feature 目录下的 **story_detail_design.md** 中。tasks.md 的每个 Task 须明确引用对应设计入口（如 `epic-design.md:ST-001` 或 `story_detail_design.md:ST-001:功能设计:时序图`）。
+> **规则**：L2 详细设计**统一写在各 Feature 目录下的 `story_detail_design.md`** 中（模板见 `.specify/templates/story_detail_design_template.md`），本节仅保留索引表。这样做的目的是：避免设计说明书过于庞大、支持 Feature 级独立评审、便于 tasks/implement 阶段精准引用。
+>
+> tasks.md 的每个 Task 须明确引用 `story_detail_design.md:ST-xxx:功能设计:类图/时序图`。
 
-### 6.1 ST-001 L2 详细设计：[标题]
+### 6.1 L2 设计索引表
 
-#### 需求与 DoD
+| Story ID | 标题 | 所属 Feature | L2 设计位置 | 状态 |
+|----------|------|-------------|-------------|------|
+| ST-001 | [标题] | FEAT-xxx | `features/FEAT-xxx-.../story_detail_design.md:ST-001` | 待设计/已完成 |
+| ST-002 | [标题] | FEAT-xxx | `features/FEAT-xxx-.../story_detail_design.md:ST-002` | 待设计/已完成 |
 
-- **需求描述**：[Story 做什么，关联的 FR/NFR]
-- **DoD（验收标准）**：[ ] 功能验收；[ ] NFR 验收
+### 6.2 L2 覆盖度检查
 
-#### 功能设计（类图 + 时序图）
-
-- **类图**：须完整覆盖本 Story 涉及的关键类与方法签名（可在此绘制或引用 story_detail_design.md）。
-- **时序图**：须覆盖正常流程与关键异常分支（可在此绘制或引用 story_detail_design.md）。
-- **触发条件与系统响应**：简要表格或列表。
-
-### 6.2 ST-002 L2 详细设计：[标题]
-
-（同 6.1 结构）
-
----
-
-*更多 Story 按相同结构追加。若 L2 全部放在各 Feature 的 story_detail_design.md，本节可仅保留索引表，指向各文件。*
+- [ ] 所有 §5 Story 拆解中的 ST-xxx 在索引表中有对应条目
+- [ ] 所有 L2 设计状态为「已完成」（design-ready 关卡前置条件）
 
 ---
 
@@ -262,4 +255,4 @@ flowchart TD
 | 二、1 层架构 | §三 架构约束 | 模块/组件参考 |
 | 四、全景类图/时序 | §三/§五 | 具体 Task 引用 §4 或 §6.x |
 | 五、Story 拆解 | Story 索引表 | 每个 Task 绑定 ST-xxx |
-| 六、L2 详细设计 | — | 设计引用：本 doc §6.x 或 story_detail_design.md:ST-xxx |
+| 六、L2 索引 → story_detail_design.md | — | 设计引用：story_detail_design.md:ST-xxx:功能设计:类图/时序图 |
