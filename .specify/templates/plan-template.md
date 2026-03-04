@@ -4,15 +4,18 @@
 **Feature ID**：FEAT-[编号，例如 001]
 **Feature Version**：v0.1.0（来自 `spec.md`）
 **Plan Version**：v0.1.0
-**当前工作分支**：`[epic/... 或 story/... ]`
+**当前工作分支**：`epic/EPIC-[编号]-[short-name]`（EPIC 统一分支，不为 Feature 单独建分支）
 **Feature 目录**：`specs/epics/EPIC-[编号]-[short-name]/features/FEAT-[编号]-[short-name]/`
 **日期**：[YYYY-MM-DD]
-**输入**：来自 `Feature 目录/spec.md`、EPIC 根下 `epic-plan.md`、EPIC 软件设计说明书（若已产出）
+**输入**：来自 `Feature 目录/spec.md`、EPIC 根下 `epic-plan.md`、`ux-design.md`（若已产出，作为 UI/交互约束输入）、EPIC 软件设计说明书（若已产出）
 
 > **规则**：
 > - Plan 阶段产出本 Feature 的**技术规约与实现约束**。详细架构、类图、时序与 Story 拆解见 **EPIC 软件设计说明书**。
 > - Implement 阶段**不得**擅自改写 Plan 的技术决策；若必须变更，走增量变更流程并提升 Version。
 > - tasks.md 的 Task 拆解须同时遵循 **plan.md 约束** 与 **EPIC 软件设计说明书** 中的设计。
+> - plan.md 分**两阶段**产出：
+>   - **初版**（epic-design 之前）：完成技术规约（§一~§八），Story 索引表留空
+>   - **回填**（epic-design §九 Story 拆解完成后）：回填 Story 索引表，确保与设计说明书一致
 
 ## 变更记录（增量变更）
 

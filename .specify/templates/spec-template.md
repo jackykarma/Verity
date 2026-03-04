@@ -100,9 +100,9 @@
 - **假设**：[若假设不成立会怎样？触发什么降级/回滚？]
 - **约束**：[平台/版本/兼容性/法律合规等]
 
-## 需求追溯（预留，Plan 后填写）
+## 需求追溯（预留，Story 拆解后填写）
 
-> 说明：此表在 Plan 的 Story Breakdown 完成后填写，用于确保 FR/NFR 被 Story 覆盖；Implement 不得擅自改写 FR/NFR。
+> 说明：此表在 **EPIC 软件设计说明书的 Story 拆解（§九）完成后**填写，用于确保 FR/NFR 被 Story 覆盖；Implement 不得擅自改写 FR/NFR。
 
 | FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
 |---|---|---|---|

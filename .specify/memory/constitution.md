@@ -127,6 +127,16 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 - `gate-log.md`（EPIC 级）是 **审批事实源**：记录各阶段关卡的评审结论、冻结产物与版本
 - `/speckit.verify` 产出的验证报告是 **实现↔设计一致性事实源**：记录代码与设计方案的偏离项
 
+### 七.1 分支策略（Branch Strategy）
+
+**每个 EPIC 使用一个统一的 Git 分支，Feature 不单独创建分支。**
+
+- 分支命名：`epic/EPIC-xxx-short-name`，由 `create-new-epic.ps1` 自动创建
+- **不为 Feature 单独创建分支**——Feature 是文档组织单位（目录），而非分支单位
+- 所有 Feature 的 spec/plan/tasks/代码实现均在 EPIC 分支上进行
+- Story/Task 的增量提交均在 EPIC 分支上，按 Task 或逻辑分组粒度提交
+- EPIC 完成后合并回主分支（merge/rebase 由团队约定）
+
 追溯与变更规则：
 
 - 任何“可测试/可验收”的变化，必须最终落到 `spec.md`（FR/NFR/AC/边界）、`plan.md`（预算/测量/降级/回滚）或 EPIC 软件设计说明书中；不得只停留在口头或实现代码里
@@ -150,6 +160,18 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 
 - 能用最小改动满足需求的，不得引入“理想化的大方案”
 - 若必须提高复杂度，须在 plan.md 的“复杂度跟踪”或设计说明书中说明必要性与取舍
+
+快速通道（Fast Track）：
+
+- **单 Feature EPIC**（EPIC 仅含一个 Feature）：
+  - `epic-plan.md` 可省略，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）
+  - `epic-design.md` 仅需 Lite 级
+  - `story_detail_design.md` 视复杂度，简单 Story 可仅写概要
+- **纯修复/小改动**（预估 ≤ 3 人天）：
+  - 可跳过 `epic-plan.md` 和 `ux-design.md`
+  - `epic-design.md` 可精简为仅含 Story 拆解 + 关键类图
+  - `story_detail_design.md` 可跳过
+- 详细裁剪规则与判断流程见 `workflow-overview.md` §四
 
 ## AI 在 Plan 阶段的职责边界
 

@@ -2,7 +2,7 @@
 
 > **定位**：EPIC 需求级别的技术设计方案，面向人类评审与后续 Task 拆解、Implement 阶段的 AI 编码参考。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
 >
-> **输入**：`epic.md`、`epic-plan.md`、各 `features/*/spec.md`、各 `features/*/plan.md`、现有工程代码
+> **输入**：`epic.md`、`epic-plan.md`、各 `features/*/spec.md`、各 `features/*/plan.md`、`ux-design.md`（若已产出）、现有工程代码
 >
 > **图表规范**：样式遵循 `.cursor/rules/mermaid-style-guide.mdc`；**内容与结构**须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 
@@ -544,6 +544,8 @@ sequenceDiagram
 ## 八、技术风险与评估（必须量化）
 
 > **说明**：本节涵盖技术风险、边界异常、算法/功耗/性能/内存/安全/兼容性的**完整评估**。各子节标注「如适用」的，若不适用须标注 N/A 并简述原因。
+>
+> **与 spec.md NFR 的关系**：`spec.md` 的 NFR 定义**验收目标**（如"p95 ≤ 200ms"）；本节基于设计方案进行**技术评估与实测**，验证方案是否满足 NFR 目标。若评估结果超标，须调整设计方案或协商 NFR 目标变更（走 CR 流程）。
 
 ### 8.1 技术风险与消解策略（绑定 Feature/Story）
 
@@ -799,6 +801,8 @@ sequenceDiagram
 ## 九、Story 拆解
 
 > **说明**：Story 拆解采用**混合模式**——以 **User Story（用户功能视角）为主干**，以 **Tech Story（技术准备视角）为补充**，按 Feature 分组组织。每个 Feature 下的 Story 须构成端到端可验证的功能增量。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）story_detail_design.md。
+>
+> **下游同步**：Story 拆解完成后，须回填各 Feature 的 `plan.md`「Story 索引表」和 `spec.md`「需求追溯表」，确保上下游一致。
 
 ### 9.1 拆解策略
 
