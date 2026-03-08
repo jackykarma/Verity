@@ -17,7 +17,7 @@ alwaysApply: false
 
 1. 本 Feature 的 `spec.md` 已完成（Spec Ready）
 2. `epic-plan.md` 已存在（若为单 Feature EPIC 可省略，其内容合并到 plan.md）
-3. 若 EPIC 级 `ux-design.md` 已产出，作为可选输入
+3. 若 EPIC 级 `ux-design.md` 已产出（设计稿解析结果），作为可选输入
 
 ## 脚本
 
@@ -27,7 +27,7 @@ alwaysApply: false
 
 1. **本 Feature 的 `spec.md`**：FR/NFR/依赖/约束/边界场景——方案设计的主要输入
 2. **`epic-plan.md`**（若存在）：EPIC 级技术约束（plan 不得违反）
-3. **`ux-design.md`**（若已产出）：信息架构、交互规则、视觉规范、设计稿索引
+3. **`ux-design.md`**（若已产出）：从设计稿解析出的信息架构、交互规则（页面流转图、逐屏交互规则）、视觉规范（色板、布局标注、组件清单）、设计稿索引；关注「遗漏与待确认」章节
 4. **`.specify/templates/plan-template.md`**：模板结构
 5. **`.specify/memory/constitution.md`**：章程约束（MUST/SHOULD）
 6. **`.cursor/rules/specify-diagram-requirements.mdc`**：确保图表基于本工程实际架构

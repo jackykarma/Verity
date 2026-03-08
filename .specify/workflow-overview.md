@@ -12,7 +12,7 @@ flowchart TD
     Start([需求输入]) --> EpicMd["epic.md<br/>EPIC 规格说明"]
     EpicMd --> SpecMd["各 Feature spec.md<br/>Feature 规格说明"]
     SpecMd --> EpicPlan["epic-plan.md<br/>EPIC 技术规约"]
-    SpecMd --> UxDesign["ux-design.md<br/>UX 设计"]
+    SpecMd --> UxDesign["ux-design.md<br/>设计稿解析"]
     EpicPlan --> PlanMd["各 Feature plan.md 初版<br/>Feature 技术规约"]
     UxDesign -.-> PlanMd
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
@@ -60,7 +60,7 @@ flowchart TD
 | **EPIC 规格** | `epic.md` | 需求边界与 Feature 拆分 | 需求描述 | — |
 | **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC） | `epic.md` | Spec Ready |
 | **EPIC 技术规约** | `epic-plan.md` | EPIC 技术规约事实源 | `epic.md`、各 `spec.md` | — |
-| **UX 设计** | `ux-design.md` | 体验呈现事实源 | `epic.md`、各 `spec.md` | — |
+| **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
 | **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规约事实源 | `spec.md`、`epic-plan.md`、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、`epic-plan.md`、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
@@ -144,8 +144,9 @@ flowchart TD
 
 ## 五、ux-design.md 产出时机
 
-- **前置条件**：所有 Feature 的 `spec.md` 已完成
+- **前置条件**：所有 Feature 的 `spec.md` 已完成；设计素材（图片/Pencil/Figma）已放入 `design/` 目录（无设计素材时进入兜底模式）
 - **并行窗口**：与 `epic-plan.md` 并行产出，或在其之前完成
+- **核心价值**：从设计稿中提取并结构化交互逻辑与视觉规范，与 spec.md 交叉比对标出遗漏，供团队验证 AI 理解的正确性
 - **下游消费**：作为各 Feature `plan.md` 和 `epic-design.md` 的**可选输入**（UI/交互约束）
 - **非技术 Feature 可跳过**：纯后台/数据/SDK 类 Feature 无需 `ux-design.md`
 
@@ -161,7 +162,7 @@ flowchart TD
     Step1["create-new-epic.ps1<br/>创建 EPIC 分支 + 目录"] --> Step2["/aisdd.epicspec<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
     Step2 --> Step3["/aisdd.featurespec<br/>创建 Feature 目录 + 产出 spec.md<br/>（逐个 Feature 执行）"]
     Step3 --> Step4["/aisdd.epicplan<br/>产出 epic-plan.md"]
-    Step3 --> Step5["/aisdd.epicuidesign<br/>产出 ux-design.md"]
+    Step3 --> Step5["/aisdd.epicuidesign<br/>解析设计稿 → ux-design.md"]
     Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
     Step5 -.-> Step6
     Step6 --> Step7["/aisdd.epicdesign<br/>key → diagram（骨架）<br/>→ diagram FEAT-xxx（按 Feature）<br/>→ story → l2"]
@@ -180,7 +181,7 @@ flowchart TD
 | 2 | `/aisdd.epicspec` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
 | 3 | `/aisdd.featurespec` | Feature 目录 + `spec.md`（填充内容） | 每个 Feature 一次 |
 | 4 | `/aisdd.epicplan` | `epic-plan.md` | 每个 EPIC 一次 |
-| 5 | `/aisdd.epicuidesign` | `ux-design.md` | 每个 EPIC 一次（可选，与步骤 4 并行） |
+| 5 | `/aisdd.epicuidesign` | `ux-design.md`（解析设计稿 → 结构化交互/视觉规范） | 每个 EPIC 一次（可选，与步骤 4 并行） |
 | 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `diagram` 骨架 / `diagram FEAT-xxx` 按 Feature / `story` / `l2`） | 分阶段；建议 `diagram` 先无范围出骨架，再 `diagram FEAT-001`、`FEAT-002`… 逐个 check |
 | 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（含回填 plan/spec） | 每个 Feature 一次 |

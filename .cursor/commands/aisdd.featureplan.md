@@ -29,7 +29,7 @@ $ARGUMENTS
 
 **plan.md 的定位**：Feature 级技术约束与实现规范。详细架构设计（0 层/1 层架构图、全景类图、关键时序图、Story 拆解、L2 详细设计）由后续 `/aisdd.epicdesign` 阶段在 EPIC 级统一产出。
 
-**方案设计的输入（必须考虑）**：**spec 需求**（spec.md）与 **EPIC 级 epic uidesign**（`specs/epics/<EPIC>/ux-design.md` + Figma 链接 / `design/` 下截图或 HTML）。设计稿在 ux-design.md 的「设计稿索引」中登记。若 epic uidesign 未执行则仅以 spec 为输入。
+**方案设计的输入（必须考虑）**：**spec 需求**（spec.md）与 **EPIC 级设计稿解析结果**（`specs/epics/<EPIC>/ux-design.md`，由 `/aisdd.epicuidesign` 从交互稿/视觉稿中提取的结构化交互逻辑与视觉规范）。若 epicuidesign 未执行则仅以 spec 为输入。
 
 建议：在 **EPIC 分支** 执行，并确保已通过 `SPECIFY_FEATURE` 选中目标 Feature。
 
@@ -44,7 +44,7 @@ $ARGUMENTS
 2. **加载上下文**：
    - 读取 `FEATURE_SPEC`（提取：Epic/Feature 元信息、FR/NFR、验收与边界场景、依赖）——**spec 需求**为方案设计的主要输入。
    - 若 `EPIC_PLAN` 存在（**EPIC 级** epic-plan.md）：读取 epic-plan.md，提取 **EPIC 级技术约束与规约**；技术规约须在其约束下展开，不得违反 EPIC 规约。
-   - 若 `UX_DESIGN` 存在：读取 ux-design.md，提取信息架构、交互规则、视觉规范、设计稿索引（按所属 Feature 过滤）。
+   - 若 `UX_DESIGN` 存在：读取 ux-design.md（设计稿解析结果），提取信息架构、交互规则（含页面流转图、逐屏交互规则）、视觉规范（色板、布局标注、组件清单）、设计稿索引（按所属 Feature 过滤）；关注「遗漏与待确认」章节中与本 Feature 相关的未覆盖场景。
    - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
    - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
    - 读取 `.cursor/rules/specify-diagram-requirements.mdc`，确保图表基于本工程实际架构
