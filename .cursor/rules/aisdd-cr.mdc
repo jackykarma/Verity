@@ -1,0 +1,123 @@
+---
+description: "当用户输入 /aisdd.cr 时触发：创建 CR、自动影响分析、生成下游更新清单并分步执行更新"
+alwaysApply: false
+---
+
+# /aisdd.cr — 变更请求（CR）
+
+## 触发
+
+用户输入 `/aisdd.cr`。作用于当前 EPIC。
+
+## 目的
+
+为中途变更（新增/修改/删除需求，或技术方案变更）提供端到端自动化——从影响分析到生成 CR 文件，再到分步更新下游产物。
+
+## 模式
+
+| 模式 | 参数 | 行为 |
+|------|------|------|
+| 交互式（默认） | 无参数 | 收集描述 → 影响分析 → 生成 CR → 分步执行更新 |
+| 仅分析 | `analyze` | 仅影响分析 + 更新清单，不写文件 |
+| 执行已有 CR | `apply CR-xxx` | 读取已有 CR，执行下游更新 |
+| 帮助 | `-h` | 输出参数说明 |
+
+## 执行流程
+
+### Phase 1：环境准备
+
+1. 确认 EPIC 目录（通过参数或自动检测）
+2. 验证前置条件：至少有 `epic.md` 和一个 Feature 的 `spec.md`
+3. 若参数为 `-h`：输出帮助信息后终止
+
+### Phase 2：收集变更描述
+
+1. 从用户输入提取变更描述；若不足则交互式追问：
+   - 改了什么（What）
+   - 为什么改（Why）
+   - 哪些 Feature 受影响
+
+### Phase 3：影响分析
+
+1. 加载当前 EPIC 全部产物（epic.md、各 spec.md、plan.md、epic-plan.md、epic-design.md、ux-design.md、tasks.md）
+2. 判断变更类型：
+   - **需求类**：Scope / FR / NFR / AC / 边界场景 新增/修改/删除
+   - **交互类**：流程 / 状态 / 反馈 / 视觉 / 动效
+   - **技术方案类**：架构 / 接口 / 实现决策 / 契约
+   - **混合**：跨类型
+3. 定位受影响产物与章节：
+   - 逐一检查 spec → ux-design → plan → epic-plan → epic-design → story_detail_design → tasks
+   - 参考 `workflow-overview.md §7.3 变更影响速查表`
+4. 风险评估：性能 / 兼容性 / 工期 / 依赖
+
+### Phase 4：生成 CR 文件
+
+1. 基于 `.specify/templates/change-request-template.md` 模板
+2. 文件名：`CR-[YYYYMMDD]-[短编号].md`，存放在 EPIC 目录下
+3. 自动填充：
+   - §1 变更内容（从描述提取）
+   - §3 影响分析（影响范围 + 下游更新清单）
+4. 用户补充：
+   - §2 变更原因与证据
+   - §3.2 风险与回滚策略
+
+### Phase 5：输出影响分析结果
+
+无论哪种模式，都输出：
+
+```
+## 影响分析结果
+
+**变更类型**：需求类 / 技术方案类 / 混合
+**受影响 Feature**：FEAT-001、FEAT-003
+**下游更新链路**（执行顺序）：
+
+1. [ ] spec.md — FR-003 修改、AC-005 新增
+2. [ ] ux-design.md — 流程 Flow-002 调整
+3. [ ] plan.md — §三 契约更新
+4. [ ] epic-design.md — §六.2 方案流程图
+5. [ ] tasks.md — 重新生成受影响 Story 的 Task
+```
+
+`analyze` 模式到此结束。
+
+### Phase 6：分步执行下游更新
+
+1. **提示确认**：展示下游更新清单，等待用户确认
+2. **按变更类型走流程**（参考 `workflow-overview.md`）：
+   - **需求类** → 7.1 流程：spec → ux-design → plan → epic-design → story_detail_design → tasks
+   - **技术方案类** → 7.2 流程：检查 NFR → plan/epic-plan → epic-design → story_detail_design → Story 拆解 → tasks
+3. **每步更新后**：
+   - 更新文件的变更记录表（Version +0.0.1）
+   - 输出已更新的文件与章节摘要
+   - **等待用户 check 确认后再继续下一步**（分步确认，不一次性全改）
+
+### Phase 7：完成报告
+
+```
+## CR 完成报告
+
+**CR 文件**：specs/epics/EPIC-xxx/CR-20260308-001.md
+**已更新文件**：
+- specs/epics/EPIC-xxx/features/FEAT-001/spec.md（v0.2.1）
+- specs/epics/EPIC-xxx/features/FEAT-001/plan.md（v0.1.3）
+- specs/epics/EPIC-xxx/features/FEAT-001/tasks.md（v0.1.2）
+
+**建议**：运行 `/aisdd.verify` 确认变更后各产物无矛盾
+```
+
+## 核心规则
+
+| 规则 | 说明 |
+|------|------|
+| 精准更新 | 只更新 CR 影响分析中列出的产物章节，不扩散修改 |
+| 版本追踪 | 每份更新的文档须更新 Version 与变更记录表 |
+| 分步确认 | 每步更新后提示用户 check，不一次性全部改完 |
+| 数据一致 | 更新后各产物之间的引用关系须保持一致 |
+| 变更闭环 | CR → 影响分析 → 增量更新 → 验证，形成完整闭环 |
+
+## 边界
+
+- 若变更规模过大（影响超过 3 个 Feature 或需重构架构），建议新建 EPIC 而非 CR
+- 若变更导致 Story 拆解结构性调整，提示用户考虑重新运行 `/aisdd.epicdesign story`
+- CR 仅记录变更元信息和影响分析，实际产物更新由本命令分步执行

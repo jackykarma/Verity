@@ -37,6 +37,20 @@ flowchart TD
 
 **说明**：实线箭头表示顺序依赖，虚线箭头表示可选输入。`ux-design.md` 与 `epic-plan.md` 可并行产出（均依赖所有 `spec.md` 完成）。
 
+### 新需求如何走流程
+
+新需求从进入到交付，按上图顺序走一遍即可：
+
+1. **需求输入** → 创建 EPIC 分支与目录，产出 `epic.md`（EPIC 规格 + Feature 拆分）
+2. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
+3. **技术规约与 UX** → 产出 `epic-plan.md`、可选 `ux-design.md`
+4. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版
+5. **设计说明书** → 产出 `epic-design.md` 及 key-func-design、key-diagram、各 `story_detail_design.md`
+6. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表与 plan §一互校）
+7. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify` 做实现↔设计一致性验证后交付
+
+具体命令与产出物对应关系见**六、命令执行顺序**；各阶段事实源与关卡见下表。
+
 ---
 
 ## 二、各阶段产出物与事实源
@@ -150,7 +164,7 @@ flowchart TD
     Step3 --> Step5["/aisdd.epicuidesign<br/>产出 ux-design.md"]
     Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
     Step5 -.-> Step6
-    Step6 --> Step7["/aisdd.epicdesign<br/>产出 epic-design.md<br/>+ key-func-design.md<br/>+ key-diagram.md<br/>+ story_detail_design.md"]
+    Step6 --> Step7["/aisdd.epicdesign<br/>key → diagram（骨架）<br/>→ diagram FEAT-xxx（按 Feature）<br/>→ story → l2"]
     Step7 --> Step8["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（含回填 plan/spec）"]
     Step8 --> Step9["/aisdd.implement<br/>按 Task 逐个实现代码"]
     Step9 --> Step10["/aisdd.verify<br/>实现↔设计一致性验证"]
@@ -168,16 +182,28 @@ flowchart TD
 | 4 | `/aisdd.epicplan` | `epic-plan.md` | 每个 EPIC 一次 |
 | 5 | `/aisdd.epicuidesign` | `ux-design.md` | 每个 EPIC 一次（可选，与步骤 4 并行） |
 | 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
-| 7 | `/aisdd.epicdesign` | `epic-design.md` + `key-func-design.md` + `key-diagram.md` + 各 `story_detail_design.md` | 每个 EPIC 一次（分 Gate 逐阶段） |
+| 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `diagram` 骨架 / `diagram FEAT-xxx` 按 Feature / `story` / `l2`） | 分阶段；建议 `diagram` 先无范围出骨架，再 `diagram FEAT-001`、`FEAT-002`… 逐个 check |
 | 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（含回填 plan/spec） | 每个 Feature 一次 |
 | 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | 10 | `/aisdd.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
+| — | `/aisdd.cr` | CR 文件 + 下游产物增量更新 | 变更时按需（自动影响分析 → 生成 CR → 分步更新） |
 
 ---
 
 ## 七、变更管理
 
-任何变更通过 **Change Request（CR）** 发起，流程见 `change-request-template.md`。
+### 变更需求如何走流程
+
+任何**变更**（含**中途新增需求**——追加 Scope/FR/新 Feature、以及修改或删除已有 FR/NFR/AC、交互/视觉、技术方案等）统一走 **Change Request（CR）**，再按类型走下游更新。
+
+**推荐使用 `/aisdd.cr` 命令**自动化执行以下流程（自动影响分析 → 生成 CR → 分步更新下游产物）：
+
+1. **创建 CR**：运行 `/aisdd.cr`（或手动使用模板 [change-request-template.md](./templates/change-request-template.md)），填写「变更内容」「变更原因与证据」「影响分析」「下游更新清单」
+2. **CR 评审**：结论为通过 / 有条件通过 / 不通过
+3. **按类型走流程**：
+   - **需求类变更**（Scope/FR/NFR/AC/边界）→ 走 [7.1 需求变更流程](#71-需求变更流程)：从更新 `spec.md` 起，自顶向下检查并更新 ux-design → plan → epic-design → story_detail_design → tasks
+   - **技术方案类变更**（架构/接口/实现决策）→ 走 [7.2 技术方案变更流程](#72-技术方案变更流程)：从更新 `plan.md`/`epic-plan.md` 起，自中间向两端扩展，必要时先协商 NFR 再更新设计说明书与 tasks
+4. **执行下游更新清单**：只更新 CR 影响分析中列出的产物，每份文档更新后填写 Version 与变更记录表（`/aisdd.cr` 会分步执行并逐步确认）
 
 核心规则：
 - 变更须有影响分析 → 增量更新的闭环
