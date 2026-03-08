@@ -20,7 +20,7 @@ alwaysApply: false
 | 文件 | 对应章节 | 内容 |
 |------|----------|------|
 | `epic-design.md` | §1~§2、§5 + 各章节摘要/引用 | 设计总览（零层/一层架构、Story 拆解、子文件引用） |
-| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计策略、方案流程图、Feature 流程图集 |
+| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计策略、方案流程图、核心调用链时序图、Feature 流程图集 |
 | `key-diagram.md` | §4 | 全景骨架类图、Feature 子类图（含方法签名）、关键时序图 |
 | `features/FEAT-xxx/story_detail_design.md` | §6 | 各 Story 落码级 L2 详细设计 |
 
@@ -32,8 +32,8 @@ alwaysApply: false
 |------|----------|----------|------|
 | 无参数（默认） | §1~§2 填充；§3~§6 占位 | `epic-design.md`（完整章节骨架） | 首次调用，建立完整章节结构 + 零层/一层架构 |
 | `arch` | §1~§2 | `epic-design.md` §1~§2 | 重新生成零层/一层架构（覆盖已有内容） |
-| `key` | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计决策、方案流程图 |
-| `diagram` | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 全景类图、Feature 子类图、关键时序图 |
+| `key` | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计决策、方案流程图、核心调用链时序图 |
+| `diagram` | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 无范围：全景骨架类图；`diagram FEAT-001`：该 Feature 的子类图 + 完整时序图 |
 | `story` | §5 | `epic-design.md` §5 | Story 列表、依赖关系图、FR/NFR 覆盖矩阵 |
 | `l2` | §6 | 各 `story_detail_design.md` + `epic-design.md` §6 索引表 | 按 Story 产出 L2 详细设计 |
 | `all` | §1~§5 一次性 | 上述对应文件 | 适用于小 EPIC 或上下文窗口充裕时 |
@@ -46,23 +46,24 @@ alwaysApply: false
 
   (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充零层/一层架构（§1~§2），其余章节占位
   arch       重新生成零层/一层架构（§1~§2）
-  key        产出关键功能疑难设计（§3）→ key-func-design.md
-  diagram    产出全景类图与关键时序（§4）→ key-diagram.md
+  key        产出关键功能疑难设计（§3）→ key-func-design.md（含流程图 + 核心调用链时序图）
+  diagram    产出全景骨架类图（§4）→ key-diagram.md §7.2
+             可指定范围：diagram FEAT-001（该 Feature 的子类图 + 完整时序图）
   story      产出 Story 拆解（§5）
   l2         产出 L2 详细设计（§6）→ 各 Feature 的 story_detail_design.md
              可指定范围：l2 FEAT-001 或 l2 ST-001
   all        一次性产出 §1~§5（不含 l2），适用于小 EPIC
   -h         显示本帮助信息
 
-推荐顺序：(默认) → key → diagram → story → l2
+推荐顺序：(默认) → key → diagram → diagram FEAT-001 → diagram FEAT-002 → … → story → l2
 ```
 
 **默认调用行为**：首次执行 `/aisdd.epicdesign` 时，`epic-design.md` 输出**全部 §1~§6 章节标题**，其中 §1~§2 填充实际内容，§3~§6 仅保留标题与占位提示（如「待填充，运行 `/aisdd.epicdesign key` 产出」），确保后续章节填充时不会出现结构错乱。
 
 **使用建议**：
-- 复杂 EPIC（多 Feature）：默认 → `key` → `diagram` → `story` → `l2` 逐步产出，每步确认后继续
+- 复杂 EPIC（多 Feature）：默认 → `key` → `diagram`（骨架）→ `diagram FEAT-001` → `diagram FEAT-002` → … → `story` → `l2`，每个 Feature 的图表输出后 check 确认再继续
 - 简单 EPIC（单 Feature/小改动）：直接 `all`，`l2` 按需
-- `l2` 可指定范围：如 `l2 FEAT-001` 或 `l2 ST-001`
+- `diagram` 和 `l2` 均可指定范围：如 `diagram FEAT-001`、`l2 FEAT-001` 或 `l2 ST-001`
 
 ## 前置条件
 
@@ -131,9 +132,10 @@ alwaysApply: false
 
 根据已完成的章节提示下一步：
 - 默认（arch）完成 → 提示继续 `key`（关键设计）
-- `key` 完成 → 提示继续 `diagram`（类图与时序）
-- `diagram` 完成 → 提示继续 `story`（Story 拆解）
-- `story` 完成 → 提示继续 `l2`（L2 详细设计），并提示更新各 Feature `plan.md` Story 索引表
+- `key` 完成 → 提示继续 `diagram`（全景骨架类图）
+- `diagram`（无范围）完成 → 提示继续 `diagram FEAT-001`（逐个 Feature 的子类图 + 完整时序图）
+- `diagram FEAT-xxx` 完成 → 提示继续下一个 Feature 的 `diagram FEAT-yyy`；全部 Feature 完成后提示继续 `story`
+- `story` 完成 → 提示继续 `l2`（L2 详细设计）
 - `l2` 完成 → 所有章节就绪，提示：
   1. 运行 `/aisdd.epicanalyze`（跨 Feature 一致性与质量分析）
   2. 运行 `/aisdd.gate design-ready`（审批关卡）
