@@ -46,7 +46,7 @@ $ARGUMENTS
 2. **前置条件检查（所有 Feature spec 已就绪）**：遍历 `EPIC_DIR/features/` 下每个**子目录**，若某子目录存在且其中**无 `spec.md`**，则**终止**并提示：「须在**所有** Feature 的 spec 输出后再运行 /aisdd.epicplan。以下 Feature 目录尚未具备 spec：\[列出缺 spec 的目录名\]。」
 
 3. **加载上下文**：
-   - 读取 `EPIC_DIR/epic.md`（范围、Feature 拆分、通用能力、跨 Feature 技术策略、EPIC-FR/NFR）
+   - 读取 `EPIC_DIR/epic.md`（范围、Feature 拆分、跨 Feature 关注点与 Capability 决策、跨 Feature 技术策略、EPIC 完成条件）
    - 读取各 `EPIC_DIR/features/*/spec.md`（FR/NFR、依赖、核心实体）
    - 读取 `.specify/memory/constitution.md`（MUST/SHOULD 约束）
    - 读取 `.specify/templates/epic-plan-template.md`（作为结构与输出格式）
@@ -66,6 +66,6 @@ $ARGUMENTS
    - **安全与合规约束**（如适用）
    - **变更记录**：初版写入一条
 
-5. **与 epic.md 的「跨 Feature 技术策略」对齐**：epic-plan 中的共享能力、技术约束应与 epic.md 的「跨 Feature 技术策略」一致；若 epic.md 该节尚为占位，可根据 epic-plan 输出建议其内容。
+5. **与 epic.md 的「跨 Feature 技术策略」对齐**：epic-plan 中的共享能力、技术约束应与 epic.md 的轻量登记一致，并将详细约束补齐到 epic-plan；若 epic.md 该节尚为占位，可根据 epic-plan 输出建议其内容。
 
 6. **完成报告**：输出 epic-plan.md 路径（EPIC 根），并提示下一步：对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/aisdd.featureplan`（plan 将读取 EPIC_PLAN 并在其约束下编写）。

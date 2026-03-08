@@ -13,9 +13,7 @@
 > - Plan 阶段产出本 Feature 的**技术规约与实现约束**。详细架构、类图、时序与 Story 拆解见 **EPIC 软件设计说明书**。
 > - Implement 阶段**不得**擅自改写 Plan 的技术决策；若必须变更，走增量变更流程并提升 Version。
 > - tasks.md 的 Task 拆解须同时遵循 **plan.md 约束** 与 **EPIC 软件设计说明书** 中的设计。
-> - plan.md 分**两阶段**产出：
->   - **初版**（epic-design 之前）：完成技术规约（§一~§八），Story 索引表留空
->   - **回填**（epic-design §十二 Story 拆解完成后）：回填 Story 索引表，确保与设计说明书一致
+> - plan.md 在 epic-design **之前**一次性产出技术规约（§一~§七）；§一（一致性互校）在 epic-design 完成后回填。
 
 ## 变更记录（增量变更）
 
@@ -207,40 +205,6 @@ specs/[###-feature-short-name]/
 ├── quickstart.md               # 可选：快速验证/联调指南
 └── contracts/                  # 可选：接口契约
 ```
-
-## 八、源代码结构（代码库根目录）
-
-<!--
-  需执行操作：将下方的占位目录树替换为该功能的具体目录结构。
-  删除未使用的选项，并使用实际路径扩展选定的结构（例如：apps/admin、packages/something）。
--->
-
-```text
-# 选项1：单项目（默认）
-src/
-tests/
-
-# 选项2：Web 应用
-backend/
-frontend/
-
-# 选项3：移动应用 + 接口
-api/
-android/ 或 ios/
-```
-
-**结构决策**：[记录选定的结构，并引用上述捕获的实际目录]
-
----
-
-## Story 索引表（与 EPIC 软件设计说明书对应）
-
-> **说明**：Story 的完整拆解、依赖关系与 L2 详细设计见 **EPIC 软件设计说明书**（及可选 `story_detail_design.md`）。本表仅作索引，便于 tasks.md 引用。
-
-| Story ID | 标题 | 类型 | 设计说明书中的位置 |
-|----------|------|------|---------------------|
-| ST-001 | [标题] | Functional / Design-Enabler / Infrastructure / Optimization | [例如：设计说明书 §Story 拆解 - ST-001；L2 见 story_detail_design.md:ST-001] |
-| ST-002 | [标题] | … | … |
 
 ---
 

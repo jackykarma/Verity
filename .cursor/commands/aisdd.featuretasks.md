@@ -33,7 +33,7 @@ $ARGUMENTS
 2. **加载设计文档**：从 FEATURE_DIR 及 EPIC 目录中读取以下文档：
     - **必需文档**：
         - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§5 Story 列表、依赖关系、FR/NFR 覆盖矩阵）、**L2 详细设计**（§6）、**全景类图与关键时序**（§4）、**架构图**（§1、§2）
-        - plan.md（**技术规约与实现约束**：架构约束、数据模型、接口规范、项目结构、源代码结构）
+        - plan.md（**技术规约与实现约束**：架构约束、数据模型、接口规范、项目结构）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
     - **可选文档**：epic-plan.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
     - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。

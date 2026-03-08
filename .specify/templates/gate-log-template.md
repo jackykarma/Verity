@@ -14,7 +14,7 @@
 |------|----------|----------|----------|
 | **Spec Ready** | 所有 Feature `spec.md` 完成 | 各 `spec.md` | FR/NFR 可测试、边界场景完整、依赖已识别 |
 | **Plan Ready** | 所有 Feature `plan.md` 初版完成 | 各 `plan.md`、`epic-plan.md` | 技术规约完整、架构约束明确、接口契约可联调 |
-| **Design Ready** | EPIC 设计说明书 + L2 设计完成 | `epic-design.md`、各 `story_detail_design.md` | Story 拆解完整、类图/时序图端到端完整、plan.md/spec.md 已回填 |
+| **Design Ready** | EPIC 设计说明书 + L2 设计完成 | `epic-design.md`、各 `story_detail_design.md` | Story 拆解完整、类图/时序图端到端完整、plan.md §一互校 + spec.md 追溯表已回填 |
 | **Implement Ready** | 所有 `tasks.md` 拆解完成 | 各 `tasks.md` | Task 可执行、设计引用完整、合规性检查通过 |
 | **Verify Pass** | 实现↔设计一致性验证通过 | 代码 + 验证报告 | 所有 Story 验证通过、NFR 指标达标、无 P0/P1 遗留 |
 

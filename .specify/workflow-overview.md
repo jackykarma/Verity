@@ -18,7 +18,7 @@ flowchart TD
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
     UxDesign -.-> EpicDesign
     EpicDesign --> StoryDesign["story_detail_design.md<br/>L2 Story 详细设计"]
-    EpicDesign --> Backfill["回填 plan.md 索引表<br/>回填 spec.md 追溯表"]
+    EpicDesign --> Backfill["回填 plan.md §一互校<br/>回填 spec.md 追溯表"]
     StoryDesign --> TasksMd["tasks.md<br/>Task 拆解"]
     Backfill --> TasksMd
     TasksMd --> Implement["Implement<br/>代码实现"]
@@ -53,7 +53,7 @@ flowchart TD
 | **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规约事实源 | `spec.md`、`epic-plan.md`、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、`epic-plan.md`、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
-| **回填** | 各 `plan.md` Story 索引表、各 `spec.md` 需求追溯表 | — | `epic-design.md` §十二 | — |
+| **回填** | 各 `plan.md` §一互校、各 `spec.md` 需求追溯表 | — | `epic-design.md` §十二 | — |
 | **Task 拆解** | 各 `tasks.md` | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |
 | **实现** | 代码 | — | `tasks.md` | Implement Ready |
 | **验证** | 验证报告 | 实现↔设计一致性事实源 | 代码、设计文档 | Verify Pass |
@@ -155,7 +155,7 @@ flowchart TD
     Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
     Step5 -.-> Step6
     Step6 --> Step7["/aisdd.epicdesign<br/>产出 epic-design.md<br/>+ key-func-design.md<br/>+ key-diagram.md<br/>+ story_detail_design.md"]
-    Step7 --> Step8["/aisdd.backfill<br/>回填 plan.md Story 索引表<br/>回填 spec.md 需求追溯表<br/>回填 plan.md §一 互校"]
+    Step7 --> Step8["/aisdd.backfill<br/>回填 plan.md §一互校<br/>回填 spec.md 需求追溯表"]
     Step8 --> Step9["/aisdd.featuretasks<br/>产出各 Feature tasks.md"]
     Step9 --> Step10["/aisdd.implement<br/>按 Task 逐个实现代码"]
     Step10 --> Step11["/aisdd.verify<br/>实现↔设计一致性验证"]
@@ -175,7 +175,7 @@ flowchart TD
 | 5 | `/aisdd.epicuidesign` | `ux-design.md` | 每个 EPIC 一次（可选，与步骤 4 并行） |
 | 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + `key-func-design.md` + `key-diagram.md` + 各 `story_detail_design.md` | 每个 EPIC 一次（分 Gate 逐阶段） |
-| 8 | `/aisdd.backfill` | `plan.md` Story 索引表 + `spec.md` 需求追溯表 + `plan.md` §一互校 | Gate 5 通过后一次 |
+| 8 | `/aisdd.backfill` | `plan.md` §一互校 + `spec.md` 需求追溯表 | Gate 5 通过后一次 |
 | 9 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 每个 Feature 一次 |
 | 10 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | 11 | `/aisdd.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
@@ -248,7 +248,7 @@ flowchart TD
     UpdatePlan --> UpdateDesign["更新 epic-design.md<br/>架构图/类图/时序图"]
     UpdateDesign --> UpdateL2["更新 story_detail_design.md"]
     UpdateL2 --> CheckStory{Story 拆解需调整?}
-    CheckStory -->|是| UpdateStory["调整 Story 拆解<br/>回填 plan.md 索引 + spec.md 追溯"]
+    CheckStory -->|是| UpdateStory["调整 Story 拆解<br/>回填 spec.md 追溯"]
     CheckStory -->|否| UpdateTasks["更新 tasks.md<br/>调整受影响的 Task"]
     UpdateStory --> UpdateTasks
     UpdateTasks --> Continue([继续实现])

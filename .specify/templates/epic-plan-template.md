@@ -92,7 +92,7 @@
 | 共享能力名称 | 类型 | Owner Feature | 消费方 Feature | 设计状态 |
 |-------------|------|---------------|----------------|----------|
 | [例如：UI 基础框架] | Infrastructure | FEAT-001 | FEAT-002, FEAT-003 | 待设计/已设计 |
-| [例如：统一错误处理] | Enabler | FEAT-001 | All | 待设计 |
+| [例如：统一错误处理] | Infrastructure | FEAT-001 | All | 待设计 |
 
 **Feature Plan 执行顺序**：[根据依赖关系，Owner 必须先完成 plan]
 

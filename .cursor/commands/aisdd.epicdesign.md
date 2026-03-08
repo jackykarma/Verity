@@ -114,14 +114,12 @@ $ARGUMENTS
 
 5. **子文件引用规则**：当 §3、§4、§6 内容在子文件中时，`epic-design.md` 对应章节仅保留**摘要 + 引用链接**（见 `.cursor/rules/aisdd-epicdesign.mdc` 中的示例）。
 
-6. **更新各 Feature plan.md 的 Story 索引表**：在 story 或 l2 阶段后，若 plan.md 中有 Story 索引表，提示更新以对齐设计说明书。
-
-7. **完成报告**：输出本次产出的文件路径、对应章节，并提示下一步：
+6. **完成报告**：输出本次产出的文件路径、对应章节，并提示下一步：
    - 默认/arch 完成 → 提示继续 `key`
    - key 完成 → 提示继续 `diagram`
    - diagram 完成 → 提示继续 `story`
-   - story 完成 → 提示继续 `l2`，并提示更新 plan.md Story 索引表
-   - l2 完成 → 提示：`/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`
+   - story 完成 → 提示继续 `l2`
+   - l2 完成 → 提示：`/aisdd.backfill`（回填 plan.md §一互校 + spec.md 需求追溯表）→ `/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`
 
 核心规则：
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`

@@ -43,7 +43,7 @@ $ARGUMENTS
 
 ### 2. 加载 EPIC 级产物
 
-- `epic.md`：范围、Feature 拆分、通用能力、跨 Feature 技术策略、整体 FR/NFR、EPIC 验收
+- `epic.md`：范围、Feature 拆分、跨 Feature 关注点与 Capability 决策、跨 Feature 技术策略、EPIC 完成条件
 - `epic-plan.md`：技术栈、分层约束、NFR 预算框架、共享能力识别
 - `epic-design.md`：0/1 层架构、全景类图/时序、Story 拆解、L2 索引
 - `ux-design.md`（若存在）：信息架构、交互说明、设计稿索引
@@ -54,7 +54,7 @@ $ARGUMENTS
 
 对每个 Feature 目录，加载（按存在性渐进）：
 - `spec.md`：FR/NFR/AC/依赖/核心实体
-- `plan.md`：技术规约/接口契约/数据模型/Story 索引表
+- `plan.md`：技术规约/接口契约/数据模型
 - `tasks.md`：Task 清单/设计引用
 - `story_detail_design.md`：L2 详细设计
 
@@ -78,7 +78,7 @@ $ARGUMENTS
 
 - 各 Feature spec.md 的 NFR 指标之和是否超出 epic-plan.md §7 的 EPIC 级预算上限
 - 性能、功耗、内存预算是否有 Feature 未明确分配
-- epic.md EPIC-NFR 与各 Feature NFR 是否对齐
+- 若 epic.md 记录了完成约束，是否与 epic-plan.md 和各 Feature 的验收口径一致
 
 #### D. 共享能力完整性
 
@@ -89,7 +89,7 @@ $ARGUMENTS
 
 #### E. Story 依赖与覆盖完整性
 
-- epic-design.md §5 的 Story 拆解与各 Feature plan.md 的 Story 索引表是否一致
+- epic-design.md 的 Story 拆解是否完整覆盖各 Feature 的 spec.md 需求
 - Story 间依赖关系是否有环
 - FR/NFR 覆盖矩阵是否有遗漏（某 FR/NFR 无 Story 覆盖）
 - 所有 Story 是否在 story_detail_design.md 中有对应 L2 设计
@@ -98,7 +98,7 @@ $ARGUMENTS
 #### F. 架构一致性
 
 - 各 Feature plan.md §3 的架构约束是否与 epic-plan.md §2 一致
-- 各 Feature plan.md §8 的源代码结构是否无冲突（如包名/模块名冲突）
+- epic-design §五 一层架构中各模块/组件归属是否无冲突（如包名/模块名冲突）
 - 全景类图中的类与各 story_detail_design.md 中的类是否一致
 - 依赖方向是否符合 epic-plan.md §2 分层约束
 

@@ -79,7 +79,7 @@ description: "Story → Task 落地任务清单模板"
   - **依赖**：无
   - **步骤**：
     - 1) 确认 `Feature Version`、`Plan Version` 已填写
-    - 2) 确认 EPIC 软件设计说明书中的 Story 拆解已完成（ST-xxx），且 plan.md 的 Story 索引表已对齐
+    - 2) 确认 EPIC 软件设计说明书中的 Story 拆解已完成（ST-xxx）
   - **验证**：
     - [ ] tasks.md 中 `Plan Version` 与 plan.md 一致
   - **产物**：`spec.md`、`plan.md`、`tasks.md`

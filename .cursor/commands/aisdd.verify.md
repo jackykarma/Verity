@@ -99,7 +99,7 @@ $ARGUMENTS
 
 - 线程/并发模型是否符合 plan.md §3（如 IO 是否在 Dispatchers.IO）
 - 日志/可观测性是否符合 epic-plan.md §9（如有）
-- 命名规范是否与 plan.md §8 源代码结构约定一致
+- 命名规范是否与 epic-design §五 一层架构中的模块/组件归属一致
 
 ### 5. 生成验证报告
 

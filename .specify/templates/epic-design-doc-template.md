@@ -965,7 +965,7 @@ erDiagram
 
 > **说明**：Story 拆解采用**混合模式**——以 **User Story（用户功能视角）为主干**，以 **Tech Story（技术准备视角）为补充**，按 Feature 分组组织。每个 Feature 下的 Story 须构成端到端可验证的功能增量。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）story_detail_design.md。
 >
-> **下游同步**：Story 拆解完成后，须回填各 Feature 的 `plan.md`「Story 索引表」和 `spec.md`「需求追溯表」，确保上下游一致。
+> **下游同步**：Story 拆解完成后，须通过 `/aisdd.backfill` 回填各 Feature 的 `plan.md` §一（一致性互校）和 `spec.md`「需求追溯表」，确保上下游一致。
 
 ### 12.1 拆解策略
 
@@ -1225,7 +1225,7 @@ flowchart TD
 | 九、接口设计                            | plan.md §接口规约 对齐  | 接口契约参考；Task 接口实现依据                             |
 | 十、数据库设计                           | plan.md §数据规约 对齐  | 数据表结构参考；Task 数据层实现依据                           |
 | 十一、埋点技术方案                         | —                 | 埋点事件参考                                         |
-| 十二、Story 拆解                       | plan.md Story 索引表 | 每个 Task 绑定 ST-xxx                              |
+| 十二、Story 拆解                       | tasks.md 直接引用      | 每个 Task 绑定 ST-xxx                              |
 | 十三、L2 索引 → story_detail_design.md | —                 | 设计引用：story_detail_design.md:ST-xxx:功能设计:类图/时序图 |
 
 

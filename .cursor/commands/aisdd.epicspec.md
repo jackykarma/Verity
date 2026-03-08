@@ -43,14 +43,15 @@ $ARGUMENTS
 ### 3) 在 EPIC 文档中完成 Feature 拆分（必填）
 
 对 EPIC 做 Feature 拆分，输出：
-- Feature 列表（每项必须可独立交付）
-- 每个 Feature 的边界（In/Out）、依赖、验收意图、拆分动机
-- Feature 类型标注：Product / Platform-Capability
+- Feature 列表（每项必须可独立交付，并包含 Feature ID、状态）
+- 每个 Feature 的边界（目标、In/Out、依赖、验收意图、拆分动机）
+- Feature 类型标注：Product / Capability
+- 若存在跨 Feature 共享关注点，补充 Capability 决策与轻量技术策略登记
 
 ### 4) 输出下一步指令（逐个 Feature 手动触发）
 
 在命令输出中列出建议的下一步（不自动批量创建多个 Feature 文档目录）：
-- 对每个 Feature 输出一条建议命令：`/aisdd.featurespec <Feature 描述>`
+- 对每个 Feature 输出一条建议命令：`/aisdd.featurespec <Feature 目标；范围（In/Out）；依赖；关键 NFR 关注点>`
 
 ### 5) 完成报告
 
