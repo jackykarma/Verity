@@ -74,5 +74,4 @@ alwaysApply: false
 
 提示用户：
 1. 评审 tasks.md
-2. 运行 `/speckit.epicsync` 更新 Feature Registry 状态为 Tasks Ready
-3. 逐个 Task 运行 `/speckit.implement` 实现代码
+2. 逐个 Task 运行 `/speckit.implement` 实现代码

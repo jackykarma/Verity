@@ -110,5 +110,4 @@ alwaysApply: false
 提示用户：
 1. 所有 Gate 通过 → Design Ready
 2. 确认回填已完成（plan.md Story 索引表 + spec.md 需求追溯表）
-3. 运行 `/speckit.epicsync` 更新 epic.md Feature Registry
-4. 逐个 Feature 运行 `/speckit.tasks` 产出任务清单
+3. 逐个 Feature 运行 `/speckit.tasks` 产出任务清单

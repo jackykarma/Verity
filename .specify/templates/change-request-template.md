@@ -62,7 +62,6 @@ description: "Change Request（CR）变更请求模板：用于需求/交互/视
 - [ ] 更新 Feature `spec.md`（如涉及验收口径/范围/FR/NFR/边界）
 - [ ] 更新 Feature `plan.md`（如涉及方案决策/契约/预算/风险/Story）
 - [ ] 重新生成/更新 Feature `tasks.md`（确保验证步骤与追溯一致）
-- [ ] 运行 `/speckit.epicsync "<备注>"` 更新 `epic.md` Feature Registry
 
 ---
 

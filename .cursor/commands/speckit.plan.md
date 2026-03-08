@@ -9,10 +9,6 @@ handoffs:
     agent: speckit.epicdesign
     prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
     send: true
-  - label: 同步 EPIC 总览（可选）
-    agent: speckit.epicsync
-    prompt: 将本 Feature 的 plan 进展同步到 EPIC 总览
-    send: false
   - label: 创建检查清单
     agent: speckit.checklist
     prompt: 为以下领域创建检查清单……

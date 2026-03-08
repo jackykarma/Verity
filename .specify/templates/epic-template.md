@@ -210,7 +210,7 @@
 
 ### 验收前置条件
 
-- 所有 Feature 验收通过（参见 Feature Registry 状态）
+- 所有 Feature 验收通过
 - 跨 Feature 集成测试完成
 - EPIC-NFR 指标采集就绪（性能/功耗/内存/安全）
 - 上项范围内的机型/OS 版本覆盖验证
@@ -239,26 +239,6 @@
 - **验收结论**：通过 / 有条件通过 / 不通过
 - **遗留问题**：[若有条件通过，列出遗留项及跟进计划]
 - **签字确认**：[产品/技术/测试负责人]
-
-## Feature Registry（自动同步区）
-
-> 说明：本区块由 `/speckit.epicsync` 自动增量更新，用于提供 EPIC 的统一视图。
->
-> - 开发者可手工补充“备注”列，但不要修改表头与 `BEGIN/END` 标记。
-
-
-
-
-<!-- BEGIN_FEATURE_REGISTRY -->
-
-| Feature     | 分支            | Feature Version | Plan Version | Tasks Version | 状态         | 备注  |
-| ----------- | ------------- | --------------- | ------------ | ------------- | ---------- | --- |
-| [Feature A] | 001-feature-a | v0.1.0          | v0.1.0       | v0.1.0        | Plan Ready |     |
-
-<!-- END_FEATURE_REGISTRY -->
-
-
-
 
 ## 变更记录（增量变更）
 

@@ -5,10 +5,6 @@ handoffs:
     agent: speckit.epicdesign-update
     prompt: 范围：受影响的设计章节（因 Feature plan 变更）
     send: false
-  - label: 同步 EPIC 总览（可选）
-    agent: speckit.epicsync
-    prompt: 将本 Feature 的 plan 进展同步到 EPIC 总览
-    send: false
   - label: 创建检查清单
     agent: speckit.checklist
     prompt: 为以下领域创建检查清单……

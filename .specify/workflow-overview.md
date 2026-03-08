@@ -157,18 +157,15 @@ flowchart TD
     Step5 -.-> Step6
     Step6 --> Step7["/speckit.epicdesign<br/>产出 epic-design.md<br/>+ key-func-design.md<br/>+ key-diagram.md<br/>+ story_detail_design.md"]
     Step7 --> Step8["/speckit.backfill<br/>回填 plan.md Story 索引表<br/>回填 spec.md 需求追溯表<br/>回填 plan.md §一 互校"]
-    Step7 --> Step9["/speckit.epicsync<br/>同步 epic.md Feature Registry"]
-    Step8 --> Step10["/speckit.tasks<br/>产出各 Feature tasks.md"]
-    Step9 --> Step10
-    Step10 --> Step11["/speckit.implement<br/>按 Task 逐个实现代码"]
-    Step11 --> Step12["/speckit.verify<br/>实现↔设计一致性验证"]
-    Step12 --> Step13([交付 / 合并主分支])
+    Step8 --> Step9["/speckit.tasks<br/>产出各 Feature tasks.md"]
+    Step9 --> Step10["/speckit.implement<br/>按 Task 逐个实现代码"]
+    Step10 --> Step11["/speckit.verify<br/>实现↔设计一致性验证"]
+    Step11 --> Step12([交付 / 合并主分支])
 
     style Step1 fill:#E8F5E9,stroke:#388E3C
     style Step1b fill:#E8F5E9,stroke:#388E3C
-    style Step13 fill:#E8F5E9,stroke:#388E3C
+    style Step12 fill:#E8F5E9,stroke:#388E3C
     style Step8 fill:#FFF3E0,stroke:#F57C00
-    style Step9 fill:#FFF3E0,stroke:#F57C00
 ```
 
 | 步骤 | 命令 | 产出物 | 执行次数 |
@@ -182,10 +179,9 @@ flowchart TD
 | 6 | `/speckit.plan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
 | 7 | `/speckit.epicdesign` | `epic-design.md` + `key-func-design.md` + `key-diagram.md` + 各 `story_detail_design.md` | 每个 EPIC 一次（分 Gate 逐阶段） |
 | 8 | `/speckit.backfill` | `plan.md` Story 索引表 + `spec.md` 需求追溯表 + `plan.md` §一互校 | Gate 5 通过后一次 |
-| 9 | `/speckit.epicsync` | `epic.md` Feature Registry 更新 | 按需 |
-| 10 | `/speckit.tasks` | 各 Feature `tasks.md` | 每个 Feature 一次 |
-| 11 | `/speckit.implement` | 代码 | 按 Task 逐个执行 |
-| 12 | `/speckit.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
+| 9 | `/speckit.tasks` | 各 Feature `tasks.md` | 每个 Feature 一次 |
+| 10 | `/speckit.implement` | 代码 | 按 Task 逐个执行 |
+| 11 | `/speckit.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
 
 ---
 
@@ -221,8 +217,7 @@ flowchart TD
     CheckDesign -->|否| UpdateTasks["更新 tasks.md<br/>调整/新增/删除 Task"]
     UpdateDesign --> UpdateL2["更新 story_detail_design.md<br/>（如涉及 L2）"]
     UpdateL2 --> UpdateTasks
-    UpdateTasks --> SyncRegistry["/speckit.epicsync<br/>同步 Feature Registry"]
-    SyncRegistry --> Continue([继续实现])
+    UpdateTasks --> Continue([继续实现])
 
     style Trigger fill:#FFF3E0,stroke:#F57C00
     style Reject fill:#FFEBEE,stroke:#D32F2F
@@ -259,8 +254,7 @@ flowchart TD
     CheckStory -->|是| UpdateStory["调整 Story 拆解<br/>回填 plan.md 索引 + spec.md 追溯"]
     CheckStory -->|否| UpdateTasks["更新 tasks.md<br/>调整受影响的 Task"]
     UpdateStory --> UpdateTasks
-    UpdateTasks --> SyncRegistry["/speckit.epicsync<br/>同步 Feature Registry"]
-    SyncRegistry --> Continue([继续实现])
+    UpdateTasks --> Continue([继续实现])
 
     style Trigger fill:#FFF3E0,stroke:#F57C00
     style Reject fill:#FFEBEE,stroke:#D32F2F

@@ -5,10 +5,6 @@ handoffs:
     agent: speckit.tasks
     prompt: 将 EPIC 设计说明书的 Story 拆解为可执行 tasks.md
     send: true
-  - label: 同步 EPIC 总览
-    agent: speckit.epicsync
-    prompt: 将本 Feature 的 spec/plan 进展同步到 EPIC 总览
-    send: false
   - label: 制定/更新技术方案（未级联且 spec 变更影响设计时）
     agent: speckit.plan-update
     prompt: 根据 spec 的 [变更范围] 更新 plan.md 的 [受影响的 plan 范围]

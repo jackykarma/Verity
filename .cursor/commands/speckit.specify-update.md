@@ -1,5 +1,5 @@
 ---
-description: 对 epic.md 做增量更新，仅重写 $ARGUMENTS 指定范围的章节，其余保留；不改动 Feature Registry。
+description: 对 epic.md 做增量更新，仅重写 $ARGUMENTS 指定范围的章节，其余保留。
 handoffs: []
 ---
 
@@ -22,7 +22,7 @@ $ARGUMENTS
 
 强制约束：
 - **增量规则**：仅重写/重算指定范围对应的章节，禁止全量重写。
-- **禁止修改**：`Feature Registry（自动同步区）` 及其 `BEGIN_FEATURE_REGISTRY` / `END_FEATURE_REGISTRY` 之间的内容由 `/speckit.epicsync` 维护，本命令**不得改写**。
+- **增量更新**：仅重写指定范围的章节，其余原文保留。
 
 ## 执行步骤
 
@@ -43,7 +43,7 @@ $ARGUMENTS
 
 ### 4. 确定可更新范围
 
-与 [epic-template.md](.specify/templates/epic-template.md) 对应，**不得修改 Feature Registry 区块**。可更新章节包括：
+与 [epic-template.md](.specify/templates/epic-template.md) 对应，可更新章节包括：
 
 | 可更新范围 | 对应 epic-template 章节 |
 |-----------|-------------------------|
@@ -68,14 +68,13 @@ $ARGUMENTS
 ### 6. 变更记录
 
 - 在「变更记录（增量变更）」表**追加一行**。
-- 若该表不存在：在 `Feature Registry` **之前**，按 epic-template 格式插入「变更记录」节与表头，再追加。
+- 若该表不存在：在文档末尾按 epic-template 格式插入「变更记录」节与表头，再追加。
 - 表列建议：`版本 | 日期 | 变更范围 | 变更摘要 | 影响模块/Feature | 是否需要回滚`。
 - **版本**：在变更记录中更新文档头部 `**EPIC Version**`（如 v0.1.0 → v0.2.0）。规则：凡涉及 FR/NFR/AC/设计决策的为 **Minor**；纯澄清/格式为 **Patch**。
 
 ### 7. 写回
 
 - 仅替换受影响章节的原文，写回 `epic.md`。
-- 不得改写 `BEGIN_FEATURE_REGISTRY` / `END_FEATURE_REGISTRY` 之间的内容。
 
 ### 8. 完成报告
 
@@ -84,9 +83,8 @@ $ARGUMENTS
 - EPIC Version（更新后）
 - 本次更新范围摘要
 
-若 EPIC 层变更影响跨 Feature：建议通过 CR 明确影响面，并对受影响 Feature 逐个执行 feature-update / plan-update / tasks，再运行 `/speckit.epicsync` 同步总览。
+若 EPIC 层变更影响跨 Feature：建议通过 CR 明确影响面，并对受影响 Feature 逐个执行 feature-update / plan-update / tasks。
 
 ## 与现有命令的关系
 
 - **`/speckit.specify`**：创建 EPIC 和 epic.md；specify-update 只做**增量更新**，不创建。
-- **`/speckit.epicsync`**：只更新 epic.md 的 Feature Registry；specify-update **不碰** Feature Registry。

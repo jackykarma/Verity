@@ -13,10 +13,7 @@
     执行主体：speckit.implement
     提示语：分阶段启动实施工作
     发送状态：是
-  - 标签：同步 EPIC 总览（可选）
-    执行主体：speckit.epicsync
-    提示语：将本 Feature 的 tasks 进展同步到 EPIC 总览
-    发送状态：否
+
 ---
 
 ## 用户输入
