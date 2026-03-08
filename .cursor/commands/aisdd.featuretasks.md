@@ -38,9 +38,15 @@ $ARGUMENTS
     - **可选文档**：epic-plan.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
     - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。
 
-3. **执行任务生成流程**：
+3. **回填 plan.md 与 spec.md**（原 `/aisdd.backfill` 职责，现合并至此）：
+    - 回填本 Feature 的 `spec.md`「需求追溯表」：从 `epic-design.md` §5 覆盖矩阵提取 FR/NFR → Story 映射填入
+    - 回填本 Feature 的 `plan.md` §一「一致性互校」：对照 `epic-design.md` 零层/一层架构，逐行确认无矛盾
+    - **精准更新**：仅修改上述 2 处，不得修改 plan.md 和 spec.md 的其他章节
+    - 回填完成后更新 plan.md 变更记录表（版本号 +0.0.1）
+
+4. **执行任务生成流程**：
     - 加载 plan.md 并提取技术栈、技术规约、项目结构信息
-    - 从 **EPIC 软件设计说明书**的 **§5 Story 拆解** 提取 Story 列表（ST-xxx），包括：类型、目标、依赖、覆盖 FR/NFR、验收/验证方式
+    - 从 **EPIC 软件设计说明书**的 **§5 Story 拆解** 提取 Story 列表（ST-xxx），包括：目标、改动范围、依赖、覆盖 FR/NFR、验证条件
     - 从 spec.md 提取 FR/NFR 与 AC（验收标准）
     - 若存在 data-model.md：提取实体并映射至对应 Story
     - 若存在 contracts/ 目录：将接口端点映射至对应 Story
@@ -50,7 +56,7 @@ $ARGUMENTS
     - 为每个 Story 生成并行执行示例（仅列 [P] 任务）
     - 验证任务完整性
 
-4. **生成 tasks.md 文件**：以 `.specify/templates/tasks-template.md` 为模板填充内容，包含：
+5. **生成 tasks.md 文件**：以 `.specify/templates/tasks-template.md` 为模板填充内容，包含：
     - 从设计说明书中提取的正确功能名称
     - 阶段 0：准备（版本/输入冻结检查）
     - 阶段 1：环境搭建任务（项目初始化）
@@ -65,7 +71,7 @@ $ARGUMENTS
     - 每个 Story 的并行执行示例
     - 增量交付策略
 
-5. **报告输出**：输出生成的 tasks.md 文件路径及汇总信息：
+6. **报告输出**：输出生成的 tasks.md 文件路径及汇总信息：
     - 任务总数
     - 各 Story（ST-xxx）对应的任务数量
     - 识别出的可并行执行机会

@@ -119,7 +119,7 @@ $ARGUMENTS
    - key 完成 → 提示继续 `diagram`
    - diagram 完成 → 提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：`/aisdd.backfill`（回填 plan.md §一互校 + spec.md 需求追溯表）→ `/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`
+   - l2 完成 → 提示：`/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（自动含回填 plan.md §一互校 + spec.md 需求追溯表）
 
 核心规则：
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`

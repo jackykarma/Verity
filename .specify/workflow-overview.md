@@ -18,16 +18,13 @@ flowchart TD
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
     UxDesign -.-> EpicDesign
     EpicDesign --> StoryDesign["story_detail_design.md<br/>L2 Story 详细设计"]
-    EpicDesign --> Backfill["回填 plan.md §一互校<br/>回填 spec.md 追溯表"]
-    StoryDesign --> TasksMd["tasks.md<br/>Task 拆解"]
-    Backfill --> TasksMd
+    StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（含回填 spec 追溯表<br/>+ plan §一互校）"]
     TasksMd --> Implement["Implement<br/>代码实现"]
     Implement --> Verify["Verify<br/>实现↔设计一致性验证"]
     Verify --> Done([交付])
 
     style Start fill:#E8F5E9,stroke:#388E3C
     style Done fill:#E8F5E9,stroke:#388E3C
-    style Backfill fill:#FFF3E0,stroke:#F57C00
     style EpicMd fill:#E3F2FD,stroke:#1976D2
     style SpecMd fill:#E3F2FD,stroke:#1976D2
     style EpicPlan fill:#E3F2FD,stroke:#1976D2
@@ -53,8 +50,7 @@ flowchart TD
 | **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规约事实源 | `spec.md`、`epic-plan.md`、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、`epic-plan.md`、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
-| **回填** | 各 `plan.md` §一互校、各 `spec.md` 需求追溯表 | — | `epic-design.md` §十二 | — |
-| **Task 拆解** | 各 `tasks.md` | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |
+| **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |
 | **实现** | 代码 | — | `tasks.md` | Implement Ready |
 | **验证** | 验证报告 | 实现↔设计一致性事实源 | 代码、设计文档 | Verify Pass |
 | **审批记录** | `gate-log.md` | 审批事实源 | 各关卡评审结果 | — |
@@ -155,15 +151,13 @@ flowchart TD
     Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
     Step5 -.-> Step6
     Step6 --> Step7["/aisdd.epicdesign<br/>产出 epic-design.md<br/>+ key-func-design.md<br/>+ key-diagram.md<br/>+ story_detail_design.md"]
-    Step7 --> Step8["/aisdd.backfill<br/>回填 plan.md §一互校<br/>回填 spec.md 需求追溯表"]
-    Step8 --> Step9["/aisdd.featuretasks<br/>产出各 Feature tasks.md"]
-    Step9 --> Step10["/aisdd.implement<br/>按 Task 逐个实现代码"]
-    Step10 --> Step11["/aisdd.verify<br/>实现↔设计一致性验证"]
-    Step11 --> Step12([交付 / 合并主分支])
+    Step7 --> Step8["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（含回填 plan/spec）"]
+    Step8 --> Step9["/aisdd.implement<br/>按 Task 逐个实现代码"]
+    Step9 --> Step10["/aisdd.verify<br/>实现↔设计一致性验证"]
+    Step10 --> Step11([交付 / 合并主分支])
 
     style Step1 fill:#E8F5E9,stroke:#388E3C
-    style Step12 fill:#E8F5E9,stroke:#388E3C
-    style Step8 fill:#FFF3E0,stroke:#F57C00
+    style Step11 fill:#E8F5E9,stroke:#388E3C
 ```
 
 | 步骤 | 命令 | 产出物 | 执行次数 |
@@ -175,10 +169,9 @@ flowchart TD
 | 5 | `/aisdd.epicuidesign` | `ux-design.md` | 每个 EPIC 一次（可选，与步骤 4 并行） |
 | 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + `key-func-design.md` + `key-diagram.md` + 各 `story_detail_design.md` | 每个 EPIC 一次（分 Gate 逐阶段） |
-| 8 | `/aisdd.backfill` | `plan.md` §一互校 + `spec.md` 需求追溯表 | Gate 5 通过后一次 |
-| 9 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 每个 Feature 一次 |
-| 10 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
-| 11 | `/aisdd.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
+| 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（含回填 plan/spec） | 每个 Feature 一次 |
+| 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
+| 10 | `/aisdd.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
 
 ---
 

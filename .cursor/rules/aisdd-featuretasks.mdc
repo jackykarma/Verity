@@ -28,6 +28,30 @@ alwaysApply: false
 5. **`epic-plan.md`**（若存在）：EPIC 级技术约束
 6. **`.specify/templates/tasks-template.md`**：模板结构
 
+## 前置步骤：回填 plan.md 与 spec.md
+
+在产出 `tasks.md` **之前**，自动执行以下回填操作（原 `/aisdd.backfill` 的职责）：
+
+### 1. 回填 spec.md「需求追溯表」
+
+在本 Feature 的 `spec.md`「需求追溯」表中填入 FR/NFR → Story 的映射：
+
+| FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
+|---|---|---|---|
+| FR-001 | ST-xxx | （tasks.md 产出后补填） | |
+
+数据来源：`epic-design.md` §5 覆盖矩阵。
+
+### 2. 回填 plan.md「§一 一致性互校」
+
+在本 Feature 的 `plan.md` §一中，对照 `epic-design.md` 的零层架构和一层架构，逐行填写互校结果，确认无矛盾。
+
+### 回填约束
+
+- **精准更新**：仅修改上述 2 处，不得修改 plan.md 和 spec.md 的其他章节
+- **数据一致**：所有回填数据必须与 `epic-design.md` §5 的内容完全一致
+- **版本更新**：回填完成后，更新 plan.md 的变更记录表（版本号 +0.0.1）
+
 ## 输出
 
 `tasks.md`，包含以下内容：
