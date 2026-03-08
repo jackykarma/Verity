@@ -1,9 +1,9 @@
 ---
-name: web-crawler
+name: bbc-6-minute-crawler
 description: 从网站爬取文章、音频、图片等内容到本地。支持配置多种网站，内置 BBC 6 Minute English 配置。当用户要求爬取网页内容、下载文章、抓取音频、批量下载网站资源时使用。
 ---
 
-# Web Crawler Skill
+# BBC 6 Minute Crawler Skill
 
 从指定网站爬取内容（文章、音频、图片等）到本地目录。
 
@@ -22,7 +22,7 @@ pip install requests beautifulsoup4 lxml
 运行爬虫脚本：
 
 ```bash
-python .cursor/skills/web-crawler/scripts/crawler.py --config <配置名> --output <输出目录> [--days <天数>]
+python .cursor/skills/bbc-6-minute-crawler/scripts/crawler.py --config <配置名> --output <输出目录> [--days <天数>]
 ```
 
 **参数说明：**
@@ -41,7 +41,7 @@ python .cursor/skills/web-crawler/scripts/crawler.py --config <配置名> --outp
 
 ```bash
 # 爬取过去 30 天的内容到 docs/bbc-6-minutes/
-python .cursor/skills/web-crawler/scripts/crawler.py --config bbc-6-minute --output docs/bbc-6-minutes --days 30
+python .cursor/skills/bbc-6-minute-crawler/scripts/crawler.py --config bbc-6-minute --output docs/bbc-6-minutes --days 30
 ```
 
 **爬取内容：**
@@ -186,5 +186,5 @@ python scripts/crawler.py --config bbc-6-minute --output docs/bbc --no-audio
 
 ## 相关资源
 
-- 配置文件目录: `.cursor/skills/web-crawler/configs/`
-- 爬虫脚本: `.cursor/skills/web-crawler/scripts/crawler.py`
+- 配置文件目录: `.cursor/skills/bbc-6-minute-crawler/configs/`
+- 爬虫脚本: `.cursor/skills/bbc-6-minute-crawler/scripts/crawler.py`
