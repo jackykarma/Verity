@@ -1,4 +1,4 @@
----
+﻿---
 description: 根据自然语言的需求描述创建或更新 EPIC 规格说明（EPIC 容器 + Feature 拆分列表）。Feature 的文档目录与 spec.md 请使用 /speckit.feature 单独创建。
 handoffs: 
   - label: 创建 Feature（逐个）

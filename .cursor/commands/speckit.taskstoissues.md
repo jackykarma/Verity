@@ -1,4 +1,4 @@
----
+﻿---
 description: 根据可用的设计工件，将现有任务转换为该功能对应的、按依赖关系排序的可执行 GitHub 议题。
 tools: ['github/github-mcp-server/issue_write']
 ---

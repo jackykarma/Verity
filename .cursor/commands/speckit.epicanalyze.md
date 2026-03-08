@@ -1,17 +1,9 @@
----
+﻿---
 description: "EPIC 级跨 Feature 一致性与质量分析。在 EPIC 软件设计说明书及各 Feature tasks.md 产出后运行，检测跨 Feature 的术语漂移、接口契约冲突、NFR 预算超支、共享能力不一致、Story 依赖完整性等问题。严格只读，不修改任何文件。"
 handoffs:
-  - label: 更新 EPIC 技术规约
-    agent: speckit.epicplan-update
-    prompt: 修复 EPIC 级技术规约中发现的问题
-    send: false
-  - label: 更新 EPIC 设计说明书
-    agent: speckit.epicdesign-update
-    prompt: 修复设计说明书中发现的跨 Feature 问题
-    send: false
-  - label: 更新 Feature plan
-    agent: speckit.plan-update
-    prompt: 修复某 Feature plan 中发现的问题
+  - label: 修复发现的问题
+    agent: speckit.epicplan
+    prompt: 根据分析结论说明要修复的文档与范围（epic-plan.md / epic-design.md / 某 Feature plan.md），由 AI 做增量更新
     send: false
 ---
 

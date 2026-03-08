@@ -1,4 +1,4 @@
----
+﻿---
 description: "生成 Feature 级技术规约与实现约束，在 epic-plan.md 的 EPIC 级约束下编写。详细架构设计（0/1 层架构、全景类图、时序、Story 拆解、L2 设计）在 /speckit.epicdesign 阶段产出。"
 handoffs:
   - label: 审批关卡（plan-ready，在所有 Feature plan 完成后）

@@ -1,4 +1,4 @@
----
+﻿---
 description: "**EPIC 级**软件设计说明书。在 epic-plan.md 及各 Feature plan.md 完成后运行；基于 epic.md、epic-plan.md、各 feature spec/plan 及**现有工程代码**，产出 EPIC 级设计说明书（0 层/1 层架构图、全景类图与关键时序、Story 拆解、L2 详细设计）。供人类评审与后续 tasks/implement 阶段 AI 编码引用。"
 handoffs:
   - label: 审批关卡（design-ready）
@@ -15,7 +15,7 @@ handoffs:
     send: true
   - label: 补充需求或澄清
     agent: speckit.clarify
-    prompt: 需补充设计边界或约束时，澄清后可再运行 epicdesign-update
+    prompt: 需补充设计边界或约束时，澄清后可再运行 epicdesign 或直接说明要更新的章节/参数由 AI 做增量更新
     send: false
 ---
 

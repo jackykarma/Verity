@@ -1,4 +1,4 @@
----
+﻿---
 description: "**EPIC 级**技术规约与约束。须在**所有 Feature 的 spec 均已输出**之后运行；基于 epic.md 与各 feature spec.md 及**现有工程代码**，产出 EPIC 根下的 epic-plan.md（全局技术约束与规约，不含 0 层/1 层架构图）。各 Feature 的 plan 必须在其约束下编写。0 层/1 层架构图在后续 /speckit.epicdesign 阶段产出。"
 handoffs:
   - label: 制定 Feature 技术规约
@@ -11,7 +11,7 @@ handoffs:
     send: false
   - label: 补充需求或澄清
     agent: speckit.clarify
-    prompt: 需补充技术边界或约束时，澄清后可再运行 epicplan 或 epicplan-update
+    prompt: 需补充技术边界或约束时，澄清后可再运行 epicplan；若 epic-plan.md 已存在可直接说明更新范围由 AI 做增量更新
     send: false
 ---
 
@@ -27,7 +27,7 @@ $ARGUMENTS
 
 目标：在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）下产出 `epic-plan.md`，为**各 Feature 的 plan** 提供**EPIC 级技术约束与规约**。内容为纯文字约束（技术栈、分层、线程、错误处理、数据、接口、NFR 预算、共享能力等），**不含 0 层/1 层架构图**（架构图在 `/speckit.epicdesign` 阶段产出）。
 
-**须在 epic.md 已存在、EPIC 根下 epic-plan.md 尚不存在时运行**；若已存在，请改用 `/speckit.epicplan-update`。
+**须在 epic.md 已存在、EPIC 根下 epic-plan.md 尚不存在时运行**；若已存在，可直接说明要更新的章节或范围，由 AI 做增量更新。
 
 **前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行，以保证规约设计输入完整（epic 目标 + 各 feature 需求）。须遵循 `.specify/memory/constitution.md` 的演进式设计原则。
 
@@ -41,7 +41,7 @@ $ARGUMENTS
 .specify/scripts/powershell/get-epic-paths.ps1 -EpicId "EPIC-002" -Json
 ```
 
-解析 JSON 得到 `EPIC_DIR`、`EPIC_PLAN`（epic-plan.md 路径）。若 `EpicId` 未提供且 `$env:SPECIFY_EPIC` 未设：**终止**并提示「请设置 SPECIFY_EPIC 或在 $ARGUMENTS 中提供 EPIC 标识，如 EPIC-002」。若 `EPIC_PLAN`（epic-plan.md）**已存在**：**终止**并提示「请使用 /speckit.epicplan-update 做增量更新」。
+解析 JSON 得到 `EPIC_DIR`、`EPIC_PLAN`（epic-plan.md 路径）。若 `EpicId` 未提供且 `$env:SPECIFY_EPIC` 未设：**终止**并提示「请设置 SPECIFY_EPIC 或在 $ARGUMENTS 中提供 EPIC 标识，如 EPIC-002」。若 `EPIC_PLAN`（epic-plan.md）**已存在**：**终止**并提示「请直接说明要更新的章节或范围，由 AI 做增量更新」。
 
 2. **前置条件检查（所有 Feature spec 已就绪）**：遍历 `EPIC_DIR/features/` 下每个**子目录**，若某子目录存在且其中**无 `spec.md`**，则**终止**并提示：「须在**所有** Feature 的 spec 输出后再运行 /speckit.epicplan。以下 Feature 目录尚未具备 spec：\[列出缺 spec 的目录名\]。」
 

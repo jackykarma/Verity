@@ -159,7 +159,7 @@ function Get-FeaturePathsEnv {
     }
 }
 
-# 解析 EPIC 标识并返回 EPIC 根路径，供 /speckit.epicuidesign、/speckit.epicuidesign-update、/speckit.epicplan、/speckit.epicdesign 使用。
+# 解析 EPIC 标识并返回 EPIC 根路径，供 /speckit.epicuidesign、/speckit.epicplan、/speckit.epicdesign 使用。
 # $EpicIdOrArg：如 "EPIC-002"、"EPIC-002-android-english-learning" 或 "EPIC-002 范围：整体"；可从 $env:SPECIFY_EPIC 或 $ARGUMENTS 传入。
 function Get-EpicPathsForUidesign {
     param([string]$EpicIdOrArg)

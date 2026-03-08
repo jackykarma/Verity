@@ -1,4 +1,4 @@
----
+﻿---
 description: 在任务生成完成后，对spec.md、plan.md和tasks.md这三类核心工件进行非破坏性的跨工件一致性与质量分析。
 ---
 

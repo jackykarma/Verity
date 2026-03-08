@@ -1,4 +1,4 @@
----
+﻿---
 description: "执行实施计划，处理并执行 tasks.md 中定义的所有任务（开发者在 Story 分支执行；严格遵循 EPIC 分支冻结的 spec/plan/epic-design/tasks）"
 handoffs:
   - label: 实现验证

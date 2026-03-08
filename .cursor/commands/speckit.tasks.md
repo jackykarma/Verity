@@ -1,4 +1,4 @@
----
+﻿---
 描述：基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、plan.md 的技术规约与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序的 tasks.md 文件（Story → Task），严禁改写设计方案的技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
 交接项：
   - 标签：一致性分析
