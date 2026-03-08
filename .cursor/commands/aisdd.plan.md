@@ -1,16 +1,16 @@
-﻿---
-description: "生成 Feature 级技术规约与实现约束，在 epic-plan.md 的 EPIC 级约束下编写。详细架构设计（0/1 层架构、全景类图、时序、Story 拆解、L2 设计）在 /speckit.epicdesign 阶段产出。"
+---
+description: "生成 Feature 级技术规约与实现约束，在 epic-plan.md 的 EPIC 级约束下编写。详细架构设计（0/1 层架构、全景类图、时序、Story 拆解、L2 设计）在 /aisdd.epicdesign 阶段产出。"
 handoffs:
   - label: 审批关卡（plan-ready，在所有 Feature plan 完成后）
-    agent: speckit.gate
+    agent: aisdd.gate
     prompt: plan-ready 关卡——冻结 epic-plan 与各 plan 后进入设计说明书阶段
     send: false
   - label: 输出 EPIC 软件设计说明书
-    agent: speckit.epicdesign
+    agent: aisdd.epicdesign
     prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
     send: true
   - label: 创建检查清单
-    agent: speckit.checklist
+    agent: aisdd.checklist
     prompt: 为以下领域创建检查清单……
     send: false
 ---
@@ -27,7 +27,7 @@ $ARGUMENTS
 
 目标：生成 `plan.md`（Feature 级技术规约与实现约束）。
 
-**plan.md 的定位**：Feature 级技术约束与实现规范。详细架构设计（0 层/1 层架构图、全景类图、关键时序图、Story 拆解、L2 详细设计）由后续 `/speckit.epicdesign` 阶段在 EPIC 级统一产出。
+**plan.md 的定位**：Feature 级技术约束与实现规范。详细架构设计（0 层/1 层架构图、全景类图、关键时序图、Story 拆解、L2 详细设计）由后续 `/aisdd.epicdesign` 阶段在 EPIC 级统一产出。
 
 **方案设计的输入（必须考虑）**：**spec 需求**（spec.md）与 **EPIC 级 epic uidesign**（`specs/epics/<EPIC>/ux-design.md` + Figma 链接 / `design/` 下截图或 HTML）。设计稿在 ux-design.md 的「设计稿索引」中登记。若 epic uidesign 未执行则仅以 spec 为输入。
 
@@ -75,7 +75,7 @@ $ARGUMENTS
    - `plan.md` 路径
    - Plan Version
    - 已生成的章节清单
-   - **下一步提示**：若所有 Feature plan 已完成 → `/speckit.gate plan-ready`（审批关卡）→ `/speckit.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
+   - **下一步提示**：若所有 Feature plan 已完成 → `/aisdd.gate plan-ready`（审批关卡）→ `/aisdd.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
 
 核心规则：
 - **文档格式要求（强制）**：所有技术图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`

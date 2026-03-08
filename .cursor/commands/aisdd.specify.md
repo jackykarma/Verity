@@ -1,12 +1,12 @@
-﻿---
-description: 根据自然语言的需求描述创建或更新 EPIC 规格说明（EPIC 容器 + Feature 拆分列表）。Feature 的文档目录与 spec.md 请使用 /speckit.feature 单独创建。
+---
+description: 根据自然语言的需求描述创建或更新 EPIC 规格说明（EPIC 容器 + Feature 拆分列表）。Feature 的文档目录与 spec.md 请使用 /aisdd.feature 单独创建。
 handoffs: 
   - label: 创建 Feature（逐个）
-    agent: speckit.feature
+    agent: aisdd.feature
     prompt: 为某个 Feature 创建文档目录与 spec.md。Feature 描述如下……
     send: false
   - label: 审批关卡（spec-ready，在所有 Feature spec 完成后）
-    agent: speckit.gate
+    agent: aisdd.gate
     prompt: spec-ready 关卡——冻结各 spec 后进入 epicuidesign/epicplan 阶段
     send: false
 ---
@@ -21,7 +21,7 @@ $ARGUMENTS
 
 ## 大纲
 
-用户在触发消息中 `/speckit.specify` 后输入的文本**即为 EPIC 描述**（大需求/主题）。该 EPIC 可能拆解为多个可独立交付的 Feature。即使下方出现字面量 `$ARGUMENTS`，也需假定该对话中始终可获取此描述。除非用户提交的指令为空，否则请勿要求用户重复描述。
+用户在触发消息中 `/aisdd.specify` 后输入的文本**即为 EPIC 描述**（大需求/主题）。该 EPIC 可能拆解为多个可独立交付的 Feature。即使下方出现字面量 `$ARGUMENTS`，也需假定该对话中始终可获取此描述。除非用户提交的指令为空，否则请勿要求用户重复描述。
 
 根据该功能描述，执行以下操作：
 
@@ -50,7 +50,7 @@ $ARGUMENTS
 ### 4) 输出下一步指令（逐个 Feature 手动触发）
 
 在命令输出中列出建议的下一步（不自动批量创建多个 Feature 文档目录）：
-- 对每个 Feature 输出一条建议命令：`/speckit.feature <Feature 描述>`
+- 对每个 Feature 输出一条建议命令：`/aisdd.feature <Feature 描述>`
 
 ### 5) 完成报告
 
@@ -61,8 +61,8 @@ $ARGUMENTS
 
 ## 重要说明（避免流程混淆）
 
-- `/speckit.specify`：EPIC 入口（产出 epic.md + Feature 拆分列表）
-- `/speckit.feature`：Feature 入口（创建 Feature 文档目录 + 产出 spec.md；本工作流不为 Feature 创建 git 分支）
+- `/aisdd.specify`：EPIC 入口（产出 epic.md + Feature 拆分列表）
+- `/aisdd.feature`：Feature 入口（创建 Feature 文档目录 + 产出 spec.md；本工作流不为 Feature 创建 git 分支）
 
 ## 通用指南
 

@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /speckit.implement 时触发：分阶段执行 tasks.md 中的任务，实现代码"
+description: "当用户输入 /aisdd.implement 时触发：分阶段执行 tasks.md 中的任务，实现代码"
 alwaysApply: false
 ---
 
-# /speckit.implement — 代码实现
+# /aisdd.implement — 代码实现
 
 ## 触发
 
-用户输入 `/speckit.implement`，可附带 Task ID（如 `T101`）或 Story ID（如 `ST-001`）。
+用户输入 `/aisdd.implement`，可附带 Task ID（如 `T101`）或 Story ID（如 `ST-001`）。
 
 ## 目的
 
@@ -61,4 +61,4 @@ alwaysApply: false
 提示用户：
 1. 输出最终状态，汇总已完成的工作
 2. 检查已实现功能是否匹配 `spec.md` 的 FR/NFR/AC
-3. 运行 `/speckit.verify` 进行独立验证 → `/speckit.gate implement-done` 通过完成关卡
+3. 运行 `/aisdd.verify` 进行独立验证 → `/aisdd.gate implement-done` 通过完成关卡

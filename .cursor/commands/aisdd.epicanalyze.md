@@ -1,8 +1,8 @@
-﻿---
+---
 description: "EPIC 级跨 Feature 一致性与质量分析。在 EPIC 软件设计说明书及各 Feature tasks.md 产出后运行，检测跨 Feature 的术语漂移、接口契约冲突、NFR 预算超支、共享能力不一致、Story 依赖完整性等问题。严格只读，不修改任何文件。"
 handoffs:
   - label: 修复发现的问题
-    agent: speckit.epicplan
+    agent: aisdd.epicplan
     prompt: 根据分析结论说明要修复的文档与范围（epic-plan.md / epic-design.md / 某 Feature plan.md），由 AI 做增量更新
     send: false
 ---
@@ -19,9 +19,9 @@ $ARGUMENTS
 
 在 EPIC 级别执行**跨 Feature 的一致性与质量分析**，检测各 Feature 的 spec/plan/tasks/story_detail_design 之间以及与 EPIC 级产物（epic.md、epic-plan.md、epic-design.md）之间的不一致、冲突、缺口问题。
 
-**与 `/speckit.analyze` 的区别**：
-- `/speckit.analyze`：单 Feature 内的 spec↔plan↔tasks 一致性
-- `/speckit.epicanalyze`：EPIC 级跨 Feature + EPIC 产物之间的一致性
+**与 `/aisdd.analyze` 的区别**：
+- `/aisdd.analyze`：单 Feature 内的 spec↔plan↔tasks 一致性
+- `/aisdd.epicanalyze`：EPIC 级跨 Feature + EPIC 产物之间的一致性
 
 ## 操作约束
 
@@ -165,7 +165,7 @@ $ARGUMENTS
 
 ### 7. 后续行动建议
 
-- 若存在 CRITICAL：列出必须在 `/speckit.implement` 前解决的问题及建议命令
+- 若存在 CRITICAL：列出必须在 `/aisdd.implement` 前解决的问题及建议命令
 - 若存在 HIGH：列出建议在 design-ready 关卡前解决的问题
 - 给出 EPIC 整体健康度评分（A/B/C/D/F）
 
@@ -175,7 +175,7 @@ $ARGUMENTS
 
 ## 与现有命令的关系
 
-- **`/speckit.analyze`**：单 Feature 内的 spec↔plan↔tasks 分析（Feature 级质量关卡）
-- **`/speckit.epicanalyze`**：EPIC 级跨 Feature 分析（EPIC 级质量关卡）
-- **`/speckit.gate`**：审批关卡——建议在 `design-ready` 关卡前运行 epicanalyze
-- 建议执行顺序：各 Feature `/speckit.analyze` → `/speckit.epicanalyze` → `/speckit.gate design-ready`
+- **`/aisdd.analyze`**：单 Feature 内的 spec↔plan↔tasks 分析（Feature 级质量关卡）
+- **`/aisdd.epicanalyze`**：EPIC 级跨 Feature 分析（EPIC 级质量关卡）
+- **`/aisdd.gate`**：审批关卡——建议在 `design-ready` 关卡前运行 epicanalyze
+- 建议执行顺序：各 Feature `/aisdd.analyze` → `/aisdd.epicanalyze` → `/aisdd.gate design-ready`

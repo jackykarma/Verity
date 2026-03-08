@@ -359,7 +359,7 @@ flowchart LR
 
 ## 六、关键功能与疑难点/亮点设计
 
-> 📌 **占位**：待运行 `/speckit.epicdesign key` 产出。
+> 📌 **占位**：待运行 `/aisdd.epicdesign key` 产出。
 
 > **定位**：面向方案评审，将重难点模块的**设计策略与决策逻辑**讲清楚。聚焦"为什么难 → 怎么解决 → 方案的处理流程"，抽象层级与 §五（模块/组件级）对齐，不下沉到类/方法级细节（类图、时序图见 §七）。
 >
@@ -384,7 +384,7 @@ flowchart LR
 
 ## 七、全景类图与关键流程/时序（EPIC 或主 Feature 级）
 
-> 📌 **占位**：待运行 `/speckit.epicdesign diagram` 产出。
+> 📌 **占位**：待运行 `/aisdd.epicdesign diagram` 产出。
 
 > **定位**：EPIC/主 Feature 级的**结构纵览与主流程说明**，服务于方案评审与 Task 对设计的引用。
 >
@@ -961,7 +961,7 @@ erDiagram
 
 ## 十二、Story 拆解
 
-> 📌 **占位**：待运行 `/speckit.epicdesign story` 产出。
+> 📌 **占位**：待运行 `/aisdd.epicdesign story` 产出。
 
 > **说明**：Story 拆解采用**混合模式**——以 **User Story（用户功能视角）为主干**，以 **Tech Story（技术准备视角）为补充**，按 Feature 分组组织。每个 Feature 下的 Story 须构成端到端可验证的功能增量。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）story_detail_design.md。
 >
@@ -1183,7 +1183,7 @@ flowchart TD
 
 ## 十三、二层 Story 详细设计（L2）索引
 
-> 📌 **占位**：待运行 `/speckit.epicdesign l2` 产出。
+> 📌 **占位**：待运行 `/aisdd.epicdesign l2` 产出。
 
 > **定位**：按 **Story** 的完整详细设计（含完整类图/时序图、触发条件与系统响应），是 tasks.md 与 implement 阶段的**详细设计事实源**，提供落码级指导。与 §七（全景类图/关键流程）的关系：§七 为 EPIC/主 Feature 级纵览，本节所索引的 L2 为各 Story 的局部完整设计，二者层级与粒度不同（参见 §七 开头的对比表）。
 >

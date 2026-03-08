@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /speckit.verify 时触发：执行实现↔设计一致性验证"
+description: "当用户输入 /aisdd.verify 时触发：执行实现↔设计一致性验证"
 alwaysApply: false
 ---
 
-# /speckit.verify — 实现↔设计一致性验证
+# /aisdd.verify — 实现↔设计一致性验证
 
 ## 触发
 
-用户输入 `/speckit.verify`，可附带 Feature ID 或 Story ID 限定验证范围。
+用户输入 `/aisdd.verify`，可附带 Feature ID 或 Story ID 限定验证范围。
 
 ## 目的
 

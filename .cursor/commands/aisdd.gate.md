@@ -1,8 +1,8 @@
-﻿---
+---
 description: "阶段审批关卡：在关键阶段转换前执行人工审批，记录评审结论、冻结产物状态，确保 AI 后续阶段在已审批的基线上执行。支持 spec-ready / plan-ready / design-ready / tasks-ready / implement-done 五个关卡。"
 handoffs:
   - label: 进入下一阶段
-    agent: speckit.plan
+    agent: aisdd.plan
     prompt: 关卡通过后，进入下一阶段
     send: false
 ---
@@ -72,11 +72,11 @@ $ARGUMENTS
 - [ ] 各 Feature 的 `tasks.md` 存在
 - [ ] 每个 Task 包含设计引用
 - [ ] Story 覆盖率 100%（所有 ST-xxx 均有对应 Task）
-- [ ] 若已运行 `/speckit.analyze`，无 CRITICAL 级问题
+- [ ] 若已运行 `/aisdd.analyze`，无 CRITICAL 级问题
 
 #### implement-done
 - [ ] tasks.md 中所有 Task 标记为 `[x]`
-- [ ] 若已运行 `/speckit.verify`，验证报告无阻塞项
+- [ ] 若已运行 `/aisdd.verify`，验证报告无阻塞项
 - [ ] 代码可构建通过
 
 ### 3. 输出检查报告
@@ -152,14 +152,14 @@ $ARGUMENTS
 
 | 关卡 | 下一步 |
 |------|--------|
-| spec-ready | `/speckit.epicuidesign`（可选）→ `/speckit.epicplan` |
-| plan-ready | `/speckit.epicdesign` |
-| design-ready | `/speckit.tasks` |
-| tasks-ready | `/speckit.analyze`（若未运行）→ `/speckit.implement` |
-| implement-done | `/speckit.verify`（若未运行）→ 合并/发布 |
+| spec-ready | `/aisdd.epicuidesign`（可选）→ `/aisdd.epicplan` |
+| plan-ready | `/aisdd.epicdesign` |
+| design-ready | `/aisdd.tasks` |
+| tasks-ready | `/aisdd.analyze`（若未运行）→ `/aisdd.implement` |
+| implement-done | `/aisdd.verify`（若未运行）→ 合并/发布 |
 
 ## 与现有命令的关系
 
 - **关卡是阶段间的卡点**：关卡不产出设计文档，只做检查、记录与冻结
 - **冻结后变更**：冻结后的产物若需变更，须说明变更范围由 AI 做增量更新，变更完成后建议重新运行关卡
-- **implement 阶段的强制约束**：`/speckit.implement` 在步骤 3 中应检查 `gate-log.md` 中 `tasks-ready` 关卡是否已通过；若未通过则警告（非阻塞，由用户决定是否继续）
+- **implement 阶段的强制约束**：`/aisdd.implement` 在步骤 3 中应检查 `gate-log.md` 中 `tasks-ready` 关卡是否已通过；若未通过则警告（非阻塞，由用户决定是否继续）

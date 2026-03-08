@@ -1,20 +1,20 @@
-﻿---
-description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /speckit.plan → /speckit.tasks → /speckit.implement 使用。
+---
+description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /aisdd.plan → /aisdd.tasks → /aisdd.implement 使用。
 handoffs:
   - label: 澄清规格说明要求
-    agent: speckit.clarify
+    agent: aisdd.clarify
     prompt: 澄清规格说明的相关要求
     send: true
   - label: 交互与视觉设计（EPIC 级，可选）
-    agent: speckit.epicuidesign
-    prompt: 若 UX/视觉稿已就绪且尚未运行，可运行 /speckit.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；本步骤可选——若 UX 尚未就绪可跳过
+    agent: aisdd.epicuidesign
+    prompt: 若 UX/视觉稿已就绪且尚未运行，可运行 /aisdd.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；本步骤可选——若 UX 尚未就绪可跳过
     send: false
   - label: EPIC 技术规约（EPIC 级）
-    agent: speckit.epicplan
-    prompt: 运行 /speckit.epicplan "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有）→ epicplan → 各 Feature plan
+    agent: aisdd.epicplan
+    prompt: 运行 /aisdd.epicplan "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有）→ epicplan → 各 Feature plan
     send: false
   - label: 制定技术方案
-    agent: speckit.plan
+    agent: aisdd.plan
     prompt: 为该规格说明制定方案（由 SE/TL 在 EPIC 分支产出与维护）。我正在基于……进行开发
 ---
 
@@ -52,7 +52,7 @@ $ARGUMENTS
 3. **加载模板**：读取 `.specify/templates/spec-template.md`，按模板结构写入 `SPEC_FILE`。
 
 4. **Feature 规格填写规则（必须）**：
-- 必须填写 `Epic`（例如 `EPIC-001 - xxx`），若未知写 `TODO(Epic)` 并交由 `/speckit.clarify` 补齐
+- 必须填写 `Epic`（例如 `EPIC-001 - xxx`），若未知写 `TODO(Epic)` 并交由 `/aisdd.clarify` 补齐
 - Feature Version 初始为 `v0.1.0`
 - FR 必须可测试
 - NFR 必须覆盖至少：性能/功耗/内存/安全隐私/可观测性/可靠性（可少量 `[需澄清]`，但不得缺失整类）
@@ -61,8 +61,8 @@ $ARGUMENTS
 5. **质量检查清单**：在 `FEATURE_DIR/checklists/requirements.md` 生成需求质量清单（与 Feature 模板结构一致）。
 
 6. **完成报告**：输出 Feature Key、spec.md 路径、检查清单路径，并提示下一步：
-- `/speckit.clarify`（建议先做）
-- 若 UX/视觉稿已就绪且尚未运行：**`/speckit.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
-- 若尚未做 EPIC 技术规约：**`/speckit.epicplan "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → epicplan → 各 Feature plan
-- 或直接 `/speckit.plan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
+- `/aisdd.clarify`（建议先做）
+- 若 UX/视觉稿已就绪且尚未运行：**`/aisdd.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
+- 若尚未做 EPIC 技术规约：**`/aisdd.epicplan "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → epicplan → 各 Feature plan
+- 或直接 `/aisdd.plan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
 

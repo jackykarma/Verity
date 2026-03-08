@@ -1,16 +1,16 @@
-﻿---
+---
 描述：基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、plan.md 的技术规约与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序的 tasks.md 文件（Story → Task），严禁改写设计方案的技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
 交接项：
   - 标签：一致性分析
-    执行主体：speckit.analyze
+    执行主体：aisdd.analyze
     提示语：运行项目一致性分析
     发送状态：是
   - 标签：审批关卡（tasks-ready）
-    执行主体：speckit.gate
+    执行主体：aisdd.gate
     提示语：tasks-ready 关卡——冻结 tasks 后进入实施
     发送状态：否
   - 标签：项目实施
-    执行主体：speckit.implement
+    执行主体：aisdd.implement
     提示语：分阶段启动实施工作
     发送状态：是
 

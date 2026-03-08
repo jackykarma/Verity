@@ -1,12 +1,12 @@
-﻿---
+---
 description: **EPIC 级**交互与视觉设计。须在**所有 Feature 的 spec 均已输出**之后运行；基于 epic.md 与各 feature spec.md 进行**整个 EPIC** 的交互与视觉设计，产出 EPIC 根下的 ux-design.md 与 design/；设计稿支持 Figma 链接、截图（design/）、本地 HTML（design/）。须从整个需求整体看待与设计，保证导航、风格与跨 Feature 交互一致。插入在 specify→plan 之间。
 handoffs:
   - label: 制定技术方案
-    agent: speckit.plan
+    agent: aisdd.plan
     prompt: 完成 epic uidesign 后，基于 spec 与 EPIC 级 ux-design 制定技术方案
     send: true
   - label: 澄清交互/视觉约束
-    agent: speckit.clarify
+    agent: aisdd.clarify
     prompt: 需补充交互或视觉约束时，澄清后可再运行 epicuidesign；若 ux-design.md 已存在可直接说明更新范围由 AI 做增量更新
     send: false
 ---
@@ -25,7 +25,7 @@ $ARGUMENTS
 
 **设计稿**可选用：**Figma 链接**、**截图**（放于 `design/`，如 .png/.jpg）、**本地 HTML**（`design/*.html`）；在 ux-design.md 的「设计稿索引」中登记形式与路径/链接；可含「所属 Feature」列区分。**须在 epic.md 已存在、EPIC 根下 ux-design.md 尚不存在时运行**；若已存在，可直接说明要更新的章节或范围，由 AI 做增量更新。
 
-**本命令是可选步骤**：并非所有 EPIC 在技术方案阶段都具备完整 UX/视觉稿。若 UX 设计尚未就绪，可跳过本命令直接进入 `/speckit.epicplan`；后续 UX 就绪后再运行本命令，或直接说明更新范围由 AI 做增量更新。
+**本命令是可选步骤**：并非所有 EPIC 在技术方案阶段都具备完整 UX/视觉稿。若 UX 设计尚未就绪，可跳过本命令直接进入 `/aisdd.epicplan`；后续 UX 就绪后再运行本命令，或直接说明更新范围由 AI 做增量更新。
 
 **前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行，以保证整个 EPIC 的交互与视觉设计完整、一致。
 
@@ -41,7 +41,7 @@ $ARGUMENTS
 
 解析 JSON 得到 `EPIC_DIR`、`EPIC_UX_DESIGN`、`EPIC_DESIGN_DIR`。若 `EpicId` 未提供且 `$env:SPECIFY_EPIC` 未设：**终止**并提示「请设置 SPECIFY_EPIC 或在 $ARGUMENTS 中提供 EPIC 标识，如 EPIC-002」。若 `EPIC_UX_DESIGN`（ux-design.md）**已存在**：**终止**并提示「请直接说明要更新的章节或范围，由 AI 做增量更新」。
 
-2. **前置条件检查（所有 Feature spec 已就绪）**：遍历 `EPIC_DIR/features/` 下每个**子目录**，若某子目录存在且其中**无 `spec.md`**，则**终止**并提示：「须在**所有** Feature 的 spec 输出后再运行 /speckit.epicuidesign。以下 Feature 目录尚未具备 spec：\[列出缺 spec 的目录名\]。请对缺 spec 的 Feature 运行 /speckit.feature 或 /speckit.specify，待全部完成后再运行本命令。」
+2. **前置条件检查（所有 Feature spec 已就绪）**：遍历 `EPIC_DIR/features/` 下每个**子目录**，若某子目录存在且其中**无 `spec.md`**，则**终止**并提示：「须在**所有** Feature 的 spec 输出后再运行 /aisdd.epicuidesign。以下 Feature 目录尚未具备 spec：\[列出缺 spec 的目录名\]。请对缺 spec 的 Feature 运行 /aisdd.feature 或 /aisdd.specify，待全部完成后再运行本命令。」
 
 3. **加载上下文**：读取 `EPIC_DIR/epic.md`、各 `EPIC_DIR/features/*/spec.md`、`.specify/templates/ux-design-template.md`。  
    **输入**：epic.md 与各 feature spec，以保障**整体**信息架构、跨 Feature 导航与统一交互/视觉。
@@ -51,4 +51,4 @@ $ARGUMENTS
 5. **填充 ux-design.md**：按 **epic.md 与各 feature spec** 的 FR/NFR、验收与场景、核心实体、**跨 Feature 流程与导航**，填充 ux-design-template 各章节（信息架构、**跨 Feature 导航与流程**、交互说明、视觉规范、设计稿索引；可按 **Feature 分节** 或分表），写入 `EPIC_UX_DESIGN`。  
    元信息：**Epic**、**Epic Version**、**ux-design Version**、日期；**输入**：`epic.md`、各 `features/*/spec.md`。**设计稿索引**须支持：Figma 链接、`design/xxx.png`、`design/xxx.html`；可加「所属 Feature」列。
 
-6. **完成报告**：输出 ux-design.md 路径（EPIC 根）、design 路径（若已创建），并提示下一步：若尚未做 EPIC 技术规约可运行 `/speckit.epicplan "EPIC-xxx"`；对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/speckit.plan`。
+6. **完成报告**：输出 ux-design.md 路径（EPIC 根）、design 路径（若已创建），并提示下一步：若尚未做 EPIC 技术规约可运行 `/aisdd.epicplan "EPIC-xxx"`；对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/aisdd.plan`。

@@ -67,7 +67,7 @@
 >
 > - 每个 Feature 必须可独立交付（Product / Platform-Capability）。
 > - FR/NFR 属于 Feature，不属于 EPIC；EPIC 只提供边界与方向。
-> - 本节输出用于后续逐个运行 `/speckit.feature` 创建 Feature 文档目录与 spec.md（本工作流不为 Feature 创建 git 分支）。
+> - 本节输出用于后续逐个运行 `/aisdd.feature` 创建 Feature 文档目录与 spec.md（本工作流不为 Feature 创建 git 分支）。
 
 ### Feature 列表（候选）
 
@@ -86,7 +86,7 @@
 - **依赖**：
 - **验收意图**：[高层验收意图；FR/NFR 在 Feature spec 里细化]
 - **拆分动机**：[为何单独交付？]
-- **建议下一步**：运行 `/speckit.feature`，输入：`[一句话 Feature 描述]`
+- **建议下一步**：运行 `/aisdd.feature`，输入：`[一句话 Feature 描述]`
 
 ## 通用能力（跨 Feature Capability）*（必填，若存在）*
 

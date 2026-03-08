@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /speckit.specify 时触发：填充 EPIC 级 epic.md（EPIC 规格说明 + Feature 拆分）"
+description: "当用户输入 /aisdd.specify 时触发：填充 EPIC 级 epic.md（EPIC 规格说明 + Feature 拆分）"
 alwaysApply: false
 ---
 
-# /speckit.specify — EPIC 规格说明
+# /aisdd.specify — EPIC 规格说明
 
 ## 触发
 
-用户输入 `/speckit.specify` 并附带 EPIC 描述（大需求/主题）。
+用户输入 `/aisdd.specify` 并附带 EPIC 描述（大需求/主题）。
 
 ## 目的
 
@@ -15,8 +15,8 @@ alwaysApply: false
 
 ## 与其他命令的关系
 
-- `/speckit.specify`：**EPIC 入口**——产出 `epic.md`（EPIC 规格 + Feature 拆分列表）
-- `/speckit.feature`：**Feature 入口**——创建 Feature 文档目录 + 产出 `spec.md`（Feature 级规格）
+- `/aisdd.specify`：**EPIC 入口**——产出 `epic.md`（EPIC 规格 + Feature 拆分列表）
+- `/aisdd.feature`：**Feature 入口**——创建 Feature 文档目录 + 产出 `spec.md`（Feature 级规格）
 
 ## 前置条件
 
@@ -61,7 +61,7 @@ alwaysApply: false
 
 - 每个 Feature **必须可独立交付**（Product / Platform-Capability）
 - FR/NFR 属于 Feature（在 `spec.md` 中细化），不属于 EPIC；EPIC 只提供边界与方向
-- Feature 列表仅为候选，后续逐个运行 `/speckit.feature` 创建文档目录
+- Feature 列表仅为候选，后续逐个运行 `/aisdd.feature` 创建文档目录
 
 ### Capability Feature 强制规则
 
@@ -90,5 +90,5 @@ alwaysApply: false
 
 提示用户：
 1. 评审 epic.md 内容（尤其 Feature 拆分与跨 Feature 技术策略）
-2. 逐个 Feature 运行 `/speckit.feature <Feature 描述>` 创建 Feature 目录与 spec.md
-3. 所有 Feature 的 spec.md 完成后 → 可进入 `/speckit.epicplan` 或 `/speckit.epicuidesign`
+2. 逐个 Feature 运行 `/aisdd.feature <Feature 描述>` 创建 Feature 目录与 spec.md
+3. 所有 Feature 的 spec.md 完成后 → 可进入 `/aisdd.epicplan` 或 `/aisdd.epicuidesign`

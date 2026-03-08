@@ -1,20 +1,20 @@
-﻿---
+---
 description: "**EPIC 级**软件设计说明书。在 epic-plan.md 及各 Feature plan.md 完成后运行；基于 epic.md、epic-plan.md、各 feature spec/plan 及**现有工程代码**，产出 EPIC 级设计说明书（0 层/1 层架构图、全景类图与关键时序、Story 拆解、L2 详细设计）。供人类评审与后续 tasks/implement 阶段 AI 编码引用。"
 handoffs:
   - label: 审批关卡（design-ready）
-    agent: speckit.gate
+    agent: aisdd.gate
     prompt: design-ready 关卡——冻结设计说明书后进入 tasks 拆解
     send: false
   - label: EPIC 级跨 Feature 分析（建议在 design-ready 关卡前）
-    agent: speckit.epicanalyze
+    agent: aisdd.epicanalyze
     prompt: 运行跨 Feature 一致性与质量分析
     send: false
   - label: 生成任务（Story → Task）
-    agent: speckit.tasks
+    agent: aisdd.tasks
     prompt: 将设计说明书中的 Story 拆解为可执行 tasks.md
     send: true
   - label: 补充需求或澄清
-    agent: speckit.clarify
+    agent: aisdd.clarify
     prompt: 需补充设计边界或约束时，澄清后可再运行 epicdesign 或直接说明要更新的章节/参数由 AI 做增量更新
     send: false
 ---
@@ -40,8 +40,8 @@ $ARGUMENTS
 目标：在 **EPIC 根**（或指定输出位置）产出 **EPIC 软件设计说明书**，作为面向人类评审与后续 Task/Implement 阶段 AI 编码引用的设计方案文档。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
 
 **前置条件**：
-- `epic-plan.md` 已产出（/speckit.epicplan）
-- 至少一个 Feature 的 `plan.md` 已产出（/speckit.plan）
+- `epic-plan.md` 已产出（/aisdd.epicplan）
+- 至少一个 Feature 的 `plan.md` 已产出（/aisdd.plan）
 - 须遵循 `.specify/memory/constitution.md` 的演进式设计原则
 
 执行步骤：
@@ -52,7 +52,7 @@ $ARGUMENTS
 .specify/scripts/powershell/get-epic-paths.ps1 -EpicId "EPIC-002" -Json
 ```
 
-解析 JSON 得到 `EPIC_DIR`、`EPIC_PLAN`。若 `EPIC_PLAN` 不存在：**终止**并提示先运行 `/speckit.epicplan`。
+解析 JSON 得到 `EPIC_DIR`、`EPIC_PLAN`。若 `EPIC_PLAN` 不存在：**终止**并提示先运行 `/aisdd.epicplan`。
 
 2. **解析深度参数**：从 `$ARGUMENTS` 中解析 `--depth=xxx`，若未指定则默认 `standard`。
 
@@ -94,10 +94,10 @@ $ARGUMENTS
 6. **更新各 Feature plan.md 的 Story 索引表**：若各 Feature 的 plan.md 中有 Story 索引表，提示更新以对齐本设计说明书中的 Story 拆解。
 
 7. **完成报告**：输出设计说明书路径、各 Feature 的 story_detail_design.md 路径、当前深度、已生成的章节，并提示下一步：
-   - Lite 完成后：提示 `/speckit.epicdesign --depth=standard` 或进入审批流程
-   - Standard 完成后：提示 `/speckit.epicdesign --depth=deep` 或进入审批流程
+   - Lite 完成后：提示 `/aisdd.epicdesign --depth=standard` 或进入审批流程
+   - Standard 完成后：提示 `/aisdd.epicdesign --depth=deep` 或进入审批流程
    - Deep 完成后：进入审批流程
-   - **审批流程**：`/speckit.epicanalyze`（跨 Feature 分析）→ `/speckit.gate design-ready`（审批关卡）→ `/speckit.tasks`
+   - **审批流程**：`/aisdd.epicanalyze`（跨 Feature 分析）→ `/aisdd.gate design-ready`（审批关卡）→ `/aisdd.tasks`
 
 核心规则：
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`

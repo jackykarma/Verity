@@ -1,12 +1,12 @@
-﻿---
+---
 description: "执行实施计划，处理并执行 tasks.md 中定义的所有任务（开发者在 Story 分支执行；严格遵循 EPIC 分支冻结的 spec/plan/epic-design/tasks）"
 handoffs:
   - label: 实现验证
-    agent: speckit.verify
+    agent: aisdd.verify
     prompt: 验证代码实现是否符合设计方案
     send: true
   - label: 完成审批关卡
-    agent: speckit.gate
+    agent: aisdd.gate
     prompt: implement-done 关卡
     send: false
 ---
@@ -111,6 +111,6 @@ $ARGUMENTS
 
 10. **关卡检查提示**：
     - 若 `EPIC_DIR/gate-log.md` 存在且 `tasks-ready` 关卡**未通过**：输出警告（非阻塞，由用户决定是否继续）
-    - 完成后提示下一步：运行 `/speckit.verify` 进行独立验证 → `/speckit.gate implement-done` 通过完成关卡
+    - 完成后提示下一步：运行 `/aisdd.verify` 进行独立验证 → `/aisdd.gate implement-done` 通过完成关卡
 
-注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/speckit.tasks` 重新生成任务列表。
+注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/aisdd.tasks` 重新生成任务列表。

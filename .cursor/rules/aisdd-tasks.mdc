@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /speckit.tasks 时触发：产出某个 Feature 的 tasks.md（Story → Task 落地任务清单）"
+description: "当用户输入 /aisdd.tasks 时触发：产出某个 Feature 的 tasks.md（Story → Task 落地任务清单）"
 alwaysApply: false
 ---
 
-# /speckit.tasks — Task 拆解
+# /aisdd.tasks — Task 拆解
 
 ## 触发
 
-用户输入 `/speckit.tasks`。作用于当前 Feature。
+用户输入 `/aisdd.tasks`。作用于当前 Feature。
 
 ## 目的
 
@@ -16,7 +16,7 @@ alwaysApply: false
 ## 前置条件
 
 1. 本 Feature 的 `spec.md` 和 `plan.md` 已完成
-2. `epic-design.md` 已通过 Design Ready（`/speckit.gate design-ready`）
+2. `epic-design.md` 已通过 Design Ready（`/aisdd.gate design-ready`）
 3. 本 Feature 的 `story_detail_design.md` 已完成（若有 L2 设计）
 
 ## 输入（必须阅读）
@@ -80,6 +80,6 @@ alwaysApply: false
 
 提示用户：
 1. 评审 tasks.md
-2. 建议运行 `/speckit.analyze`（一致性分析）
-3. 运行 `/speckit.gate tasks-ready`（审批关卡）
-4. 审批通过后运行 `/speckit.implement` 分阶段实现代码
+2. 建议运行 `/aisdd.analyze`（一致性分析）
+3. 运行 `/aisdd.gate tasks-ready`（审批关卡）
+4. 审批通过后运行 `/aisdd.implement` 分阶段实现代码

@@ -57,7 +57,7 @@ description: "Story → Task 落地任务清单模板"
 ============================================================================
 重要提示：以下内容为示例，用于说明格式与逻辑。
 
-/speckit.tasks 命令必须基于以下内容替换为实际任务：
+/aisdd.tasks 命令必须基于以下内容替换为实际任务：
 - plan.md 的 Story Breakdown（ST-xxx）
 - spec.md 的 FR/NFR（用于验证与追溯）
 - （可选）data-model.md、contracts/、research.md、quickstart.md

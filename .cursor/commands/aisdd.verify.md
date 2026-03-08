@@ -1,12 +1,12 @@
-﻿---
+---
 description: "实现验证：在 implement 完成（全部或按阶段）后运行，独立验证代码实现是否符合 spec 的 FR/NFR/AC、plan 的技术规约、epic-design 的架构设计与 story_detail_design 的 L2 详细设计。严格只读（不修改设计文档），但会标记 tasks.md 中的验证结果。"
 handoffs:
   - label: 提交变更请求（发现偏离时）
-    agent: speckit.plan
+    agent: aisdd.plan
     prompt: 实现偏离设计时，可说明要更新的 plan 范围由 AI 更新，或提交 CR
     send: false
   - label: 通过审批关卡
-    agent: speckit.gate
+    agent: aisdd.gate
     prompt: implement-done 关卡
     send: true
 ---
@@ -21,7 +21,7 @@ $ARGUMENTS
 
 ## 目标
 
-在 `/speckit.implement` 执行完毕（全部或部分阶段）后，**独立验证**代码实现是否与设计方案一致。这是一个**独立于实现者的验证视角**，避免实现过程中的"自我确认偏差"。
+在 `/aisdd.implement` 执行完毕（全部或部分阶段）后，**独立验证**代码实现是否与设计方案一致。这是一个**独立于实现者的验证视角**，避免实现过程中的"自我确认偏差"。
 
 **与 implement 步骤 9 的区别**：
 - implement 步骤 9 是实现者自验（同一 AI 上下文）
@@ -179,8 +179,8 @@ $ARGUMENTS
 - 整体通过率
 - 阻塞性偏离数量
 - 建议下一步：
-  - 若无阻塞性偏离 → `/speckit.gate implement-done`
-  - 若有阻塞性偏离 → 修复后重新运行 `/speckit.verify`
+  - 若无阻塞性偏离 → `/aisdd.gate implement-done`
+  - 若有阻塞性偏离 → 修复后重新运行 `/aisdd.verify`
   - 若有设计缺口 → 使用 CR 模板提交变更，更新设计后重新验证
 
 ## 验证原则
@@ -193,7 +193,7 @@ $ARGUMENTS
 
 ## 与现有命令的关系
 
-- **`/speckit.implement`**：执行实现——verify 在 implement 完成后运行
-- **`/speckit.analyze`**：分析 spec↔plan↔tasks 文档一致性——verify 分析代码↔设计一致性
-- **`/speckit.gate implement-done`**：verify 通过后可运行 implement-done 关卡
+- **`/aisdd.implement`**：执行实现——verify 在 implement 完成后运行
+- **`/aisdd.analyze`**：分析 spec↔plan↔tasks 文档一致性——verify 分析代码↔设计一致性
+- **`/aisdd.gate implement-done`**：verify 通过后可运行 implement-done 关卡
 - 建议流程：implement → verify（可按 Story 分批） → gate implement-done

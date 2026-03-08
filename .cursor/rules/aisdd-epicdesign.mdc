@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /speckit.epicdesign 时触发：产出 EPIC 软件设计说明书（通过参数控制本次输出的章节范围，大章节输出到子文件并引用）"
+description: "当用户输入 /aisdd.epicdesign 时触发：产出 EPIC 软件设计说明书（通过参数控制本次输出的章节范围，大章节输出到子文件并引用）"
 alwaysApply: false
 ---
 
-# /speckit.epicdesign — EPIC 软件设计说明书
+# /aisdd.epicdesign — EPIC 软件设计说明书
 
 ## 触发
 
-用户输入 `/speckit.epicdesign`，可附带章节范围参数控制本次输出内容。
+用户输入 `/aisdd.epicdesign`，可附带章节范围参数控制本次输出内容。
 
 ## 目的
 
@@ -42,7 +42,7 @@ alwaysApply: false
 **`-h` 帮助输出**：当参数为 `-h` 时，仅输出以下帮助信息，不执行任何文件操作：
 
 ```
-/speckit.epicdesign 参数说明：
+/aisdd.epicdesign 参数说明：
 
   (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充零层/一层架构（§1~§2），其余章节占位
   arch       重新生成零层/一层架构（§1~§2）
@@ -57,7 +57,7 @@ alwaysApply: false
 推荐顺序：(默认) → key → diagram → story → l2
 ```
 
-**默认调用行为**：首次执行 `/speckit.epicdesign` 时，`epic-design.md` 输出**全部 §1~§6 章节标题**，其中 §1~§2 填充实际内容，§3~§6 仅保留标题与占位提示（如「待填充，运行 `/speckit.epicdesign key` 产出」），确保后续章节填充时不会出现结构错乱。
+**默认调用行为**：首次执行 `/aisdd.epicdesign` 时，`epic-design.md` 输出**全部 §1~§6 章节标题**，其中 §1~§2 填充实际内容，§3~§6 仅保留标题与占位提示（如「待填充，运行 `/aisdd.epicdesign key` 产出」），确保后续章节填充时不会出现结构错乱。
 
 **使用建议**：
 - 复杂 EPIC（多 Feature）：默认 → `key` → `diagram` → `story` → `l2` 逐步产出，每步确认后继续
@@ -66,8 +66,8 @@ alwaysApply: false
 
 ## 前置条件
 
-1. `epic-plan.md` 已产出（`/speckit.epicplan`）
-2. **至少一个 Feature 的 `plan.md` 已产出**（`/speckit.plan`）
+1. `epic-plan.md` 已产出（`/aisdd.epicplan`）
+2. **至少一个 Feature 的 `plan.md` 已产出**（`/aisdd.plan`）
 3. `ux-design.md`（若已产出）作为可选输入
 4. 须遵循 `.specify/memory/constitution.md` 的演进式设计原则
 
@@ -135,6 +135,6 @@ alwaysApply: false
 - `diagram` 完成 → 提示继续 `story`（Story 拆解）
 - `story` 完成 → 提示继续 `l2`（L2 详细设计），并提示更新各 Feature `plan.md` Story 索引表
 - `l2` 完成 → 所有章节就绪，提示：
-  1. 运行 `/speckit.epicanalyze`（跨 Feature 一致性与质量分析）
-  2. 运行 `/speckit.gate design-ready`（审批关卡）
-  3. 审批通过后逐个 Feature 运行 `/speckit.tasks` 产出任务清单
+  1. 运行 `/aisdd.epicanalyze`（跨 Feature 一致性与质量分析）
+  2. 运行 `/aisdd.gate design-ready`（审批关卡）
+  3. 审批通过后逐个 Feature 运行 `/aisdd.tasks` 产出任务清单

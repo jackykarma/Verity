@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /speckit.epicuidesign 时触发：产出 EPIC 级 UX 设计 ux-design.md"
+description: "当用户输入 /aisdd.epicuidesign 时触发：产出 EPIC 级 UX 设计 ux-design.md"
 alwaysApply: false
 ---
 
-# /speckit.epicuidesign — EPIC UX 设计
+# /aisdd.epicuidesign — EPIC UX 设计
 
 ## 触发
 
-用户输入 `/speckit.epicuidesign`，可附带 EPIC 标识或范围说明。
+用户输入 `/aisdd.epicuidesign`，可附带 EPIC 标识或范围说明。
 
 ## 目的
 
@@ -17,7 +17,7 @@ alwaysApply: false
 
 1. `epic.md` 已存在
 2. **所有 Feature 的 `spec.md` 已完成**（Spec Ready）
-3. 可与 `/speckit.epicplan` 并行执行
+3. 可与 `/aisdd.epicplan` 并行执行
 4. 非技术 Feature（纯后台/数据/SDK）可跳过
 
 ## 输入（必须阅读）
@@ -47,4 +47,4 @@ EPIC 根目录下的 `ux-design.md`，覆盖模板全部章节：
 提示用户：
 1. 评审 ux-design.md
 2. 补充设计稿（Figma/截图/HTML）到 `design/` 目录
-3. 后续 `/speckit.plan` 和 `/speckit.epicdesign` 可引用此文件作为 UI 约束输入
+3. 后续 `/aisdd.plan` 和 `/aisdd.epicdesign` 可引用此文件作为 UI 约束输入

@@ -125,7 +125,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 - **EPIC 软件设计说明书**（EPIC 级）是 **架构与设计事实源**：0 层/1 层架构图、全景类图与关键时序、关键功能与疑难设计、Story 拆解与 L2 索引；L2 详细设计统一写在各 Feature 的 `story_detail_design.md` 中；供人类评审与 Task/Implement 阶段引用
 - `tasks.md` 是 **执行事实源**：将设计说明书中的 Story 拆解为可执行 Task，并引用 plan 约束与 story_detail_design.md 中的设计片段
 - `gate-log.md`（EPIC 级）是 **审批事实源**：记录各阶段关卡的评审结论、冻结产物与版本
-- `/speckit.verify` 产出的验证报告是 **实现↔设计一致性事实源**：记录代码与设计方案的偏离项
+- `/aisdd.verify` 产出的验证报告是 **实现↔设计一致性事实源**：记录代码与设计方案的偏离项
 
 ### 七.1 分支策略（Branch Strategy）
 

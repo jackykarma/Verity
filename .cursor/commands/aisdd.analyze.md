@@ -1,4 +1,4 @@
-﻿---
+---
 description: 在任务生成完成后，对spec.md、plan.md和tasks.md这三类核心工件进行非破坏性的跨工件一致性与质量分析。
 ---
 
@@ -12,13 +12,13 @@ $ARGUMENTS
 
 ## 目标
 
-在项目实施前，识别三类核心工件（`spec.md`、`plan.md`、`tasks.md`）中存在的不一致、重复、模糊不清以及描述不充分的问题。该命令**仅允许**在 `/speckit.tasks` 成功生成完整的 `tasks.md` 文件后运行。
+在项目实施前，识别三类核心工件（`spec.md`、`plan.md`、`tasks.md`）中存在的不一致、重复、模糊不清以及描述不充分的问题。该命令**仅允许**在 `/aisdd.tasks` 成功生成完整的 `tasks.md` 文件后运行。
 
 ## 操作约束
 
 **严格只读**：请勿修改任何文件。输出结构化的分析报告。可提供可选的整改方案（需用户明确批准后，方可手动触发后续的编辑命令）。
 
-**章程权威性**：项目章程（`.specify/memory/constitution.md`）在本次分析范围内**不可协商**。违反章程的问题自动判定为CRITICAL（严重）级别，需调整规格说明（spec）、计划（plan）或任务（tasks）——而非淡化、重新解读或默认忽略相关原则。若章程原则本身需要变更，必须在 `/speckit.analyze` 之外通过单独、明确的章程更新流程完成。
+**章程权威性**：项目章程（`.specify/memory/constitution.md`）在本次分析范围内**不可协商**。违反章程的问题自动判定为CRITICAL（严重）级别，需调整规格说明（spec）、计划（plan）或任务（tasks）——而非淡化、重新解读或默认忽略相关原则。若章程原则本身需要变更，必须在 `/aisdd.analyze` 之外通过单独、明确的章程更新流程完成。
 
 ## 执行步骤
 
@@ -144,11 +144,11 @@ $ARGUMENTS
 
 在报告末尾输出简洁的“后续行动”模块：
 
-- 若存在CRITICAL级问题：建议在执行 `/speckit.implement` 前解决
+- 若存在CRITICAL级问题：建议在执行 `/aisdd.implement` 前解决
 - 若仅存在LOW/MEDIUM级问题：用户可继续推进，但需提供优化建议
-- 给出明确的命令建议：例如，“运行 /speckit.feature 生成/细化 Feature spec.md”、“运行 /speckit.plan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
+- 给出明确的命令建议：例如，“运行 /aisdd.feature 生成/细化 Feature spec.md”、“运行 /aisdd.plan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
 
-- 若本 Feature 属于多 Feature EPIC：建议完成所有 Feature 的 analyze 后运行 /speckit.epicanalyze 做跨 Feature 一致性分析
+- 若本 Feature 属于多 Feature EPIC：建议完成所有 Feature 的 analyze 后运行 /aisdd.epicanalyze 做跨 Feature 一致性分析
 
 ### 8. 提供整改建议
 
