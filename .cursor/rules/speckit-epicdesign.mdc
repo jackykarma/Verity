@@ -1,5 +1,5 @@
 ---
-description: "当用户输入 /speckit.epicdesign 时触发：产出 EPIC 软件设计说明书 epic-design.md 及配套文件（分 Gate 逐阶段产出）"
+description: "当用户输入 /speckit.epicdesign 时触发：产出 EPIC 软件设计说明书（通过参数控制本次输出的章节范围，大章节输出到子文件并引用）"
 alwaysApply: false
 ---
 
@@ -7,33 +7,77 @@ alwaysApply: false
 
 ## 触发
 
-用户输入 `/speckit.epicdesign`，可附带 EPIC 标识或指定 Gate 阶段（如 `Gate 0`、`Gate 1`）。
+用户输入 `/speckit.epicdesign`，可附带章节范围参数控制本次输出内容。
 
 ## 目的
 
-产出 EPIC 根目录下的设计文件组：
+在 EPIC 根目录产出 EPIC 软件设计说明书及配套子文件，作为面向人类评审与后续 Task/Implement 阶段 AI 编码引用的设计方案文档。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
 
-| 文件 | 内容 |
-|------|------|
-| `epic-design.md` | 设计总览（各章节摘要/引用/Gate 确认） |
-| `key-func-design.md` | §六 关键功能疑难点/亮点设计策略、方案流程图、Feature 流程图集 |
-| `key-diagram.md` | §七 全景骨架类图、Feature 子类图（含方法签名）、关键时序图 |
-| `features/FEAT-xxx/story_detail_design.md` | §十三 各 Story 落码级 L2 详细设计 |
+文档结构遵循**从整体到局部细节**的设计思路，通过参数控制每次输出的章节范围。
+
+## 产出文件组
+
+| 文件 | 对应章节 | 内容 |
+|------|----------|------|
+| `epic-design.md` | §1~§2、§5 + 各章节摘要/引用 | 设计总览（零层/一层架构、Story 拆解、子文件引用） |
+| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计策略、方案流程图、Feature 流程图集 |
+| `key-diagram.md` | §4 | 全景骨架类图、Feature 子类图（含方法签名）、关键时序图 |
+| `features/FEAT-xxx/story_detail_design.md` | §6 | 各 Story 落码级 L2 详细设计 |
+
+## 章节范围参数
+
+通过参数控制每次调用产出的章节范围，建议按从粗到细的顺序逐步推进：
+
+| 参数 | 对应章节 | 产出文件 | 内容 |
+|------|----------|----------|------|
+| 无参数（默认） | §1~§2 填充；§3~§6 占位 | `epic-design.md`（完整章节骨架） | 首次调用，建立完整章节结构 + 零层/一层架构 |
+| `arch` | §1~§2 | `epic-design.md` §1~§2 | 重新生成零层/一层架构（覆盖已有内容） |
+| `key` | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计决策、方案流程图 |
+| `diagram` | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 全景类图、Feature 子类图、关键时序图 |
+| `story` | §5 | `epic-design.md` §5 | Story 列表、依赖关系图、FR/NFR 覆盖矩阵 |
+| `l2` | §6 | 各 `story_detail_design.md` + `epic-design.md` §6 索引表 | 按 Story 产出 L2 详细设计 |
+| `all` | §1~§5 一次性 | 上述对应文件 | 适用于小 EPIC 或上下文窗口充裕时 |
+| `-h` | — | — | 列出所有参数及说明（不产出任何文件） |
+
+**`-h` 帮助输出**：当参数为 `-h` 时，仅输出以下帮助信息，不执行任何文件操作：
+
+```
+/speckit.epicdesign 参数说明：
+
+  (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充零层/一层架构（§1~§2），其余章节占位
+  arch       重新生成零层/一层架构（§1~§2）
+  key        产出关键功能疑难设计（§3）→ key-func-design.md
+  diagram    产出全景类图与关键时序（§4）→ key-diagram.md
+  story      产出 Story 拆解（§5）
+  l2         产出 L2 详细设计（§6）→ 各 Feature 的 story_detail_design.md
+             可指定范围：l2 FEAT-001 或 l2 ST-001
+  all        一次性产出 §1~§5（不含 l2），适用于小 EPIC
+  -h         显示本帮助信息
+
+推荐顺序：(默认) → key → diagram → story → l2
+```
+
+**默认调用行为**：首次执行 `/speckit.epicdesign` 时，`epic-design.md` 输出**全部 §1~§6 章节标题**，其中 §1~§2 填充实际内容，§3~§6 仅保留标题与占位提示（如「待填充，运行 `/speckit.epicdesign key` 产出」），确保后续章节填充时不会出现结构错乱。
+
+**使用建议**：
+- 复杂 EPIC（多 Feature）：默认 → `key` → `diagram` → `story` → `l2` 逐步产出，每步确认后继续
+- 简单 EPIC（单 Feature/小改动）：直接 `all`，`l2` 按需
+- `l2` 可指定范围：如 `l2 FEAT-001` 或 `l2 ST-001`
 
 ## 前置条件
 
-1. `epic.md` 已存在
-2. `epic-plan.md` 已存在
-3. **所有 Feature 的 `plan.md` 初版已完成**（Plan Ready）
-4. `ux-design.md`（若已产出）作为可选输入
+1. `epic-plan.md` 已产出（`/speckit.epicplan`）
+2. **至少一个 Feature 的 `plan.md` 已产出**（`/speckit.plan`）
+3. `ux-design.md`（若已产出）作为可选输入
+4. 须遵循 `.specify/memory/constitution.md` 的演进式设计原则
 
 ## 输入（必须阅读）
 
-1. **`epic.md`**：背景、范围、Feature 列表、跨 Feature 技术策略
+1. **`epic.md`**：范围、Feature 拆分、通用能力、EPIC-FR/NFR
 2. **`epic-plan.md`**：EPIC 级技术约束
-3. **所有 Feature 的 `spec.md`**：FR/NFR/边界/验收
-4. **所有 Feature 的 `plan.md`**：技术规约、接口契约、数据模型
-5. **`ux-design.md`**（若有）：UI/交互约束
+3. **各 Feature 的 `spec.md`**：FR/NFR/边界/验收
+4. **各 Feature 的 `plan.md`**：技术规约、接口契约、数据模型
+5. **`ux-design.md`**（若有）：信息架构、交互规则、设计稿索引
 6. **模板文件**：
    - `.specify/templates/epic-design-doc-template.md`
    - `.specify/templates/key-func-design-template.md`
@@ -44,70 +88,53 @@ alwaysApply: false
 9. **`.cursor/rules/mermaid-style-guide.mdc`**：图表样式规范
 10. **现有工程代码**：实际架构、类、方法
 
-## 分阶段产出（Gate 机制，必须严格遵守）
+## 子文件引用规则
 
-**核心规则：每个 Gate 完成后必须停止，等待用户确认后才能继续下一阶段。**
+当章节内容输出到子文件时，`epic-design.md` 中对应章节仅保留**摘要 + 引用链接**：
 
-### Gate 0（§一～§四）：零层架构
+```markdown
+## §3 关键功能与疑难设计
 
-- §一 简介、§二 需求概述、§三 领域模型、§四 零层架构
-- 产出文件：`epic-design.md` 对应章节
-- **停止并等待确认**
+> 详见 [key-func-design.md](./key-func-design.md)
 
-### Gate 1（§五）：一层架构
+**摘要**：本 EPIC 共识别 N 个关键疑难点……（2-3 句概述）
+```
 
-- 框架图（须标注代码工程模块名）、组件清单与职责、组件协作流程图、技术方案选型
-- 产出文件：`epic-design.md` §五
-- **停止并等待确认**
+```markdown
+## §4 全景类图与关键时序
 
-### Gate 2（§六 + `key-func-design.md`）：关键设计策略
+> 详见 [key-diagram.md](./key-diagram.md)
 
-- §六 关键设计疑难点/亮点（设计决策与方案分析）
-- `key-func-design.md`（完整内容：方案流程图 + Feature 流程图集）
-- 产出文件：`key-func-design.md`（完整内容）+ `epic-design.md` §六
-- **停止并等待确认**
+**摘要**：全景类图覆盖 N 个核心类……（2-3 句概述）
+```
 
-### Gate 3（§七 + `key-diagram.md`）：全景类图与关键时序
+```markdown
+## §6 L2 详细设计
 
-- §七 图表概览（摘要索引）
-- `key-diagram.md`（完整内容：骨架类图、Feature 子类图含方法签名、关键时序图）
-- 产出文件：`key-diagram.md`（完整内容）+ `epic-design.md` §七摘要
-- **停止并等待确认**
+> 各 Story 的详细设计见各 Feature 目录下的 `story_detail_design.md`。
 
-### Gate 4（§八～§十一）：质量与契约
-
-- 技术风险与评估（量化）、接口设计、数据库设计、埋点技术方案
-- 产出文件：`epic-design.md` §八～§十一
-- **停止并等待确认**
-
-### Gate 5（§十二）：Story 拆解
-
-- 拆解策略、Story 列表（按 Feature 分组）、依赖关系图、覆盖矩阵、工作量汇总
-- 产出文件：`epic-design.md` §十二
-- **停止并等待确认**
-- **Gate 5 通过后**提示用户运行 `/speckit.backfill` 执行回填（自动完成以下 3 项）：
-  - 回填各 Feature 的 `plan.md` Story 索引表
-  - 回填各 Feature 的 `spec.md` 需求追溯表
-  - 回填 `plan.md` §一 一致性互校
-
-### Gate 6（§十三）：L2 详细设计
-
-- 按 Story 逐个产出 L2 详细设计
-- 产出文件：各 Feature 的 `story_detail_design.md`，`epic-design.md` §十三索引表
-- **每个 Story 的 L2 完成后单独确认**，全部完成后整体确认
+| Story ID | Feature | 设计位置 | 状态 |
+|----------|---------|----------|------|
+| ST-001 | FEAT-001 | `features/FEAT-001-.../story_detail_design.md:ST-001` | 已完成 |
+```
 
 ## 行为约束
 
 - **基于真实代码**：类图/时序图必须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）
 - **Mermaid 样式**：所有图表遵循 Material Design 配色（`.cursor/rules/mermaid-style-guide.mdc`）
 - **演进式设计**：不得从零设计理想方案（constitution §二）
-- **模板结构保护**：不得增删模板已定义的章节（constitution §九）
-- **禁止跨 Gate 提前生成**：当前 Gate 未通过时，后续章节保持占位状态
-- **L2 完整性**：story_detail_design.md 中每个 Story 的类图/时序图必须完整书写，不得引用其他文档
+- **子文件完整性**：`key-func-design.md`、`key-diagram.md`、`story_detail_design.md` 必须是自包含的完整文档，不得依赖读者先阅读 `epic-design.md`
+- **章节骨架先行**：首次调用必须输出全部 §1~§6 章节标题，未填充的章节保留占位提示；后续调用仅更新指定章节，已有内容不改动
+- **设计说明书是事实源**：是 tasks.md 与 implement 阶段的设计事实源，与 plan.md 的技术规约共同约束实现
 
 ## 完成后
 
-提示用户：
-1. 所有 Gate 通过 → Design Ready
-2. 确认回填已完成（plan.md Story 索引表 + spec.md 需求追溯表）
-3. 逐个 Feature 运行 `/speckit.tasks` 产出任务清单
+根据已完成的章节提示下一步：
+- 默认（arch）完成 → 提示继续 `key`（关键设计）
+- `key` 完成 → 提示继续 `diagram`（类图与时序）
+- `diagram` 完成 → 提示继续 `story`（Story 拆解）
+- `story` 完成 → 提示继续 `l2`（L2 详细设计），并提示更新各 Feature `plan.md` Story 索引表
+- `l2` 完成 → 所有章节就绪，提示：
+  1. 运行 `/speckit.epicanalyze`（跨 Feature 一致性与质量分析）
+  2. 运行 `/speckit.gate design-ready`（审批关卡）
+  3. 审批通过后逐个 Feature 运行 `/speckit.tasks` 产出任务清单

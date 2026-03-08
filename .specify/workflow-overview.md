@@ -148,9 +148,8 @@ flowchart TD
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Step1["create-new-epic.ps1<br/>创建 EPIC 分支 + 目录"] --> Step2["create-new-feature.ps1<br/>创建 Feature 目录"]
-    Step1 --> Step1b["init-epic-files.ps1<br/>初始化 EPIC 级设计文件模板"]
-    Step2 --> Step3["/speckit.specify<br/>产出各 Feature spec.md"]
+    Step1["create-new-epic.ps1<br/>创建 EPIC 分支 + 目录"] --> Step2["/speckit.specify<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
+    Step2 --> Step3["/speckit.feature<br/>创建 Feature 目录 + 产出 spec.md<br/>（逐个 Feature 执行）"]
     Step3 --> Step4["/speckit.epicplan<br/>产出 epic-plan.md"]
     Step3 --> Step5["/speckit.epicuidesign<br/>产出 ux-design.md"]
     Step4 --> Step6["/speckit.plan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
@@ -163,17 +162,15 @@ flowchart TD
     Step11 --> Step12([交付 / 合并主分支])
 
     style Step1 fill:#E8F5E9,stroke:#388E3C
-    style Step1b fill:#E8F5E9,stroke:#388E3C
     style Step12 fill:#E8F5E9,stroke:#388E3C
     style Step8 fill:#FFF3E0,stroke:#F57C00
 ```
 
 | 步骤 | 命令 | 产出物 | 执行次数 |
 |------|------|--------|----------|
-| 1 | `create-new-epic.ps1` | EPIC 分支 + EPIC 目录 + `epic.md` | 每个 EPIC 一次 |
-| 1b | `init-epic-files.ps1` | EPIC 级设计文件模板（epic-plan/ux-design/epic-design/key-\*/gate-log） | 每个 EPIC 一次（可选，也可由命令自动创建） |
-| 2 | `create-new-feature.ps1` | Feature 目录 + `spec.md`（空模板） | 每个 Feature 一次 |
-| 3 | `/speckit.specify` | 各 Feature `spec.md`（填充内容） | 每个 Feature 一次 |
+| 1 | `create-new-epic.ps1` | EPIC 分支 + EPIC 目录 + `epic.md`（空模板） | 每个 EPIC 一次 |
+| 2 | `/speckit.specify` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
+| 3 | `/speckit.feature` | Feature 目录 + `spec.md`（填充内容） | 每个 Feature 一次 |
 | 4 | `/speckit.epicplan` | `epic-plan.md` | 每个 EPIC 一次 |
 | 5 | `/speckit.epicuidesign` | `ux-design.md` | 每个 EPIC 一次（可选，与步骤 4 并行） |
 | 6 | `/speckit.plan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
