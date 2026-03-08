@@ -59,4 +59,4 @@ alwaysApply: false
 
 提示用户：
 1. 回填已完成，列出已更新的文件清单
-2. 后续逐个 Feature 运行 `/aisdd.tasks` 产出任务清单
+2. 后续逐个 Feature 运行 `/aisdd.featuretasks` 产出任务清单

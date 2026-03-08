@@ -55,4 +55,4 @@ EPIC 根目录下的 `epic-plan.md`，覆盖模板全部章节：
 
 提示用户：
 1. 评审 epic-plan.md
-2. 后续各 Feature 按 §八 确定的执行顺序逐个运行 `/aisdd.plan`
+2. 后续各 Feature 按 §八 确定的执行顺序逐个运行 `/aisdd.featureplan`

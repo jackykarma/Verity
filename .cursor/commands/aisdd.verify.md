@@ -2,7 +2,7 @@
 description: "实现验证：在 implement 完成（全部或按阶段）后运行，独立验证代码实现是否符合 spec 的 FR/NFR/AC、plan 的技术规约、epic-design 的架构设计与 story_detail_design 的 L2 详细设计。严格只读（不修改设计文档），但会标记 tasks.md 中的验证结果。"
 handoffs:
   - label: 提交变更请求（发现偏离时）
-    agent: aisdd.plan
+    agent: aisdd.featureplan
     prompt: 实现偏离设计时，可说明要更新的 plan 范围由 AI 更新，或提交 CR
     send: false
   - label: 通过审批关卡

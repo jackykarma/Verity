@@ -2,7 +2,7 @@
 description: "阶段审批关卡：在关键阶段转换前执行人工审批，记录评审结论、冻结产物状态，确保 AI 后续阶段在已审批的基线上执行。支持 spec-ready / plan-ready / design-ready / tasks-ready / implement-done 五个关卡。"
 handoffs:
   - label: 进入下一阶段
-    agent: aisdd.plan
+    agent: aisdd.featureplan
     prompt: 关卡通过后，进入下一阶段
     send: false
 ---
@@ -154,7 +154,7 @@ $ARGUMENTS
 |------|--------|
 | spec-ready | `/aisdd.epicuidesign`（可选）→ `/aisdd.epicplan` |
 | plan-ready | `/aisdd.epicdesign` |
-| design-ready | `/aisdd.tasks` |
+| design-ready | `/aisdd.featuretasks` |
 | tasks-ready | `/aisdd.analyze`（若未运行）→ `/aisdd.implement` |
 | implement-done | `/aisdd.verify`（若未运行）→ 合并/发布 |
 

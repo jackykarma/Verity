@@ -12,7 +12,7 @@ $ARGUMENTS
 
 ## 目标
 
-在项目实施前，识别三类核心工件（`spec.md`、`plan.md`、`tasks.md`）中存在的不一致、重复、模糊不清以及描述不充分的问题。该命令**仅允许**在 `/aisdd.tasks` 成功生成完整的 `tasks.md` 文件后运行。
+在项目实施前，识别三类核心工件（`spec.md`、`plan.md`、`tasks.md`）中存在的不一致、重复、模糊不清以及描述不充分的问题。该命令**仅允许**在 `/aisdd.featuretasks` 成功生成完整的 `tasks.md` 文件后运行。
 
 ## 操作约束
 
@@ -146,7 +146,7 @@ $ARGUMENTS
 
 - 若存在CRITICAL级问题：建议在执行 `/aisdd.implement` 前解决
 - 若仅存在LOW/MEDIUM级问题：用户可继续推进，但需提供优化建议
-- 给出明确的命令建议：例如，“运行 /aisdd.feature 生成/细化 Feature spec.md”、“运行 /aisdd.plan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
+- 给出明确的命令建议：例如，“运行 /aisdd.featurespec 生成/细化 Feature spec.md”、“运行 /aisdd.featureplan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
 
 - 若本 Feature 属于多 Feature EPIC：建议完成所有 Feature 的 analyze 后运行 /aisdd.epicanalyze 做跨 Feature 一致性分析
 

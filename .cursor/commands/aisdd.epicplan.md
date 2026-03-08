@@ -2,7 +2,7 @@
 description: "**EPIC 级**技术规约与约束。须在**所有 Feature 的 spec 均已输出**之后运行；基于 epic.md 与各 feature spec.md 及**现有工程代码**，产出 EPIC 根下的 epic-plan.md（全局技术约束与规约，不含 0 层/1 层架构图）。各 Feature 的 plan 必须在其约束下编写。0 层/1 层架构图在后续 /aisdd.epicdesign 阶段产出。"
 handoffs:
   - label: 制定 Feature 技术规约
-    agent: aisdd.plan
+    agent: aisdd.featureplan
     prompt: 完成 EPIC Plan 后，基于 epic-plan 约束制定各 Feature 的 plan
     send: true
   - label: 输出 EPIC 软件设计说明书
@@ -68,4 +68,4 @@ $ARGUMENTS
 
 5. **与 epic.md 的「跨 Feature 技术策略」对齐**：epic-plan 中的共享能力、技术约束应与 epic.md 的「跨 Feature 技术策略」一致；若 epic.md 该节尚为占位，可根据 epic-plan 输出建议其内容。
 
-6. **完成报告**：输出 epic-plan.md 路径（EPIC 根），并提示下一步：对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/aisdd.plan`（plan 将读取 EPIC_PLAN 并在其约束下编写）。
+6. **完成报告**：输出 epic-plan.md 路径（EPIC 根），并提示下一步：对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/aisdd.featureplan`（plan 将读取 EPIC_PLAN 并在其约束下编写）。

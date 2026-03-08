@@ -10,7 +10,7 @@ handoffs:
     prompt: 运行跨 Feature 一致性与质量分析
     send: false
   - label: 生成任务（Story → Task）
-    agent: aisdd.tasks
+    agent: aisdd.featuretasks
     prompt: 将设计说明书中的 Story 拆解为可执行 tasks.md
     send: true
   - label: 补充需求或澄清
@@ -41,7 +41,7 @@ $ARGUMENTS
 
 **前置条件**：
 - `epic-plan.md` 已产出（/aisdd.epicplan）
-- 至少一个 Feature 的 `plan.md` 已产出（/aisdd.plan）
+- 至少一个 Feature 的 `plan.md` 已产出（/aisdd.featureplan）
 - 须遵循 `.specify/memory/constitution.md` 的演进式设计原则
 
 执行步骤：
@@ -97,7 +97,7 @@ $ARGUMENTS
    - Lite 完成后：提示 `/aisdd.epicdesign --depth=standard` 或进入审批流程
    - Standard 完成后：提示 `/aisdd.epicdesign --depth=deep` 或进入审批流程
    - Deep 完成后：进入审批流程
-   - **审批流程**：`/aisdd.epicanalyze`（跨 Feature 分析）→ `/aisdd.gate design-ready`（审批关卡）→ `/aisdd.tasks`
+   - **审批流程**：`/aisdd.epicanalyze`（跨 Feature 分析）→ `/aisdd.gate design-ready`（审批关卡）→ `/aisdd.featuretasks`
 
 核心规则：
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`

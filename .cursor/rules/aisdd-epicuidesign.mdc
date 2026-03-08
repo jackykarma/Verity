@@ -47,4 +47,4 @@ EPIC 根目录下的 `ux-design.md`，覆盖模板全部章节：
 提示用户：
 1. 评审 ux-design.md
 2. 补充设计稿（Figma/截图/HTML）到 `design/` 目录
-3. 后续 `/aisdd.plan` 和 `/aisdd.epicdesign` 可引用此文件作为 UI 约束输入
+3. 后续 `/aisdd.featureplan` 和 `/aisdd.epicdesign` 可引用此文件作为 UI 约束输入

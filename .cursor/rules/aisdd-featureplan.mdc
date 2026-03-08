@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /aisdd.plan 时触发：产出某个 Feature 的 plan.md（技术规约与实现约束）"
+description: "当用户输入 /aisdd.featureplan 时触发：产出某个 Feature 的 plan.md（技术规约与实现约束）"
 alwaysApply: false
 ---
 
-# /aisdd.plan — Feature 技术规约
+# /aisdd.featureplan — Feature 技术规约
 
 ## 触发
 
-用户输入 `/aisdd.plan`。作用于当前 Feature（由 `$env:SPECIFY_FEATURE` 或分支确定）。
+用户输入 `/aisdd.featureplan`。作用于当前 Feature（由 `$env:SPECIFY_FEATURE` 或分支确定）。
 
 ## 目的
 

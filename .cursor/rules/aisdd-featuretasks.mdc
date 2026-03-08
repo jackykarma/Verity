@@ -1,13 +1,13 @@
 ---
-description: "当用户输入 /aisdd.tasks 时触发：产出某个 Feature 的 tasks.md（Story → Task 落地任务清单）"
+description: "当用户输入 /aisdd.featuretasks 时触发：产出某个 Feature 的 tasks.md（Story → Task 落地任务清单）"
 alwaysApply: false
 ---
 
-# /aisdd.tasks — Task 拆解
+# /aisdd.featuretasks — Task 拆解
 
 ## 触发
 
-用户输入 `/aisdd.tasks`。作用于当前 Feature。
+用户输入 `/aisdd.featuretasks`。作用于当前 Feature。
 
 ## 目的
 

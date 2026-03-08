@@ -40,7 +40,7 @@ $ARGUMENTS
    - `TASKS`（tasks.md 路径，可能不存在）
     - 所有文件路径必须为绝对路径。
     - 若参数中包含单引号（如 "I'm Groot"），需使用转义语法：例如 'I'\''m Groot'（或尽可能使用双引号："I'm Groot"）。
-   - 若 `FEATURE_SPEC` 不存在：终止并提示先运行 `/aisdd.feature` 创建 Feature 文档目录与 spec.md。
+   - 若 `FEATURE_SPEC` 不存在：终止并提示先运行 `/aisdd.featurespec` 创建 Feature 文档目录与 spec.md。
 
 2. **明确意图（动态）**：推导最多三个初始的上下文澄清问题（禁止使用预设模板）。问题必须满足：
     - 基于用户表述 + 从规格说明/计划/任务中提取的关键信息生成

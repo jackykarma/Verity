@@ -148,15 +148,15 @@ flowchart TD
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Step1["create-new-epic.ps1<br/>创建 EPIC 分支 + 目录"] --> Step2["/aisdd.specify<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
-    Step2 --> Step3["/aisdd.feature<br/>创建 Feature 目录 + 产出 spec.md<br/>（逐个 Feature 执行）"]
+    Step1["create-new-epic.ps1<br/>创建 EPIC 分支 + 目录"] --> Step2["/aisdd.epicspec<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
+    Step2 --> Step3["/aisdd.featurespec<br/>创建 Feature 目录 + 产出 spec.md<br/>（逐个 Feature 执行）"]
     Step3 --> Step4["/aisdd.epicplan<br/>产出 epic-plan.md"]
     Step3 --> Step5["/aisdd.epicuidesign<br/>产出 ux-design.md"]
-    Step4 --> Step6["/aisdd.plan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
+    Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
     Step5 -.-> Step6
     Step6 --> Step7["/aisdd.epicdesign<br/>产出 epic-design.md<br/>+ key-func-design.md<br/>+ key-diagram.md<br/>+ story_detail_design.md"]
     Step7 --> Step8["/aisdd.backfill<br/>回填 plan.md Story 索引表<br/>回填 spec.md 需求追溯表<br/>回填 plan.md §一 互校"]
-    Step8 --> Step9["/aisdd.tasks<br/>产出各 Feature tasks.md"]
+    Step8 --> Step9["/aisdd.featuretasks<br/>产出各 Feature tasks.md"]
     Step9 --> Step10["/aisdd.implement<br/>按 Task 逐个实现代码"]
     Step10 --> Step11["/aisdd.verify<br/>实现↔设计一致性验证"]
     Step11 --> Step12([交付 / 合并主分支])
@@ -169,14 +169,14 @@ flowchart TD
 | 步骤 | 命令 | 产出物 | 执行次数 |
 |------|------|--------|----------|
 | 1 | `create-new-epic.ps1` | EPIC 分支 + EPIC 目录 + `epic.md`（空模板） | 每个 EPIC 一次 |
-| 2 | `/aisdd.specify` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
-| 3 | `/aisdd.feature` | Feature 目录 + `spec.md`（填充内容） | 每个 Feature 一次 |
+| 2 | `/aisdd.epicspec` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
+| 3 | `/aisdd.featurespec` | Feature 目录 + `spec.md`（填充内容） | 每个 Feature 一次 |
 | 4 | `/aisdd.epicplan` | `epic-plan.md` | 每个 EPIC 一次 |
 | 5 | `/aisdd.epicuidesign` | `ux-design.md` | 每个 EPIC 一次（可选，与步骤 4 并行） |
-| 6 | `/aisdd.plan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
+| 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + `key-func-design.md` + `key-diagram.md` + 各 `story_detail_design.md` | 每个 EPIC 一次（分 Gate 逐阶段） |
 | 8 | `/aisdd.backfill` | `plan.md` Story 索引表 + `spec.md` 需求追溯表 + `plan.md` §一互校 | Gate 5 通过后一次 |
-| 9 | `/aisdd.tasks` | 各 Feature `tasks.md` | 每个 Feature 一次 |
+| 9 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 每个 Feature 一次 |
 | 10 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | 11 | `/aisdd.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
 

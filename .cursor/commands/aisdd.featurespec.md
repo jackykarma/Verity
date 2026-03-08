@@ -1,5 +1,5 @@
 ---
-description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /aisdd.plan → /aisdd.tasks → /aisdd.implement 使用。
+description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /aisdd.featureplan → /aisdd.featuretasks → /aisdd.implement 使用。
 handoffs:
   - label: 澄清规格说明要求
     agent: aisdd.clarify
@@ -14,7 +14,7 @@ handoffs:
     prompt: 运行 /aisdd.epicplan "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有）→ epicplan → 各 Feature plan
     send: false
   - label: 制定技术方案
-    agent: aisdd.plan
+    agent: aisdd.featureplan
     prompt: 为该规格说明制定方案（由 SE/TL 在 EPIC 分支产出与维护）。我正在基于……进行开发
 ---
 
@@ -64,5 +64,5 @@ $ARGUMENTS
 - `/aisdd.clarify`（建议先做）
 - 若 UX/视觉稿已就绪且尚未运行：**`/aisdd.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
 - 若尚未做 EPIC 技术规约：**`/aisdd.epicplan "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → epicplan → 各 Feature plan
-- 或直接 `/aisdd.plan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
+- 或直接 `/aisdd.featureplan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
 

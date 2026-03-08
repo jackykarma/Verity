@@ -113,4 +113,4 @@ $ARGUMENTS
     - 若 `EPIC_DIR/gate-log.md` 存在且 `tasks-ready` 关卡**未通过**：输出警告（非阻塞，由用户决定是否继续）
     - 完成后提示下一步：运行 `/aisdd.verify` 进行独立验证 → `/aisdd.gate implement-done` 通过完成关卡
 
-注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/aisdd.tasks` 重新生成任务列表。
+注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/aisdd.featuretasks` 重新生成任务列表。

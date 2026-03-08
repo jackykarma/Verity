@@ -199,9 +199,9 @@
 
 ```text
 specs/[###-feature-short-name]/
-├── spec.md                     # Feature 规格说明（/aisdd.specify）
-├── plan.md                     # 本文件（/aisdd.plan）
-├── tasks.md                    # 任务拆解（/aisdd.tasks）
+├── spec.md                     # Feature 规格说明（/aisdd.epicspec）
+├── plan.md                     # 本文件（/aisdd.featureplan）
+├── tasks.md                    # 任务拆解（/aisdd.featuretasks）
 ├── research.md                 # 可选：调研产物
 ├── data-model.md               # 可选：数据模型
 ├── quickstart.md               # 可选：快速验证/联调指南

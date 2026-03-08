@@ -67,7 +67,7 @@ alwaysApply: false
 ## 前置条件
 
 1. `epic-plan.md` 已产出（`/aisdd.epicplan`）
-2. **至少一个 Feature 的 `plan.md` 已产出**（`/aisdd.plan`）
+2. **至少一个 Feature 的 `plan.md` 已产出**（`/aisdd.featureplan`）
 3. `ux-design.md`（若已产出）作为可选输入
 4. 须遵循 `.specify/memory/constitution.md` 的演进式设计原则
 
@@ -137,4 +137,4 @@ alwaysApply: false
 - `l2` 完成 → 所有章节就绪，提示：
   1. 运行 `/aisdd.epicanalyze`（跨 Feature 一致性与质量分析）
   2. 运行 `/aisdd.gate design-ready`（审批关卡）
-  3. 审批通过后逐个 Feature 运行 `/aisdd.tasks` 产出任务清单
+  3. 审批通过后逐个 Feature 运行 `/aisdd.featuretasks` 产出任务清单
