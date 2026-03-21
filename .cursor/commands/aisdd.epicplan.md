@@ -23,6 +23,15 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。可用于：**EPIC 标识**（如 `EPIC-002`，用于定位 EPIC 目录；当 `SPECIFY_EPIC` 已设时可空）、或补充规约侧重范围。
 
+## 进入本阶段前（Gate 提醒）
+
+在执行下方步骤**之前**，你**必须**：
+
+1. **提醒用户**核对 EPIC 根目录 `gate-log.md`（若存在）中 **spec-ready** 是否已记录为通过或有条件通过（关卡定义见 `.cursor/commands/aisdd.gate.md`）。
+2. 若 `gate-log.md` 不存在、或 **spec-ready** 未通过、或用户未确认可进入，须**再次提示**先运行 `/aisdd.gate spec-ready`（或说明为何跳过）；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate（如「跳过关卡」「探索性」）时，可记录风险后继续。
+
+**本命令对应的准入关卡**：**spec-ready**（放行的下一步含 epicplan / epicuidesign）。
+
 ## 大纲
 
 目标：在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）下产出 `epic-plan.md`，为**各 Feature 的 plan** 提供**EPIC 级技术约束与规约**。内容为纯文字约束（技术栈、分层、线程、错误处理、数据、接口、NFR 预算、共享能力等），**不含 0 层/1 层架构图**（架构图在 `/aisdd.epicdesign` 阶段产出）。

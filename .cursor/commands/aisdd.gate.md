@@ -20,7 +20,7 @@ $ARGUMENTS
 | 关卡 | 检查时机 | 前置产物 | 冻结对象 | 放行的下一步 |
 |------|----------|----------|----------|-------------|
 | **spec-ready** | 所有 Feature spec + clarify 完成后 | 各 `spec.md` | spec.md（状态→就绪） | epicuidesign / epicplan |
-| **plan-ready** | epicplan + 各 Feature plan 完成后 | `epic-plan.md`、各 `plan.md` | epic-plan.md、plan.md | epicdesign |
+| **plan-ready** | epicplan（或多 Feature 时等效）+ 各 Feature plan 完成后 | `epic-plan.md`（多 Feature 时；单 Feature 可省略）、各 `plan.md` | epic-plan.md（若存在）、plan.md | epicdesign |
 | **design-ready** | EPIC 软件设计说明书完成后 | `epic-design.md`（及 `story_detail_design.md`） | epic-design.md | tasks |
 | **tasks-ready** | tasks 生成 + analyze 通过后 | 各 `tasks.md` | tasks.md | implement |
 | **implement-done** | implement 完成 + verify 通过后 | 代码 + verify 报告 | — | 发布/合并 |
@@ -55,7 +55,7 @@ $ARGUMENTS
 - [ ] 各 spec.md 的 Epic 字段与 epic.md 一致
 
 #### plan-ready
-- [ ] `epic-plan.md` 存在且版本已填写
+- [ ] **EPIC 级技术规约**：`epic-plan.md` 存在且版本已填写，**或**（**单 Feature EPIC**：`features/` 下仅一个子目录且该目录 `plan.md` 已包含合并后的 EPIC 级约束并版本已填写）
 - [ ] 所有 Feature 的 `plan.md` 存在
 - [ ] 各 plan.md 的「Plan 前置检查」章节已通过
 - [ ] 各 plan.md 的 Feature Version 与对应 spec.md 一致
@@ -137,7 +137,7 @@ $ARGUMENTS
 
 **冻结规则**：
 - `spec-ready`：各 spec.md 状态 → `冻结（执行中）`
-- `plan-ready`：各 plan.md 追加冻结标注；epic-plan.md 同理
+- `plan-ready`：各 plan.md 追加冻结标注；若存在 epic-plan.md 则同理冻结；单 Feature 省略 epic-plan 时仅冻结各 plan.md，并在 gate-log 备注中说明「单 Feature EPIC，EPIC 级约束合并于 plan.md」
 - `design-ready`：epic-design.md 追加冻结标注
 - `tasks-ready`：各 tasks.md 追加冻结标注
 - `implement-done`：不冻结文档，仅记录完成
@@ -160,6 +160,7 @@ $ARGUMENTS
 
 ## 与现有命令的关系
 
+- **进入下一阶段前的提醒**：各 `/aisdd.*` 命令（如 `epicplan`、`featureplan`、`epicdesign`、`featuretasks`、`implement`、`analyze`、`epicanalyze`、`verify` 等）在正文步骤前包含 **「进入本阶段前（Gate 提醒）」**，要求 Agent **提醒用户**核对 `gate-log.md` 中与本阶段对应的准入关卡；用户可在 `$ARGUMENTS` 中显式声明跳过并自担风险。
 - **关卡是阶段间的卡点**：关卡不产出设计文档，只做检查、记录与冻结
 - **冻结后变更**：冻结后的产物若需变更，须说明变更范围由 AI 做增量更新，变更完成后建议重新运行关卡
 - **implement 阶段的强制约束**：`/aisdd.implement` 在步骤 3 中应检查 `gate-log.md` 中 `tasks-ready` 关卡是否已通过；若未通过则警告（非阻塞，由用户决定是否继续）

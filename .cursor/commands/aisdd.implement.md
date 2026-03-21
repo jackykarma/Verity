@@ -19,6 +19,15 @@ $ARGUMENTS
 
 在继续操作前，你**必须**考虑用户输入（若不为空）。
 
+## 进入本阶段前（Gate 提醒）
+
+在执行下方步骤**之前**，你**必须**：
+
+1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **tasks-ready** 是否已通过（各 `tasks.md` 已冻结或可进入实现）。
+2. 若 **tasks-ready** 未通过或用户未确认，须**再次提示**先运行 `/aisdd.analyze`（若未跑）与 `/aisdd.gate tasks-ready`；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate（如「继续」「强制」「force」）时，可记录风险后继续（与检查清单强制规则一致时可合并判断）。
+
+**本命令对应的准入关卡**：**tasks-ready**。
+
 ## 大纲
 
 1. 从代码库根目录运行 `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks`，并解析 FEATURE_DIR（功能目录）和 AVAILABLE_DOCS（可用文档）列表。所有路径必须为绝对路径。

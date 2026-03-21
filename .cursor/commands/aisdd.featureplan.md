@@ -23,6 +23,16 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入内容（若不为空）。
 
+## 进入本阶段前（Gate 提醒）
+
+在执行下方步骤**之前**，你**必须**：
+
+1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **spec-ready** 是否已通过（各 Feature `spec.md` 已冻结或可进入 Plan）。
+2. **多 Feature EPIC**：还须提醒确认已具备 `epic-plan.md`（或用户已选择单 Feature 合并路径且 `get-epic-paths.ps1 -Json` 将来可满足 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK`）。
+3. 若 **spec-ready** 未通过或用户未确认，须**再次提示**先运行 `/aisdd.gate spec-ready`（及按需 `/aisdd.epicplan`）；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
+
+**本命令对应的准入关卡**：**spec-ready**（技术规约编写的前置关卡）。
+
 ## 大纲
 
 目标：生成 `plan.md`（Feature 级技术规约与实现约束）。

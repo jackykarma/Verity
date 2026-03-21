@@ -67,15 +67,17 @@ alwaysApply: false
 
 ## 前置条件
 
-1. `epic-plan.md` 已产出（`/aisdd.epicplan`）
-2. **至少一个 Feature 的 `plan.md` 已产出**（`/aisdd.featureplan`）
+1. **EPIC 级技术约束**满足以下之一：`epic-plan.md` 已产出（`/aisdd.epicplan`）；或 **单 Feature EPIC**（`features/` 下仅一个子目录）且该 Feature 的 `plan.md` 已产出并将 EPIC 级约束合并其中（可省略 `epic-plan.md`，与 `aisdd-featureplan.mdc` 一致）
+2. **各 Feature 的 `plan.md` 已产出**（`/aisdd.featureplan`）
 3. `ux-design.md`（若已产出，即设计稿解析结果）作为可选输入
 4. 须遵循 `.specify/memory/constitution.md` 的演进式设计原则
+
+**脚本判定**：运行 `get-epic-paths.ps1 -EpicId ... -Json`，当 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true 时满足本节条件 1。
 
 ## 输入（必须阅读）
 
 1. **`epic.md`**：范围、Feature 拆分、通用能力、EPIC-FR/NFR
-2. **`epic-plan.md`**：EPIC 级技术约束
+2. **EPIC 级技术约束**：`epic-plan.md`（若存在）；否则在单 Feature EPIC 下读取 `EPIC_CONSTRAINT_SOURCE` / 唯一 Feature 的 `plan.md` 中的 EPIC 级约束与 Feature 规约
 3. **各 Feature 的 `spec.md`**：FR/NFR/边界/验收
 4. **各 Feature 的 `plan.md`**：技术规约、接口契约、数据模型
 5. **`ux-design.md`**（若有）：从设计稿解析出的信息架构、交互规则（页面流转图、逐屏交互规则、状态定义）、视觉规范（色板、布局标注、组件清单、动效参数）、设计稿索引；关注「遗漏与待确认」章节

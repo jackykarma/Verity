@@ -19,6 +19,10 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。
 
+## 进入本阶段前（Gate 提醒）
+
+本命令为 EPIC 入口，**无**必须通过的上一关卡。完成各 Feature `spec.md` 后，须在进入 `/aisdd.epicplan` / `/aisdd.epicuidesign` 前提醒用户运行 **`/aisdd.gate spec-ready`**（见 `.cursor/commands/aisdd.gate.md`）。
+
 ## 大纲
 
 用户在触发消息中 `/aisdd.epicspec` 后输入的文本**即为 EPIC 描述**（大需求/主题）。该 EPIC 可能拆解为多个可独立交付的 Feature。即使下方出现字面量 `$ARGUMENTS`，也需假定该对话中始终可获取此描述。除非用户提交的指令为空，否则请勿要求用户重复描述。
@@ -27,13 +31,21 @@ $ARGUMENTS
 
 ### 1) 创建 EPIC 文档目录与 epic.md
 
-- **优先**：从仓库根目录执行脚本创建 EPIC 与 Git 分支（脚本会创建分支 `epic/EPIC-###-<short-name>` 并输出 JSON）：
-  - 执行：`pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -ShortName "<short-name>" "<EPIC 描述>"`  
-    其中 `<short-name>` 为英文短名（如 `android-gallery`），用于目录与分支名；`<EPIC 描述>` 可与用户输入一致。若环境仅支持 PowerShell 5，使用 `powershell -NoProfile -File ...`，且**不要**使用 `&&` 连接命令，应分两步：先 `cd` 到仓库根，再执行脚本。
-  - 解析 JSON 输出得到：`EPIC_ID`、`EPIC_BRANCH`、`EPIC_DIR`、`EPIC_FILE`。
+- **是否新建 Git 分支**（由 `$ARGUMENTS` 决定）：
+  - **默认**：创建 EPIC 目录并 **新建并切换** 到分支 `epic/EPIC-###-<short-name>`（与原先行为一致）。
+  - **保持在当前分支**：若用户在指令中显式包含以下任一标记，则脚本须加 **`-UseCurrentBranch`**，**不**执行 `git checkout -b`，仅在当前 HEAD 上创建 `specs/epics/...` 与 `epic.md`：
+    - `-UseCurrentBranch`、`--use-current-branch`
+    - 中文：`在当前分支`、`不新建分支`、`保留当前分支`
+- **优先**：从仓库根目录执行脚本（输出 JSON）：
+  - **默认（新建 epic 分支）**：  
+    `pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -ShortName "<short-name>" "<EPIC 描述>"`
+  - **当前分支**：  
+    `pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -UseCurrentBranch -ShortName "<short-name>" "<EPIC 描述>"`  
+  其中 `<short-name>` 为英文短名（如 `android-gallery`），用于目录名（及默认模式下的分支名）；`<EPIC 描述>` 可与用户输入一致（调用脚本时去掉上述分支开关字样，仅保留描述正文）。若环境仅支持 PowerShell 5，使用 `powershell -NoProfile -File ...`，且**不要**使用 `&&` 连接命令，应分两步：先 `cd` 到仓库根，再执行脚本。
+  - 解析 JSON 输出得到：`EPIC_ID`、`EPIC_BRANCH`（当前分支模式下为当前分支名）、`USE_CURRENT_BRANCH`、`EPIC_DIR`、`EPIC_FILE`。
 - **脚本失败时（如中文/编码导致执行失败）**：
   - 手动创建目录 `specs/epics/EPIC-001-<short-name>/` 与 `epic.md`（见步骤 2、3）。
-  - **必须补建 Git 分支**：在仓库根执行 `git checkout -b epic/EPIC-001-<short-name>`，并在完成报告中说明“分支已补建”。
+  - **Git 分支**：若用户要求默认流程，在仓库根执行 `git checkout -b epic/EPIC-001-<short-name>`；若用户已选择「当前分支」模式，**不要**新建分支，并在完成报告中说明「已在当前分支创建 EPIC 目录」。
 
 ### 2) 加载 EPIC 模板并写入 epic.md
 

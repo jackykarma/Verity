@@ -26,6 +26,10 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。此处输入为**单个 Feature** 的描述（不是 EPIC）。
 
+## 进入本阶段前（Gate 提醒）
+
+本命令**无**必须通过的上一关卡。执行前可**轻量提醒**用户：当前 EPIC 的 `epic.md` 应已由 `/aisdd.epicspec` 填充；当**最后一个** Feature 的 `spec.md` 完成后，应在进入 `/aisdd.epicplan` / `/aisdd.epicuidesign` 前申报 **`/aisdd.gate spec-ready`**。
+
 ## 大纲
 
 目标：在当前 EPIC（`specs/epics/<EPIC>/`）下创建一个 Feature 文档目录（`features/FEAT-xxx-.../`），并生成 `spec.md`（包含 Epic/Feature/FR-NFR/依赖/边界/版本等）。

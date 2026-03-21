@@ -10,6 +10,15 @@ $ARGUMENTS
 
 在继续执行前，你**必须**考量用户输入的内容（若不为空）。
 
+## 进入本阶段前（Gate 提醒）
+
+在执行下方步骤**之前**，你**必须**：
+
+1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **design-ready** 是否已通过（Task 拆解依赖已冻结的设计说明书基线）。
+2. 若 **design-ready** 未通过或用户未确认，须**再次提示**先运行 `/aisdd.gate design-ready` 再生成/冻结 tasks；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
+
+**本命令对应的准入关卡**：**design-ready**（与 `/aisdd.featuretasks` 之后、`/aisdd.gate tasks-ready` 之前的质量门禁衔接）。
+
 ## 目标
 
 在项目实施前，识别三类核心工件（`spec.md`、`plan.md`、`tasks.md`）中存在的不一致、重复、模糊不清以及描述不充分的问题。该命令**仅允许**在 `/aisdd.featuretasks` 成功生成完整的 `tasks.md` 文件后运行。

@@ -15,6 +15,15 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。可用于：**EPIC 标识**（如 `EPIC-002`）、侧重分析范围（如 `仅 NFR 预算`、`仅接口契约`）。
 
+## 进入本阶段前（Gate 提醒）
+
+在执行下方步骤**之前**，你**必须**：
+
+1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **plan-ready** 是否已通过（本分析假定各 Feature `plan.md` 与 EPIC 技术规约基线已就绪）。
+2. 若 **plan-ready** 未通过，须**再次提示**：建议先完成 plan 评审与 `/aisdd.gate plan-ready`，再继续迭代 `epic-design.md` 与本次跨 Feature 分析；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
+
+**本命令对应的准入关卡**：**plan-ready**（建议在申报 **design-ready** 前运行本分析）。
+
 ## 目标
 
 在 EPIC 级别执行**跨 Feature 的一致性与质量分析**，检测各 Feature 的 spec/plan/tasks/story_detail_design 之间以及与 EPIC 级产物（epic.md、epic-plan.md、epic-design.md）之间的不一致、冲突、缺口问题。

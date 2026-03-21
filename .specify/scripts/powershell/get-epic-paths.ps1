@@ -14,7 +14,7 @@ $ErrorActionPreference = 'Stop'
 if ($Help) {
     Write-Output "Usage: ./get-epic-paths.ps1 [-EpicId EPIC-002] [-Json] [-Help]"
     Write-Output "  -EpicId    EPIC 标识，如 EPIC-002 或 EPIC-002-android-english-learning；不设则用 `$env:SPECIFY_EPIC"
-    Write-Output "  -Json      输出 JSON"
+    Write-Output "  -Json      输出 JSON（含 HAS_EPIC_PLAN、单 Feature 省略 epic-plan 时的 SOLE_FEATURE_PLAN 等）"
     exit 0
 }
 
@@ -31,11 +31,41 @@ if (-not $p) {
     exit 1
 }
 
+$epicPlanPath = $p.EPIC_PLAN
+$hasEpicPlan = Test-Path -LiteralPath $epicPlanPath
+$featuresDir = Join-Path $p.EPIC_DIR 'features'
+$singleFeatureWithoutEpicPlanOk = $false
+$soleFeaturePlan = $null
+if (-not $hasEpicPlan -and (Test-Path -LiteralPath $featuresDir)) {
+    $featDirs = @(Get-ChildItem -LiteralPath $featuresDir -Directory -ErrorAction SilentlyContinue)
+    if ($featDirs.Count -eq 1) {
+        $cand = Join-Path $featDirs[0].FullName 'plan.md'
+        if (Test-Path -LiteralPath $cand) {
+            $singleFeatureWithoutEpicPlanOk = $true
+            $soleFeaturePlan = $cand
+        }
+    }
+}
+$epicConstraintSource = if ($hasEpicPlan) { $epicPlanPath } elseif ($singleFeatureWithoutEpicPlanOk) { $soleFeaturePlan } else { $null }
+
 if ($Json) {
-    $p | ConvertTo-Json -Compress
+    [PSCustomObject]@{
+        EPIC_DIR         = $p.EPIC_DIR
+        EPIC_UX_DESIGN   = $p.EPIC_UX_DESIGN
+        EPIC_DESIGN_DIR  = $p.EPIC_DESIGN_DIR
+        EPIC_PLAN        = $p.EPIC_PLAN
+        HAS_EPIC_PLAN    = $hasEpicPlan
+        SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK = $singleFeatureWithoutEpicPlanOk
+        SOLE_FEATURE_PLAN = $soleFeaturePlan
+        EPIC_CONSTRAINT_SOURCE = $epicConstraintSource
+    } | ConvertTo-Json -Compress
 } else {
     'EPIC_DIR: ' + $p.EPIC_DIR | Write-Output
     'EPIC_UX_DESIGN: ' + $p.EPIC_UX_DESIGN | Write-Output
     'EPIC_DESIGN_DIR: ' + $p.EPIC_DESIGN_DIR | Write-Output
     'EPIC_PLAN: ' + $p.EPIC_PLAN | Write-Output
+    'HAS_EPIC_PLAN: ' + $hasEpicPlan | Write-Output
+    'SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK: ' + $singleFeatureWithoutEpicPlanOk | Write-Output
+    if ($soleFeaturePlan) { 'SOLE_FEATURE_PLAN: ' + $soleFeaturePlan | Write-Output }
+    if ($epicConstraintSource) { 'EPIC_CONSTRAINT_SOURCE: ' + $epicConstraintSource | Write-Output }
 }

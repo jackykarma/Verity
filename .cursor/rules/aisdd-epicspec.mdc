@@ -20,7 +20,7 @@ alwaysApply: false
 
 ## 前置条件
 
-1. `create-new-epic.ps1` 已运行，EPIC 目录与 Git 分支已创建
+1. `create-new-epic.ps1` 已运行，EPIC 目录已创建；Git 方面默认为新建 `epic/EPIC-###-*` 分支，若使用 `-UseCurrentBranch` 则保留当前分支（见 `.cursor/commands/aisdd.epicspec.md`）
 2. EPIC 目录下存在空的 `epic.md`（从 `.specify/templates/epic-template.md` 复制）
 
 ## 输入（必须阅读）

@@ -11,9 +11,11 @@
 flowchart TD
     Start([需求输入]) --> EpicMd["epic.md<br/>EPIC 规格说明"]
     EpicMd --> SpecMd["各 Feature spec.md<br/>Feature 规格说明"]
-    SpecMd --> EpicPlan["epic-plan.md<br/>EPIC 技术规约"]
+    SpecMd --> EpicPlan["epic-plan.md<br/>EPIC 技术规约<br/>（多 Feature 必选）"]
+    SpecMd --> PlanSingle["唯一 Feature plan.md<br/>含合并的 EPIC 级约束<br/>（单 Feature 可省略 epic-plan）"]
     SpecMd --> UxDesign["ux-design.md<br/>设计稿解析"]
     EpicPlan --> PlanMd["各 Feature plan.md 初版<br/>Feature 技术规约"]
+    PlanSingle --> PlanMd
     UxDesign -.-> PlanMd
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
     UxDesign -.-> EpicDesign
@@ -28,6 +30,7 @@ flowchart TD
     style EpicMd fill:#E3F2FD,stroke:#1976D2
     style SpecMd fill:#E3F2FD,stroke:#1976D2
     style EpicPlan fill:#E3F2FD,stroke:#1976D2
+    style PlanSingle fill:#FFF3E0,stroke:#F57C00
     style UxDesign fill:#E3F2FD,stroke:#1976D2
     style PlanMd fill:#E3F2FD,stroke:#1976D2
     style EpicDesign fill:#E3F2FD,stroke:#1976D2
@@ -35,16 +38,16 @@ flowchart TD
     style TasksMd fill:#E3F2FD,stroke:#1976D2
 ```
 
-**说明**：实线箭头表示顺序依赖，虚线箭头表示可选输入。`ux-design.md` 与 `epic-plan.md` 可并行产出（均依赖所有 `spec.md` 完成）。
+**说明**：实线箭头表示顺序依赖，虚线箭头表示可选输入。`ux-design.md` 与 `epic-plan.md` 可并行产出（均依赖所有 `spec.md` 完成）。**单 Feature EPIC** 可不走 `epic-plan.md`，将 EPIC 级技术约束合并进唯一的 `plan.md`（与 `constitution.md` §八、`get-epic-paths.ps1` 的 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 判定一致）；**多 Feature EPIC** 仍须产出 `epic-plan.md` 后再写各 Feature `plan.md`（或与 `ux-design` 并行窗口内完成）。
 
 ### 新需求如何走流程
 
 新需求从进入到交付，按上图顺序走一遍即可：
 
-1. **需求输入** → 创建 EPIC 分支与目录，产出 `epic.md`（EPIC 规格 + Feature 拆分）
+1. **需求输入** → 运行 `create-new-epic.ps1` 创建 EPIC 目录与空 `epic.md`；**默认**同时新建并切换 `epic/EPIC-xxx-*` 分支，**可选** `-UseCurrentBranch` 保留当前 Git 分支（见 `/aisdd.epicspec`）→ `/aisdd.epicspec` 填充 `epic.md`（EPIC 规格 + Feature 拆分）
 2. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
-3. **技术规约与 UX** → 产出 `epic-plan.md`、可选 `ux-design.md`
-4. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版
+3. **技术规约与 UX** → 多 Feature：产出 `epic-plan.md`；单 Feature：可省略 `epic-plan.md`，在唯一 `plan.md` 中写入 EPIC 级约束。可选 `ux-design.md`
+4. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版（须在 `epic-plan.md` 约束下编写，或单 Feature 时在合并后的 `plan.md` 中自洽）
 5. **设计说明书** → 产出 `epic-design.md` 及 key-func-design、key-diagram、各 `story_detail_design.md`
 6. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表与 plan §一互校）
 7. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify` 做实现↔设计一致性验证后交付
@@ -59,10 +62,10 @@ flowchart TD
 |------|--------|-----------|------|------|
 | **EPIC 规格** | `epic.md` | 需求边界与 Feature 拆分 | 需求描述 | — |
 | **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC） | `epic.md` | Spec Ready |
-| **EPIC 技术规约** | `epic-plan.md` | EPIC 技术规约事实源 | `epic.md`、各 `spec.md` | — |
+| **EPIC 技术规约** | `epic-plan.md`（多 Feature 必选；单 Feature 可省略） | EPIC 技术规约事实源 | `epic.md`、各 `spec.md` | — |
 | **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
-| **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规约事实源 | `spec.md`、`epic-plan.md`、`ux-design.md`（可选） | Plan Ready |
-| **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、`epic-plan.md`、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
+| **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规约事实源；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
+| **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
 | **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |
 | **实现** | 代码 | — | `tasks.md` | Implement Ready |
@@ -73,10 +76,11 @@ flowchart TD
 
 ## 三、分支策略
 
-- 每个 EPIC 创建一个 `epic/EPIC-xxx-short-name` 分支（由 `create-new-epic.ps1` 自动创建）
+- **默认**：每个 EPIC 由 `create-new-epic.ps1` **新建并切换**到 `epic/EPIC-xxx-short-name` 分支，同时创建 `specs/epics/...` 与空 `epic.md`
+- **可选**：脚本加 **`-UseCurrentBranch`** 时**不**创建/切换 `epic/*` 分支，仅在**当前 HEAD** 上创建 EPIC 目录与 `epic.md`（适用于热修复栈、共享分支等；见 `.cursor/commands/aisdd.epicspec.md`）
 - **不为 Feature 单独创建分支**——Feature 是文档组织单位（目录），而非分支单位
-- 所有 Feature 的 spec/plan/tasks/代码实现均在 EPIC 分支上进行
-- Story/Task 的增量提交均在 EPIC 分支上，按 Task 或逻辑分组粒度提交
+- 所有 Feature 的 spec/plan/tasks/代码实现均在当前工作分支（默认即 EPIC 分支）上进行
+- Story/Task 的增量提交均在同一工作分支上，按 Task 或逻辑分组粒度提交
 - EPIC 完成后合并回主分支
 
 详见 `constitution.md` §七.1。
@@ -91,7 +95,7 @@ flowchart TD
 
 | 产物 | 裁剪规则 | 预估文档量 |
 |------|----------|-----------|
-| `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节） | 节省 ~140 行 |
+| `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）。`/aisdd.epicdesign` 前置条件以 `get-epic-paths.ps1 -Json` 的 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为准 | 节省 ~140 行 |
 | `epic-design.md` | 仅需 **Lite** 级：§一～§五 + §十二 Story 拆解 + §十三 L2 索引；§六～§十一 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
 | `key-func-design.md` | 无疑难点/亮点可省略，在 epic-design.md §六标注「本 EPIC 无关键疑难点/亮点，省略」 | 可省 ~100 行 |
 | `key-diagram.md` | 仅需骨架类图 + 1 个 Feature 子类图 + 1 张关键时序图 | ~80 行（vs 完整 185+） |
@@ -159,11 +163,13 @@ flowchart TD
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Step1["create-new-epic.ps1<br/>创建 EPIC 分支 + 目录"] --> Step2["/aisdd.epicspec<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
+    Step1["create-new-epic.ps1<br/>EPIC 目录 + epic.md 模板<br/>默认：新建 epic/* 分支<br/>可选：-UseCurrentBranch"] --> Step2["/aisdd.epicspec<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
     Step2 --> Step3["/aisdd.featurespec<br/>创建 Feature 目录 + 产出 spec.md<br/>（逐个 Feature 执行）"]
-    Step3 --> Step4["/aisdd.epicplan<br/>产出 epic-plan.md"]
+    Step3 --> Step4["/aisdd.epicplan<br/>产出 epic-plan.md<br/>（多 Feature 必选）"]
     Step3 --> Step5["/aisdd.epicuidesign<br/>解析设计稿 → ux-design.md"]
+    Step3 --> Step4b["单 Feature：跳过 epicplan<br/>合并 EPIC 约束 → plan.md"]
     Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>（按依赖顺序逐个执行）"]
+    Step4b --> Step6
     Step5 -.-> Step6
     Step6 --> Step7["/aisdd.epicdesign<br/>key → diagram（骨架）<br/>→ diagram FEAT-xxx（按 Feature）<br/>→ story → l2"]
     Step7 --> Step8["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（含回填 plan/spec）"]
@@ -172,18 +178,19 @@ flowchart TD
     Step10 --> Step11([交付 / 合并主分支])
 
     style Step1 fill:#E8F5E9,stroke:#388E3C
+    style Step4b fill:#FFF3E0,stroke:#F57C00
     style Step11 fill:#E8F5E9,stroke:#388E3C
 ```
 
 | 步骤 | 命令 | 产出物 | 执行次数 |
 |------|------|--------|----------|
-| 1 | `create-new-epic.ps1` | EPIC 分支 + EPIC 目录 + `epic.md`（空模板） | 每个 EPIC 一次 |
+| 1 | `create-new-epic.ps1` | **默认**：新建 `epic/EPIC-xxx-*` 分支 + EPIC 目录 + `epic.md`（空模板）；**可选** `-UseCurrentBranch`：不切换分支，仅创建目录与模板 | 每个 EPIC 一次 |
 | 2 | `/aisdd.epicspec` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
 | 3 | `/aisdd.featurespec` | Feature 目录 + `spec.md`（填充内容） | 每个 Feature 一次 |
-| 4 | `/aisdd.epicplan` | `epic-plan.md` | 每个 EPIC 一次 |
-| 5 | `/aisdd.epicuidesign` | `ux-design.md`（解析设计稿 → 结构化交互/视觉规范） | 每个 EPIC 一次（可选，与步骤 4 并行） |
+| 4 | `/aisdd.epicplan` | `epic-plan.md` | **多 Feature**：每个 EPIC 一次；**单 Feature**：可跳过，EPIC 级约束在步骤 6 合并写入唯一 `plan.md` |
+| 5 | `/aisdd.epicuidesign` | `ux-design.md`（解析设计稿 → 结构化交互/视觉规范） | 每个 EPIC 一次（可选，与步骤 4 或单 Feature 路径并行） |
 | 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | 每个 Feature 一次（按依赖顺序） |
-| 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `diagram` 骨架 / `diagram FEAT-xxx` 按 Feature / `story` / `l2`） | 分阶段；建议 `diagram` 先无范围出骨架，再 `diagram FEAT-001`、`FEAT-002`… 逐个 check |
+| 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `diagram` 骨架 / `diagram FEAT-xxx` 按 Feature / `story` / `l2`） | 分阶段；建议 `diagram` 先无范围出骨架，再 `diagram FEAT-001`、`FEAT-002`… 逐个 check。前置：`get-epic-paths.ps1 -Json` 中 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true |
 | 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（含回填 plan/spec） | 每个 Feature 一次 |
 | 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | 10 | `/aisdd.verify` | 验证报告（模板：`verify-report-template.md`） | 按需 |
@@ -285,7 +292,7 @@ flowchart TD
 **关键原则**：
 - 方案变更从 `plan.md` / `epic-plan.md` 出发，**自中间向两端**扩展——向上检查是否需要调整 NFR 目标（`spec.md`），向下更新设计说明书和 Task
 - 若变更导致 NFR 超标，必须先与产品协商 NFR 目标调整（走 CR），再继续方案变更
-- EPIC 级变更（架构/分层/共享能力）须先更新 `epic-plan.md`，再级联更新各 Feature 的 `plan.md`
+- EPIC 级变更（架构/分层/共享能力）须先更新 `epic-plan.md`（多 Feature），或单 Feature EPIC 时在**唯一** `plan.md` 中更新合并的 EPIC 级约束，再视需要级联更新设计说明书与 tasks
 
 ### 7.3 变更影响速查表
 
@@ -294,6 +301,6 @@ flowchart TD
 | 需求范围/FR/AC | `spec.md` | `ux-design.md` → `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
 | NFR 指标调整 | `spec.md` | `plan.md`（预算） → `epic-design.md`（§八 评估） → `tasks.md`（验证阈值） |
 | 交互/视觉/动效 | `ux-design.md` | `plan.md`（UI 约束） → `epic-design.md`（类图/时序） → `tasks.md` |
-| EPIC 级技术约束 | `epic-plan.md` | 各 `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
+| EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
 | Feature 级技术方案 | `plan.md` | `epic-design.md` → `story_detail_design.md` → `tasks.md` |
 | Story 拆解调整 | `epic-design.md` §十二 | `story_detail_design.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |

@@ -1,12 +1,12 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Create a new EPIC dev branch and epic.md.
+Create a new EPIC directory and epic.md; by default also create epic/* git branch.
 
 .DESCRIPTION
-Creates a new git branch for the EPIC (epic/EPIC-###-<short-name>) and
-creates specs/epics/EPIC-###-<short-name>/epic.md from template:
-  .specify/templates/epic-template.md
+Creates specs/epics/EPIC-###-<short-name>/epic.md from template (.specify/templates/epic-template.md).
+By default creates and checks out git branch epic/EPIC-###-<short-name>. With -UseCurrentBranch, skips
+branch creation and stays on the current HEAD.
 
 .PARAMETER Json
 Output JSON result.
@@ -19,12 +19,16 @@ Optional epic number override (integer).
 
 .PARAMETER EpicDescription
 Remaining args joined as EPIC description.
+
+.PARAMETER UseCurrentBranch
+Do not create or switch to epic/* branch; stay on current HEAD. EPIC_DIR and epic.md are still created.
 #>
 [CmdletBinding()]
 param(
     [switch]$Json,
     [string]$ShortName,
     [int]$Number = 0,
+    [switch]$UseCurrentBranch,
     [switch]$Help,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$EpicDescription
@@ -33,7 +37,8 @@ param(
 $ErrorActionPreference = 'Stop'
 
 if ($Help) {
-    Write-Host "Usage: ./create-new-epic.ps1 [-Json] [-ShortName <name>] [-Number N] <epic description>"
+    Write-Host "Usage: ./create-new-epic.ps1 [-Json] [-ShortName <name>] [-Number N] [-UseCurrentBranch] <epic description>"
+    Write-Host "  -UseCurrentBranch  不新建/切换 epic/* 分支，保持在当前分支；仍会创建 EPIC 目录与 epic.md"
     exit 0
 }
 
@@ -114,15 +119,27 @@ $epicId = "EPIC-$epicNum"
 $epicDirName = "$epicId-$short"
 
 $hasGit = Test-HasGit
+$epicBranch = ""
 if ($hasGit) {
     $epicBranch = "epic/$epicDirName"
-    try {
-        git checkout -b $epicBranch | Out-Null
-    } catch {
-        Write-Warning "Failed to create git branch: $epicBranch"
+    if ($UseCurrentBranch) {
+        try {
+            $cur = git rev-parse --abbrev-ref HEAD 2>$null
+            if ($LASTEXITCODE -eq 0 -and $cur) {
+                $epicBranch = $cur.Trim()
+            }
+        } catch {
+            # keep suggested epic/* name for JSON metadata only
+        }
+        Write-Host "[specify] UseCurrentBranch: skipped git checkout -b (staying on $epicBranch)"
+    } else {
+        try {
+            git checkout -b "epic/$epicDirName" | Out-Null
+        } catch {
+            Write-Warning "Failed to create git branch: epic/$epicDirName"
+        }
     }
 } else {
-    $epicBranch = ""
     Write-Warning "[specify] Warning: Git repository not detected; skipped EPIC branch creation"
 }
 
@@ -145,6 +162,7 @@ if ($Json) {
     [PSCustomObject]@{
         EPIC_ID   = $epicId
         EPIC_BRANCH = $epicBranch
+        USE_CURRENT_BRANCH = [bool]$UseCurrentBranch
         EPIC_DIR  = $epicDir
         EPIC_FILE = $epicFile
         EPIC_DESC = $epicDesc
