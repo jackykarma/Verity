@@ -4,7 +4,7 @@
 >
 > **所属 EPIC**：`epic-design.md` → §七 全景类图与关键流程/时序
 >
-> **输入**：`key-func-design.md`（关键设计策略已通过 Gate 2 确认）、`epic-design.md` §五组件清单
+> **输入**：`key-func-design.md`（各 KD **核心方案**已覆盖技术点与相关技术链路、每环如何达成，并与 §六 流程图/核心时序互证；关键设计策略已通过 Gate 2 确认）、`epic-design.md` §五组件清单
 >
 > **与 L2（story_detail_design.md）的区别**：
 >

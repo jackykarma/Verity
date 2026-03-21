@@ -20,7 +20,7 @@ alwaysApply: false
 | 文件 | 对应章节 | 内容 |
 |------|----------|------|
 | `epic-design.md` | §1~§2、§5 + 各章节摘要/引用 | 设计总览（零层/一层架构、Story 拆解、子文件引用） |
-| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计策略、方案流程图、核心调用链时序图、Feature 流程图集 |
+| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计策略、各 KD **核心方案**（技术点与全链路覆盖、每环如何达成、与图表互证）、方案流程图、核心调用链时序图、Feature 流程图集 |
 | `key-diagram.md` | §4 | 全景骨架类图、Feature 子类图（含方法签名）、关键时序图 |
 | `features/FEAT-xxx/story_detail_design.md` | §6 | 各 Story 落码级 L2 详细设计 |
 
@@ -32,7 +32,7 @@ alwaysApply: false
 |------|----------|----------|------|
 | 无参数（默认） | §1~§2 填充；§3~§6 占位 | `epic-design.md`（完整章节骨架） | 首次调用，建立完整章节结构 + 零层/一层架构 |
 | `arch` | §1~§2 | `epic-design.md` §1~§2 | 重新生成零层/一层架构（覆盖已有内容） |
-| `key` | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计决策、方案流程图、核心调用链时序图 |
+| `key` | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计决策、各 KD **核心方案**（全链路 + 每环落地 + 与图互证）、方案流程图、核心调用链时序图 |
 | `diagram` | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 无范围：全景骨架类图；`diagram FEAT-001`：该 Feature 的子类图 + 完整时序图 |
 | `story` | §5 | `epic-design.md` §5 | Story 列表、依赖关系图、FR/NFR 覆盖矩阵 |
 | `l2` | §6 | 各 `story_detail_design.md` + `epic-design.md` §6 索引表 | 按 Story 产出 L2 详细设计 |
@@ -46,7 +46,7 @@ alwaysApply: false
 
   (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充零层/一层架构（§1~§2），其余章节占位
   arch       重新生成零层/一层架构（§1~§2）
-  key        产出关键功能疑难设计（§3）→ key-func-design.md（含流程图 + 核心调用链时序图）
+  key        产出关键功能疑难设计（§3）→ key-func-design.md（各 KD 核心方案须全链路、每环可落地、与图互证；含流程图 + 核心调用链时序图）
   diagram    产出全景骨架类图（§4）→ key-diagram.md §7.2
              可指定范围：diagram FEAT-001（该 Feature 的子类图 + 完整时序图）
   story      产出 Story 拆解（§5）
@@ -124,6 +124,7 @@ alwaysApply: false
 ## 行为约束
 
 - **基于真实代码**：类图/时序图必须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）
+- **`key-func-design.md` 核心方案（必须）**：每个关键设计点（KD）的「核心方案」须按 `.specify/templates/key-func-design-template.md` 要求撰写——清晰详述设计与实现，**全覆盖**涉及的技术点，**写全相关技术链路**且链上**每一环如何达成**可核对，并与该 KD 的流程图、核心时序图**互证**；禁止仅用标题或条目堆砌代替正文。
 - **时序图图后说明（必须）**：凡产出含 `sequenceDiagram` 的章节（如 `key-func-design.md`、`key-diagram.md`、`story_detail_design.md`），每张时序图**紧下方**须有**详细**文字说明，系统解释协作过程、工作过程及 `alt/else` 等分支含义（见 `.cursor/rules/specify-diagram-requirements.mdc` §四「图后文字说明」）；不得省略或用一句话代替。
 - **Mermaid 样式**：所有图表遵循 Material Design 配色（`.cursor/rules/mermaid-style-guide.mdc`）
 - **演进式设计**：不得从零设计理想方案（constitution §二）

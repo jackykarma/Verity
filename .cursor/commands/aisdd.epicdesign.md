@@ -46,7 +46,7 @@ $ARGUMENTS
 |------|----------|----------|------|
 | **无参数**（默认） | §1~§2 填充；§3~§6 占位 | `epic-design.md`（完整章节骨架） | 首次调用：建立完整 §1~§6 骨架 + 填充零层/一层架构（§1~§2），其余占位 |
 | **arch** | §1~§2 | `epic-design.md` §1~§2 | 重新生成零层/一层架构（覆盖已有） |
-| **key** | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计、方案流程图、核心调用链时序图 |
+| **key** | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计、各 KD **核心方案**（全链路 + 每环落地 + 与图互证）、方案流程图、核心调用链时序图 |
 | **diagram** | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 无范围：全景骨架类图；`diagram FEAT-001`：该 Feature 的子类图 + 完整时序图 |
 | **story** | §5 | `epic-design.md` §5 | Story 列表、依赖关系图、FR/NFR 覆盖矩阵 |
 | **l2** | §6 | 各 `features/FEAT-xxx/story_detail_design.md` + `epic-design.md` §6 索引表 | 按 Story 产出 L2 详细设计；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
@@ -62,7 +62,7 @@ $ARGUMENTS
 
   (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充 §1~§2（零层/一层架构），§3~§6 占位
   arch       重新生成零层/一层架构（§1~§2）
-  key        产出关键功能疑难设计（§3）→ key-func-design.md（含流程图 + 核心调用链时序图）
+  key        产出关键功能疑难设计（§3）→ key-func-design.md（各 KD 核心方案须全链路、每环可落地、与图互证；含流程图 + 核心调用链时序图）
   diagram    产出全景骨架类图（§4）→ key-diagram.md §7.2
              可指定范围：diagram FEAT-001（该 Feature 的子类图 + 完整时序图）
   story      产出 Story 拆解（§5）
@@ -79,7 +79,7 @@ $ARGUMENTS
 | 文件 | 对应章节 | 内容 |
 |------|----------|------|
 | `epic-design.md` | §1~§2、§5 + 各章节摘要/引用 | 设计总览（零层/一层架构、Story 拆解、子文件引用） |
-| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计、方案流程图、核心调用链时序图、Feature 流程图集 |
+| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计、各 KD **核心方案**、方案流程图、核心调用链时序图、Feature 流程图集 |
 | `key-diagram.md` | §4 | 全景骨架类图、Feature 子类图（含方法签名）、关键时序图 |
 | `features/FEAT-xxx/story_detail_design.md` | §6 | 各 Story 落码级 L2 详细设计 |
 
@@ -124,7 +124,7 @@ $ARGUMENTS
 4. **根据参数产出**：
    - **无参数**：生成/更新 `epic-design.md`，含完整 §1~§6 骨架；§1~§2 填充内容，§3~§6 占位（提示运行对应参数产出）。
    - **arch**：重写 `epic-design.md` 的 §1~§2。
-   - **key**：产出 `key-func-design.md`，并更新 `epic-design.md` 的 §3 为摘要 + 引用该文件。
+   - **key**：按 `key-func-design-template.md` 产出 `key-func-design.md`（各 KD **核心方案**须覆盖技术点与相关链路、每环如何达成、与流程图/时序图一致），并更新 `epic-design.md` 的 §3 为摘要 + 引用该文件。
    - **diagram**（无范围）：产出 `key-diagram.md` 的 §7.2 全景骨架类图，并更新 `epic-design.md` 的 §4 为摘要 + 引用。
    - **diagram FEAT-xxx**：产出 `key-diagram.md` 中该 Feature 的子类图（§7.2.x）+ 完整时序图（§7.3 SEQ-xxx），并更新 `epic-design.md` §4 的索引表。
    - **story**：更新 `epic-design.md` 的 §5（Story 列表、依赖图、FR/NFR 矩阵）。
@@ -142,6 +142,7 @@ $ARGUMENTS
    - l2 完成 → 提示：`/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（自动含回填 plan.md §一互校 + spec.md 需求追溯表）
 
 核心规则：
+- 产出 `key-func-design.md` 时须严格遵循 `key-func-design-template.md`：各 KD 的**核心方案**为清晰连贯正文，覆盖技术点与**全链路**，链上**每一环如何达成**写清，并与流程图/时序图一致
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`
 - 图表内容须基于本工程**实际架构与真实代码**，遵循 `.cursor/rules/specify-diagram-requirements.mdc`
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
