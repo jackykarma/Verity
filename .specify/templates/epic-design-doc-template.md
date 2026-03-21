@@ -18,8 +18,8 @@
 | 文件 | 对应章节 | 内容 |
 | ---- | -------- | ---- |
 | `epic-design.md`（本文件） | 全部章节（摘要/引用） | EPIC 设计总览，各章节摘要与子文件引用 |
-| `key-func-design.md` | §六 | 关键功能疑难点/亮点设计策略、方案流程图、核心调用链时序图、Feature 流程图集（图表后附工作流程/协作过程文字描述） |
-| `key-diagram.md` | §七 | 全景骨架类图（`diagram`）、Feature 子类图+完整时序图（`diagram FEAT-xxx` 按 Feature 分步产出），图表后附协作过程文字描述 |
+| `key-func-design.md` | §六 | 关键功能疑难点/亮点设计策略、方案流程图、核心调用链时序图、Feature 流程图集（**每张时序图紧下方须有详细协作者与过程说明**，见 `specify-diagram-requirements.mdc` §四） |
+| `key-diagram.md` | §七 | 全景骨架类图（`diagram`）、Feature 子类图+完整时序图（`diagram FEAT-xxx` 按 Feature 分步产出），**每张时序图紧下方须有详细协作过程说明** |
 | `features/FEAT-xxx/story_detail_design.md` | §十三 | 各 Story 落码级详细设计（L2） |
 
 ---

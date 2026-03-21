@@ -85,6 +85,7 @@ classDiagram
 > **完整性**：须在本文档内绘制**完整详细**的时序图，覆盖正常流程与**所有**关键异常分支；**不得引用** plan.md 组件设计的时序图。
 > **覆盖要求**：从触发到响应的完整方法调用链，不得遗漏核心交互步骤；须使用 `alt/else` 明确区分正常与异常分支。
 > **真实代码**：participant 使用本工程真实类名。遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
+> **图后文字说明（必须）**：时序图代码块**紧下方**须有「**协作者与过程说明**」小节，**详细**写出触发入口、逐跳协作与职责、数据/状态变化、各 `alt/else` 分支条件与结果、正常/异常结束条件——不得用一句话概括（详见 `.cursor/rules/specify-diagram-requirements.mdc` §四）。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'actorBkg': '#E3F2FD', 'actorBorder': '#1976D2', 'actorTextColor': '#1565C0', 'signalColor': '#1976D2', 'signalTextColor': '#212121', 'noteBkgColor': '#FFF8E1', 'noteBorderColor': '#FFC107'}}}%%
@@ -111,6 +112,14 @@ sequenceDiagram
         UC-->>UI: Failure/fallback
     end
 ```
+
+**协作者与过程说明**（必须，紧随上图）：
+
+1. **触发与入口**：[谁、在什么条件下发起；对应图中首批消息]
+2. **协作链与职责**：[逐跳说明谁调谁、目的、关键参数/返回值语义]
+3. **工作过程与状态**：[中间状态或数据如何变化]
+4. **分支与异常**：[对图中每个 alt/else：进入条件、各分支行为、用户可见结果]
+5. **结束条件**：[成功结束与各类失败/降级结束分别是什么]
 
 ##### 触发条件与系统响应
 

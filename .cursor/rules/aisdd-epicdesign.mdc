@@ -124,6 +124,7 @@ alwaysApply: false
 ## 行为约束
 
 - **基于真实代码**：类图/时序图必须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）
+- **时序图图后说明（必须）**：凡产出含 `sequenceDiagram` 的章节（如 `key-func-design.md`、`key-diagram.md`、`story_detail_design.md`），每张时序图**紧下方**须有**详细**文字说明，系统解释协作过程、工作过程及 `alt/else` 等分支含义（见 `.cursor/rules/specify-diagram-requirements.mdc` §四「图后文字说明」）；不得省略或用一句话代替。
 - **Mermaid 样式**：所有图表遵循 Material Design 配色（`.cursor/rules/mermaid-style-guide.mdc`）
 - **演进式设计**：不得从零设计理想方案（constitution §二）
 - **子文件完整性**：`key-func-design.md`、`key-diagram.md`、`story_detail_design.md` 必须是自包含的完整文档，不得依赖读者先阅读 `epic-design.md`
