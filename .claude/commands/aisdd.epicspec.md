@@ -1,0 +1,141 @@
+---
+description: 根据自然语言的需求描述创建或更新 EPIC 规格说明（EPIC 容器 + Feature 拆分列表）。Feature 的文档目录与 spec.md 请使用 /aisdd.featurespec 单独创建。
+handoffs: 
+  - label: 创建 Feature（逐个）
+    agent: aisdd.featurespec
+    prompt: 为某个 Feature 创建文档目录与 spec.md。Feature 描述如下……
+    send: false
+  - label: 审批关卡（spec-ready，在所有 Feature spec 完成后）
+    agent: aisdd.gate
+    prompt: spec-ready 关卡——冻结各 spec 后进入 epicuidesign/epicplan 阶段
+    send: false
+---
+
+## 用户输入
+
+```text
+$ARGUMENTS
+```
+
+在继续操作前，你**必须**参考用户输入（若不为空）。
+
+## 进入本阶段前（Gate 提醒）
+
+本命令为 EPIC 入口，**无**必须通过的上一关卡。完成各 Feature `spec.md` 后，须在进入 `/aisdd.epicplan` / `/aisdd.epicuidesign` 前提醒用户运行 **`/aisdd.gate spec-ready`**（见 `.claude/commands/aisdd.gate.md`）。
+
+## 大纲
+
+用户在触发消息中 `/aisdd.epicspec` 后输入的文本**即为 EPIC 描述**（大需求/主题）。该 EPIC 可能拆解为多个可独立交付的 Feature。即使下方出现字面量 `$ARGUMENTS`，也需假定该对话中始终可获取此描述。除非用户提交的指令为空，否则请勿要求用户重复描述。
+
+根据该功能描述，执行以下操作：
+
+### 1) 创建 EPIC 文档目录与 epic.md
+
+- **是否新建 Git 分支**（由 `$ARGUMENTS` 决定）：
+  - **默认**：创建 EPIC 目录并 **新建并切换** 到分支 `epic/EPIC-###-<short-name>`（与原先行为一致）。
+  - **保持在当前分支**：若用户在指令中显式包含以下任一标记，则脚本须加 **`-UseCurrentBranch`**，**不**执行 `git checkout -b`，仅在当前 HEAD 上创建 `specs/epics/...` 与 `epic.md`：
+    - `-UseCurrentBranch`、`--use-current-branch`
+    - 中文：`在当前分支`、`不新建分支`、`保留当前分支`
+- **优先**：从仓库根目录执行脚本（输出 JSON）：
+  - **默认（新建 epic 分支）**：  
+    `pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -ShortName "<short-name>" "<EPIC 描述>"`
+  - **当前分支**：  
+    `pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -UseCurrentBranch -ShortName "<short-name>" "<EPIC 描述>"`  
+  其中 `<short-name>` 为英文短名（如 `android-gallery`），用于目录名（及默认模式下的分支名）；`<EPIC 描述>` 可与用户输入一致（调用脚本时去掉上述分支开关字样，仅保留描述正文）。若环境仅支持 PowerShell 5，使用 `powershell -NoProfile -File ...`，且**不要**使用 `&&` 连接命令，应分两步：先 `cd` 到仓库根，再执行脚本。
+  - 解析 JSON 输出得到：`EPIC_ID`、`EPIC_BRANCH`（当前分支模式下为当前分支名）、`USE_CURRENT_BRANCH`、`EPIC_DIR`、`EPIC_FILE`。
+- **脚本失败时（如中文/编码导致执行失败）**：
+  - 手动创建目录 `specs/epics/EPIC-001-<short-name>/` 与 `epic.md`（见步骤 2、3）。
+  - **Git 分支**：若用户要求默认流程，在仓库根执行 `git checkout -b epic/EPIC-001-<short-name>`；若用户已选择「当前分支」模式，**不要**新建分支，并在完成报告中说明「已在当前分支创建 EPIC 目录」。
+
+### 2) 加载 EPIC 模板并写入 epic.md
+
+- 加载 `.specify/templates/epic-template.md`
+- 按模板结构将 EPIC 信息写入 `EPIC_FILE`（不得切换为 Feature 视角写 FR/NFR）
+
+### 3) 在 EPIC 文档中完成 Feature 拆分（必填）
+
+对 EPIC 做 Feature 拆分，输出：
+- Feature 列表（每项必须可独立交付，并包含 Feature ID、状态）
+- 每个 Feature 的边界（目标、In/Out、依赖、验收意图、拆分动机）
+- Feature 类型标注：Product / Capability
+- 若存在跨 Feature 共享关注点，补充 Capability 决策与轻量技术策略登记
+
+### 4) 输出下一步指令（逐个 Feature 手动触发）
+
+在命令输出中列出建议的下一步（不自动批量创建多个 Feature 文档目录）：
+- 对每个 Feature 输出一条建议命令：`/aisdd.featurespec <Feature 目标；范围（In/Out）；依赖；关键 NFR 关注点>`
+
+### 5) 完成报告
+
+输出：
+- EPIC ID
+- epic.md 路径（`EPIC_FILE`）
+- 拆分出的 Feature 数量
+
+## 重要说明（避免流程混淆）
+
+- `/aisdd.epicspec`：EPIC 入口（产出 epic.md + Feature 拆分列表）
+- `/aisdd.featurespec`：Feature 入口（创建 Feature 文档目录 + 产出 spec.md；本工作流不为 Feature 创建 git 分支）
+
+## 通用指南
+
+### 快速指南
+
+- 聚焦用户**需要什么**以及**为什么需要**。
+- 避免描述**如何**实现（不提及技术栈、API、代码结构）。
+- 面向业务相关方编写，而非开发人员。
+- 请勿在规格说明中嵌入任何检查清单，检查清单需通过单独命令生成。
+
+### 章节要求
+
+- **必填章节**：每个功能都必须完成
+- **可选章节**：仅在与功能相关时包含
+- 若某章节不适用，直接删除（勿保留为 "不适用"）
+
+### AI 生成规则
+
+基于用户提示创建规格说明时：
+
+1. **合理推测**：结合上下文、行业标准和通用模式填补信息空白
+2. **记录假设**：在“假设”章节记录所使用的合理默认值
+3. **限制澄清次数**：最多使用 3 个 [需澄清] 标记——仅用于以下关键决策：
+    - 对功能范围或用户体验有重大影响
+    - 存在多种合理且影响不同的解读方式
+    - 无任何合理默认值可参考
+4. **澄清优先级**：范围 > 安全/隐私 > 用户体验 > 技术细节
+5. **以测试视角思考**：任何模糊的需求都应判定为“不可测试、有歧义”（不符合检查清单要求）
+6. **常见需澄清场景**（仅在无合理默认值时）：
+    - 功能范围和边界（包含/排除特定用例）
+    - 用户类型和权限（若存在多种冲突解读）
+    - 安全/合规要求（涉及法律/财务重大影响时）
+
+**合理默认值示例**（无需询问）：
+
+- 数据留存：所属领域的行业通用做法
+- 性能指标：除非特别说明，否则采用标准 Web/移动应用的预期值
+- 错误处理：用户友好的提示信息及适当的降级方案
+- 认证方式：Web 应用默认采用基于会话或 OAuth2 认证
+- 集成模式：除非特别说明，否则默认采用 RESTful API
+
+### 成功标准编写指南
+
+成功标准必须满足：
+
+1. **可衡量**：包含具体指标（时间、百分比、数量、速率）
+2. **与技术无关**：不提及框架、语言、数据库或工具
+3. **以用户为中心**：从用户/业务视角描述结果，而非系统内部逻辑
+4. **可验证**：无需了解实现细节即可测试/验证
+
+**正面示例**：
+
+- "用户可在 3 分钟内完成结账流程"
+- "系统支持 10,000 个并发用户"
+- "95% 的搜索请求可在 1 秒内返回结果"
+- "任务完成率提升 40%"
+
+**反面示例**（聚焦实现细节）：
+
+- "API 响应时间低于 200 毫秒"（过于技术化，应改为“用户可即时看到结果”）
+- "数据库可处理 1000 TPS"（实现细节，应改为面向用户的指标）
+- "React 组件渲染高效"（框架相关）
+- "Redis 缓存命中率高于 80%"（技术相关）

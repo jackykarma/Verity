@@ -1,0 +1,73 @@
+---
+description: "当用户输入 /aisdd.epicuidesign 时触发：解析设计稿（交互稿/视觉稿），提取并结构化交互逻辑与视觉规范，产出可验证的 ux-design.md"
+alwaysApply: false
+---
+
+# /aisdd.epicuidesign — EPIC 设计稿解析
+
+## 触发
+
+用户输入 `/aisdd.epicuidesign`，可附带 EPIC 标识、解析侧重（`交互` / `视觉`）或 Figma 链接。
+
+## 目的
+
+从设计稿中**提取并结构化**交互逻辑与视觉规范，产出 EPIC 根目录下的 `ux-design.md`，供团队验证 AI 对设计稿理解是否完整、正确。**不是** AI 凭空创作 UX 设计。
+
+## 前置条件
+
+1. `epic.md` 已存在
+2. **所有 Feature 的 `spec.md` 已完成**（Spec Ready）
+3. 可与 `/aisdd.epicplan` 并行执行
+4. 非技术 Feature（纯后台/数据/SDK）可跳过
+
+## 输入
+
+### 必须阅读
+
+1. **`epic.md`**：背景、范围、Feature 列表
+2. **所有 Feature 的 `spec.md`**：用户旅程、FR、NFR、边界场景（作为交叉比对的需求参照）
+3. **`.specify/templates/ux-design-template.md`**：模板结构
+
+### 设计素材（三种输入源，可组合）
+
+1. **图片文件**（`design/` 下的 `.png` / `.jpg` / `.webp`）：通过 Read 工具读取图片进行视觉分析
+2. **Pencil 文件**（`design/` 下的 `.pen`）：通过 Pencil MCP 工具读取
+   - `open_document(filePath)` → 打开文件
+   - `batch_get(filePath)` → 获取节点树结构
+   - `snapshot_layout(filePath)` → 获取布局信息
+   - `get_screenshot(filePath, nodeId)` → 获取关键 Frame 截图
+3. **Figma 链接**：用户在 `$ARGUMENTS` 中提供，或在 `design/figma-links.md` 中索引
+
+### 兜底模式
+
+当 `design/` 为空且无 Figma 链接时，AI 基于 spec.md 提出 UX 建议草案，所有内容标记为 `[AI 建议 - 待设计师确认]`。
+
+## 输出
+
+EPIC 根目录下的 `ux-design.md`，覆盖模板全部章节：
+
+- **元信息**：Epic、版本、解析模式、设计稿来源清单
+- **信息架构**：从设计稿识别的跨 Feature 导航、页面层级、界面清单
+- **交互说明（交互稿解析结果）**：页面流转图（Mermaid）、逐屏交互规则、状态定义、反馈方式、异常与边界交互
+- **导航与手势**：从设计稿识别的导航模式、返回行为、手势交互
+- **视觉规范（视觉稿解析结果）**：主题与色板、布局结构（Markdown 表格展示尺寸与间距）、组件清单、动效/过渡、响应与适配
+- **无障碍**：触控区域、对比度、内容描述等
+- **设计稿索引**：所有素材索引（含解析状态列）
+- **遗漏与待确认**：设计稿未覆盖的场景、AI 待确认项、建议补充内容
+- **变更记录**：初始版本 v0.1.0
+
+## 行为约束
+
+- **EPIC 级整体视角**：从整个 EPIC 需求整体解析，保证跨 Feature 一致性
+- **来源标注**：所有提取的交互规则和视觉规范必须标注来源设计稿（文件名/页面/区域）
+- **交叉比对**：必须将提取结果与 spec.md 中的 FR/AC/用户旅程逐条比对，在「遗漏与待确认」章节标出设计稿未覆盖的场景
+- **兜底标记**：无设计稿时的 AI 建议内容须明确标记 `[AI 建议 - 待设计师确认]`，区别于从设计稿解析出的确定性内容
+- **模板结构保护**：不得增删章节
+- 作为各 Feature `plan.md` 和 `epic-design.md` 的**可选输入**（UI/交互约束）
+
+## 完成后
+
+提示用户：
+1. **重点 review**「遗漏与待确认」章节，确认 AI 理解是否正确
+2. 若有设计稿未覆盖的场景，补充设计稿后可说明更新范围做增量更新
+3. 后续 `/aisdd.featureplan` 和 `/aisdd.epicdesign` 可引用此文件作为 UI 约束输入

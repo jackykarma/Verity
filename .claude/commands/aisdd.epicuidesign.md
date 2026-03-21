@@ -1,0 +1,162 @@
+---
+description: "**EPIC 级**设计稿解析：从交互稿/视觉稿中提取并结构化交互逻辑与视觉规范。支持图片、Pencil(.pen)、Figma 链接三种输入源。须在所有 Feature 的 spec 均已输出之后运行；与 spec.md 交叉比对标出遗漏，产出可验证的 ux-design.md。无设计稿时进入兜底模式（AI 建议草案）。插入在 specify→plan 之间。"
+handoffs:
+  - label: 制定技术方案
+    agent: aisdd.featureplan
+    prompt: 完成 epic uidesign 后，基于 spec 与 EPIC 级 ux-design 制定技术方案
+    send: true
+  - label: 澄清交互/视觉约束
+    agent: aisdd.clarify
+    prompt: 需补充交互或视觉约束时，澄清后可再运行 epicuidesign；若 ux-design.md 已存在可直接说明更新范围由 AI 做增量更新
+    send: false
+---
+
+## 用户输入
+
+```text
+$ARGUMENTS
+```
+
+在继续操作前，你**必须**参考用户输入（若不为空）。可用于：
+- **EPIC 标识**（如 `EPIC-002`，用于定位 EPIC 目录；当 `SPECIFY_EPIC` 已设时可空）
+- **解析侧重**：`交互` / `交互稿` → 侧重提取交互逻辑；`视觉` / `视觉稿` → 侧重提取视觉规范；不指定 → 全量（默认）
+- **Figma 链接**：若用户直接提供 Figma URL，记录为输入源之一
+
+## 进入本阶段前（Gate 提醒）
+
+在执行下方步骤**之前**，你**必须**：
+
+1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **spec-ready** 是否已通过。
+2. 若未通过或用户未确认，须**再次提示**先运行 `/aisdd.gate spec-ready`；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
+
+**本命令对应的准入关卡**：**spec-ready**。
+
+## 大纲
+
+**核心定位**：从设计稿（交互稿/视觉稿）中**提取并结构化**交互逻辑与视觉规范，供团队验证 AI 理解是否完整、正确。**不是** AI 凭空创作 UX 设计。
+
+**输入源**（三选一或组合）：
+- **图片文件**：截图/导出图放在 `design/` 目录下（.png/.jpg/.webp），AI 通过 Read 工具读取图片进行视觉分析
+- **Pencil 文件**：`.pen` 文件放在 `design/` 目录下，AI 通过 Pencil MCP 工具读取（`batch_get` 获取节点树、`get_screenshot` 获取截图、`snapshot_layout` 获取布局信息）
+- **Figma 链接**：用户在 `$ARGUMENTS` 中提供 Figma URL，或在 `design/figma-links.md` 中索引
+
+**兜底模式**：当 `design/` 为空且无 Figma 链接时，AI 基于 spec.md 提出 UX 建议草案，所有内容标记为 `[AI 建议 - 待设计师确认]`。
+
+**本命令是可选步骤**：并非所有 EPIC 在技术方案阶段都具备完整 UX/视觉稿。若设计稿尚未就绪，可跳过本命令直接进入 `/aisdd.epicplan`；后续设计稿就绪后再运行本命令，或直接说明更新范围由 AI 做增量更新。
+
+**前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行。
+
+**推荐顺序**：epicuidesign（若有） → epicplan → 各 Feature plan。若先做 epicuidesign 再做 epicplan，epicplan 可参考 UX 结论校准技术约束。
+
+---
+
+执行步骤：
+
+### 1. 环境与路径
+
+从仓库根目录运行（通过 `SPECIFY_EPIC` 或 `$ARGUMENTS` 中的 EPIC 标识定位 EPIC，如 `EPIC-002`）：
+
+```powershell
+.specify/scripts/powershell/get-epic-paths.ps1 -EpicId "EPIC-002" -Json
+```
+
+解析 JSON 得到 `EPIC_DIR`、`EPIC_UX_DESIGN`、`EPIC_DESIGN_DIR`。
+
+- 若 `EpicId` 未提供且 `$env:SPECIFY_EPIC` 未设：**终止**并提示「请设置 SPECIFY_EPIC 或在 $ARGUMENTS 中提供 EPIC 标识，如 EPIC-002」。
+- 若 `EPIC_UX_DESIGN`（ux-design.md）**已存在**：**终止**并提示「ux-design.md 已存在，请直接说明要更新的章节或范围，由 AI 做增量更新」。
+
+### 2. 前置条件检查（所有 Feature spec 已就绪）
+
+遍历 `EPIC_DIR/features/` 下每个**子目录**，若某子目录存在且其中**无 `spec.md`**，则**终止**并提示：「须在**所有** Feature 的 spec 输出后再运行 /aisdd.epicuidesign。以下 Feature 目录尚未具备 spec：\[列出缺 spec 的目录名\]。」
+
+### 3. 扫描设计素材
+
+扫描 `EPIC_DESIGN_DIR`（`design/`）目录和 `$ARGUMENTS`，按类型分类收集设计素材：
+
+**3a. 图片文件**（`.png` / `.jpg` / `.jpeg` / `.webp`）：
+- 使用 Read 工具逐个读取图片
+
+**3b. Pencil 文件**（`.pen`）：
+- 使用 Pencil MCP `open_document(filePath)` 打开文件
+- 使用 `batch_get(filePath)` 读取顶层节点树，了解整体结构
+- 使用 `snapshot_layout(filePath)` 获取布局信息
+- 对关键 Frame 使用 `get_screenshot(filePath, nodeId)` 获取截图以辅助视觉分析
+
+**3c. Figma 链接**：
+- 从 `$ARGUMENTS` 中提取 Figma URL
+- 若 `design/figma-links.md` 存在，读取其中的链接列表
+- 记录链接，提示用户 AI 无法直接访问 Figma，需要用户将相关页面导出为截图放入 `design/`，或在 Pencil 中打开
+
+**3d. 判断模式**：
+- 若以上扫描均无设计素材 → 进入**兜底模式**（步骤 5c）
+- 否则 → 记录所有素材清单，进入**解析模式**（步骤 5a/5b）
+
+### 4. 加载需求上下文
+
+读取以下文件作为交叉比对的需求参照：
+- `EPIC_DIR/epic.md`：背景、范围、Feature 列表
+- 各 `EPIC_DIR/features/*/spec.md`：FR、NFR、AC、用户旅程、边界场景
+- `.specify/templates/ux-design-template.md`：输出模板结构
+
+### 5. 解析与提取
+
+根据**解析侧重**（从 `$ARGUMENTS` 解析：`交互` / `视觉` / 全量默认）和素材类型执行解析：
+
+**5a. 交互稿解析**（当侧重为「交互」或「全量」时执行）：
+
+逐页/逐屏分析设计稿，提取：
+1. **信息架构**：识别所有界面、层级关系、导航入口
+2. **页面流转**：识别界面间的跳转关系，用 Mermaid flowchart 还原
+3. **逐屏交互规则**：每个界面内的操作触发、响应行为、目标状态
+4. **状态定义**：识别 Loading/空态/错误态/成功态/离线态等各状态的视觉表现
+5. **反馈方式**：Toast/Snackbar/Dialog/内联提示等反馈机制
+6. **异常与边界**：设计稿中体现的异常处理方案
+7. **导航与手势**：返回行为、手势交互、Deep Link
+8. **交叉比对**：将提取结果与 spec.md 中的 FR/AC/用户旅程逐条比对，标出设计稿未覆盖的场景 → 写入「遗漏与待确认」章节
+
+每条提取的规则**必须标注来源设计稿**（文件名/页面/区域）。
+
+**5b. 视觉稿解析**（当侧重为「视觉」或「全量」时执行）：
+
+逐页分析设计稿，提取：
+1. **主题与色板**：提取主色、辅色、背景、表面、错误等色值（Light/Dark）
+2. **布局结构**：提取关键界面的布局区域、尺寸、间距，用 Markdown 表格展示
+3. **组件清单**：识别使用的组件、对应 Material 组件、自定义样式参数
+4. **动效/过渡**：识别或从标注中读取动效类型、时长、缓动曲线
+5. **响应与适配**：屏幕尺寸分级、折叠屏、字体缩放、横竖屏策略
+6. **无障碍**：触控区域、对比度、内容描述等
+7. **交叉比对**：将提取结果与 spec.md 中的 NFR（性能/适配/无障碍要求）比对，标出差异
+
+每项提取的规范**必须标注来源设计稿**。
+
+**5c. 兜底模式**（当无任何设计素材时执行）：
+
+基于 epic.md 与各 spec.md 的 FR/NFR/用户旅程，**提出 UX 建议草案**：
+- 填充模板各章节，但所有内容前缀标记 `[AI 建议 - 待设计师确认]`
+- 在「遗漏与待确认」章节说明：本文档为 AI 建议草案，非基于设计稿解析，需设计师评审并提供正式设计稿
+- 「设计稿来源」表填写「暂无 — AI 建议草案」
+
+### 6. 填充 ux-design.md
+
+按 `.specify/templates/ux-design-template.md` 结构填充，写入 `EPIC_UX_DESIGN`。
+
+元信息须包含：
+- **Epic / Epic Version / ux-design Version / 日期**
+- **解析模式**：交互 / 视觉 / 全量 / 兜底
+- **设计稿来源**：列出所有解析的设计素材
+- **需求参照**：`epic.md`、各 `features/*/spec.md`
+
+确保从**整个 EPIC 需求整体**视角填充，保证跨 Feature 导航、风格与交互一致。
+
+### 7. 完成报告
+
+输出：
+1. `ux-design.md` 路径
+2. 解析统计：解析了多少设计素材、提取了多少交互规则/视觉规范
+3. **遗漏摘要**：设计稿未覆盖的 spec 场景数量及关键项
+4. **待确认摘要**：AI 无法确定的细节数量
+5. 提示下一步：
+   - 请 review ux-design.md 中的「遗漏与待确认」章节
+   - 若有遗漏，补充设计稿后可重新运行或说明更新范围做增量更新
+   - 若尚未做 EPIC 技术规约可运行 `/aisdd.epicplan "EPIC-xxx"`
+   - 对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/aisdd.featureplan`

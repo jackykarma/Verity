@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(D:\\Jacky\\AndroidProjects\\Verity\\**)",
+      "Edit(D:\\Jacky\\AndroidProjects\\Verity\\**)",
+      "Write(D:\\Jacky\\AndroidProjects\\Verity\\**)",
+      "Bash(find /d/Jacky/AndroidProjects/Verity -maxdepth 3 -name *.md ! -path */.git/*)",
+      "Bash(find /d/Jacky/AndroidProjects/Verity/.cursor -name *.mdc)",
+      "Bash(find /d/Jacky/AndroidProjects/Verity/.specify -name *.ps1)",
+      "WebSearch",
+      "Bash(claude:*)",
+      "WebFetch(domain:docs.anthropic.com)"
+    ]
+  }
+}

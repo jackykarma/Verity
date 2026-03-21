@@ -1,0 +1,109 @@
+---
+description: "当用户输入 /aisdd.featuretasks 时触发：产出某个 Feature 的 tasks.md（Story → Task 落地任务清单）"
+alwaysApply: false
+---
+
+# /aisdd.featuretasks — Task 拆解
+
+## 触发
+
+用户输入 `/aisdd.featuretasks`。作用于当前 Feature。
+
+## 目的
+
+基于 EPIC 软件设计说明书的 Story 拆解（§5）、plan.md 的技术规约与 spec.md 的 FR/NFR，将 Story 拆解为可执行的 Task 清单，产出当前 Feature 目录下的 `tasks.md`。
+
+## 前置条件
+
+1. 本 Feature 的 `spec.md` 和 `plan.md` 已完成
+2. `epic-design.md` 已通过 Design Ready（`/aisdd.gate design-ready`）
+3. 本 Feature 的 `story_detail_design.md` 已完成（若有 L2 设计）
+
+## 输入（必须阅读）
+
+1. **`epic-design.md`**：Story 拆解（§5 Story 列表、依赖关系、FR/NFR 覆盖矩阵）、全景类图与关键时序（§4）、架构图（§1、§2）
+2. **本 Feature 的 `plan.md`**：技术规约、接口契约、Story 索引表
+3. **本 Feature 的 `story_detail_design.md`**：L2 详细设计（Task 的设计引用来源）
+4. **本 Feature 的 `spec.md`**：FR/NFR/AC（Task 验证须追溯）
+5. **`epic-plan.md`**（若存在）：EPIC 级技术约束
+6. **`.specify/templates/tasks-template.md`**：模板结构
+
+## 前置步骤：回填 plan.md 与 spec.md
+
+在产出 `tasks.md` **之前**，自动执行以下回填操作（原 `/aisdd.backfill` 的职责）：
+
+### 1. 回填 spec.md「需求追溯表」
+
+在本 Feature 的 `spec.md`「需求追溯」表中填入 FR/NFR → Story 的映射：
+
+| FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
+|---|---|---|---|
+| FR-001 | ST-xxx | （tasks.md 产出后补填） | |
+
+数据来源：`epic-design.md` §5 覆盖矩阵。
+
+### 2. 回填 plan.md「§一 一致性互校」
+
+在本 Feature 的 `plan.md` §一中，对照 `epic-design.md` 的零层架构和一层架构，逐行填写互校结果，确认无矛盾。
+
+### 回填约束
+
+- **精准更新**：仅修改上述 2 处，不得修改 plan.md 和 spec.md 的其他章节
+- **数据一致**：所有回填数据必须与 `epic-design.md` §5 的内容完全一致
+- **版本更新**：回填完成后，更新 plan.md 的变更记录表（版本号 +0.0.1）
+
+## 输出
+
+`tasks.md`，包含以下内容：
+
+### Task 行格式
+
+```text
+- [ ] T001 [P?] [ST-001] <带路径的任务标题>
+```
+
+- 复选框 `- [ ]`（完成后改 `- [x]`）
+- 任务 ID（T001、T002…全局递增）
+- `[P]` 标记可并行任务
+- `[ST-xxx]` 绑定 Story ID（来自 EPIC 设计说明书 §5 Story 拆解，不得擅自发明新 Story）
+- 路径使用工程真实文件路径
+
+### 每个 Task 必须包含
+
+- **依赖**：T??? 或"无"
+- **设计引用**：指向 `epic-design.md:§4 全景类图/时序图` 或 `story_detail_design.md:ST-xxx:功能设计:类图/时序图`
+- **步骤**：编号步骤列表
+- **验证**：可执行的验证清单（含 NFR 阈值）
+- **产物**：涉及的文件
+
+### 阶段组织
+
+- 阶段 0：准备（版本对齐、冻结设计输入）
+- 阶段 1：环境搭建（目录/依赖/工具链）
+- 阶段 2：核心基础（阻塞性前置，阻塞所有 Story）
+- 阶段 3+：每个 Story 一个阶段（按依赖与优先级组织）
+- 最终阶段：优化与跨领域关注点
+- 依赖关系与执行顺序总结
+
+### 测试任务
+
+**测试任务可选**：仅当 spec 中明确要求，或用户指定采用 TDD 方式时，才生成测试任务。
+
+## 行为约束
+
+- **禁止改写技术决策**：Task 只拆解与执行既定设计，不得新增未决策的方案
+- **设计引用必填**：每个 Task 必须有明确的设计引用
+- **Story 绑定**：每个 Task 必须绑定 `[ST-xxx]`（来自 §5）
+- **真实路径**：使用工程实际文件路径，不用示例路径
+- **模板结构保护**：不得增删模板已定义的章节
+- **独立可验证**：每个 Story 完成后可独立测试
+- **执行主体**：SE/TL（或架构师）。开发者应将 tasks.md 视为只读执行清单；如需调整须提交变更提案
+- **可直接执行**：每个任务描述需足够具体，确保无需额外上下文即可完成
+
+## 完成后
+
+提示用户：
+1. 评审 tasks.md
+2. 建议运行 `/aisdd.analyze`（一致性分析）
+3. 运行 `/aisdd.gate tasks-ready`（审批关卡）
+4. 审批通过后运行 `/aisdd.implement` 分阶段实现代码

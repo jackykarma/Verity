@@ -1,0 +1,69 @@
+---
+description: "当用户输入 /aisdd.featureplan 时触发：产出某个 Feature 的 plan.md（技术规约与实现约束）"
+alwaysApply: false
+---
+
+# /aisdd.featureplan — Feature 技术规约
+
+## 触发
+
+用户输入 `/aisdd.featureplan`。作用于当前 Feature（由 `$env:SPECIFY_FEATURE` 或分支确定）。
+
+## 目的
+
+产出当前 Feature 目录下的 `plan.md`（Feature 级技术规约与实现约束）。详细架构设计（0 层/1 层架构图、全景类图、关键时序图、Story 拆解、L2 详细设计）由后续 `/aisdd.epicdesign` 在 EPIC 级统一产出。
+
+## 前置条件
+
+1. 本 Feature 的 `spec.md` 已完成（Spec Ready）
+2. `epic-plan.md` 已存在（若为单 Feature EPIC 可省略，其内容合并到 plan.md）
+3. 若 EPIC 级 `ux-design.md` 已产出（设计稿解析结果），作为可选输入
+
+## 脚本
+
+先运行 `.specify/scripts/powershell/setup-plan.ps1 -Json` 创建 plan.md 文件（从模板复制），解析 JSON 得到 `FEATURE_SPEC`、`IMPL_PLAN`、`EPIC_PLAN`、`UX_DESIGN` 等路径。
+
+## 输入（必须阅读）
+
+1. **本 Feature 的 `spec.md`**：FR/NFR/依赖/约束/边界场景——方案设计的主要输入
+2. **`epic-plan.md`**（若存在）：EPIC 级技术约束（plan 不得违反）
+3. **`ux-design.md`**（若已产出）：从设计稿解析出的信息架构、交互规则（页面流转图、逐屏交互规则）、视觉规范（色板、布局标注、组件清单）、设计稿索引；关注「遗漏与待确认」章节
+4. **`.specify/templates/plan-template.md`**：模板结构
+5. **`.specify/memory/constitution.md`**：章程约束（MUST/SHOULD）
+6. **`.claude/rules/specify-diagram-requirements.mdc`**：确保图表基于本工程实际架构
+7. **现有工程代码**：实际架构、模块、技术栈
+
+## 输出
+
+`plan.md`，覆盖以下章节：
+
+| 章节 | 内容 | 状态 |
+|------|------|------|
+| Plan 前置检查 | 验证 EPIC 级规约遵从、共享能力依赖 | 填写 |
+| §一 设计说明书↔技术规约一致性互校 | 与设计说明书的对应关系 | 填写 |
+| §二 技术背景 | 语言/框架/存储/测试/平台 | 填写 |
+| §三 架构约束与演进规则 | 分层/线程/错误/日志 | 填写 |
+| §四 数据模型与状态管理 | 存储形态/物理结构/迁移 | 填写 |
+| §五 接口与契约规范 | 对外接口/依赖接口/契约工件 | 填写 |
+| §六 合规性检查 | Implement 前的检查项（如适用） | 填写 |
+| §七 项目结构约定 | Feature 文档目录 | 填写 |
+| §八 源代码结构 | 代码目录结构 | 填写 |
+| Story 索引表 | 轻量 Story 索引（详细设计指向后续 EPIC 软件设计说明书） | 填写 |
+| 复杂度跟踪 | 仅有违规项时填写 | 按需 |
+
+## 行为约束
+
+- **演进式设计**：基于现有代码分析，不得从零设计理想方案（constitution §一、§二）
+- **差距分析**：需求映射→差距分析→演进设计（constitution §四）
+- **不得违反 epic-plan**：技术栈、分层、线程模型等必须与 EPIC 级约束一致
+- **共享能力复用**：若 Owner 是其他 Feature，必须复用而非另起炉灶
+- **模板结构保护**：不得增删章节
+- **图表规范**：所有技术图表必须使用 Mermaid 格式，遵循 `.claude/rules/mermaid-style-guide.mdc`
+- **plan 定位**：plan.md 是技术规约与实现约束，不包含详细架构设计；架构图、全景类图、时序图、Story 拆解由 `/aisdd.epicdesign` 在 EPIC 级统一产出
+- **执行主体**：SE/TL（或架构师）。开发者应将 plan.md 视为只读输入；如需变更须提交变更提案
+
+## 完成后
+
+提示用户：
+1. 评审 plan.md
+2. 所有 Feature 的 plan 完成后 → `/aisdd.gate plan-ready`（审批关卡）→ `/aisdd.epicdesign` 产出 EPIC 软件设计说明书
