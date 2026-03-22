@@ -132,7 +132,14 @@ $ARGUMENTS
    - **diagram**（无范围）：产出 `key-diagram.md` 的 §7.2 全景骨架类图，并更新 `epic-design.md` 的 §4 为摘要 + 引用。
    - **diagram FEAT-xxx**：产出 `key-diagram.md` 中该 Feature 的子类图（§7.2.x）+ 完整时序图（§7.3 SEQ-xxx），并更新 `epic-design.md` §4 的索引表。
    - **story**：更新 `epic-design.md` 的 §5（Story 列表、依赖图、FR/NFR 矩阵）。
-   - **l2**：在各 Feature 目录下产出/更新 `story_detail_design.md`，并更新 `epic-design.md` 的 §6 为索引表；若带范围则仅处理指定 FEAT 或 ST。
+   - **l2**：
+     - **前置：类名存在性检查**（每个 Story 生成类图前必须执行）：
+       1. 按 `plan.md` 的项目结构扫描工程代码，定位本 Story 涉及的相关模块/包
+       2. 列出本 Story 类图将使用的全部核心类，区分两类：
+          - **现有类**（代码中已存在）：必须使用代码中的真实完整类名，不得改名或使用示例类名
+          - **新增类**（设计新增，代码中尚不存在）：在类图中该类旁注明 `// 新增类：[一句话说明新增理由]`
+       3. 若无法确认某类是否存在，在类图旁标注 `// 待确认：[类名]`，由人工评审时核实
+     - 完成类名检查后，在各 Feature 目录下产出/更新 `story_detail_design.md`，并更新 `epic-design.md` 的 §6 为索引表；若带范围则仅处理指定 FEAT 或 ST。
    - **all**：依次执行 arch + key + diagram + story 的产出（不执行 l2）。
 
 5. **子文件引用规则**：当 §3、§4、§6 内容在子文件中时，`epic-design.md` 对应章节仅保留**摘要 + 引用链接**（见 `.claude/rules/aisdd-epicdesign.mdc` 中的示例）。
