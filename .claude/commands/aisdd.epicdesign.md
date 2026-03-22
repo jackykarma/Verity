@@ -52,7 +52,7 @@ $ARGUMENTS
 | **arch** | §1~§2 | `epic-design.md` §1~§2 | 重新生成零层/一层架构（覆盖已有） |
 | **key** | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计、各 KD **核心方案**（全链路 + 每环落地 + 与图互证）、方案流程图、核心调用链时序图 |
 | **diagram** | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 无范围：全景骨架类图；`diagram FEAT-001`：该 Feature 的子类图 + 完整时序图 |
-| **story** | §5 | `epic-design.md` §5 | Story 列表、依赖关系图、FR/NFR 覆盖矩阵 |
+| **story** | §5 | `epic-design.md` §5 | 拆解策略说明、Story 列表（含预估工作量）、依赖关系图、FR/NFR 覆盖矩阵、工作量汇总；须通过模板 §12.3 Story 自检清单 |
 | **l2** | §6 | 各 `features/FEAT-xxx/story_detail_design.md` + `epic-design.md` §6 索引表 | 按 Story 产出 L2 详细设计；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
 | **all** | §1~§5 一次性 | 上述对应文件（不含 l2） | 小 EPIC 或上下文充裕时一次性产出 |
 | **-h** | — | — | 仅输出参数帮助，不产出任何文件 |
@@ -131,7 +131,7 @@ $ARGUMENTS
    - **key**：按 `key-func-design-template.md` 产出 `key-func-design.md`（各 KD **核心方案**须覆盖技术点与相关链路、每环如何达成、与流程图/时序图一致），并更新 `epic-design.md` 的 §3 为摘要 + 引用该文件。
    - **diagram**（无范围）：产出 `key-diagram.md` 的 §7.2 全景骨架类图，并更新 `epic-design.md` 的 §4 为摘要 + 引用。
    - **diagram FEAT-xxx**：产出 `key-diagram.md` 中该 Feature 的子类图（§7.2.x）+ 完整时序图（§7.3 SEQ-xxx），并更新 `epic-design.md` §4 的索引表。
-   - **story**：更新 `epic-design.md` 的 §5（Story 列表、依赖图、FR/NFR 矩阵）。
+   - **story**：按模板「§12.1 拆解策略（拆解维度 → 反模式筛查）→ §12.2 拆分约束（拆分首看改动路径独立性与技术边界，工作量仅为参考信号：典型 2～5 人天，>7 人天检查是否可拆，<1 人天检查是否可合并）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §5（拆解策略说明、Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵 §12.6、工作量汇总 §12.7）。
    - **l2**：
      - **前置：类名存在性检查**（每个 Story 生成类图前必须执行）：
        1. 按 `plan.md` 的项目结构扫描工程代码，定位本 Story 涉及的相关模块/包
