@@ -1,6 +1,10 @@
 ---
 description: "**EPIC 级**软件设计说明书。在 EPIC 级技术约束就绪（`epic-plan.md` **或** 单 Feature EPIC 下唯一 Feature 的 `plan.md`）及各 Feature `plan.md` 完成后运行；基于 epic.md、上述约束文档、各 feature spec/plan 及**现有工程代码**，按章节范围参数分阶段产出设计说明书（0 层/1 层架构、关键设计、全景类图与关键时序、Story 拆解、L2 详细设计）。供人类评审与后续 tasks/implement 阶段 AI 编码引用。"
 handoffs:
+  - label: 对抗性挑战（多 Feature 推荐）
+    agent: aisdd.challenge
+    prompt: epicdesign 完成（至少 story 阶段）后，运行 /aisdd.challenge design 对设计进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
+    send: false
   - label: 审批关卡（design-ready）
     agent: aisdd.gate
     prompt: design-ready 关卡——冻结设计说明书后进入 tasks 拆解
@@ -118,7 +122,7 @@ $ARGUMENTS
    - 若存在：读取 `EPIC_DIR/ux-design.md`
    - 读取 `.specify/memory/constitution.md`
    - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-template.md`、`key-diagram-template.md`、`story_detail_design_template.md`
-   - 读取 `.cursor/rules/specify-diagram-requirements.mdc`、`.cursor/rules/mermaid-style-guide.mdc`
+   - 读取 `.claude/rules/specify-diagram-requirements.mdc`、`.claude/rules/mermaid-style-guide.mdc`
    - **分析现有工程代码**：架构分层、模块划分、包组织、现有框架
 
 4. **根据参数产出**：
@@ -131,7 +135,7 @@ $ARGUMENTS
    - **l2**：在各 Feature 目录下产出/更新 `story_detail_design.md`，并更新 `epic-design.md` 的 §6 为索引表；若带范围则仅处理指定 FEAT 或 ST。
    - **all**：依次执行 arch + key + diagram + story 的产出（不执行 l2）。
 
-5. **子文件引用规则**：当 §3、§4、§6 内容在子文件中时，`epic-design.md` 对应章节仅保留**摘要 + 引用链接**（见 `.cursor/rules/aisdd-epicdesign.mdc` 中的示例）。
+5. **子文件引用规则**：当 §3、§4、§6 内容在子文件中时，`epic-design.md` 对应章节仅保留**摘要 + 引用链接**（见 `.claude/rules/aisdd-epicdesign.mdc` 中的示例）。
 
 6. **完成报告**：输出本次产出的文件路径、对应章节，并提示下一步：
    - 默认/arch 完成 → 提示继续 `key`
@@ -139,12 +143,12 @@ $ARGUMENTS
    - diagram（无范围）完成 → 提示继续 `diagram FEAT-001`（逐个 Feature 的子类图 + 完整时序图）
    - diagram FEAT-xxx 完成 → 提示继续下一个 Feature 的 `diagram FEAT-yyy`；全部 Feature 完成后提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：`/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（自动含回填 plan.md §一互校 + spec.md 需求追溯表）
+   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（自动含回填 plan.md §一互校 + spec.md 需求追溯表）
 
 核心规则：
 - 产出 `key-func-design.md` 时须严格遵循 `key-func-design-template.md`：各 KD 的**核心方案**为清晰连贯正文，覆盖技术点与**全链路**，链上**每一环如何达成**写清，并与流程图/时序图一致
-- 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`
-- 图表内容须基于本工程**实际架构与真实代码**，遵循 `.cursor/rules/specify-diagram-requirements.mdc`
+- 所有图表必须使用 **Mermaid 格式**，遵循 `.claude/rules/mermaid-style-guide.mdc`
+- 图表内容须基于本工程**实际架构与真实代码**，遵循 `.claude/rules/specify-diagram-requirements.mdc`
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
 - **L2 详细设计统一分文件**：epic-design.md 的 §6 仅为索引表，详细设计写在各 Feature 的 `story_detail_design.md` 中
 - **章节骨架先行**：首次（无参数）调用必须输出完整 §1~§6 骨架，未填充章节保留占位提示；后续调用仅更新指定章节

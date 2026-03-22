@@ -38,7 +38,7 @@
 
 ### 3.1 架构图
 
-图表须基于项目真实架构绘制，包含模块、组件与数据流方向。绘图样式须遵循 `.cursor/rules/mermaid-style-guide.mdc`。
+图表须基于项目真实架构绘制，包含模块、组件与数据流方向。绘图样式须遵循 `.claude/rules/mermaid-style-guide.mdc`。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {

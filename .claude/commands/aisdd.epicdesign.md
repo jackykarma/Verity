@@ -1,6 +1,10 @@
 ---
 description: "**EPIC 级**软件设计说明书。在 EPIC 级技术约束就绪（`epic-plan.md` **或** 单 Feature EPIC 下唯一 Feature 的 `plan.md`）及各 Feature `plan.md` 完成后运行；基于 epic.md、上述约束文档、各 feature spec/plan 及**现有工程代码**，按章节范围参数分阶段产出设计说明书（0 层/1 层架构、关键设计、全景类图与关键时序、Story 拆解、L2 详细设计）。供人类评审与后续 tasks/implement 阶段 AI 编码引用。"
 handoffs:
+  - label: 对抗性挑战（多 Feature 推荐）
+    agent: aisdd.challenge
+    prompt: epicdesign 完成（至少 story 阶段）后，运行 /aisdd.challenge design 对设计进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
+    send: false
   - label: 审批关卡（design-ready）
     agent: aisdd.gate
     prompt: design-ready 关卡——冻结设计说明书后进入 tasks 拆解
@@ -139,7 +143,7 @@ $ARGUMENTS
    - diagram（无范围）完成 → 提示继续 `diagram FEAT-001`（逐个 Feature 的子类图 + 完整时序图）
    - diagram FEAT-xxx 完成 → 提示继续下一个 Feature 的 `diagram FEAT-yyy`；全部 Feature 完成后提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：`/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（自动含回填 plan.md §一互校 + spec.md 需求追溯表）
+   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（自动含回填 plan.md §一互校 + spec.md 需求追溯表）
 
 核心规则：
 - 产出 `key-func-design.md` 时须严格遵循 `key-func-design-template.md`：各 KD 的**核心方案**为清晰连贯正文，覆盖技术点与**全链路**，链上**每一环如何达成**写清，并与流程图/时序图一致

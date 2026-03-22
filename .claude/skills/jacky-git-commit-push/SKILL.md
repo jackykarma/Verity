@@ -25,8 +25,8 @@ description: Git 提交和推送助手。自动化 Git 提交流程，遵循 Com
 - 用户说"仅提交不推送"、"先 commit 稍后 push"
 
 **相关资源**:
-- 提交模板: [docs/template/commit-message-template.md](../../../docs/template/commit-message-template.md)
-- 编码规范: `.cursor/rules/git-commit-encoding.mdc`（Windows 下避免中文乱码）
+- 提交模板: [commit-message-template.md](reference/commit-message-template.md)
+
 
 ## Commitizen 中文规范
 
@@ -251,7 +251,7 @@ EOF
 )"
 ```
 
-**注意**: Windows PowerShell 下 `git commit -m "中文"` 易乱码，务必使用 `-F` 读取 UTF-8 文件。详见 `.cursor/rules/git-commit-encoding.mdc`。
+**注意**: Windows PowerShell 下 `git commit -m "中文"` 易乱码，务必使用 `-F` 读取 UTF-8 文件。
 
 **5.3 推送到远程**
 ```bash
@@ -395,7 +395,7 @@ git config commit.template
 git commit
 ```
 
-**本项目的模板**: `docs/template/commit-message-template.md`。可配置 `git config commit.template docs/template/commit-message-template.md`。
+**本项目的模板**: `reference/commit-message-template.md`。可配置 `git config commit.template .claude/skills/jacky-git-commit-push/reference/commit-message-template.md`。
 
 ## 注意事项
 
@@ -427,7 +427,7 @@ git commit
 
 ### 📄 提交模板
 
-项目提供 [docs/template/commit-message-template.md](../../../docs/template/commit-message-template.md)，包含各类型的完整模板。可配置 `git config commit.template docs/template/commit-message-template.md`。
+项目提供 [commit-message-template.md](reference/commit-message-template.md)，包含各类型的完整模板。可配置 `git config commit.template .claude/skills/jacky-git-commit-push/reference/commit-message-template.md`。
 
 ## 快速参考
 
@@ -481,7 +481,7 @@ git checkout -- <file>  # 放弃修改
 
 ### 0. 中文乱码（Windows）
 
-参见 `.cursor/rules/git-commit-encoding.mdc`。**务必使用 `git commit -F .git-msg.txt`**，勿用 `-m "中文"`。
+**务必使用 `git commit -F .git-msg.txt`**，勿用 `-m "中文"`。
 
 ### 1. Git 未初始化
 ```
@@ -543,5 +543,5 @@ git checkout -- <file>  # 放弃修改
 ---
 
 **相关文档**:
-- [Commit Message 模板](../../../docs/template/commit-message-template.md)
+- [Commit Message 模板](reference/commit-message-template.md)
 - [Conventional Commits 规范](https://www.conventionalcommits.org/zh-hans/)

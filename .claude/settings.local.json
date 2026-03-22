@@ -9,7 +9,11 @@
       "Bash(find /d/Jacky/AndroidProjects/Verity/.specify -name *.ps1)",
       "WebSearch",
       "Bash(claude:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(cp \"D:/Jacky/AndroidProjects/Verity/docs/template/product-requirement-doc-template.md\" \"D:/Jacky/AndroidProjects/Verity/.claude/skills/jacky-prd-review/prd-template.md\")",
+      "Bash(cp \"D:/Jacky/AndroidProjects/Verity/docs/template/product-requirement-doc-template.md\" \"D:/Jacky/AndroidProjects/Verity/.claude/skills/jacky-requirement-spec-generator/prd-template.md\")",
+      "Bash(mkdir -p \"D:/Jacky/AndroidProjects/Verity/.claude/skills/jacky-git-commit-push/reference\")",
+      "Bash(cp \"D:/Jacky/AndroidProjects/Verity/docs/template/commit-message-template.md\" \"D:/Jacky/AndroidProjects/Verity/.claude/skills/jacky-git-commit-push/reference/commit-message-template.md\")"
     ]
   }
 }

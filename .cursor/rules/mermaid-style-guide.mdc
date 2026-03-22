@@ -183,6 +183,12 @@ flowchart TB
 
 ---
 
+## 备选配色方案
+
+如需使用莫兰迪、薄荷、奶茶等其他风格，参见 [mermaid-color-themes.md](mermaid-color-themes.md)。
+
+---
+
 ## 使用规范
 
 1. **每个图表必须包含 `%%{init}%%` 配置** - 确保样式一致

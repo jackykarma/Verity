@@ -113,7 +113,7 @@ Feature（业务功能）
 
 ### 技术实现文档（每篇必须包含以下全部章节）
 
-图表须遵循 `.cursor/rules/mermaid-style-guide.mdc`（样式配色）和 `.cursor/rules/specify-diagram-requirements.mdc`（内容规范）。
+图表须遵循 `.claude/rules/mermaid-style-guide.mdc`（样式配色）和 `.claude/rules/specify-diagram-requirements.mdc`（内容规范）。
 
 > 完整模板文件见 `.claude/skills/jacky-feature-technical-doc/reference/technical-doc-template.md`，以下为章节结构速览：
 
@@ -308,6 +308,6 @@ Feature（业务功能）
 - [ ] 所有图表的 participant/类名均为项目真实类名，无虚构
 - [ ] 时序图中无「...」省略；每张时序图有「协作者与过程说明」且内容详尽
 - [ ] 流程图中无「...」省略，分支完整
-- [ ] 图表符合 `.cursor/rules/mermaid-style-guide.mdc` 样式规范
+- [ ] 图表符合 `.claude/rules/mermaid-style-guide.mdc` 样式规范
 - [ ] 新人可以理解（无隐含知识，每个术语在 §2 有定义）
 - [ ] 信息来源已说明（✅ 已确认 / ⚠️ 合理推断 + 依据）

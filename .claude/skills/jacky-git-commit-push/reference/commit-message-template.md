@@ -198,4 +198,4 @@ git config commit.template .gitmessage
 
 ---
 
-**参考**: [git-commit-push SKILL](../../.cursor/skills/git-commit-push/SKILL.md) | [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)
+**参考**: [git-commit-push SKILL](../SKILL.md) | [Conventional Commits](https://www.conventionalcommits.org/zh-hans/)
