@@ -51,7 +51,7 @@ $ARGUMENTS
 | **无参数**（默认） | §1~§2 填充；§3~§6 占位 | `epic-design.md`（完整章节骨架） | 首次调用：建立完整 §1~§6 骨架 + 填充零层/一层架构（§1~§2），其余占位 |
 | **arch** | §1~§2 | `epic-design.md` §1~§2 | 重新生成零层/一层架构（覆盖已有） |
 | **key** | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计、各 KD **核心方案**（全链路 + 每环落地 + 与图互证）、方案流程图、核心调用链时序图 |
-| **diagram** | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 无范围：全景骨架类图；`diagram FEAT-001`：该 Feature 的子类图 + 完整时序图 |
+| **diagram** | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 无范围：全景骨架类图（EPIC 视角跨 Feature 依赖）；`diagram FEAT-001`：该 Feature 子类图（含字段/方法签名/新增·修改标识）+ 完整时序图 |
 | **story** | §5 | `epic-design.md` §5 | 拆解策略说明、Story 列表（含预估工作量）、依赖关系图、FR/NFR 覆盖矩阵、工作量汇总；须通过模板 §12.3 Story 自检清单 |
 | **l2** | §6 | 各 `features/FEAT-xxx/story_detail_design.md` + `epic-design.md` §6 索引表 | 按 Story 产出 L2 详细设计；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
 | **all** | §1~§5 一次性 | 上述对应文件（不含 l2） | 小 EPIC 或上下文充裕时一次性产出 |
@@ -67,8 +67,9 @@ $ARGUMENTS
   (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充 §1~§2（零层/一层架构），§3~§6 占位
   arch       重新生成零层/一层架构（§1~§2）
   key        产出关键功能疑难设计（§3）→ key-func-design.md（各 KD 核心方案须全链路、每环可落地、与图互证；含流程图 + 核心调用链时序图）
-  diagram    产出全景骨架类图（§4）→ key-diagram.md §7.2
+  diagram    产出全景骨架类图（§4）→ key-diagram.md §7.2（EPIC 视角跨 Feature 依赖关系）
              可指定范围：diagram FEAT-001（该 Feature 的子类图 + 完整时序图）
+               子类图要求：字段含类型、方法含完整签名；新增类/接口标 <<新增>> + 绿色样式，有改动的标 <<修改>> + 橙色样式
   story      产出 Story 拆解（§5）
   l2         产出 L2 详细设计（§6）→ 各 Feature 的 story_detail_design.md
              可指定范围：l2 FEAT-001 或 l2 ST-001

@@ -1,6 +1,6 @@
 # 全景类图与关键时序：EPIC-[编号] - [EPIC 名称]
 
-> **定位**：本文件对应 `epic-design.md` §七，在 §六 确认方案可行后，将设计**精确化到可编码级别**——全景类图（含完整方法签名）+ 完整时序图（穷举所有异常分支）。与 `key-func-design.md` 强关联——§六 的核心调用链时序图在此补全方法签名与全量异常分支。
+> **定位**：本文件对应 `epic-design.md` §七，提供 **EPIC/Feature 级结构视角**——在 §六（关键设计）确认方案可行后，从整体到局部呈现类结构与协作关系，作为进入 L2 前的结构全貌层：全景骨架类图（EPIC 视角跨 Feature 依赖关系）+ Feature 子类图（含完整接口、字段、方法签名与变更标识）+ 完整时序图（含全量异常分支）。与 `key-func-design.md` 强关联——§六 的核心调用链时序图在此补全真实方法签名与全量异常分支。
 >
 > **所属 EPIC**：`epic-design.md` → §七 全景类图与关键流程/时序
 >
@@ -8,12 +8,12 @@
 >
 > **与 L2（story_detail_design.md）的区别**：
 >
-> | 维度     | 本文件（全景级）                                          | story_detail_design.md（Story 级）        |
-> | ------ | ------------------------------------------------- | --------------------------------------- |
-> | 层级     | EPIC / 主 Feature 级                               | Story 级（按 ST-xxx 分节）                   |
-> | 类图/时序图 | 骨架类图（无方法签名）+ Feature 子类图（含方法签名）+ 完整时序图（全异常分支） | 本 Story 的完整详细类图/时序图                     |
-> | 目的     | §六核心时序的精确化 + 全量补全；Task 引用设计所在章节                  | tasks/implement 的详细设计事实源，落码级指导          |
-> | 何时必做   | 本文件必须产出                                           | 仅当 Story 技术复杂度高或需落码级指导时补充               |
+> | 维度     | 本文件（全景级）                                                     | story_detail_design.md（Story 级）        |
+> | ------ | ------------------------------------------------------------ | --------------------------------------- |
+> | 层级     | EPIC / Feature 级                                            | Story 级（按 ST-xxx 分节）                   |
+> | 类图/时序图 | 骨架类图（EPIC 跨 Feature 依赖）+ Feature 子类图（含字段/方法签名/变更标识）+ 完整时序图（全异常分支） | 本 Story 的完整详细类图/时序图                     |
+> | 目的     | 进入 L2 前对整体结构与协作关系的全貌呈现，评审者一眼知道改了什么、加了什么               | tasks/implement 的详细设计事实源，落码级指导          |
+> | 何时必做   | 本文件必须产出                                                       | 仅当 Story 技术复杂度高或需落码级指导时补充               |
 
 **Epic**：EPIC-[编号] - [名称]
 **关联文件**：`epic-design.md` | `key-func-design.md`
@@ -67,41 +67,65 @@ classDiagram
 
 ### 骨架类图说明
 
-| 类/接口 | 所属 Feature        | 层级             | 职责（一句话） |
-| ---- | ----------------- | -------------- | ------- |
-| [类名] | FEAT-xxx / Shared | UI/Domain/Data | [做什么]   |
+| 类/接口 | 所属 Feature        | 层级             | 变更     | 职责（一句话） |
+| ---- | ----------------- | -------------- | ------ | ------- |
+| [类名] | FEAT-xxx / Shared | UI/Domain/Data | 新增/修改/— | [做什么]   |
 
 ---
 
 ## 7.2.1 Feature 子类图：FEAT-001 [Feature 名称]
 
-> 本 Feature 的关键类/接口及**完整方法签名**。粒度：覆盖该 Feature 的所有关键类，公共方法写出完整签名（方法名 + 参数 + 返回值）。
+> 本 Feature 的所有关键类/接口，须写清：
+>
+> - **字段**：所有公共字段（属性），含完整类型（如 `+userId: String`、`+items: List~Item~`）
+> - **方法**：所有公共方法的完整签名（方法名 + 参数类型 + 返回值类型）
+> - **变更标识**（必须）：
+>   - 本 EPIC 中**新增**的类/接口：在类中添加 `<<新增>>` 标注，并使用绿色样式 `style ClassName fill:#E8F5E9,stroke:#388E3C`
+>   - 在现有类/接口上有**改动**（新增/修改字段或方法）的：添加 `<<修改>>` 标注，并使用橙色样式 `style ClassName fill:#FFF3E0,stroke:#F57C00`
+>   - 已有类/接口**无改动**（纯引用/依赖）：不加任何标注，使用默认样式
+>
+> 通过变更标识，评审者一眼可判断本 EPIC 的改动边界。
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 classDiagram
   direction TB
   class FeatureAViewModel {
+    <<新增>>
+    -repository: FeatureARepository
     +uiState: StateFlow~UiState~
     +onAction(action: Action) void
   }
   class FeatureARepository {
     <<interface>>
-    +getData(id: String) Flow~Result~
+    <<修改>>
+    +getData(id: String) Flow~Result~Data~~
+    +getList(filter: Filter) Flow~List~Data~~~
   }
-  class FeatureADataSource {
-    +fetch(id: String) Response
+  class FeatureARepositoryImpl {
+    <<新增>>
+    -localDs: FeatureALocalDataSource
+    -remoteDs: FeatureARemoteDataSource
+    +getData(id: String) Flow~Result~Data~~
+    +getList(filter: Filter) Flow~List~Data~~~
+  }
+  class FeatureALocalDataSource {
+    +fetch(id: String) Data
   }
   FeatureAViewModel --> FeatureARepository
   FeatureARepository <|.. FeatureARepositoryImpl
-  FeatureARepositoryImpl --> FeatureADataSource
+  FeatureARepositoryImpl --> FeatureALocalDataSource
+
+  style FeatureAViewModel fill:#E8F5E9,stroke:#388E3C
+  style FeatureARepository fill:#FFF3E0,stroke:#F57C00
+  style FeatureARepositoryImpl fill:#E8F5E9,stroke:#388E3C
 ```
 
 ### 关键类职责说明
 
-| 类/接口 | 层级             | 职责    | 关键方法      |
-| ---- | -------------- | ----- | --------- |
-| [类名] | UI/Domain/Data | [做什么] | [方法签名]：用途 |
+| 类/接口 | 层级             | 变更     | 职责    | 关键字段/方法      |
+| ---- | -------------- | ------ | ----- | ------------ |
+| [类名] | UI/Domain/Data | 新增/修改/— | [做什么] | [字段/方法签名]：用途 |
 
 ---
 
@@ -190,10 +214,11 @@ sequenceDiagram
 
 ## 7.4 图表一致性自检（建议）
 
-- `epic-design.md` §5.1 框架图中的组件 **100% 覆盖** §5.2 组件清单
+- `epic-design.md` §5.1 框架图中的组件 **100% 覆盖** §5.2 组件��单
 - §5.2 组件清单中的每个组件在 §7.2 骨架类图或 §7.2.x 子类图中至少有 1 个对应类/接口
-- §7.2 骨架类图中的所有类/接口在 §7.2.x 子类图中都有**含方法签名**的完整定义
-- §7.2.x 子类图中的类/接口包含**所有必要字段**，公共方法均写出**完整签名**
+- §7.2 骨架类图中的所有类/接口在 §7.2.x 子类图中都有**含字段与方法签名**的完整定义
+- §7.2.x 子类图中：所有公共**字段**含类型，所有公共**方法**含完整签名（名称 + 参数类型 + 返回值类型）
+- §7.2.x 子类图中：本 EPIC 新增的类/接口均有 `<<新增>>` 标注 + 绿色样式；有改动的类/接口均有 `<<修改>>` 标注 + 橙色样式
 - §7.3 时序图中的所有 participant 在 §7.2 骨架类图或 §7.2.x 子类图中都有对应类/接口
 - §7.3 每张时序图**端到端完整**：按本工程实际架构与真实代码绘制完整调用链，无断链；异常分支画出实际代码中的调用链
 - §7.3 每张时序图**紧下方**均有**详细**「协作过程」文字说明（触发、逐跳协作、分支、结束条件），符合 `.cursor/rules/specify-diagram-requirements.mdc` §四
