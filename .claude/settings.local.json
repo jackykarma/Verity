@@ -24,7 +24,8 @@
       "Bash(cp \".claude/commands/$f\" \".cursor/commands/$f\")",
       "Bash(echo \"synced: $f\")",
       "Bash(done)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebFetch(domain:openai.com)"
     ]
   }
 }
