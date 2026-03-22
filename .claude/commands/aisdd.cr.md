@@ -98,7 +98,15 @@ $ARGUMENTS
 8. **完成报告**：
    - 输出 CR 文件路径
    - 列出所有已更新的文件清单
-   - 建议运行 `/aisdd.analyze`（一致性分析）确认变更后各产物无矛盾
+   - 根据本次变更实际影响的阶段，输出**后续必要步骤提醒**：
+
+   | 条件 | 提醒内容 |
+   |------|---------|
+   | 始终 | 运行 `/aisdd.analyze` 确认变更后各产物无矛盾 |
+   | tasks.md 有更新 | 受影响的 Task（列出 Task ID）需重新执行 `/aisdd.implement`；实现完成后运行 `/aisdd.verify` 验证 |
+   | epic-design / story_detail_design 有更新 | 若 `design-ready` 关卡已冻结，建议重新运行 `/aisdd.gate design-ready` 更新冻结基线 |
+   | tasks.md 有更新且 `tasks-ready` 已冻结 | 建议重新运行 `/aisdd.gate tasks-ready` 更新冻结基线 |
+   | 代码已实现部分受影响的 Story | 实现完成后运行 `/aisdd.verify`（可指定范围：`story ST-xxx` 或 `feat FEAT-xxx`）验证实现与更新后设计一致 |
 
 核心规则：
 - **精准更新**：只更新 CR 影响分析中列出的产物章节，不扩散修改
