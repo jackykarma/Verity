@@ -25,7 +25,14 @@
       "Bash(echo \"synced: $f\")",
       "Bash(done)",
       "Bash(git add:*)",
-      "WebFetch(domain:openai.com)"
+      "WebFetch(domain:openai.com)",
+      "Bash(pwsh -NoProfile -File \".\\\\.specify\\\\scripts\\\\powershell\\\\create-new-epic.ps1\" -Json -UseCurrentBranch -ShortName \"media-viewer-sdk\" \"Android 媒体浏览 SDK\")",
+      "Bash(powershell -NoProfile -File \".\\\\.specify\\\\scripts\\\\powershell\\\\create-new-epic.ps1\" -Json -UseCurrentBranch -ShortName \"media-viewer-sdk\" \"Android 媒体浏览 SDK\")",
+      "Bash(BASE=\"D:/Jacky/AndroidProjects/Verity/specs/epics/EPIC-001-media-viewer-sdk/features\")",
+      "Bash(TEMPLATE=\"D:/Jacky/AndroidProjects/Verity/.specify/templates/spec-template.md\")",
+      "Bash(__NEW_LINE_8ad7355357a47d3c__ for:*)",
+      "Bash(mkdir -p \"$BASE/$feat/checklists\")",
+      "Bash(cp \"$TEMPLATE\" \"$BASE/$feat/spec.md\")"
     ]
   }
 }

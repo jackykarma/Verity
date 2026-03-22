@@ -113,6 +113,65 @@ BitmapFactory.decodeResource(resources, R.drawable.photo)
 
 **APK 里的图片文件会被 ZIP 再压缩吗**？PNG/JPEG/WebP 通常以 `STORED`（不压缩）方式存入 APK，因为它们本身已经是压缩格式，再压缩收益极低。
 
+### 2.3.2 inBitmap：复用内存
+
+`inBitmap` 的本质是：**把已有 Bitmap 的 native 内存指针交给 Skia，让解码器直接往里写，跳过 malloc**。
+
+```
+正常解码：
+  Skia 解码前 → malloc 一块新内存 → 解码写入 → 返回新 Bitmap 对象
+
+设置 inBitmap：
+  Skia 解码前 → 拿到 existingBitmap 的 native 内存指针 → 解码写入 → 返回同一个 Bitmap 对象
+              ↑
+              没有 malloc，也没有 free + malloc
+```
+
+返回的 Bitmap 对象就是传入的 `inBitmap` 本身（同一个 Java 对象，同一块 native 内存），里面的像素被新图片覆写，width/height 元数据更新为新图片的尺寸。
+
+```kotlin
+val options = BitmapFactory.Options().apply {
+    inBitmap = existingBitmap   // 必须是 mutable 的 Bitmap
+    inMutable = true
+}
+val result = BitmapFactory.decodeResource(resources, R.drawable.photo, options)
+// result === options.inBitmap，同一个对象
+```
+
+**约束条件**：
+
+| 条件 | Android 4.4 以前 | Android 4.4+ |
+|------|----------------|--------------|
+| 尺寸要求 | 必须宽高 + Config 完全一样 | `existingBitmap.byteCount >= 新图所需字节数` 即可 |
+| Config | 必须相同 | 必须相同 |
+| 可变性 | 必须 `isMutable == true` | 同左 |
+
+**inBitmap 与 BitmapPool**
+
+Glide / Coil 等图片库内部维护 `LruBitmapPool`，这是 `inBitmap` 真正发挥价值的场景：
+
+```
+BitmapPool（按 byteCount 排序存放回收的 Bitmap）：
+  [200×200 ARGB_8888 = 160KB]
+  [300×100 ARGB_8888 = 120KB]
+  [100×150 ARGB_8888 =  60KB]
+
+要解码一张 150×150（需 90KB）：
+  → 在 pool 里找 byteCount >= 90KB 的最小 Bitmap
+  → 300×100（120KB）满足条件
+  → inBitmap = 这个 Bitmap，解码直接写入其内存
+  → 该对象的 width/height 更新为 150×150，从 pool 取出交给业务层
+```
+
+**byteCount vs allocationByteCount**：复用一块 120KB 的内存装 90KB 的图，剩余 30KB 仍被分配但不使用：
+
+```kotlin
+bitmap.byteCount            // 90000  — 当前图片实际使用
+bitmap.allocationByteCount  // 120000 — 底层实际分配（复用时保持原值）
+```
+
+BitmapPool 用 `allocationByteCount` 做匹配，而不是 `byteCount`。
+
 ### 2.4 Bitmap.Config 是什么
 
 Config 决定每个像素用多少字节存储：
@@ -185,7 +244,65 @@ imageView.setImageBitmap(bitmap)
 
 但有时候"笔"是录音机——它先把你的绘制指令录下来（DisplayList），稍后找 GPU 去执行。这时 Canvas 没有直接绑定 Bitmap，但最终像素还是会写到某个 Bitmap-like 的缓冲区（GraphicBuffer）里。
 
-### 3.3 在 View.onDraw() 里的 Canvas 是哪种？
+### 3.3 设计动机：为什么要把 Canvas 和 Bitmap 分开
+
+一个很自然的疑问：为什么不直接在 Bitmap 上放 `drawCircle()`、`drawRect()` 这些方法，让它自己会画？
+
+**原因 1：绘制状态不属于像素数据**
+
+Canvas 内部维护着一套"当前绘制状态"——CTM（当前变换矩阵）、裁切区域（clip region）、状态栈（save/restore）。这些状态描述的是"现在该怎么画"，和"像素存在哪里"是完全不同的两件事。
+
+如果把 draw 方法放到 Bitmap 上，Bitmap 就必须同时承担两件事：
+
+```
+传统假设中的"Fat Bitmap"（把两件事塞一起）：
+  Bitmap.pixels        ← 像素数据     ← 这是 Bitmap 该做的
+  Bitmap.ctm           ← 变换矩阵
+  Bitmap.clipRegion    ← 裁切区域     ← 这些是状态，不是数据
+  Bitmap.saveStack     ← 状态栈
+  Bitmap.drawCircle()  ← 操作方法
+```
+
+这会导致：同一块像素数据想复用给两个不同的"绘制上下文"（比如一个旋转了 45° 画，另一个正常画），就没办法——因为状态和数据绑死在一起了。
+
+**原因 2：同一套 Canvas API 可��对接不同的"绘制目标"**
+
+Canvas 与 Bitmap 分离，最大的收益是 Canvas 可以绑定不同的目标，上层代码不需要变：
+
+```
+同一份 View.onDraw(canvas: Canvas) 代码，不变
+
+  软件渲染时：  canvas 绑定 → Bitmap（内存像素数组）
+                drawXxx() 立刻把像素写入 Bitmap
+
+  硬件加速时：  canvas 绑定 → DisplayList 记录器
+                drawXxx() 被录制为指令，稍后由 GPU 执行
+
+  自定义绘制时：canvas 绑定 → 任意 Bitmap
+                drawXxx() 写入你自己创建的 Bitmap
+```
+
+你的 `onDraw()` 代码一行不改，在三种情况下都能正确工作——这就是分离的价值。
+
+**原因 3：跨平台验证这个设计的正确性**
+
+这个"上下文 + 数据分离"的模式在各平台中都有对应：
+
+| 平台 | "画布上下文"（操作） | "像素数据"（存储） |
+|------|-------------------|-----------------|
+| Android | `Canvas` | `Bitmap` |
+| iOS / macOS | `CGContext` | `CGImage` / `CGBitmapContext` |
+| Windows GDI | `HDC`（设备上下文） | `HBITMAP` |
+| Web | `CanvasRenderingContext2D` | `ImageData` |
+| Skia（底层） | `SkCanvas` | `SkBitmap` / `SkSurface` |
+
+这些平台都把"当前怎么画"和"像素存在哪里"拆成两个对象。
+
+**一句话结论**：Canvas 是"当前绘制状态 + 操作接口"的容器，Bitmap 是"像素数据"的容器——两件完全不同的事情，由两个对象分别承担。
+
+---
+
+### 3.4 在 View.onDraw() 里的 Canvas 是哪种？
 
 ```kotlin
 override fun onDraw(canvas: Canvas) {
