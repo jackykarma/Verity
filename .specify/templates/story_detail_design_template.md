@@ -1,6 +1,6 @@
 # L2 Story 详细设计（二层详细设计）
 
-本文档与 **EPIC 软件设计说明书**（`epic-design.md`）配套使用：`epic-design.md` 的 §6 为 L2 索引表，指向本文档中各 Story 的详细设计。本文档由 `/aisdd.epicdesign` 在各 Feature 目录下生成，是 `tasks.md` 和 `/aisdd.implement` 的**详细设计事实源**。
+本文档与 **EPIC 软件设计说明书**（`epic-design.md`）配套使用：`epic-design.md` 的 §14 为 L2 索引表，指向本文档中各 Story 的详细设计。本文档由 `/aisdd.epicdesign` 在各 Feature 目录下生成，是 `tasks.md` 和 `/aisdd.implement` 的**详细设计事实源**。
 
 **使用方式**：置于 Feature 目录下（`specs/epics/EPIC-xxx/features/FEAT-xxx/story_detail_design.md`），便于 Feature 级独立评审。
 

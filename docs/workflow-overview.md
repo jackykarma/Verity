@@ -65,11 +65,11 @@ flowchart TD
 |------|--------|-----------|------|------|
 | **（可选）前置调研** | `research-<topic>-<date>.md`（`--save` 时写入；否则仅输出报告） | 技术调研事实源（平台 API / 库评估 / 可行性 / 存量代码） | 需求描述、现有代码 | — |
 | **EPIC 规格** | `epic.md` | 需求边界与 Feature 拆分 | 需求描述、调研报告（可选） | — |
-| **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC） | `epic.md` | Spec Ready |
+| **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC/完整场景矩阵） | `epic.md` | Spec Ready |
 | **EPIC 技术规约** | `epic-plan.md`（多 Feature 必选；单 Feature 可省略） | EPIC 技术规约事实源 | `epic.md`、各 `spec.md` | — |
 | **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
 | **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规格事实源（§一~§六）；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
-| **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
+| **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`（含完整场景矩阵）、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
 | **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |
 | **实现** | 代码 | — | `tasks.md` | Implement Ready |
@@ -100,8 +100,8 @@ flowchart TD
 | 产物 | 裁剪规则 | 预估文档量 |
 |------|----------|-----------|
 | `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）。`/aisdd.epicdesign` 前置条件以 `get-epic-paths.ps1 -Json` 的 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为准 | 节省 ~140 行 |
-| `epic-design.md` | 仅需 **Lite** 级：§一～§五 + §十二 Story 拆解 + §十三 L2 索引；§六～§十一 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
-| `key-func-design.md` | 无疑难点/亮点可省略，在 epic-design.md §六标注「本 EPIC 无关键疑难点/亮点，省略」 | 可省 ~100 行 |
+| `epic-design.md` | 仅需 **Lite** 级：§一～§六 + §十三 Story 拆解 + §十四 L2 索引；§七～§十二 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
+| `key-func-design.md` | 无疑难点/亮点可省略，在 epic-design.md §七标注「本 EPIC 无关键疑难点/亮点，省略」 | 可省 ~100 行 |
 | `key-diagram.md` | 仅需骨架类图 + 1 个 Feature 子类图 + 1 张关键时序图 | ~80 行（vs 完整 185+） |
 | `story_detail_design.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
 
@@ -111,7 +111,7 @@ flowchart TD
 |------|----------|-----------|
 | `epic-plan.md` | **可跳过** | 0 |
 | `ux-design.md` | **可跳过** | 0 |
-| `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十二 + 跳过其余） | ~200 行 |
+| `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十三 + 跳过其余） | ~200 行 |
 | `key-func-design.md` | **可跳过** | 0 |
 | `key-diagram.md` | 仅需关键变更涉及的类图片段 | ~50 行 |
 | `story_detail_design.md` | **可跳过** | 0 |
@@ -313,18 +313,188 @@ flowchart TD
 | 变更类型 | 起点（事实源） | 可能影响的下游产物 |
 |----------|---------------|-------------------|
 | 需求范围/FR/AC | `spec.md` | `ux-design.md` → `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
-| NFR 指标调整 | `spec.md` | `plan.md`（预算） → `epic-design.md`（§八 评估） → `tasks.md`（验证阈值） |
+| NFR 指标调整 | `spec.md` | `plan.md`（预算） → `epic-design.md`（§九 评估） → `tasks.md`（验证阈值） |
 | 交互/视觉/动效 | `ux-design.md` | `plan.md`（UI 约束） → `epic-design.md`（类图/时序） → `tasks.md` |
 | EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
 | Feature 级技术方案 | `plan.md` | `epic-design.md` → `story_detail_design.md` → `tasks.md` |
-| Story 拆解调整 | `epic-design.md` §十二 | `story_detail_design.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
+| Story 拆解调整 | `epic-design.md` §十三 | `story_detail_design.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
 
 ---
 
-## 八、版本记录
+## 八、SE 与多开发并行协作策略
+
+> **适用范围**：多 Feature / 多 Story / 多 Task 的 Standard 或 Deep 档位 EPIC。单 Feature 快速通道可简化——SE 即开发者时无需分工。
+
+### 8.1 角色定义
+
+| 角色 | 职责 | 在 AISDD 中的产出物 |
+|------|------|-------------------|
+| **SE（方案设计者）** | 驱动整个设计流程：需求分析、方案设计、Story 拆解、Task 拆分；设计评审与变更管理 | `epic.md`、`spec.md`、`epic-plan.md`、`plan.md`、`ux-design.md`、`epic-design.md`、`story_detail_design.md`、`tasks.md` |
+| **DEV（开发者）** | 按 `tasks.md` 执行代码实现；编写单元测试；提交代码与自验证 | 代码、单测、L1 Story 验证报告 |
+
+> **SE 同时可以是 DEV**——在小团队中 SE 既做设计也做实现，此时并行策略退化为串行流水线（自己设计完 Feature A → 开始实现 Feature A，同时设计 Feature B）。
+
+### 8.2 流水线并行模型
+
+核心思想：**SE 设计在前、DEV 实现在后，按 Feature 粒度形成流水线**。SE 不必等所有 Feature 设计完才交给 DEV，而是「完成一个、交付一个」。
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+gantt
+    title SE 与 DEV 流水线并行（3 Feature 示例）
+    dateFormat  YYYY-MM-DD
+    axisFormat  %m-%d
+
+    section SE 设计
+    epic.md + 全部 spec.md           :se1, 2026-01-01, 2d
+    epic-plan + ux-design（并行）    :se2, after se1, 2d
+    FEAT-001 plan + design + tasks   :se3, after se2, 3d
+    FEAT-002 plan + design + tasks   :se4, after se3, 3d
+    FEAT-003 plan + design + tasks   :se5, after se4, 2d
+    L3 EPIC 验证 + 收尾              :se6, after dev3, 1d
+
+    section DEV-A 实现
+    FEAT-001 实现                     :dev1, after se3, 4d
+    FEAT-003 实现                     :dev1b, after se5, 3d
+
+    section DEV-B 实现
+    FEAT-002 实现                     :dev2, after se4, 4d
+
+    section 联合验证
+    L2 Feature 验证（各 DEV 自验）    :dev3, after dev1b, 1d
+```
+
+**关键规则**：
+
+1. **Feature 级交付是最小可并行单元**——SE 产出某 Feature 的 `tasks.md` 后，该 Feature 即可交给 DEV 开始实现
+2. **SE 必须先完成 EPIC 级产物**（`epic.md`、全部 `spec.md`、`epic-plan.md`）再进入 Feature 级设计，因为 Feature 级设计依赖 EPIC 级约束
+3. **Feature 内部 Story/Task 可以按依赖关系进一步拆分给多个 DEV**（见 §8.4）
+
+### 8.3 多 Feature 并行策略
+
+#### 8.3.1 Feature 优先级排序原则
+
+SE 应按以下优先级排序 Feature 的设计顺序，使 DEV 尽早获得可实现的 Feature：
+
+| 优先级 | 排序依据 | 说明 |
+|--------|---------|------|
+| **P0** | **被依赖最多的 Feature**（Capability Owner） | 其他 Feature 的实现依赖它的接口/数据/能力，必须最先设计并实现 |
+| **P1** | **复杂度最高的 Feature** | 设计耗时长，提前开始可减少整体等待 |
+| **P2** | **独立 Feature**（无跨 Feature 依赖） | 设计完成后可立即交给 DEV 并行实现 |
+| **P3** | **简单 Feature / 有上游依赖的 Feature** | 等 P0 实现完成后再启动 |
+
+#### 8.3.2 依赖关系处理
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart LR
+    subgraph Independent["独立 Feature（可完全并行）"]
+        F_A["FEAT-A"]
+        F_B["FEAT-B"]
+    end
+
+    subgraph Dependent["有依赖 Feature（需排序）"]
+        F_C["FEAT-C<br/>Capability Owner"]
+        F_D["FEAT-D<br/>依赖 C 的接口"]
+        F_C --> F_D
+    end
+
+    SE["SE 设计顺序：<br/>C → A/B（并行）→ D"]
+
+    style Independent fill:#E8F5E9,stroke:#388E3C,stroke-width:2px
+    style Dependent fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
+    style SE fill:#E3F2FD,stroke:#1976D2
+```
+
+| 依赖类型 | SE 策略 | DEV 策略 |
+|----------|---------|---------|
+| **无依赖**（Feature 间独立） | 按复杂度排序逐个设计，或 `--batch` 并行生成 plan | 各 DEV 分别认领独立 Feature，完全并行实现 |
+| **接口依赖**（B 调用 A 的 API） | 先设计 A 的 `plan.md`（接口契约），B 的 `plan.md` 引用 A 的契约 | DEV-1 先实现 A 的接口层（Stub/空实现）→ DEV-2 可基于接口开始 B 的实现 |
+| **数据依赖**（B 消费 A 产出的数据） | 先设计 A 的数据模型和存储方案，B 引用该方案 | A 的数据层实现完毕后 B 才能联调；B 可先用 Mock 数据并行开发 |
+| **紧耦合依赖**（A/B 共享状态/深度交互） | 考虑合并为同一 Feature，或在 `epic-plan.md` 中定义共享契约 | 同一 DEV 负责两者，或两 DEV 频繁同步 |
+
+### 8.4 多 Story / 多 Task 在同一 Feature 内的分工
+
+当一个 Feature 包含多个 Story 且有多个 DEV 可用时：
+
+#### 分配原则
+
+1. **按 Story 分配**（推荐）：一个 Story 完整交给一个 DEV，保持上下文一致性
+2. **按 Task 分配**（谨慎使用）：同一 Story 的 Task 拆给不同 DEV，仅在 Task 间界限清晰（如一个 Task 做 UI、一个 Task 做 Repository）时可行
+3. **按分层分配**（大 Feature）：DEV-A 负责 Domain/Data 层所有 Story 的对应 Task，DEV-B 负责 UI/ViewModel 层
+
+#### 分配决策流程
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TD
+    Start{Feature 内<br/>Story 数量?} -->|"1-2 个"| Single["单 DEV 负责全部"]
+    Start -->|"3+ 个"| Multi{Story 间有<br/>依赖关系?}
+    Multi -->|无依赖| ParallelStory["按 Story 分配<br/>各 DEV 认领独立 Story<br/>完全并行"]
+    Multi -->|有依赖| DepType{依赖类型?}
+    DepType -->|"链式依赖<br/>S1→S2→S3"| Chain["拓扑排序后分配<br/>DEV-A: S1 → S3<br/>DEV-B: S2（S1 完成后）"]
+    DepType -->|"分层依赖<br/>底层→上层"| Layer["按分层分配<br/>DEV-A: 底层 Story<br/>DEV-B: 上层 Story（接口就绪后启动）"]
+
+    style Start fill:#FFF3E0,stroke:#F57C00
+    style Single fill:#E8F5E9,stroke:#388E3C
+    style ParallelStory fill:#E8F5E9,stroke:#388E3C
+    style Chain fill:#E3F2FD,stroke:#1976D2
+    style Layer fill:#E3F2FD,stroke:#1976D2
+    style DepType fill:#FFF3E0,stroke:#F57C00
+    style Multi fill:#FFF3E0,stroke:#F57C00
+```
+
+### 8.5 SE 与 DEV 的交接点与协作节奏
+
+| 阶段 | SE 产出 | 交接动作 | DEV 动作 |
+|------|--------|---------|---------|
+| **Spec Ready Gate** | 全部 `spec.md` | SE 发起 Gate 评审，DEV 参与 Review（提前了解需求） | 阅读 spec，反馈技术可行性疑问 |
+| **Feature tasks.md 完成** | 某 Feature 的 `tasks.md` | **正式交接点**——SE 将该 Feature 的 Task 列表交给 DEV | DEV 认领 Task，开始实现 |
+| **实现过程中** | SE 继续设计下一个 Feature | DEV 遇到设计疑问 → 同步 SE 确认 | DEV 按 Task 提交代码，完成 Story 后运行 L1 验证 |
+| **Feature 实现完成** | — | DEV 提交 L2 Feature 验证报告 | SE Review 验证报告，确认实现↔设计一致 |
+| **全部 Feature 完成** | SE 运行 L3 EPIC 验证 | SE 输出最终验证报告 + 跨 Feature 一致性检查 | DEV 修复验证报告中发现的偏离 |
+
+#### 典型协作时间线（4 Feature / 1 SE + 2 DEV）
+
+```
+时间轴 →
+
+SE:    [epic.md + specs] [epic-plan] [FEAT-1 design+tasks] [FEAT-2 design+tasks] [FEAT-3 design+tasks] [FEAT-4 design+tasks] [L3 验证]
+         │                  │              │                     │                     │                     │
+         ▼                  ▼              ▼                     ▼                     ▼                     ▼
+DEV-A:                                [====== FEAT-1 实现 ======] [===== FEAT-3 实现 =====]   [修复偏离]
+DEV-B:                                                          [====== FEAT-2 实现 ======] [= FEAT-4 实现 =] [修复偏离]
+```
+
+### 8.6 并行协作的风险与应对
+
+| 风险 | 场景 | 应对措施 |
+|------|------|---------|
+| **设计变更波及已实现代码** | SE 设计 FEAT-3 时发现需修改 FEAT-1 的接口 | 走 `/aisdd.cr` 变更流程；SE 评估影响范围后通知 DEV-A 同步修改 |
+| **DEV 等待 SE 设计** | SE 设计速度跟不上 DEV 实现速度 | SE 优先产出被依赖最多的 Feature；DEV 空闲时可协助 Review 或写单测 |
+| **跨 Feature 接口不一致** | DEV-A 和 DEV-B 对共享接口理解不同 | `epic-plan.md` 中明确跨 Feature 接口契约；SE 在交接时重点说明接口约束 |
+| **Story 间依赖导致阻塞** | DEV-B 的 Story 依赖 DEV-A 尚未完成的 Story | 依赖方先用 Mock/Stub 并行开发；SE 在 `tasks.md` 中标注依赖关系和建议的实现顺序 |
+| **合并冲突** | 多 DEV 同时修改相近模块 | 按分层/模块划分 Story 归属，减少文件级冲突；频繁 rebase 主分支 |
+
+### 8.7 SE 自身的并行策略（AI 辅助场景）
+
+在 AI 辅助设计的场景下，SE 可利用工具并行加速：
+
+| 并行点 | 命令/手段 | 说明 |
+|--------|----------|------|
+| 批量生成 spec | `/aisdd.featurespec --batch` | 所有 Feature 的 `spec.md` 并行生成 |
+| epic-plan 与 ux-design 并行 | `/aisdd.epicplan` + `/aisdd.epicuidesign` | 两者仅依赖 `spec.md`，互不依赖 |
+| 批量生成 plan | `/aisdd.featureplan --batch` | 依赖感知并行：Capability Owner 先，Consumer 后 |
+| 分阶段 epicdesign | `/aisdd.epicdesign diagram FEAT-xxx` | 按 Feature 逐个产出类图/时序图，完成一个即可交出 tasks |
+| 多主题调研 | `/aisdd.research --parallel` | 并行调研多个技术方向 |
+
+---
+
+## 九、版本记录
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
+| v1.4.0 | 2026-04-04 | 新增 §八「SE 与多开发并行协作策略」：角色定义、流水线并行模型、多 Feature/Story/Task 分工策略、交接点与协作节奏、并行风险应对、SE 自身 AI 辅助并行加速；版本记录调整为 §九 |
 | v1.3.0 | 2026-03-22 | 新增 `/aisdd.research` 前置调研命令（platform / library / pattern / feasibility / codebase 五类型，支持 `--parallel` 并行子 Agent、`--save` 写文件）；升级 `/aisdd.verify` 为三级验证模式（L1 Story / L2 Feature / L3 EPIC，L3 并行子 Agent，新增 `--quick` / `--save` 标志）；`/aisdd.epicdesign` 完成报告补充 `/aisdd.challenge design` 推荐节点；同步更新 §一 流程图、§一新需求走流程、§二产出物表、§六命令执行顺序 |
 | v1.2.0 | — | 新增 `/aisdd.challenge` 对抗性挑战（spec / plan / design 三阶段）；`/aisdd.featureplan` 支持 `--batch` 依赖感知并行生成；`/aisdd.featurespec` 支持 `--batch` 批量并行；`/aisdd.cr` 变更请求自动化流程；更新 §六 命令表含 3.5 / 6.5 / 7.5 challenge 步骤 |
 | v1.1.0 | — | 单 Feature EPIC 快速通道（省略 `epic-plan.md`，合并约束至 `plan.md`）；Fast Track 小改动档位（§四）；`get-epic-paths.ps1` `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 判定逻辑 |

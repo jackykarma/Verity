@@ -47,7 +47,7 @@ alwaysApply: false
   (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充零层/一层架构（§1~§2），其余章节占位
   arch       重新生成零层/一层架构（§1~§2）
   key        产出关键功能疑难设计（§3）→ key-func-design.md（各 KD 核心方案须全链路、每环可落地、与图互证；含流程图 + 核心调用链时序图）
-  diagram    产出全景骨架类图（§4）→ key-diagram.md §7.2
+  diagram    产出全景骨架类图（§4）→ key-diagram.md §8.2
              可指定范围：diagram FEAT-001（该 Feature 的子类图 + 完整时序图）
   story      产出 Story 拆解（§5）
   l2         产出 L2 详细设计（§6）→ 各 Feature 的 story_detail_design.md
@@ -78,7 +78,7 @@ alwaysApply: false
 
 1. **`epic.md`**：范围、Feature 拆分、通用能力、EPIC-FR/NFR
 2. **EPIC 级技术约束**：`epic-plan.md`（若存在）；否则在单 Feature EPIC 下读取 `EPIC_CONSTRAINT_SOURCE` / 唯一 Feature 的 `plan.md` 中的 EPIC 级约束与 Feature 规约
-3. **各 Feature 的 `spec.md`**：FR/NFR/边界/验收
+3. **各 Feature 的 `spec.md`**：FR/NFR/边界/验收/完整场景矩阵（P0 场景须在设计中可追溯）
 4. **各 Feature 的 `plan.md`**：技术规约、接口契约、数据模型
 5. **`ux-design.md`**（若有）：从设计稿解析出的信息架构、交互规则（页面流转图、逐屏交互规则、状态定义）、视觉规范（色板、布局标注、组件清单、动效参数）、设计稿索引；关注「遗漏与待确认」章节
 6. **模板文件**：
