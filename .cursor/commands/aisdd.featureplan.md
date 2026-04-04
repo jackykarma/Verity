@@ -1,5 +1,5 @@
 ---
-description: "生成 Feature 级技术规约与实现约束，在 epic-plan.md 的 EPIC 级约束下编写。详细架构设计（0/1 层架构、全景类图、时序、Story 拆解、L2 设计）在 /aisdd.epicdesign 阶段产出。支持 --batch 模式从已有 spec.md 完全并行生成所有 Feature 的 plan.md。"
+description: "生成 Feature 技术规格（约束/契约/边界），在 epic-plan.md 的 EPIC 级约束下编写。系统设计（架构图、类图、时序、Story 拆解、L2 设计）在 /aisdd.epicdesign 阶段产出。支持 --batch 模式从已有 spec.md 完全并行生成所有 Feature 的 plan.md。"
 handoffs:
   - label: 对抗性挑战（多 Feature 推荐）
     agent: aisdd.challenge
@@ -126,13 +126,12 @@ plan.md 填写规则：
 - Plan Version: v0.1.0
 - 必须在 epic-plan.md 约束下展开，不得违反 EPIC 规约
 - Plan 前置检查：验证 EPIC 级规约遵从、共享能力依赖
-- §一 设计说明���↔技术规约一致性互校
-- §二 技术背景（差距分析：现有模块可复用/需扩展/需新增）
-- §三 架构约束与演进规则（严格在 epic-plan §2 分层约束内）
-- §四 数据模型与状态管理
-- §五 接口与契约规范（若为 Capability Feature 须明确 Owner 接口；若为 Product Feature 须明确消费哪个 Owner 接口）
-- §六 合规性检查（如适用）
-- §七 项目结构（本 Feature 文档目录）
+- §一 本 Feature 特有技术上下文（相对 epic-plan §一 的增量差异；差距分析：现有模块可复用/需扩展/需新增）
+- §二 架构约束与演进规则（严格在 epic-plan §2 分层约束内）
+- §三 数据存储约束
+- §四 接口与契约规范（若为 Capability Feature 须声明能力承诺与约束规则；若为 Product Feature 须声明依赖的外部接口约束）
+- §五 合规性与安全约束（如适用）
+- §六 项目结构约定
 - 所有图表使用 Mermaid，遵循 mermaid-style-guide.mdc 配色
 ```
 
@@ -146,11 +145,11 @@ plan.md 填写规则：
 
 | 检查项 | 说明 | 级别 |
 |--------|------|------|
-| **接口契约对齐** | Capability Feature（Owner）§5 定义的接口，与 Product Feature（Consumer）§5.2 引用的接口是否一致（方法签名/参数类型/返回类型/错误码） | BLOCK |
+| **能力承诺对齐** | Capability Feature（Owner）§4.1 声明的能力承诺，与 Product Feature（Consumer）§4.2 引用的依赖是否对齐（能力覆盖、约束规则一致） | BLOCK |
 | **NFR 预算合计** | 各 Feature 的性能/内存/功耗 NFR 分配之和是否超出 epic-plan.md §7 的 EPIC 级预算上限 | BLOCK |
-| **分层约束一致性** | 各 Feature §三 的架构约束是否与 epic-plan.md §2 的分层规则一致（无跨层直接依赖） | WARN |
+| **分层约束一致性** | 各 Feature §二 的架构约束是否与 epic-plan.md §2 的分层规则一致（无跨层直接依赖） | WARN |
 | **共享能力重复设计** | 是否有多个 Feature 各自实现了相同能力（而非引用同一 Owner） | WARN |
-| **数据模型字段冲突** | 同名实体在多个 Feature §四 中字段定义是否一致（类型/命名） | WARN |
+| **数据模型字段冲突** | 同名实体在多个 Feature §三 中字段定义是否一致（类型/命名） | WARN |
 | **错误码体系统一** | 各 Feature 的错误码是否符合 epic-plan.md §4 统一错误码规范 | WARN |
 
 输出快速检查结果（不超过 20 条）：
@@ -204,9 +203,9 @@ plan.md 填写规则：
 
 ## 单 Feature 模式执行步骤（默认）
 
-目标：生成 `plan.md`（Feature 级技术规约与实现约束）。
+目标：生成 `plan.md`（Feature 技术规格）。
 
-**plan.md 的定位**：Feature 级技术约束与实现规范。详细架构设计（0 层/1 层架构图、全景类图、关键时序图、Story 拆解、L2 详细设计）由后续 `/aisdd.epicdesign` 阶段在 EPIC 级统一产出。
+**plan.md 的定位**：Feature 技术规格（约束/契约/边界）。系统设计（架构图、类图、时序图、Story 拆解、L2 详细设计）由后续 `/aisdd.epicdesign` 阶段在 EPIC 级统一产出。
 
 **方案设计的输入（必须考虑）**：**spec 需求**（spec.md）与 **EPIC 级设计稿解析结果**（`specs/epics/<EPIC>/ux-design.md`，由 `/aisdd.epicuidesign` 从交互稿/视觉稿中提取的结构化交互逻辑与视觉规范）。若 epicuidesign 未执行则仅以 spec 为输入。
 
@@ -235,14 +234,13 @@ plan.md 填写规则：
 按 plan-template.md 模板填充以下内容：
 
 - **Plan 前置检查**：验证 EPIC 级规约遵从、共享能力依赖
-- **技术规约与实现约束**（§一~§七）：
-  - 一、设计说明书 ↔ 技术规约一致性互校
-  - 二、技术背景
-  - 三、架构约束与演进规则
-  - 四、数据模型与状态管理
-  - 五、接口与契约规范
-  - 六、合规性检查（如适用）
-  - 七、项目结构（本 Feature 文档目录）
+- **技术规格**（§一~§六）：
+  - 一、本 Feature 特有技术上下文（增量）
+  - 二、架构约束与演进规则
+  - 三、数据存储约束
+  - 四、接口与契约规范
+  - 五、合规性与安全约束（如适用）
+  - 六、项目结构约定
 
 ### 4. 写入 `IMPL_PLAN`
 

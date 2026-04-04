@@ -93,7 +93,7 @@ epic.md            spec.md           epic-plan.md         tasks.md
 spec.md         → 需求：FR/NFR/AC/范围边界
 ux-design.md    → 体验：交互规则/视觉规范/设计稿索引
 epic-plan.md    → EPIC 级技术约束：全局技术栈/分层规则/NFR 预算
-plan.md         → Feature 级技术规约：接口契约/数据模型/实现约束
+plan.md         → Feature 级技术规格：接口契约/数据存储/实现约束
 epic-design.md  → 架构与设计：0/1 层架构/全景类图/时序/Story 拆解
 tasks.md        → 执行：可操作 Task，含设计追溯
 gate-log.md     → 审批：各阶段关卡评审记录
@@ -195,17 +195,16 @@ epic-plan.md 的核心内容：
 ### 4.6 Feature 技术规约（featureplan）
 
 **输入**：spec.md + epic-plan.md + ux-design.md + 现有工程代码
-**产出**：`plan.md`（Feature 级技术规约与实现约束）
+**产出**：`plan.md`（Feature 级技术规格）
 
-plan.md 的七个章节：
+plan.md 的六个章节：
 ```
-§一  设计说明书 ↔ 技术规约一致性互校
-§二  技术背景（差距分析：可复用/需扩展/需新增）
-§三  架构约束与演进规则（在 epic-plan §2 分层内）
-§四  数据模型与状态管理
-§五  接口与契约规范（Owner/Consumer 接口定义）
-§六  合规性检查
-§七  项目结构（本 Feature 文档目录）
+§一  本 Feature 特有技术上下文（相对 epic-plan §一 的增量差异）
+§二  架构约束与演进规则（在 epic-plan §2 分层内）
+§三  数据存储约束
+§四  接口与契约规范（能力承诺/外部依赖约束/接口约束规则；含 §4.1/§4.2）
+§五  合规性与安全约束
+§六  项目结构约定（本 Feature 文档目录）
 ```
 
 **差距分析**是这个阶段最重要的输出：明确每条需求对应的现有模块现状 → 目标状态，这直接约束了后续的架构设计和 Story 拆解。

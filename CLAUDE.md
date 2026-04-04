@@ -137,7 +137,7 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 | `spec.md` | 需求：FR / NFR / AC / 范围边界 |
 | `ux-design.md` | 体验呈现：交互规则、视觉规范、设计稿索引 |
 | `epic-plan.md`（或合并后的 `plan.md`） | EPIC 级技术约束 |
-| `plan.md` | Feature 级技术契约与实现约束 |
+| `plan.md` | Feature 级技术规格：技术约束、接口契约、数据存储边界 |
 | `epic-design.md` | 架构与设计：0/1 层架构图、全景类图、关键时序 |
 | `story_detail_design.md` | L2 落码级详细设计 |
 | `tasks.md` | 执行：可操作 Task，含 spec/设计追溯 |

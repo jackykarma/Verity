@@ -21,7 +21,7 @@ flowchart TD
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
     UxDesign -.-> EpicDesign
     EpicDesign --> StoryDesign["story_detail_design.md<br/>L2 Story 详细设计"]
-    StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（含回填 spec 追溯表<br/>+ plan §一互校）"]
+    StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（含回填 spec 追溯表<br/>+ plan 变更记录同步）"]
     TasksMd --> Implement["Implement<br/>代码实现"]
     Implement --> Verify["Verify<br/>实现↔设计一致性验证"]
     Verify --> Done([交付])
@@ -52,7 +52,7 @@ flowchart TD
 4. **技术规约与 UX** → 多 Feature：产出 `epic-plan.md`；单 Feature：可省略 `epic-plan.md`，在唯一 `plan.md` 中写入 EPIC 级约束。可选 `ux-design.md`
 5. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版（须在 `epic-plan.md` 约束下编写，或单 Feature 时在合并后的 `plan.md` 中自洽）
 6. **设计说明书** → 产出 `epic-design.md` 及 key-func-design、key-diagram、各 `story_detail_design.md`
-7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表与 plan §一互校）
+7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表；建议同步各 Feature `plan.md`「变更记录」）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
 
 具体命令与产出物对应关系见**六、命令执行顺序**；各阶段事实源与关卡见下表。
@@ -68,7 +68,7 @@ flowchart TD
 | **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC） | `epic.md` | Spec Ready |
 | **EPIC 技术规约** | `epic-plan.md`（多 Feature 必选；单 Feature 可省略） | EPIC 技术规约事实源 | `epic.md`、各 `spec.md` | — |
 | **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
-| **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规约事实源；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
+| **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规格事实源（§一~§六）；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
 | **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |

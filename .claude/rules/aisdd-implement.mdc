@@ -21,7 +21,7 @@ alwaysApply: false
 ## 输入（必须阅读）
 
 1. **本 Feature 的 `tasks.md`**：完整任务列表和执行计划
-2. **本 Feature 的 `plan.md`**：技术规约与实现约束
+2. **本 Feature 的 `plan.md`**：技术规格（约束/契约/边界）
 3. **`epic-design.md`**：架构设计、全景类图、关键时序、Story 拆解——架构事实源
 4. **各 Feature 的 `story_detail_design.md`**：Story L2 详细设计（类图、时序图、触发条件）——详细设计事实源
 5. **本 Feature 的 `spec.md`**：FR/NFR 与验收边界

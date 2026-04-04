@@ -42,16 +42,16 @@ $ARGUMENTS
 2. **加载设计文档**：从 FEATURE_DIR 及 EPIC 目录中读取以下文档：
     - **必需文档**：
         - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§5 Story 列表、依赖关系、FR/NFR 覆盖矩阵）、**L2 详细设计**（§6）、**全景类图与关键时序**（§4）、**架构图**（§1、§2）
-        - plan.md（**技术规约与实现约束**：架构约束、数据模型、接口规范、项目结构）
+        - plan.md（**技术规格**：架构约束、数据存储约束、接口契约、项目结构）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
     - **可选文档**：epic-plan.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
     - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。
 
-3. **回填 plan.md 与 spec.md**（原 `/aisdd.backfill` 职责，现合并至此）：
+3. **回填 spec.md 与确认 plan.md 一致性**（原 `/aisdd.backfill` 职责，现合并至此）：
     - 回填本 Feature 的 `spec.md`「需求追溯表」：从 `epic-design.md` §5 覆盖矩阵提取 FR/NFR → Story 映射填入
-    - 回填本 Feature 的 `plan.md` §一「一致性互校」：对照 `epic-design.md` 零层/一层架构，逐行确认无矛盾
-    - **精准更新**：仅修改上述 2 处，不得修改 plan.md 和 spec.md 的其他章节
-    - 回填完成后更新 plan.md 变更记录表（版本号 +0.0.1）
+    - 确认 `plan.md` 技术规格与 `epic-design.md` 设计无矛盾：对照零层/一层架构，逐项核对 plan.md §二（架构约束）、§三（数据存储约束）、§四（接口契约）是否与设计说明书一致
+    - 在 `plan.md`「变更记录」表中追加一条 design 一致性确认记录（版本号 +0.0.1，变更摘要写"design 一致性确认"）
+    - **精准更新**：仅修改 spec.md 追溯表和 plan.md 变更记录表，不得修改 plan.md 正文章节
 
 4. **执行任务生成流程**：
     - 加载 plan.md 并提取技术栈、技术规约、项目结构信息

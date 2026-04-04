@@ -74,7 +74,7 @@ alwaysApply: false
 
 1. [ ] spec.md — FR-003 修改、AC-005 新增
 2. [ ] ux-design.md — 流程 Flow-002 调整
-3. [ ] plan.md — §三 契约更新
+3. [ ] plan.md — §二 契约更新
 4. [ ] epic-design.md — §六.2 方案流程图
 5. [ ] tasks.md — 重新生成受影响 Story 的 Task
 ```

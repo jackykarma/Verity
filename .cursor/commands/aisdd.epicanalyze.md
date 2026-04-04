@@ -79,7 +79,7 @@ $ARGUMENTS
 
 #### B. 接口契约兼容性
 
-- 共享能力的 Owner Feature 在 plan.md §5.1 定义的接口，与消费方 Feature 在 plan.md §5.2 引用的接口是否一致
+- 共享能力的 Owner Feature 在 plan.md §4.1 声明的能力承诺，与消费方 Feature 在 plan.md §4.2 引用的依赖是否对齐
 - 错误码/错误类型体系是否跨 Feature 统一（与 epic-plan §4 对齐）
 - 数据模型字段命名/类型是否跨 Feature 一致
 
@@ -92,8 +92,8 @@ $ARGUMENTS
 #### D. 共享能力完整性
 
 - epic.md「跨 Feature 技术策略」与 epic-plan.md §8 的共享能力是否完全对齐
-- Owner Feature 的 plan.md 是否已设计共享能力（状态=已设计）
-- 消费方 Feature 的 plan.md 是否正确引用 Owner Feature 的接口
+- Owner Feature 的 plan.md §4.1 是否已声明共享能力承诺（状态=已声明）
+- 消费方 Feature 的 plan.md §4.2 是否正确引用 Owner Feature 的接口
 - 是否有重复设计（多个 Feature 各自实现了相同能力）
 
 #### E. Story 依赖与覆盖完整性
@@ -106,7 +106,7 @@ $ARGUMENTS
 
 #### F. 架构一致性
 
-- 各 Feature plan.md §3 的架构约束是否与 epic-plan.md §2 一致
+- 各 Feature plan.md §二 的架构约束是否与 epic-plan.md §2 一致
 - epic-design §五 一层架构中各模块/组件归属是否无冲突（如包名/模块名冲突）
 - 全景类图中的类与各 story_detail_design.md 中的类是否一致
 - 依赖方向是否符合 epic-plan.md §2 分层约束
@@ -145,7 +145,7 @@ $ARGUMENTS
 
 | ID | 类别 | 严重程度 | 涉及 Feature | 位置 | 摘要 | 建议 |
 |----|------|----------|-------------|------|------|------|
-| EA1 | 接口契约 | CRITICAL | FEAT-001, FEAT-002 | plan.md:§5 | ... | ... |
+| EA1 | 接口契约 | CRITICAL | FEAT-001, FEAT-002 | plan.md:§四 | ... | ... |
 
 ### NFR 预算汇总
 

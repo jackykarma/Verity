@@ -42,13 +42,13 @@ alwaysApply: false
 
 数据来源：`epic-design.md` §5 覆盖矩阵。
 
-### 2. 回填 plan.md「§一 一致性互校」
+### 2. 确认 plan.md 与 design 一致性
 
-在本 Feature 的 `plan.md` §一中，对照 `epic-design.md` 的零层架构和一层架构，逐行填写互校结果，确认无矛盾。
+对照 `epic-design.md` 的零层架构和一层架构，逐项核对本 Feature `plan.md` 的 §二（架构约束）、§三（数据存储约束）、§四（接口契约）是否与设计说明书无矛盾。在 `plan.md`「变更记录」表中追加一条 design 一致性确认记录（版本号 +0.0.1，变更摘要写"design 一致性确认"）。
 
 ### 回填约束
 
-- **精准更新**：仅修改上述 2 处，不得修改 plan.md 和 spec.md 的其他章节
+- **精准更新**：仅修改 spec.md 追溯表和 plan.md 变更记录表，不得修改 plan.md 正文章节
 - **数据一致**：所有回填数据必须与 `epic-design.md` §5 的内容完全一致
 - **版本更新**：回填完成后，更新 plan.md 的变更记录表（版本号 +0.0.1）
 
