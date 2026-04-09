@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-design.md, key-func-design.md, key-diagram.md, gate-log.md).
+Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-design.md, nfr.md, key-diagram.md, gate-log.md) and directory key-func-design/.
 
 .DESCRIPTION
 Creates EPIC-level design files in the EPIC directory from their respective templates.
@@ -16,7 +16,7 @@ Overwrite existing files.
 
 .PARAMETER FilesOnly
 Comma-separated list of files to create. Default: all.
-Valid values: epic-plan, ux-design, epic-design, key-func-design, key-diagram, gate-log, story-detail
+Valid values: epic-plan, ux-design, epic-design, key-func-design-dir, nfr, key-diagram, gate-log, story-detail
 
 .PARAMETER Json
 Output JSON result.
@@ -41,7 +41,8 @@ if ($Help) {
     Write-Host "  epic-plan.md              -> EPIC root"
     Write-Host "  ux-design.md              -> EPIC root"
     Write-Host "  epic-design.md            -> EPIC root"
-    Write-Host "  key-func-design.md        -> EPIC root"
+    Write-Host "  key-func-design/          -> EPIC subdirectory (empty + .gitkeep)"
+    Write-Host "  nfr.md                    -> EPIC root (from nfr-template.md)"
     Write-Host "  key-diagram.md            -> EPIC root"
     Write-Host "  gate-log.md               -> EPIC root"
     Write-Host "  story_detail_design.md    -> each Feature directory"
@@ -75,12 +76,12 @@ $repoRoot = Get-RepoRoot
 $templatesDir = Join-Path $repoRoot '.specify/templates'
 
 $fileMap = @{
-    'epic-plan'       = @{ template = 'epic-plan-template.md';              target = 'epic-plan.md' }
-    'ux-design'       = @{ template = 'ux-design-template.md';              target = 'ux-design.md' }
-    'epic-design'     = @{ template = 'epic-design-doc-template.md';        target = 'epic-design.md' }
-    'key-func-design' = @{ template = 'key-func-design-template.md';        target = 'key-func-design.md' }
-    'key-diagram'     = @{ template = 'key-diagram-template.md';            target = 'key-diagram.md' }
-    'gate-log'        = @{ template = 'gate-log-template.md';               target = 'gate-log.md' }
+    'epic-plan'   = @{ template = 'epic-plan-template.md';       target = 'epic-plan.md' }
+    'ux-design'   = @{ template = 'ux-design-template.md';       target = 'ux-design.md' }
+    'epic-design' = @{ template = 'epic-design-doc-template.md'; target = 'epic-design.md' }
+    'nfr'         = @{ template = 'nfr-template.md';             target = 'nfr.md' }
+    'key-diagram' = @{ template = 'key-diagram-template.md';     target = 'key-diagram.md' }
+    'gate-log'    = @{ template = 'gate-log-template.md';        target = 'gate-log.md' }
 }
 
 $storyDetailTemplate = 'story_detail_design_template.md'
@@ -89,12 +90,27 @@ $storyDetailTarget = 'story_detail_design.md'
 $filesToCreate = if ($FilesOnly) {
     $FilesOnly -split ',' | ForEach-Object { $_.Trim() }
 } else {
-    @('epic-plan', 'ux-design', 'epic-design', 'key-func-design', 'key-diagram', 'gate-log', 'story-detail')
+    @('epic-plan', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'key-diagram', 'gate-log', 'story-detail')
 }
 
 $results = @()
 
 foreach ($fileKey in $filesToCreate) {
+    if ($fileKey -eq 'key-func-design-dir') {
+        $kfdDir = Join-Path $epicDir 'key-func-design'
+        $gitkeepPath = Join-Path $kfdDir '.gitkeep'
+        if (-not (Test-Path $kfdDir)) {
+            New-Item -ItemType Directory -Path $kfdDir -Force | Out-Null
+        }
+        if ((Test-Path $gitkeepPath) -and -not $Force) {
+            $results += @{ file = 'key-func-design/.gitkeep'; status = 'skipped (exists)' }
+        } else {
+            New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
+            $results += @{ file = 'key-func-design/.gitkeep'; status = 'created' }
+        }
+        continue
+    }
+
     if ($fileKey -eq 'story-detail') {
         $featuresDir = Join-Path $epicDir 'features'
         if (Test-Path $featuresDir) {

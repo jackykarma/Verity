@@ -7,140 +7,71 @@ alwaysApply: false
 
 ## 触发
 
-用户输入 `/aisdd.epicdesign`，可附带章节范围参数控制本次输出内容。
+用户输入 `/aisdd.epicdesign`，可附带章节范围参数控制本次输出内容。完整参数与步骤见 `.cursor/commands/aisdd.epicdesign.md`。
 
 ## 目的
 
 在 EPIC 根目录产出 EPIC 软件设计说明书及配套子文件，作为面向人类评审与后续 Task/Implement 阶段 AI 编码引用的设计方案文档。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
 
-文档结构遵循**从整体到局部细节**的设计思路，通过参数控制每次输出的章节范围。
+## 产出文件组（与命令一致）
 
-## 产出文件组
+| 文件 / 目录 | 对应章节 | 内容 |
+|-------------|----------|------|
+| `epic-design.md` | §1~§6、§7 清单与引用、§8 摘要/引用、§9 摘要+`nfr.md` 链接、§10~§14 | 设计总览；**§7.1** 为 KD 权威清单（含层级、前置 KD、路径）；**§9** 不粘贴 9.1～9.7 全文 |
+| `key-func-design/KD_*_*.md` | §七（详细） | 每关键设计一篇；须含**关键类图**（关键类/接口 + 关键字段与方法）与核心时序等；命名 `KD_${三位序号}_${精炼slug}.md` |
+| `key-func-design/feature-flows.md` | §七（可选） | Feature 流程图集 |
+| `nfr.md` | §九（详细） | 技术评估 9.1～9.7 全文 |
+| `key-diagram.md` | §八 | 全景类图、子类图、完整时序图 |
+| `features/FEAT-xxx/story_detail_design.md` | §十四 | L2 详细设计 |
 
-| 文件 | 对应章节 | 内容 |
-|------|----------|------|
-| `epic-design.md` | §1~§2、§5 + 各章节摘要/引用 | 设计总览（零层/一层架构、Story 拆解、子文件引用） |
-| `key-func-design.md` | §3 | 关键功能疑难点/亮点设计策略、各 KD **核心方案**（技术点与全链路覆盖、每环如何达成、与图表互证）、方案流程图、核心调用链时序图、Feature 流程图集 |
-| `key-diagram.md` | §4 | 全景骨架类图、Feature 子类图（含方法签名）、关键时序图 |
-| `features/FEAT-xxx/story_detail_design.md` | §6 | 各 Story 落码级 L2 详细设计 |
+**禁止**：新 EPIC **不得**创建 EPIC 根目录 **`key-func-design.md`**（已废弃）。
 
-## 章节范围参数
+## 子文件引用规则示例
 
-通过参数控制每次调用产出的章节范围，建议按从粗到细的顺序逐步推进：
-
-| 参数 | 对应章节 | 产出文件 | 内容 |
-|------|----------|----------|------|
-| 无参数（默认） | §1~§2 填充；§3~§6 占位 | `epic-design.md`（完整章节骨架） | 首次调用，建立完整章节结构 + 零层/一层架构 |
-| `arch` | §1~§2 | `epic-design.md` §1~§2 | 重新生成零层/一层架构（覆盖已有内容） |
-| `key` | §3 | `key-func-design.md` + `epic-design.md` §3 摘要引用 | 关键疑难点/亮点设计决策、各 KD **核心方案**（全链路 + 每环落地 + 与图互证）、方案流程图、核心调用链时序图 |
-| `diagram` | §4 | `key-diagram.md` + `epic-design.md` §4 摘要引用 | 无范围：全景骨架类图；`diagram FEAT-001`：该 Feature 的子类图 + 完整时序图 |
-| `story` | §5 | `epic-design.md` §5 | Story 列表、依赖关系图、FR/NFR 覆盖矩阵 |
-| `l2` | §6 | 各 `story_detail_design.md` + `epic-design.md` §6 索引表 | 按 Story 产出 L2 详细设计 |
-| `all` | §1~§5 一次性 | 上述对应文件 | 适用于小 EPIC 或上下文窗口充裕时 |
-| `-h` | — | — | 列出所有参数及说明（不产出任何文件） |
-
-**`-h` 帮助输出**：当参数为 `-h` 时，仅输出以下帮助信息，不执行任何文件操作：
-
-```
-/aisdd.epicdesign 参数说明：
-
-  (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充零层/一层架构（§1~§2），其余章节占位
-  arch       重新生成零层/一层架构（§1~§2）
-  key        产出关键功能疑难设计（§3）→ key-func-design.md（各 KD 核心方案须全链路、每环可落地、与图互证；含流程图 + 核心调用链时序图）
-  diagram    产出全景骨架类图（§4）→ key-diagram.md §8.2
-             可指定范围：diagram FEAT-001（该 Feature 的子类图 + 完整时序图）
-  story      产出 Story 拆解（§5）
-  l2         产出 L2 详细设计（§6）→ 各 Feature 的 story_detail_design.md
-             可指定范围：l2 FEAT-001 或 l2 ST-001
-  all        一次性产出 §1~§5（不含 l2），适用于小 EPIC
-  -h         显示本帮助信息
-
-推荐顺序：(默认) → key → diagram → diagram FEAT-001 → diagram FEAT-002 → … → story → l2
-```
-
-**默认调用行为**：首次执行 `/aisdd.epicdesign` 时，`epic-design.md` 输出**全部 §1~§6 章节标题**，其中 §1~§2 填充实际内容，§3~§6 仅保留标题与占位提示（如「待填充，运行 `/aisdd.epicdesign key` 产出」），确保后续章节填充时不会出现结构错乱。
-
-**使用建议**：
-- 复杂 EPIC（多 Feature）：默认 → `key` → `diagram`（骨架）→ `diagram FEAT-001` → `diagram FEAT-002` → … → `story` → `l2`，每个 Feature 的图表输出后 check 确认再继续
-- 简单 EPIC（单 Feature/小改动）：直接 `all`，`l2` 按需
-- `diagram` 和 `l2` 均可指定范围：如 `diagram FEAT-001`、`l2 FEAT-001` 或 `l2 ST-001`
-
-## 前置条件
-
-1. **EPIC 级技术约束**满足以下之一：`epic-plan.md` 已产出（`/aisdd.epicplan`）；或 **单 Feature EPIC**（`features/` 下仅一个子目录）且该 Feature 的 `plan.md` 已产出并将 EPIC 级约束合并其中（可省略 `epic-plan.md`，与 `aisdd-featureplan.mdc` 一致）
-2. **各 Feature 的 `plan.md` 已产出**（`/aisdd.featureplan`）
-3. `ux-design.md`（若已产出，即设计稿解析结果）作为可选输入
-4. 须遵循 `.specify/memory/constitution.md` 的演进式设计原则
-
-**脚本判定**：运行 `get-epic-paths.ps1 -EpicId ... -Json`，当 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true 时满足本节条件 1。
-
-## 输入（必须阅读）
-
-1. **`epic.md`**：范围、Feature 拆分、通用能力、EPIC-FR/NFR
-2. **EPIC 级技术约束**：`epic-plan.md`（若存在）；否则在单 Feature EPIC 下读取 `EPIC_CONSTRAINT_SOURCE` / 唯一 Feature 的 `plan.md` 中的 EPIC 级约束与 Feature 规约
-3. **各 Feature 的 `spec.md`**：FR/NFR/边界/验收/完整场景矩阵（P0 场景须在设计中可追溯）
-4. **各 Feature 的 `plan.md`**：技术规约、接口契约、数据模型
-5. **`ux-design.md`**（若有）：从设计稿解析出的信息架构、交互规则（页面流转图、逐屏交互规则、状态定义）、视觉规范（色板、布局标注、组件清单、动效参数）、设计稿索引；关注「遗漏与待确认」章节
-6. **模板文件**：
-   - `.specify/templates/epic-design-doc-template.md`
-   - `.specify/templates/key-func-design-template.md`
-   - `.specify/templates/key-diagram-template.md`
-   - `.specify/templates/story_detail_design_template.md`
-7. **`.specify/memory/constitution.md`**：章程约束
-8. **`.cursor/rules/specify-diagram-requirements.mdc`**：图表内容要求
-9. **`.cursor/rules/mermaid-style-guide.mdc`**：图表样式规范
-10. **现有工程代码**：实际架构、类、方法
-
-## 子文件引用规则
-
-当章节内容输出到子文件时，`epic-design.md` 中对应章节仅保留**摘要 + 引用链接**：
+**§七**（清单在 epic，正文在 KD 文件）：
 
 ```markdown
-## §3 关键功能与疑难设计
+## 七、关键功能与疑难点/亮点设计
 
-> 详见 [key-func-design.md](./key-func-design.md)
+**摘要**：[2～3 句概述 KD 数量与分层]
 
-**摘要**：本 EPIC 共识别 N 个关键疑难点……（2-3 句概述）
+### 7.1 关键设计清单
+（表格含：编号、名称、层级/类型、前置 KD、关联 §八、路径 `./key-func-design/KD_001_xxx.md`）
+
+### 7.2 详细设计引用
+- [KD-001 名称](./key-func-design/KD_001_xxx.md)
 ```
+
+**§九**（正文在 `nfr.md`）：
 
 ```markdown
-## §4 全景类图与关键时序
+## 九、技术评估（设计产出验证，必须量化）
 
-> 详见 [key-diagram.md](./key-diagram.md)
+**摘要**：[2～3 句]
 
-**摘要**：全景类图覆盖 N 个核心类……（2-3 句概述）
+→ 详见 [nfr.md](./nfr.md)
 ```
 
-```markdown
-## §6 L2 详细设计
-
-> 各 Story 的详细设计见各 Feature 目录下的 `story_detail_design.md`。
-
-| Story ID | Feature | 设计位置 | 状态 |
-|----------|---------|----------|------|
-| ST-001 | FEAT-001 | `features/FEAT-001-.../story_detail_design.md:ST-001` | 已完成 |
-```
+**§八、§十四**：仍分别为 `key-diagram.md` 与各 Feature `story_detail_design.md` 的摘要 + 链接（见 `epic-design-doc-template.md`）。
 
 ## 行为约束
 
-- **基于真实代码**：类图/时序图必须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）
-- **`key-func-design.md` 核心方案（必须）**：每个关键设计点（KD）的「核心方案」须按 `.specify/templates/key-func-design-template.md` 要求撰写——清晰详述设计与实现，**全覆盖**涉及的技术点，**写全相关技术链路**且链上**每一环如何达成**可核对，并与该 KD 的流程图、核心时序图**互证**；禁止仅用标题或条目堆砌代替正文。
-- **时序图图后说明（必须）**：凡产出含 `sequenceDiagram` 的章节（如 `key-func-design.md`、`key-diagram.md`、`story_detail_design.md`），每张时序图**紧下方**须有**详细**文字说明，系统解释协作过程、工作过程及 `alt/else` 等分支含义（见 `.cursor/rules/specify-diagram-requirements.mdc` §四「图后文字说明」）；不得省略或用一句话代替。
-- **Mermaid 样式**：所有图表遵循 Material Design 配色（`.cursor/rules/mermaid-style-guide.mdc`）
-- **演进式设计**：不得从零设计理想方案（constitution §二）
-- **子文件完整性**：`key-func-design.md`、`key-diagram.md`、`story_detail_design.md` 必须是自包含的完整文档，不得依赖读者先阅读 `epic-design.md`
-- **章节骨架先行**：首次调用必须输出全部 §1~§6 章节标题，未填充的章节保留占位提示；后续调用仅更新指定章节，已有内容不改动
-- **设计说明书是事实源**：是 tasks.md 与 implement 阶段的设计事实源，与 plan.md 的技术规约共同约束实现
+- **基于真实代码**：类图/时序图须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）。
+- **KD 核心方案（必须）**：每个 `key-func-design/KD_*_*.md` 按 `.specify/templates/key-func-design-kd-template.md` 撰写；**全覆盖**技术点、**全链路**、**每环可落地**、与图互证。
+- **KD 关键类图（必须）**：每个 KD 须含**关键类图**（真实类/接口名 + 与方案相关的关键字段与方法）；与**核心调用链时序图** participant 一致；**全量**精确化见 §八 `key-diagram.md`。
+- **KD 内流程图（必须）**：每个 KD 的**方案流程图**（及按需架构图）**直接绘制在该 KD 的 `KD_*_*.md` 内**；`feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不得**作为省略 KD 内流程图的替代。
+- **KD 依赖（必须）**：`epic-design.md` §7.1 与各 KD 文首「依赖的其他 KD」**一致**；依赖关系须为 **DAG**，**禁止循环依赖**。
+- **时序图图后说明（必须）**：凡含 `sequenceDiagram` 的 `key-func-design/KD_*_*.md`、`key-diagram.md`、`story_detail_design.md` 等，每张时序图**紧下方**须有详细协作者与过程说明（`.cursor/rules/specify-diagram-requirements.mdc` §四）。
+- **Mermaid 样式**：遵循 `.cursor/rules/mermaid-style-guide.mdc`。
+- **演进式设计**：不得提出整体重写（`.specify/memory/constitution.md`）。
+- **子文件自包含**：各 **`KD_*_*.md`**、**`nfr.md`**、`key-diagram.md`、各 **`story_detail_design.md`** 须自包含可读；允许文内相对链接到其他 KD。
+- **章节骨架先行**：首次调用输出完整 §1～§14 骨架；后续仅更新指定章节范围。
+
+## 输入模板（须读取）
+
+- `epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`key-diagram-template.md`、`story_detail_design_template.md`
+- `specify-diagram-requirements.mdc`、`mermaid-style-guide.mdc`、`constitution.md`
 
 ## 完成后
 
-根据已完成的章节提示下一步：
-- 默认（arch）完成 → 提示继续 `key`（关键设计）
-- `key` 完成 → 提示继续 `diagram`（全景骨架类图）
-- `diagram`（无范围）完成 → 提示继续 `diagram FEAT-001`（逐个 Feature 的子类图 + 完整时序图）
-- `diagram FEAT-xxx` 完成 → 提示继续下一个 Feature 的 `diagram FEAT-yyy`；全部 Feature 完成后提示继续 `story`
-- `story` 完成 → 提示继续 `l2`（L2 详细设计）
-- `l2` 完成 → 所有章节就绪，提示：
-  1. 运行 `/aisdd.epicanalyze`（跨 Feature 一致性与质量分析）
-  2. 运行 `/aisdd.gate design-ready`（审批关卡）
-  3. 审批通过后逐个 Feature 运行 `/aisdd.featuretasks` 产出任务清单
+按 `.cursor/commands/aisdd.epicdesign.md`「完成报告」提示下一步（key → diagram → nfr → story → l2 → gate / featuretasks）。

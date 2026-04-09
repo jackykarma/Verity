@@ -55,7 +55,8 @@ epic.md            spec.md           epic-plan.md         tasks.md
                   challenge           epicdesign
                       ↓                   ↓
                   gate               epic-design.md
-                  spec-ready         key-func-design.md
+                  spec-ready         key-func-design/KD_*_*.md
+                                     nfr.md
                                      key-diagram.md
                                      story_detail_design.md
                                           ↓
@@ -216,21 +217,22 @@ plan.md 的六个章节：
 ```
 参数          产出内容                              文件
 ────────      ──────────────────────────────────   ──────────────────────
-(无参数)      完整章节骨架 + §1~§2 填充             epic-design.md
-arch          0 层/1 层架构图（覆盖已有）           epic-design.md §1~§2
-key           关键疑难点核心方案+流程图+时序图       key-func-design.md
+(无参数)      完整章节骨架 + §1~§6 填充             epic-design.md
+arch          0 层/1 层架构（覆盖已有）             epic-design.md §1~§6
+key           各 KD 文件 + epic-design §7 清单/引用  key-func-design/KD_*_*.md（无根目录 key-func-design.md）
 diagram       全景骨架类图                          key-diagram.md
 diagram FEAT  Feature 子类图+完整时序图             key-diagram.md
-story         Story 列表+依赖关系图+FR/NFR 矩阵    epic-design.md §5
+nfr           §9→nfr.md + epic §10~§12             nfr.md + epic-design.md
+story         Story 列表+依赖关系图+FR/NFR 矩阵    epic-design.md §13
 l2            Story 落码级 L2 详细设计             story_detail_design.md
 ```
 
-**推荐顺序**：(默认) → key → diagram → diagram FEAT-001 → … → story → l2
+**推荐顺序**：(默认) → key → diagram → diagram FEAT-001 → … → nfr → story → l2
 
 **关键设计约束**：
 - 所有图表使用 Mermaid，遵循 Material Design 配色（`#E3F2FD` 蓝色系为主调）
 - 图表内容必须基于本工程**实际架构与真实代码**，不能是教科书式示意图
-- L2 详细设计统一分文件，epic-design.md 的 §6 仅为索引表——避免主文档过大，支持 Feature 级独立评审
+- L2 详细设计统一分文件，epic-design.md 的 §14 仅为索引表——避免主文档过大，支持 Feature 级独立评审
 
 **设计分级**（根据 EPIC 复杂度裁剪）：
 - **Lite**：适合小改动，覆盖 0/1 层架构 + 关键类图 + Story 拆解
@@ -280,7 +282,9 @@ spec-template.md              → spec.md
 epic-plan-template.md         → epic-plan.md
 plan-template.md              → plan.md
 epic-design-doc-template.md   → epic-design.md
-key-func-design-template.md   → key-func-design.md
+key-func-design-kd-template.md  → key-func-design/KD_*_*.md（每 KD 一篇）
+key-func-design-feature-flows-template.md → key-func-design/feature-flows.md（按需）
+nfr-template.md               → nfr.md
 key-diagram-template.md       → key-diagram.md
 story_detail_design_template.md → story_detail_design.md
 tasks-template.md             → tasks.md
@@ -342,8 +346,9 @@ Git 分支策略：
     EPIC-001-short-name/
       epic.md                   ← EPIC 容器
       epic-plan.md              ← EPIC 级技术约束
-      epic-design.md            ← EPIC 软件设计说明书
-      key-func-design.md        ← 关键功能疑难设计
+      epic-design.md            ← EPIC 软件设计说明书（§7 清单与 KD 引用）
+      key-func-design/          ← 各 KD 独立 md（KD_*_*.md）与按需 feature-flows.md
+      nfr.md                    ← §九 技术评估（量化全文）
       key-diagram.md            ← 全景类图与时序图
       ux-design.md              ← 设计稿解析（可选）
       gate-log.md               ← 关卡审批记录

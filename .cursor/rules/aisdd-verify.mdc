@@ -21,12 +21,14 @@ alwaysApply: false
 ## 输入（必须阅读）
 
 1. **本 Feature 的 `tasks.md`**：所有 Task 及其验证清单
-2. **`epic-design.md`**：架构、类图、时序图、技术风险、Story 拆解
-3. **`key-diagram.md`**：全景类图、时序图
-4. **本 Feature 的 `story_detail_design.md`**：L2 详细设计
-5. **本 Feature 的 `plan.md`**：技术规约、接口契约、NFR 预算
-6. **本 Feature 的 `spec.md`**：FR/NFR/AC
-7. **实际代码**：已实现的代码文件
+2. **`epic-design.md`**：架构、§7.1 KD 清单与依赖、类图索引、技术风险、Story 拆解
+3. **`key-func-design/KD_*_*.md`**（若存在）：各 KD 核心方案与 §7.1 一致性
+4. **`nfr.md`**（若存在）：技术评估量化结论
+5. **`key-diagram.md`**：全景类图、时序图
+6. **本 Feature 的 `story_detail_design.md`**：L2 详细设计
+7. **本 Feature 的 `plan.md`**：技术规约、接口契约、NFR 预算
+8. **本 Feature 的 `spec.md`**：FR/NFR/AC
+9. **实际代码**：已实现的代码文件
 
 ## 验证维度
 
@@ -48,7 +50,7 @@ alwaysApply: false
 - 异常分支是否已实现
 - 错误处理是否与设计一致
 - **时序图图后说明**：每张关键时序图下方是否存在**详细**文字说明（协作链、工作过程、`alt/else` 分支语义、结束条件）；若缺失或仅有概括性一句话，视为设计文档不合格项（在验证报告中记录）
-- （若存在 `key-func-design.md`）各 KD 的**核心方案**：涉及技术点与**相关技术链路**是否在正文中有完整叙述，链上各环节**如何达成**是否可与代码或 `key-diagram.md` 精确化设计交叉核对；**核心方案**与对应流程图、核心时序图是否一致
+- （若存在 `key-func-design/KD_*_*.md`）`epic-design.md` §7.1 与各 KD 文首「依赖的其他 KD」是否一致，依赖是否为 DAG；各 KD **核心方案**是否覆盖技术点与**相关技术链路**、链上**如何达成**是否可与代码或 `key-diagram.md` 交叉核对；**核心方案**与对应流程图、核心时序图是否一致
 
 ### 4. 接口契约一致性
 
@@ -58,7 +60,7 @@ alwaysApply: false
 
 ### 5. NFR 达标检查
 
-- 性能/功耗/内存指标是否在预算范围内（对照 spec.md NFR）
+- 性能/功耗/内存/包体等指标是否在预算范围内（对照 `spec.md` NFR 与 EPIC 根目录 **`nfr.md`** 实测与结论，若存在）
 - 安全/隐私要求是否满足
 
 ### 6. FR/AC 覆盖

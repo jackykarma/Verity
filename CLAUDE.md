@@ -62,7 +62,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.epicuidesign` | `ux-design.md` | 可选，与 epicplan 并行 |
 | `/aisdd.featureplan` | 各 Feature `plan.md` | 需在 epic-plan（或单 Feature 合并 plan）完成后执行 |
 | `/aisdd.gate plan-ready` | gate 条目 | 所有 `plan.md` 完成后执行 |
-| `/aisdd.epicdesign` | `epic-design.md`、`key-func-design.md`、`key-diagram.md`、`story_detail_design.md` | 分阶段：`key` → `diagram` → `story` → `l2` |
+| `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`key-diagram.md`、`story_detail_design.md` | 分阶段：`key` → `diagram` → `nfr` → `story` → `l2`（无根目录 `key-func-design.md`） |
 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 含回填 spec 追溯表 |
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.verify` | 验证报告 | 实现↔设计一致性验证 |
@@ -138,7 +138,9 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 | `ux-design.md` | 体验呈现：交互规则、视觉规范、设计稿索引 |
 | `epic-plan.md`（或合并后的 `plan.md`） | EPIC 级技术约束 |
 | `plan.md` | Feature 级技术规格：技术约束、接口契约、数据存储边界 |
-| `epic-design.md` | 架构与设计：0/1 层架构图、全景类图、关键时序 |
+| `epic-design.md` | 架构与设计总览：0/1 层；§7.1 KD 清单与依赖、§7.2 引用；§8/§14 索引；§9 摘要并链至 `nfr.md` |
+| `key-func-design/KD_*_*.md` | §七各 KD 详细设计（核心方案、流程图、核心时序） |
+| `nfr.md` | §九技术评估（设计产出验证，9.1～9.7 量化全文） |
 | `story_detail_design.md` | L2 落码级详细设计 |
 | `tasks.md` | 执行：可操作 Task，含 spec/设计追溯 |
 | `gate-log.md` | 各阶段关卡审批记录 |
