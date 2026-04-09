@@ -223,7 +223,7 @@ arch          0 层/1 层架构（覆盖已有）             epic-design.md §1
 key           各 KD 文件 + epic-design §7 清单/引用  key-func-design/KD_*_*.md（无根目录 key-func-design.md）
 diagram       全景骨架类图                          key-diagram-epic.md
 diagram FEAT  Feature 子类图+完整时序图             features/<FEAT>/key-diagram.md
-nfr           §9→nfr.md + epic §10~§12             nfr.md + epic-design.md
+nfr           §9→nfr.md；§10～§12→三子文件          nfr.md + interface-design.md + database-design.md + analytics-tracking.md + epic-design.md（§9～§12 仅摘要+链接）
 story         Story 列表+依赖关系图+FR/NFR 矩阵    epic-design.md §13
 l2            Story 落码级 L2 详细设计             features/*/l2_design/ST-xxx_*.md + epic §十四
 ```

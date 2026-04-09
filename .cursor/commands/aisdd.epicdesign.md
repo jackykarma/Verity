@@ -52,7 +52,7 @@ $ARGUMENTS
 | **arch** | §1~§6 | `epic-design.md` §1~§6 | 重新生成零层/一层架构（覆盖已有） |
 | **key** | §7 | `key-func-design/KD_*_*.md`（按需 `feature-flows.md`）+ `epic-design.md` §7 | **不**产出根目录 `key-func-design.md`；每 KD 一文件，命名 `KD_${三位序号}_${slug}.md`；§7.1 清单含层级/前置 KD/路径（DAG、无环）；§7.2 逐文件引用 |
 | **diagram** | §8 | `key-diagram-epic.md` + 各 `features/FEAT-xxx/key-diagram.md` + `epic-design.md` §8 摘要引用 | 无范围：→ `key-diagram-epic.md` §8.2 全景骨架（EPIC 跨 Feature）；`diagram FEAT-001`：→ `features/FEAT-001-.../key-diagram.md` 子类图 + 本 Feature 完整时序；`diagram -all`：epic 文件 + 每个 Feature 的 `key-diagram.md`；**不再**使用 EPIC 根目录单一 `key-diagram.md` |
-| **nfr** | §9~§12 | **`nfr.md`** + `epic-design.md` §9~§12 | **§9 正文**写入 EPIC 根目录 **`nfr.md`**（模板 `.specify/templates/nfr-template.md`）；`epic-design.md` §9 仅摘要 + 链接 `nfr.md`。**§10～§12** 仍在 `epic-design.md`；建议在 `diagram` 完成后、`story` 前执行 |
+| **nfr** | §9~§12 | **`nfr.md`** + **`interface-design.md`** + **`database-design.md`** + **`analytics-tracking.md`** + `epic-design.md` §9~§12 | **§9 正文**→ EPIC 根 **`nfr.md`**（模板 `nfr-template.md`）；**§10～§12 正文**→ 分别为 **`interface-design.md`**、`database-design.md`、`analytics-tracking.md`（模板 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`）；`epic-design.md` §9～§12 **仅摘要 + 链接**对应子文件；建议在 `diagram` 完成后、`story` 前执行 |
 | **story** | §13 | `epic-design.md` §13 | 拆解策略说明、Story 列表（含预估工作量）、依赖关系图、FR/NFR 覆盖矩阵、工作量汇总；须通过模板 §13.3 Story 自检清单 |
 | **l2** | §14 | 各 `features/FEAT-xxx/l2_design/ST-xxx_<slug>.md` + `epic-design.md` §14（索引、前置依赖、依赖总览） | 按 Story **每 ST 一文件**产出 L2；维护 §14.1/§14.2 与各文件首部「L2 依赖与引用」一致；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
 | **all** | §1~§14 全量 | 上述所有对应文件（含 l2） | 小 EPIC 或上下文充裕时一次性产出全部章节；依次执行 arch → key → diagram -all → nfr → story → l2 |
@@ -72,7 +72,8 @@ $ARGUMENTS
              可指定范围：diagram FEAT-001 → features/<该Feature目录>/key-diagram.md（子类图 + 本 Feature 完整时序）
                子类图要求：字段含类型、方法含完整签名；新增类/接口标 <<新增>> + 绿色样式，有改动的标 <<修改>> + 橙色样式
              diagram -all：key-diagram-epic.md + 每个 Feature 目录下 key-diagram.md（一次性产出）
-  nfr        产出 nfr.md（§9 全文 9.1～9.7）+ epic-design.md §9（仅引用）及 §10～§12
+  nfr        产出 nfr.md（§9 全文）+ interface-design.md + database-design.md + analytics-tracking.md；
+             epic-design.md §9～§12 均为摘要 + 链接（不粘贴子文件正文）
              建议在 diagram 完成后、story 前执行
   story      产出 Story 拆解（§13）
   l2         产出 L2 详细设计（§14）→ 各 Feature 的 l2_design/ST-xxx_<slug>.md（每 Story 一文件）+ epic-design §14.1/14.2
@@ -88,10 +89,13 @@ $ARGUMENTS
 
 | 文件 | 对应章节 | 内容 |
 |------|----------|------|
-| `epic-design.md` | §1~§6、§7 清单与引用、§8 摘要/引用、§9 摘要+`nfr.md` 链接、§10~§13、§14 索引 | 设计总览；**§7.1** 为 KD 权威清单（含依赖） |
+| `epic-design.md` | §1~§6、§7 清单与引用、§8 摘要/引用、§9 摘要+`nfr.md`、§10～§12 摘要+三子文件链接、§13、§14 索引 | 设计总览；**§7.1** 为 KD 权威清单（含依赖） |
 | `key-func-design/KD_*_*.md` | §七（详细） | 每关键设计一篇；**核心方案**、方案流程图、**关键类图**（关键类/接口 + 关键字段与方法）、核心调用链时序图；文首「依赖的其他 KD」须与 §7.1 一致 |
 | `key-func-design/feature-flows.md` | §七（可选） | Feature 流程图集（按需） |
 | `nfr.md` | §九（详细） | 技术评估量化全文（9.1～9.7），模板 `nfr-template.md` |
+| `interface-design.md` | §十（详细） | 对外/外部接口（10.1～10.3），模板 `epic-design-interface-template.md` |
+| `database-design.md` | §十一（详细） | 库表与数据策略（11.1～11.4），模板 `epic-design-database-template.md` |
+| `analytics-tracking.md` | §十二（详细） | 埋点事件与字段（12.1～12.2），模板 `epic-design-analytics-tracking-template.md` |
 | `key-diagram-epic.md` | §八（EPIC） | 全景骨架类图、可选跨 Feature 完整时序 |
 | `features/FEAT-xxx/key-diagram.md` | §八（Feature） | 该 Feature 子类图（含方法签名与变更标识）、本 Feature 内完整时序 |
 | `features/FEAT-xxx/l2_design/ST-xxx_*.md` | §14 | 各 Story 落码级 L2 详细设计（每 ST 独立文件） |
@@ -130,7 +134,7 @@ $ARGUMENTS
    - 读取各 `EPIC_DIR/features/*/spec.md`（含「完整场景矩阵」，P0 场景须在设计中可追溯）、`plan.md`
    - 若存在：读取 `EPIC_DIR/ux-design.md`
    - 读取 `.specify/memory/constitution.md`
-   - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`key-diagram-epic-template.md`、`key-diagram-feature-template.md`、`story_detail_design_template.md`
+   - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`key-diagram-epic-template.md`、`key-diagram-feature-template.md`、`story_detail_design_template.md`
    - 读取 `.claude/rules/specify-diagram-requirements.mdc`、`.claude/rules/mermaid-style-guide.mdc`
    - **分析现有工程代码**：架构分层、模块划分、包组织、现有框架
 
@@ -141,7 +145,7 @@ $ARGUMENTS
    - **diagram**（无范围）：产出/更新 EPIC 根 **`key-diagram-epic.md`** 的 §8.2 全景骨架类图（及按需 §8.3 跨 Feature 时序），并更新 `epic-design.md` 的 §8 为摘要 + 引用。
    - **diagram FEAT-xxx**：在 **`EPIC_DIR/features/<对应Feature目录>/key-diagram.md`** 产出该 Feature 的子类图 + 本 Feature 内完整时序（模板 `key-diagram-feature-template.md`）；并更新 `epic-design.md` §8 的索引表（指向该文件与子节）。
    - **diagram -all**：依次产出/更新 `key-diagram-epic.md` + **每个** Feature 目录下的 `key-diagram.md`，并更新 `epic-design.md` §8 完整索引表；等同于 `diagram`（无范围）+ 逐个 `diagram FEAT-xxx` 的合并执行。
-   - **nfr**：先按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §9.1～9.7 全文）；再更新 `epic-design.md` **§9** 为摘要 + 指向 `./nfr.md` 的链接；继续产出 `epic-design.md` 的 §10（接口）、§11（数据库）、§12（埋点）；各子节如不适用须标注 N/A 并简述原因。
+   - **nfr**：先按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §9.1～9.7 全文）；再分别按 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md` 产出/更新 **`EPIC_DIR/interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**（各子节如不适用须标注 N/A 并简述原因）；最后更新 `epic-design.md` **§9～§12** 均为摘要 + 分别指向 `./nfr.md`、`./interface-design.md`、`./database-design.md`、`./analytics-tracking.md` 的链接（**禁止**在 `epic-design.md` 内重复粘贴上述子文件正文）。
    - **story**：按模板「§13.1 拆解策略（拆解维度 → 反模式筛查）→ §13.2 拆分约束（拆分首看改动路径独立性与技术边界，工作量仅为参考信号：典型 2～5 人天，>7 人天检查是否可拆，<1 人天检查是否可合并）→ §13.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §13（拆解策略说明、Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵 §13.6、工作量汇总 §13.7）。
    - **l2**：
      - **前置：类名存在性检查**（每个 Story 生成类图前必须执行）：
@@ -153,7 +157,7 @@ $ARGUMENTS
      - 完成类名检查后，在各 Feature **`l2_design/`** 下按 ST 产出/更新 **`ST-xxx_<slug>.md`**（模板 `story_detail_design_template.md`），并更新 `epic-design.md` **§14.1 索引（含前置依赖列）与 §14.2 依赖总览**；若带范围则仅处理指定 FEAT 或 ST。
    - **all**：依次执行 arch → key → diagram -all → nfr → story → l2 的完整产出（含 l2）；适用于小 EPIC 或上下文充裕时一次性产出全部章节。
 
-5. **子文件引用规则**：§7 详细在 `key-func-design/KD_*_*.md`，**清单与引用在 `epic-design.md` §7.1/§7.2**；§8、§14 仍按原规则摘要 + 链接；§9 详细在 **`nfr.md`**，`epic-design.md` §9 仅摘要 + 链接（见 `.cursor/rules/aisdd-epicdesign.mdc`）。
+5. **子文件引用规则**：§7 详细在 `key-func-design/KD_*_*.md`，**清单与引用在 `epic-design.md` §7.1/§7.2**；§8、§14 仍按原规则摘要 + 链接；§9 详细在 **`nfr.md`**；§10～§12 详细分别在 **`interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**；`epic-design.md` §9～§12 仅摘要 + 链接（见 `.cursor/rules/aisdd-epicdesign.mdc`）。
 
 6. **完成报告**：输出本次产出的文件路径、对应章节，并提示下一步：
    - 默认/arch 完成 → 提示继续 `key`

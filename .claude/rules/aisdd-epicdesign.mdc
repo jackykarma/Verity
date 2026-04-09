@@ -17,10 +17,13 @@ alwaysApply: false
 
 | 文件 / 目录 | 对应章节 | 内容 |
 |-------------|----------|------|
-| `epic-design.md` | §1~§6、§7 清单与引用、§8 摘要/引用、§9 摘要+`nfr.md` 链接、§10~§14 | 设计总览；**§7.1** 为 KD 权威清单（含层级、前置 KD、路径）；**§9** 不粘贴 9.1～9.7 全文 |
+| `epic-design.md` | §1~§6、§7 清单与引用、§8 摘要/引用、§9 摘要+`nfr.md`、§10～§12 摘要+三子文件链接、§13～§14 | 设计总览；**§7.1** 为 KD 权威清单（含层级、前置 KD、路径）；**§9** 不粘贴 9.1～9.7 全文；**§10～§12** 不粘贴子文件正文 |
 | `key-func-design/KD_*_*.md` | §七（详细） | 每关键设计一篇；须含**关键类图**（关键类/接口 + 关键字段与方法）与核心时序等；命名 `KD_${三位序号}_${精炼slug}.md` |
 | `key-func-design/feature-flows.md` | §七（可选） | Feature 流程图集 |
 | `nfr.md` | §九（详细） | 技术评估 9.1～9.7 全文 |
+| `interface-design.md` | §十（详细） | 接口设计 10.1～10.3 全文 |
+| `database-design.md` | §十一（详细） | 数据库设计 11.1～11.4 全文 |
+| `analytics-tracking.md` | §十二（详细） | 埋点方案 12.1～12.2 全文 |
 | `key-diagram-epic.md` | §八（EPIC 级） | 全景骨架类图、可选跨 Feature 完整时序；**不再**使用 EPIC 根目录单一 `key-diagram.md` |
 | `features/FEAT-xxx/key-diagram.md` | §八（按 Feature） | 该 Feature 子类图（全量签名与变更标识）+ 本 Feature 内完整时序 |
 | `features/FEAT-xxx/l2_design/ST-xxx_*.md` | §十四 | L2 详细设计（**每 Story 一文件**；§14 含索引与依赖总览） |
@@ -53,6 +56,22 @@ alwaysApply: false
 → 详见 [nfr.md](./nfr.md)
 ```
 
+**§十～§十二**（正文分别在三个独立文件，`epic-design.md` 仅摘要 + 链接）：
+
+```markdown
+## 十、接口设计
+**摘要**：[2～3 句]
+→ 详见 [interface-design.md](./interface-design.md)
+
+## 十一、数据库设计
+**摘要**：[2～3 句]
+→ 详见 [database-design.md](./database-design.md)
+
+## 十二、埋点技术方案
+**摘要**：[2～3 句]
+→ 详见 [analytics-tracking.md](./analytics-tracking.md)
+```
+
 **§八、§十四**：§八 为 `key-diagram-epic.md` + 各 Feature `features/FEAT-xxx/key-diagram.md` 的摘要 + 链接；§十四 为各 Feature `l2_design/ST-xxx_*.md` 的索引、前置依赖列与 EPIC 级依赖总览（见 `epic-design-doc-template.md`）。
 
 ## 行为约束
@@ -65,12 +84,12 @@ alwaysApply: false
 - **时序图图后说明（必须）**：凡含 `sequenceDiagram` 的 `key-func-design/KD_*_*.md`、`key-diagram-epic.md`、`features/*/key-diagram.md`、`features/*/l2_design/*.md` 等，每张时序图**紧下方**须有详细协作者与过程说明（`.claude/rules/specify-diagram-requirements.mdc` §四）。
 - **Mermaid 样式**：遵循 `.claude/rules/mermaid-style-guide.mdc`。
 - **演进式设计**：不得提出整体重写（`.specify/memory/constitution.md`）。
-- **子文件自包含**：各 **`KD_*_*.md`**、**`nfr.md`**、`key-diagram-epic.md`、各 **`features/*/key-diagram.md`**、各 **`features/*/l2_design/ST-*.md`** 须自包含可读；允许文内相对链接到其他 KD 或同目录下其他 ST 的 L2 文件。
+- **子文件自包含**：各 **`KD_*_*.md`**、**`nfr.md`**、**`interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**、`key-diagram-epic.md`、各 **`features/*/key-diagram.md`**、各 **`features/*/l2_design/ST-*.md`** 须自包含可读；允许文内相对链接到其他 KD 或同目录下其他 ST 的 L2 文件。
 - **章节骨架先行**：首次调用输出完整 §1～§14 骨架；后续仅更新指定章节范围。
 
 ## 输入模板（须读取）
 
-- `epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`key-diagram-epic-template.md`、`key-diagram-feature-template.md`、`story_detail_design_template.md`
+- `epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`key-diagram-epic-template.md`、`key-diagram-feature-template.md`、`story_detail_design_template.md`
 - `specify-diagram-requirements.mdc`、`mermaid-style-guide.mdc`、`constitution.md`
 
 ## 完成后
