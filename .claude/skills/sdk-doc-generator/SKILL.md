@@ -1,5 +1,5 @@
 ---
-name: jacky-sdk-doc-generator
+name: sdk-doc-generator
 description: 自动生成 SDK 接口文档,包括 API 扫描、使用示例、OpenAPI 规范和 README。支持 Kotlin/Java、Python、JavaScript 等多种语言。当用户需要生成 SDK 文档、API 参考、接口说明、或更新开发者文档时使用。
 ---
 

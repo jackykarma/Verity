@@ -51,7 +51,7 @@ flowchart TD
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
 4. **技术规约与 UX** → 多 Feature：产出 `epic-plan.md`；单 Feature：可省略 `epic-plan.md`，在唯一 `plan.md` 中写入 EPIC 级约束。可选 `ux-design.md`
 5. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版（须在 `epic-plan.md` 约束下编写，或单 Feature 时在合并后的 `plan.md` 中自洽）
-6. **设计说明书** → 产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§九全文）、`key-diagram.md`、各 `story_detail_design.md`（无根目录 `key-func-design.md`）
+6. **设计说明书** → 产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§九全文）、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、各 `story_detail_design.md`（无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`）
 7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表；建议同步各 Feature `plan.md`「变更记录」）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
 
@@ -102,7 +102,7 @@ flowchart TD
 | `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）。`/aisdd.epicdesign` 前置条件以 `get-epic-paths.ps1 -Json` 的 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为准 | 节省 ~140 行 |
 | `epic-design.md` | 仅需 **Lite** 级：§一～§六 + §十三 Story 拆解 + §十四 L2 索引；§七～§十二 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
 | `key-func-design/*.md` | 无疑难点/亮点可省略，在 epic-design.md §七标注「本 EPIC 无关键疑难点/亮点，省略」；可不创建 KD 文件 | 可省 ~100 行 |
-| `key-diagram.md` | 仅需骨架类图 + 1 个 Feature 子类图 + 1 张关键时序图 | ~80 行（vs 完整 185+） |
+| `key-diagram-epic.md` + 该 Feature 的 `key-diagram.md` | 仅需 EPIC 骨架类图 + 1 个 Feature 子类图 + 1 张关键时序图 | ~80 行（分散在两处） |
 | `story_detail_design.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
 
 ### 4.2 纯修复/小改动（预估 ≤ 3 人天）
@@ -113,7 +113,7 @@ flowchart TD
 | `ux-design.md` | **可跳过** | 0 |
 | `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十三 + 跳过其余） | ~200 行 |
 | `key-func-design/*.md` | **可跳过** | 0 |
-| `key-diagram.md` | 仅需关键变更涉及的类图片段 | ~50 行 |
+| `key-diagram-epic.md` + 受影响 Feature 的 `key-diagram.md` | 仅需关键变更涉及的类图片段 | ~50 行 |
 | `story_detail_design.md` | **可跳过** | 0 |
 | Gate 评审 | Gate 0~4 可合并为一轮快速评审，Gate 5~6 按需 | — |
 

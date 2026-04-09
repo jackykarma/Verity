@@ -1,5 +1,5 @@
 ---
-name: jacky-mermaid-exporter
+name: mermaid-exporter
 description: 将 Markdown 文件中的所有 Mermaid 图表导出为 PNG 图片，文件名使用中文与图表标题一致。当用户需要导出 Mermaid 图表、生成图表图片、将图表保存为 PNG，或提到 Mermaid、图表导出时使用。
 ---
 
@@ -235,7 +235,7 @@ git add *.png
   "type": "shell",
   "command": "python",
   "args": [
-    "${workspaceFolder}/.claude/skills/jacky-mermaid-exporter/scripts/export_mermaid.py",
+    "${workspaceFolder}/.claude/skills/mermaid-exporter/scripts/export_mermaid.py",
     "${file}"
   ],
   "problemMatcher": []
@@ -249,7 +249,7 @@ git add *.png
 ## 脚本位置
 
 ```
-.claude/skills/jacky-mermaid-exporter/
+.claude/skills/mermaid-exporter/
 └── scripts/
     └── export_mermaid.py
 ```

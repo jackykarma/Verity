@@ -57,7 +57,8 @@ epic.md            spec.md           epic-plan.md         tasks.md
                   gate               epic-design.md
                   spec-ready         key-func-design/KD_*_*.md
                                      nfr.md
-                                     key-diagram.md
+                                     key-diagram-epic.md
+                                     features/*/key-diagram.md
                                      story_detail_design.md
                                           ↓
                                      gate plan-ready
@@ -220,8 +221,8 @@ plan.md 的六个章节：
 (无参数)      完整章节骨架 + §1~§6 填充             epic-design.md
 arch          0 层/1 层架构（覆盖已有）             epic-design.md §1~§6
 key           各 KD 文件 + epic-design §7 清单/引用  key-func-design/KD_*_*.md（无根目录 key-func-design.md）
-diagram       全景骨架类图                          key-diagram.md
-diagram FEAT  Feature 子类图+完整时序图             key-diagram.md
+diagram       全景骨架类图                          key-diagram-epic.md
+diagram FEAT  Feature 子类图+完整时序图             features/<FEAT>/key-diagram.md
 nfr           §9→nfr.md + epic §10~§12             nfr.md + epic-design.md
 story         Story 列表+依赖关系图+FR/NFR 矩阵    epic-design.md §13
 l2            Story 落码级 L2 详细设计             story_detail_design.md
@@ -285,7 +286,8 @@ epic-design-doc-template.md   → epic-design.md
 key-func-design-kd-template.md  → key-func-design/KD_*_*.md（每 KD 一篇）
 key-func-design-feature-flows-template.md → key-func-design/feature-flows.md（按需）
 nfr-template.md               → nfr.md
-key-diagram-template.md       → key-diagram.md
+key-diagram-epic-template.md  → key-diagram-epic.md
+key-diagram-feature-template.md → features/*/key-diagram.md
 story_detail_design_template.md → story_detail_design.md
 tasks-template.md             → tasks.md
 gate-log-template.md          → gate-log.md
@@ -349,7 +351,7 @@ Git 分支策略：
       epic-design.md            ← EPIC 软件设计说明书（§7 清单与 KD 引用）
       key-func-design/          ← 各 KD 独立 md（KD_*_*.md）与按需 feature-flows.md
       nfr.md                    ← §九 技术评估（量化全文）
-      key-diagram.md            ← 全景类图与时序图
+      key-diagram-epic.md       ← EPIC 全景骨架与跨 Feature 时序
       ux-design.md              ← 设计稿解析（可选）
       gate-log.md               ← 关卡审批记录
       features/
@@ -357,6 +359,7 @@ Git 分支策略：
           spec.md               ← Feature 需求规格
           plan.md               ← Feature 技术规约
           tasks.md              ← 可执行任务
+          key-diagram.md        ← §八 该 Feature 子类图与本 Feature 时序
           story_detail_design.md← L2 详细设计
           checklists/           ← 检查清单
 ```

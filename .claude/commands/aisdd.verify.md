@@ -168,7 +168,7 @@ $ARGUMENTS
 **3B-1 架构一致性验证**（除非 `--quick`）
 - 代码的包/模块结构是否与 `epic-design.md` §2（1 层架构）一致
 - 类的分层是否符合 `plan.md` §二 的依赖方向
-- 全景类图（`key-diagram.md`）中定义的类是否均已实现
+- 全景类图（`key-diagram-epic.md`）与各 Feature `key-diagram.md` 中定义的类是否均已实现
 - 代码中新增但设计未定义的**核心类**是否有说明（辅助类可豁免）
 
 **3B-2 技术规约遵从验证**（除非 `--quick`）

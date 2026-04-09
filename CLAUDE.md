@@ -62,7 +62,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.epicuidesign` | `ux-design.md` | 可选，与 epicplan 并行 |
 | `/aisdd.featureplan` | 各 Feature `plan.md` | 需在 epic-plan（或单 Feature 合并 plan）完成后执行 |
 | `/aisdd.gate plan-ready` | gate 条目 | 所有 `plan.md` 完成后执行 |
-| `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`key-diagram.md`、`story_detail_design.md` | 分阶段：`key` → `diagram` → `nfr` → `story` → `l2`（无根目录 `key-func-design.md`） |
+| `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、`story_detail_design.md` | 分阶段：`key` → `diagram` → `nfr` → `story` → `l2`（无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`） |
 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 含回填 spec 追溯表 |
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.verify` | 验证报告 | 实现↔设计一致性验证 |

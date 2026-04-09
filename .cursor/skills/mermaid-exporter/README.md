@@ -163,7 +163,7 @@ python scripts/export_mermaid.py architecture.md
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/.claude/skills/jacky-mermaid-exporter/scripts/export_mermaid.py",
+        "${workspaceFolder}/.claude/skills/mermaid-exporter/scripts/export_mermaid.py",
         "${file}"
       ],
       "group": "build",
@@ -191,7 +191,7 @@ changed_md_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.md$
 if [ -n "$changed_md_files" ]; then
   echo "导出 Mermaid 图表..."
   for file in $changed_md_files; do
-    python .claude/skills/jacky-mermaid-exporter/scripts/export_mermaid.py "$file"
+    python .claude/skills/mermaid-exporter/scripts/export_mermaid.py "$file"
   done
   
   # 将生成的 PNG 添加到提交

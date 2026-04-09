@@ -9,7 +9,7 @@
 > **与 spec.md NFR 的关系**：`spec.md` 的 NFR 定义**验收目标**（如"p95 ≤ 200ms"）；本节基于设计方案进行**技术评估与实测**，验证方案是否满足 NFR 目标。若评估结果超标，须调整设计方案或协商 NFR 目标变更（走 CR 流程）。
 
 **Epic**：EPIC-[编号] - [名称]
-**关联文件**：`epic-design.md` | `key-func-design/KD_*_*.md`（§七）| `key-diagram.md`（§八）
+**关联文件**：`epic-design.md` | `key-func-design/KD_*_*.md`（§七）| `key-diagram-epic.md`、各 `features/*/key-diagram.md`（§八）
 **创建/更新日期**：[YYYY-MM-DD]
 
 ---

@@ -20,7 +20,8 @@
 | `epic-design.md`（本文件） | 全部章节（摘要/引用） | EPIC 设计总览；**§七**含关键设计清单（含依赖）与逐文件引用；**§九**仅摘要并链接 `nfr.md` |
 | `key-func-design/` 目录 | §七 | 各关键设计**独立文件**，命名 **`KD_${三位序号}_${精炼slug}.md`**（例：`KD_001_session_framework.md`）；**每个 KD 文件内须包含**：按需模型/方案架构图、**方案流程图**、**关键类图**（关键类/接口 + 关键字段与方法）、**核心调用链时序图**。按需 **`feature-flows.md`**（仅跨 KD/跨 Feature 补充流程，不替代 KD 内流程图）。撰稿见 **`key-func-design-kd-template.md`**；**每张时序图紧下方须有详细协作者与过程说明**（见 `specify-diagram-requirements.mdc` §四） |
 | `nfr.md` | §九 | 技术评估（设计产出验证，必须量化），模板见 `.specify/templates/nfr-template.md` |
-| `key-diagram.md` | §八 | 全景骨架类图（`diagram`）、Feature 子类图+完整时序图（`diagram FEAT-xxx` 按 Feature 分步产出），**每张时序图紧下方须有详细协作过程说明** |
+| `key-diagram-epic.md` | §八（EPIC 级） | 全景骨架类图、可选跨 Feature 完整时序（`diagram` 无范围）；模板 `key-diagram-epic-template.md`；**不再**使用 EPIC 根目录单一 `key-diagram.md` |
+| `features/FEAT-xxx/key-diagram.md` | §八（按 Feature） | 该 Feature 子类图（全量签名与变更标识）+ 本 Feature 内完整时序（`diagram FEAT-xxx`）；模板 `key-diagram-feature-template.md`；**每张时序图紧下方须有详细协作过程说明** |
 | `features/FEAT-xxx/story_detail_design.md` | §十四 | 各 Story 落码级详细设计（L2） |
 
 ---
@@ -432,7 +433,7 @@ flowchart LR
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign key` 产出。
 
-> **定位**：面向方案评审，将重难点模块的**设计策略与决策逻辑**讲清楚。每个设计点须在其 **`key-func-design/KD_*_*.md` 文档内**直接给出**方案流程图**（验逻辑分支）、**关键类图**（关键类/接口及关键字段与方法，验类型层面可行性）与**核心调用链时序图**（验协作主干），使 §七 阶段即可判断方案是否 ok——**更完整的类型与全量签名、全景子类图、全分支时序**在 §八 `key-diagram.md` 精确化。可选的 `feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不替代**各 KD 内流程图。
+> **定位**：面向方案评审，将重难点模块的**设计策略与决策逻辑**讲清楚。每个设计点须在其 **`key-func-design/KD_*_*.md` 文档内**直接给出**方案流程图**（验逻辑分支）、**关键类图**（关键类/接口及关键字段与方法，验类型层面可行性）与**核心调用链时序图**（验协作主干），使 §七 阶段即可判断方案是否 ok——**更完整的类型与全量签名、Feature 子类图、全分支时序**在 §八 **`key-diagram-epic.md`**（全景骨架与跨 Feature 时序）及各 **`features/FEAT-xxx/key-diagram.md`**（按 Feature）精确化。可选的 `feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不替代**各 KD 内流程图。
 >
 > **核心方案（各 KD 必填）**：用清晰易懂的中文**详写设计方案与实现**；须**全覆盖**本设计点涉及的技术点，**写全每条相关的技术链路**（含方案明确纳入的异常/降级路径），并对链上**每一环说明如何达成**（机制、职责、数据/状态传递与约束）；**与**该 KD 文件内模型/方案架构图（若有）、流程图、**关键类图**、时序图**互证**，不得仅用标题或条目堆砌代替叙述。细则见 `.specify/templates/key-func-design-kd-template.md`。
 >
@@ -473,9 +474,9 @@ flowchart LR
 
 > **定位**：在 §七 确认方案可行后，本节将设计**精确化到可编码级别**——全景类图（含完整方法签名）+ 完整时序图（穷举所有异常分支），供 Task 拆解与 implement 阶段直接引用。
 >
-> **与 §七 的分工**：§七 在各 KD 中验方案主干——**关键类图**（关键类型与成员是否撑得起方案）+ **核心调用链时序**（协作是否走得通）；§八 在 **key-diagram.md** 中补全精度（**全量**方法签名与字段、Feature/EPIC 子类图与变更标识、**全分支**时序）。
+> **与 §七 的分工**：§七 在各 KD 中验方案主干——**关键类图**（关键类型与成员是否撑得起方案）+ **核心调用链时序**（协作是否走得通）；§八 在 **`key-diagram-epic.md`**（EPIC 全景骨架、跨 Feature 时序）与各 **`features/FEAT-xxx/key-diagram.md`**（该 Feature 子类图与本 Feature 完整时序）中补全精度（**全量**方法签名与字段、变更标识、**全分支**时序）。
 >
-> **内容文件**：详细内容写在独立文件 **`key-diagram.md`** 中（模板见 `.specify/templates/key-diagram-template.md`），本节仅保留摘要与引用。
+> **内容文件**：EPIC 级图表写在 **`key-diagram-epic.md`**（模板 `.specify/templates/key-diagram-epic-template.md`）；各 Feature 图表写在 **`features/FEAT-xxx/key-diagram.md`**（模板 `.specify/templates/key-diagram-feature-template.md`）。**不再**使用 EPIC 根目录单一 **`key-diagram.md`**。本节仅保留摘要与引用。
 >
 > **与 §十四 L2（story_detail_design.md）的区别**：
 >
@@ -488,16 +489,16 @@ flowchart LR
 
 ### 8.1 图表概览（摘要）
 
-> 列出 `key-diagram.md` 中包含的骨架类图、Feature 子类图和时序图，便于评审者快速定位。详细图表见引用文件。
+> 列出 `key-diagram-epic.md` 与各 Feature `key-diagram.md` 中的骨架类图、子类图和时序图，便于评审者快速定位。详细图表见引用文件。
 
-**骨架类图**：→ `key-diagram.md` §8.2
+**骨架类图（EPIC）**：→ [`key-diagram-epic.md`](./key-diagram-epic.md) §8.2
 
 **Feature 子类图清单**：
 
-| Feature    | 子类图位置                        | 关键类/接口（Top3）    |
+| Feature    | 子类图文件                        | 关键类/接口（Top3）    |
 | ---------- | -------------------------------- | -------------------- |
-| FEAT-001   | `key-diagram.md` §8.2.1          | [类名1, 类名2, 类名3] |
-| FEAT-002   | `key-diagram.md` §8.2.2          | [类名1, 类名2]        |
+| FEAT-001   | [`features/FEAT-001-xxx/key-diagram.md`](./features/FEAT-001-xxx/key-diagram.md)「子类图」 | [类名1, 类名2, 类名3] |
+| FEAT-002   | [`features/FEAT-002-xxx/key-diagram.md`](./features/FEAT-002-xxx/key-diagram.md)「子类图」 | [类名1, 类名2]        |
 
 **时序图索引**：
 
@@ -508,7 +509,8 @@ flowchart LR
 
 ### 8.2 详细图表引用
 
-→ **`key-diagram.md`**（含全景骨架类图、Feature 子类图、关键时序图、图表一致性自检）
+→ **[`key-diagram-epic.md`](./key-diagram-epic.md)**（全景骨架类图、可选跨 Feature 时序、EPIC 级一致性自检）  
+→ **各 Feature** `./features/<FEAT-目录名>/key-diagram.md`（含该 Feature 子类图、本 Feature 完整时序、Feature 级自检）
 
 ---
 

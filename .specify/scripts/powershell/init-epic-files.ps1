@@ -1,12 +1,12 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-design.md, nfr.md, key-diagram.md, gate-log.md) and directory key-func-design/.
+Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-design.md, nfr.md, key-diagram-epic.md, gate-log.md) and directory key-func-design/; per-Feature key-diagram.md under features/*/.
 
 .DESCRIPTION
 Creates EPIC-level design files in the EPIC directory from their respective templates.
 Only creates files that don't already exist (safe to re-run).
-Also creates story_detail_design.md in each Feature directory (if features exist).
+Also creates story_detail_design.md and key-diagram.md in each Feature directory (if features exist).
 
 .PARAMETER EpicId
 EPIC identifier (e.g. EPIC-001). Falls back to $env:SPECIFY_EPIC or current branch.
@@ -16,7 +16,8 @@ Overwrite existing files.
 
 .PARAMETER FilesOnly
 Comma-separated list of files to create. Default: all.
-Valid values: epic-plan, ux-design, epic-design, key-func-design-dir, nfr, key-diagram, gate-log, story-detail
+Valid values: epic-plan, ux-design, epic-design, key-func-design-dir, nfr, key-diagram-epic, key-diagram-feature, key-diagram, gate-log, story-detail
+  (key-diagram is deprecated: same as key-diagram-epic + key-diagram-feature)
 
 .PARAMETER Json
 Output JSON result.
@@ -35,7 +36,7 @@ $ErrorActionPreference = 'Stop'
 if ($Help) {
     Write-Host "Usage: ./init-epic-files.ps1 [-EpicId EPIC-001] [-Force] [-FilesOnly epic-plan,gate-log] [-Json]"
     Write-Host ""
-    Write-Host "Creates EPIC-level design files from templates. Safe to re-run (skips existing files unless -Force)."
+    Write-Host "Creates EPIC-level design files from templates. Safe to re-run (skips existing unless -Force)."
     Write-Host ""
     Write-Host "Files created:"
     Write-Host "  epic-plan.md              -> EPIC root"
@@ -43,9 +44,12 @@ if ($Help) {
     Write-Host "  epic-design.md            -> EPIC root"
     Write-Host "  key-func-design/          -> EPIC subdirectory (empty + .gitkeep)"
     Write-Host "  nfr.md                    -> EPIC root (from nfr-template.md)"
-    Write-Host "  key-diagram.md            -> EPIC root"
+    Write-Host "  key-diagram-epic.md       -> EPIC root (from key-diagram-epic-template.md)"
+    Write-Host "  features/*/key-diagram.md -> per Feature (from key-diagram-feature-template.md)"
     Write-Host "  gate-log.md               -> EPIC root"
     Write-Host "  story_detail_design.md    -> each Feature directory"
+    Write-Host ""
+    Write-Host "Note: key-diagram (legacy) expands to key-diagram-epic + key-diagram-feature."
     exit 0
 }
 
@@ -76,22 +80,36 @@ $repoRoot = Get-RepoRoot
 $templatesDir = Join-Path $repoRoot '.specify/templates'
 
 $fileMap = @{
-    'epic-plan'   = @{ template = 'epic-plan-template.md';       target = 'epic-plan.md' }
-    'ux-design'   = @{ template = 'ux-design-template.md';       target = 'ux-design.md' }
-    'epic-design' = @{ template = 'epic-design-doc-template.md'; target = 'epic-design.md' }
-    'nfr'         = @{ template = 'nfr-template.md';             target = 'nfr.md' }
-    'key-diagram' = @{ template = 'key-diagram-template.md';     target = 'key-diagram.md' }
-    'gate-log'    = @{ template = 'gate-log-template.md';        target = 'gate-log.md' }
+    'epic-plan'        = @{ template = 'epic-plan-template.md';        target = 'epic-plan.md' }
+    'ux-design'        = @{ template = 'ux-design-template.md';        target = 'ux-design.md' }
+    'epic-design'      = @{ template = 'epic-design-doc-template.md'; target = 'epic-design.md' }
+    'nfr'              = @{ template = 'nfr-template.md';             target = 'nfr.md' }
+    'key-diagram-epic' = @{ template = 'key-diagram-epic-template.md'; target = 'key-diagram-epic.md' }
+    'gate-log'         = @{ template = 'gate-log-template.md';         target = 'gate-log.md' }
 }
 
 $storyDetailTemplate = 'story_detail_design_template.md'
 $storyDetailTarget = 'story_detail_design.md'
+$keyDiagramFeatureTemplate = 'key-diagram-feature-template.md'
+$keyDiagramFeatureTarget = 'key-diagram.md'
 
 $filesToCreate = if ($FilesOnly) {
     $FilesOnly -split ',' | ForEach-Object { $_.Trim() }
 } else {
-    @('epic-plan', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'key-diagram', 'gate-log', 'story-detail')
+    @('epic-plan', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'key-diagram-epic', 'key-diagram-feature', 'gate-log', 'story-detail')
 }
+
+# Legacy: key-diagram -> epic + per-feature
+$expanded = [System.Collections.ArrayList]::new()
+foreach ($k in $filesToCreate) {
+    if ($k -eq 'key-diagram') {
+        [void]$expanded.Add('key-diagram-epic')
+        [void]$expanded.Add('key-diagram-feature')
+    } else {
+        [void]$expanded.Add($k)
+    }
+}
+$filesToCreate = @($expanded)
 
 $results = @()
 
@@ -111,24 +129,32 @@ foreach ($fileKey in $filesToCreate) {
         continue
     }
 
-    if ($fileKey -eq 'story-detail') {
+    if ($fileKey -eq 'story-detail' -or $fileKey -eq 'key-diagram-feature') {
         $featuresDir = Join-Path $epicDir 'features'
         if (Test-Path $featuresDir) {
             $featureDirs = Get-ChildItem -Path $featuresDir -Directory -ErrorAction SilentlyContinue
             foreach ($featDir in $featureDirs) {
-                $targetPath = Join-Path $featDir.FullName $storyDetailTarget
-                $templatePath = Join-Path $templatesDir $storyDetailTemplate
+                if ($fileKey -eq 'story-detail') {
+                    $targetPath = Join-Path $featDir.FullName $storyDetailTarget
+                    $templatePath = Join-Path $templatesDir $storyDetailTemplate
+                    $rel = "$($featDir.Name)/$storyDetailTarget"
+                } else {
+                    $targetPath = Join-Path $featDir.FullName $keyDiagramFeatureTarget
+                    $templatePath = Join-Path $templatesDir $keyDiagramFeatureTemplate
+                    $rel = "$($featDir.Name)/$keyDiagramFeatureTarget"
+                }
                 if ((Test-Path $targetPath) -and -not $Force) {
-                    $results += @{ file = "$($featDir.Name)/$storyDetailTarget"; status = 'skipped (exists)' }
+                    $results += @{ file = $rel; status = 'skipped (exists)' }
                 } elseif (Test-Path $templatePath) {
                     Copy-Item -LiteralPath $templatePath -Destination $targetPath -Force
-                    $results += @{ file = "$($featDir.Name)/$storyDetailTarget"; status = 'created' }
+                    $results += @{ file = $rel; status = 'created' }
                 } else {
-                    $results += @{ file = "$($featDir.Name)/$storyDetailTarget"; status = 'template not found' }
+                    $results += @{ file = $rel; status = 'template not found' }
                 }
             }
         } else {
-            $results += @{ file = 'story_detail_design.md'; status = 'no features directory' }
+            $label = if ($fileKey -eq 'story-detail') { 'story_detail_design.md' } else { 'key-diagram.md' }
+            $results += @{ file = $label; status = 'no features directory' }
         }
         continue
     }
