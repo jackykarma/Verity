@@ -122,8 +122,8 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 - `ux-design.md`（EPIC 级）是 **体验呈现事实源**：信息架构、交互规则与状态、视觉规范、动效清单与说明、设计稿索引
 - `epic-plan.md`（EPIC 级）是 **EPIC 技术规约事实源**：全局技术栈、分层与模块约束、线程/错误/数据/接口/NFR 预算等，各 Feature plan 必须遵守
 - `plan.md`（Feature 级）是 **Feature 技术规约事实源**：本 Feature 的接口/契约、数据模型、实现约束；与 epic-plan 及 EPIC 软件设计说明书一致
-- **EPIC 软件设计说明书**（EPIC 级）是 **架构与设计事实源**：0 层/1 层架构图、全景类图与关键时序、关键功能与疑难设计、Story 拆解与 L2 索引；L2 详细设计统一写在各 Feature 的 `story_detail_design.md` 中；供人类评审与 Task/Implement 阶段引用
-- `tasks.md` 是 **执行事实源**：将设计说明书中的 Story 拆解为可执行 Task，并引用 plan 约束与 story_detail_design.md 中的设计片段
+- **EPIC 软件设计说明书**（EPIC 级）是 **架构与设计事实源**：0 层/1 层架构图、全景类图与关键时序、关键功能与疑难设计、Story 拆解与 L2 索引（§十四）；L2 详细设计按 Story 分文件写在各 Feature 的 **`l2_design/ST-xxx_<slug>.md`** 中；供人类评审与 Task/Implement 阶段引用
+- `tasks.md` 是 **执行事实源**：将设计说明书中的 Story 拆解为可执行 Task，并引用 plan 约束与对应 `l2_design/ST-xxx_*.md` 中的设计片段
 - `gate-log.md`（EPIC 级）是 **审批事实源**：记录各阶段关卡的评审结论、冻结产物与版本
 - `/aisdd.verify` 产出的验证报告是 **实现↔设计一致性事实源**：记录代码与设计方案的偏离项
 
@@ -151,10 +151,10 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 
 建议分级（作为指导性规则）：
 
-- **设计说明书-Lite（小改动/低风险）**：至少覆盖 0 层/1 层架构、组件清单、全景类图与关键时序、Story 拆解；L2 索引指向各 Feature 的 `story_detail_design.md`（可仅占位）
-- **设计说明书-Standard（默认）**：在 Lite 基础上补齐关键功能与疑难设计；各 Story 在 `story_detail_design.md` 中写入概要
-- **设计说明书-Deep（高风险/高不确定性）**：在 Standard 基础上，在各 Feature 的 `story_detail_design.md` 中补齐**所有** Story 的完整 L2 详细设计（类图/时序图/触发条件/系统响应）
-- **L2 详细设计统一分文件**：`epic-design.md` 的 §6 仅为索引表，详细设计始终写在各 Feature 的 `story_detail_design.md` 中（避免设计说明书过于庞大、支持 Feature 级独立评审）
+- **设计说明书-Lite（小改动/低风险）**：至少覆盖 0 层/1 层架构、组件清单、全景类图与关键时序、Story 拆解；L2 索引（§十四）指向各 Feature 的 `l2_design/ST-xxx_*.md`（可仅占位或少量文件）
+- **设计说明书-Standard（默认）**：在 Lite 基础上补齐关键功能与疑难设计；各 Story 在 `l2_design/ST-xxx_*.md` 中写入概要
+- **设计说明书-Deep（高风险/高不确定性）**：在 Standard 基础上，在各 Feature 的 `l2_design/ST-xxx_*.md` 中补齐**所有** Story 的完整 L2 详细设计（类图/时序图/触发条件/系统响应）
+- **L2 按 Story 分文件**：`epic-design.md` **§十四** 为索引与依赖总览；详细设计始终写在各 Feature 的 **`l2_design/ST-xxx_<slug>.md`** 中（避免单文件过大、支持按 Story 评审与并行编辑）
 
 落地准则：
 
@@ -166,11 +166,11 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 - **单 Feature EPIC**（EPIC 仅含一个 Feature）：
   - `epic-plan.md` 可省略，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）
   - `epic-design.md` 仅需 Lite 级
-  - `story_detail_design.md` 视复杂度，简单 Story 可仅写概要
+  - `l2_design/ST-xxx_*.md` 视复杂度，简单 Story 可仅写概要
 - **纯修复/小改动**（预估 ≤ 3 人天）：
   - 可跳过 `epic-plan.md` 和 `ux-design.md`
   - `epic-design.md` 可精简为仅含 Story 拆解 + 关键类图
-  - `story_detail_design.md` 可跳过
+  - `l2_design/` 下 L2 文件可跳过
 - 详细裁剪规则与判断流程见 `workflow-overview.md` §四
 
 ## AI 在 Plan 阶段的职责边界

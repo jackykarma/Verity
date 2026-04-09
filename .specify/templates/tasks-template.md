@@ -14,7 +14,7 @@ description: "Story → Task 落地任务清单模板"
 > 规则：
 > - Task 只能拆解与执行 **EPIC 软件设计说明书** 与 **plan.md** 中既定的 Story；**禁止**在 tasks.md 里改写技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
-> - 每个 Task 必须提供**设计引用**：指向 EPIC 软件设计说明书（或各 Feature 的 story_detail_design.md）中对应 ST-xxx 的小节/类图/时序图。
+> - 每个 Task 必须提供**设计引用**：指向 EPIC 软件设计说明书（或各 Feature 的 `l2_design/ST-xxx_<slug>.md`）中对应 ST-xxx 的小节/类图/时序图。
 
 ## Task 行格式（首行必须严格遵循）
 
@@ -33,8 +33,8 @@ description: "Story → Task 落地任务清单模板"
 - **依赖**：T???（无则写“无”）
 - **设计引用**：
   - 架构级：`epic-design.md:§4 全景类图/时序图`
-  - Story 级：`story_detail_design.md:ST-xxx:功能设计:类图/时序图`
-  - （若该 Story 的 L2 设计尚未补齐，则写 `N/A` 并在对应 Feature 的 story_detail_design.md 中补齐）
+  - Story 级：`l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`
+  - （若该 Story 的 L2 设计尚未补齐，则写 `N/A` 并在对应 Feature 的 `l2_design/` 下补齐该 ST 文件）
 - **步骤**：
   - 1) …
   - 2) …

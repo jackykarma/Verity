@@ -22,7 +22,7 @@
 | `nfr.md` | §九 | 技术评估（设计产出验证，必须量化），模板见 `.specify/templates/nfr-template.md` |
 | `key-diagram-epic.md` | §八（EPIC 级） | 全景骨架类图、可选跨 Feature 完整时序（`diagram` 无范围）；模板 `key-diagram-epic-template.md`；**不再**使用 EPIC 根目录单一 `key-diagram.md` |
 | `features/FEAT-xxx/key-diagram.md` | §八（按 Feature） | 该 Feature 子类图（全量签名与变更标识）+ 本 Feature 内完整时序（`diagram FEAT-xxx`）；模板 `key-diagram-feature-template.md`；**每张时序图紧下方须有详细协作过程说明** |
-| `features/FEAT-xxx/story_detail_design.md` | §十四 | 各 Story 落码级详细设计（L2） |
+| `features/FEAT-xxx/l2_design/` | §十四 | 各 Story 落码级详细设计（L2）；**每 Story 独立一个 Markdown 文件**（建议命名 `ST-xxx_<短slug>.md`），依赖关系由 §14.1 索引表与 §14.2 总览共同维护 |
 
 ---
 
@@ -478,11 +478,11 @@ flowchart LR
 >
 > **内容文件**：EPIC 级图表写在 **`key-diagram-epic.md`**（模板 `.specify/templates/key-diagram-epic-template.md`）；各 Feature 图表写在 **`features/FEAT-xxx/key-diagram.md`**（模板 `.specify/templates/key-diagram-feature-template.md`）。**不再**使用 EPIC 根目录单一 **`key-diagram.md`**。本节仅保留摘要与引用。
 >
-> **与 §十四 L2（story_detail_design.md）的区别**：
+> **与 §十四 L2（`l2_design/`）的区别**：
 >
 > | 维度     | §八 本节（全景级）                                      | §十四 L2（Story 级）                        |
 > | ------ | ------------------------------------------------ | ---------------------------------------- |
-> | 层级     | EPIC / 主 Feature 级                              | Story 级（按 ST-xxx 分节）                    |
+> | 层级     | EPIC / 主 Feature 级                              | Story 级（每 ST 独立文件，见 `features/FEAT-xxx/l2_design/ST-xxx_*.md`） |
 > | 类图/时序图 | 骨架类图 + Feature 子类图（**全量**签名与变更标识）+ 完整时序图（全异常分支） | 本 Story 的完整详细类图/时序图                      |
 > | 目的     | 在 §七 **关键类图/核心时序** 上精确化与全量补全；Task 引用设计所在章节                 | tasks/implement 的详细设计事实源，落码级指导           |
 > | 何时必做   | 本节必须产出                                           | 仅当 Story 技术复杂度高或需落码级指导时补充                |
@@ -769,7 +769,7 @@ erDiagram
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign story` 产出。
 
-> **说明**：Story 是 Feature 内的**技术开发分解单位**，从技术视角拆分，服务于**并行开发**和**分笔 git 提交**。Feature 才是最小交付单位（面向 PM/QA 演示验收），Story 不要求独立可交付。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）story_detail_design.md。
+> **说明**：Story 是 Feature 内的**技术开发分解单位**，从技术视角拆分，服务于**并行开发**和**分笔 git 提交**。Feature 才是最小交付单位（面向 PM/QA 演示验收），Story 不要求独立可交付。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）对应 Feature `l2_design/ST-xxx_<slug>.md` 中的 L2 详细设计。
 >
 > **下游同步**：`/aisdd.featuretasks` 执行时会自动回填各 Feature 的 `spec.md`「需求追溯表」，并建议同步更新各 Feature `plan.md`「变更记录」，确保上下游一致。
 
@@ -954,25 +954,56 @@ flowchart TD
 
 > **定位**：按 **Story** 的完整详细设计（含完整类图/时序图、触发条件与系统响应），是 tasks.md 与 implement 阶段的**详细设计事实源**，提供落码级指导。与 §八（全景类图/关键流程）的关系：§八 为 EPIC/主 Feature 级纵览，本节所索引的 L2 为各 Story 的局部完整设计，二者层级与粒度不同（参见 §八 开头的对比表）。
 >
-> **规则**：L2 详细设计**统一写在各 Feature 目录下的 `story_detail_design.md`** 中（模板见 `.specify/templates/story_detail_design_template.md`），本节仅保留索引表。这样做的目的是：避免设计说明书过于庞大、支持 Feature 级独立评审、便于 tasks/implement 阶段精准引用。
+> **规则**：
+> - 每个 Story 对应 **一个独立 Markdown 文件**，统一放在所属 Feature 目录下的 **`l2_design/`** 子目录中（路径示例：`features/FEAT-xxx/l2_design/ST-001_session_login.md`）。
+> - **文件命名**：必须以 Story ID 为前缀，建议 `ST-xxx_<短slug>.md`（slug 用小写英文/数字与连字符，与 §十三 中 Story 标题语义一致即可），保证全局可通过 ID 唯一定位。
+> - **依赖关系**：§14.1 索引表须列出每行 Story 的 **前置依赖 ST**（可为空）；§14.2 给出 EPIC 级依赖总览（表 + 可选 Mermaid 图），且须与各 Story 文件首部的「L2 依赖与引用」小节 **一致**（双向可核对）。
+> - 单 Story 文件撰稿模板见 `.specify/templates/story_detail_design_template.md`；本节保留索引与依赖总览，不内嵌 L2 正文。
 >
-> **何时需要 L2**：当 Story 的技术复杂度较高、涉及多组件协作或需要落码级指导时，须补充 L2 详细设计（按 Story 序号覆盖，不得遗漏）。
+> **何时需要 L2**：当 Story 的技术复杂度较高、涉及多组件协作或需要落码级指导时，须补充 L2 详细设计（按 Story 覆盖，不得遗漏）。
 >
-> tasks.md 的每个 Task 须明确引用 `story_detail_design.md:ST-xxx:功能设计:类图/时序图`。
+> tasks.md 的每个 Task 须明确引用对应 L2 文件中的设计段落，例如：`features/FEAT-xxx/l2_design/ST-001_xxx.md:功能设计:类图` 或 `...:功能设计:时序图`。
 
 ### 14.1 L2 设计索引表
 
+| Story ID | 标题   | 所属 Feature | L2 文件路径（相对 EPIC 根） | 前置依赖（须先完成的 ST，可跨 Feature；无则填「—」） | 状态      |
+| -------- | ---- | ---------- | ------------------- | -------------------------------- | ------- |
+| ST-001   | [标题] | FEAT-xxx   | `features/FEAT-xxx/l2_design/ST-001_<slug>.md` | —                                | 待设计/已完成 |
+| ST-002   | [标题] | FEAT-xxx   | `features/FEAT-xxx/l2_design/ST-002_<slug>.md` | ST-001                           | 待设计/已完成 |
 
-| Story ID | 标题   | 所属 Feature | L2 设计位置                                               | 状态      |
-| -------- | ---- | ---------- | ----------------------------------------------------- | ------- |
-| ST-001   | [标题] | FEAT-xxx   | `features/FEAT-xxx-.../story_detail_design.md:ST-001` | 待设计/已完成 |
-| ST-002   | [标题] | FEAT-xxx   | `features/FEAT-xxx-.../story_detail_design.md:ST-002` | 待设计/已完成 |
 
+### 14.2 L2 Story 依赖关系（EPIC 总览）
 
-### 14.2 L2 覆盖度检查
+> **要求**：与 §十三 拆解表中的依赖列一致；若某 Story 仅依赖本 Feature 内其他 ST，仍须在此汇总，便于评审关键路径与并行度。
+>
+> **依赖表**（可与 §14.1 合并维护时以 §14.1 为准，此处侧重**跨 Feature** 与**图示**）：
 
-- 所有 §十三 Story 拆解中的 ST-xxx 在索引表中有对应条目
+| Story ID | 前置依赖 ST（可多值，逗号分隔） | 备注（如：跨 Feature、并行组） |
+| -------- | ------------------- | ---------------- |
+| ST-102   | ST-101              | 与 ST-103 可并行 |
+| ST-201   | ST-101（FEAT-001）   | 跨 Feature       |
+
+**依赖示意图**（可选；须遵循 `.cursor/rules/mermaid-style-guide.mdc`）：
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
+flowchart TB
+    ST101["ST-101"]
+    ST102["ST-102"]
+    ST103["ST-103"]
+    ST101 --> ST102
+    ST101 --> ST103
+
+    style ST101 fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style ST102 fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+    style ST103 fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
+```
+
+### 14.3 L2 覆盖度检查
+
+- 所有 §十三 Story 拆解中的 ST-xxx 在 §14.1 索引表中有对应条目，且 **l2_design/** 下存在同名前缀文件 `ST-xxx_*.md`
 - 所有 L2 设计状态为「已完成」（design-ready 关卡前置条件）
+- §14.1「前置依赖」与 §14.2、各 L2 文件首部「L2 依赖与引用」**无矛盾**
 
 ---
 
@@ -994,6 +1025,6 @@ flowchart TD
 | 十一、数据库设计                          | plan.md §三 数据存储约束（§3.1/§3.2）对齐   | 数据表结构参考；Task 数据层实现依据                           |
 | 十二、埋点技术方案                         | —                 | 埋点事件参考                                         |
 | 十三、Story 拆解                       | tasks.md 直接引用      | 每个 Task 绑定 ST-xxx                              |
-| 十四、L2 索引 → story_detail_design.md | —                 | 设计引用：story_detail_design.md:ST-xxx:功能设计:类图/时序图 |
+| 十四、L2 索引 → `features/*/l2_design/ST-xxx_*.md` | —                 | 设计引用：`features/FEAT-xxx/l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图` |
 
 

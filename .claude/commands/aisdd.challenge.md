@@ -113,7 +113,7 @@ $ARGUMENTS
 
 **`design` 模式** — 加载：
 - `epic-design.md`（0/1 层架构、全景类图、关键时序、Story 拆解）
-- 各 Feature `story_detail_design.md`（L2 详细设计，若存在）
+- 各 Feature `l2_design/ST-xxx_*.md`（L2 详细设计，若存在）
 - `epic-plan.md`（作为 NFR 基线对照）
 - `.specify/memory/constitution.md`
 

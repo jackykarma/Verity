@@ -54,7 +54,7 @@ $ARGUMENTS
 | **diagram** | §8 | `key-diagram-epic.md` + 各 `features/FEAT-xxx/key-diagram.md` + `epic-design.md` §8 摘要引用 | 无范围：→ `key-diagram-epic.md` §8.2 全景骨架（EPIC 跨 Feature）；`diagram FEAT-001`：→ `features/FEAT-001-.../key-diagram.md` 子类图 + 本 Feature 完整时序；`diagram -all`：epic 文件 + 每个 Feature 的 `key-diagram.md`；**不再**使用 EPIC 根目录单一 `key-diagram.md` |
 | **nfr** | §9~§12 | **`nfr.md`** + `epic-design.md` §9~§12 | **§9 正文**写入 EPIC 根目录 **`nfr.md`**（模板 `.specify/templates/nfr-template.md`）；`epic-design.md` §9 仅摘要 + 链接 `nfr.md`。**§10～§12** 仍在 `epic-design.md`；建议在 `diagram` 完成后、`story` 前执行 |
 | **story** | §13 | `epic-design.md` §13 | 拆解策略说明、Story 列表（含预估工作量）、依赖关系图、FR/NFR 覆盖矩阵、工作量汇总；须通过模板 §13.3 Story 自检清单 |
-| **l2** | §14 | 各 `features/FEAT-xxx/story_detail_design.md` + `epic-design.md` §14 索引表 | 按 Story 产出 L2 详细设计；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
+| **l2** | §14 | 各 `features/FEAT-xxx/l2_design/ST-xxx_<slug>.md` + `epic-design.md` §14（索引、前置依赖、依赖总览） | 按 Story **每 ST 一文件**产出 L2；维护 §14.1/§14.2 与各文件首部「L2 依赖与引用」一致；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
 | **all** | §1~§14 全量 | 上述所有对应文件（含 l2） | 小 EPIC 或上下文充裕时一次性产出全部章节；依次执行 arch → key → diagram -all → nfr → story → l2 |
 | **-h** | — | — | 仅输出参数帮助，不产出任何文件 |
 
@@ -75,7 +75,7 @@ $ARGUMENTS
   nfr        产出 nfr.md（§9 全文 9.1～9.7）+ epic-design.md §9（仅引用）及 §10～§12
              建议在 diagram 完成后、story 前执行
   story      产出 Story 拆解（§13）
-  l2         产出 L2 详细设计（§14）→ 各 Feature 的 story_detail_design.md
+  l2         产出 L2 详细设计（§14）→ 各 Feature 的 l2_design/ST-xxx_<slug>.md（每 Story 一文件）+ epic-design §14.1/14.2
              可指定范围：l2 FEAT-001 或 l2 ST-001
   all        一次性产出全部章节 §1~§14（含 l2），适用于小 EPIC 或上下文充裕时
              依次执行：arch → key → diagram -all → nfr → story → l2
@@ -94,7 +94,7 @@ $ARGUMENTS
 | `nfr.md` | §九（详细） | 技术评估量化全文（9.1～9.7），模板 `nfr-template.md` |
 | `key-diagram-epic.md` | §八（EPIC） | 全景骨架类图、可选跨 Feature 完整时序 |
 | `features/FEAT-xxx/key-diagram.md` | §八（Feature） | 该 Feature 子类图（含方法签名与变更标识）、本 Feature 内完整时序 |
-| `features/FEAT-xxx/story_detail_design.md` | §14 | 各 Story 落码级 L2 详细设计 |
+| `features/FEAT-xxx/l2_design/ST-xxx_*.md` | §14 | 各 Story 落码级 L2 详细设计（每 ST 独立文件） |
 
 ## 大纲
 
@@ -150,7 +150,7 @@ $ARGUMENTS
           - **现有类**（代码中已存在）：必须使用代码中的真实完整类名，不得改名或使用示例类名
           - **新增类**（设计新增，代码中尚不存在）：在类图中该类旁注明 `// 新增类：[一句话说明新增理由]`
        3. 若无法确认某类是否存在，在类图旁标注 `// 待确认：[类名]`，由人工评审时核实
-     - 完成类名检查后，在各 Feature 目录下产出/更新 `story_detail_design.md`，并更新 `epic-design.md` 的 §14 为索引表；若带范围则仅处理指定 FEAT 或 ST。
+     - 完成类名检查后，在各 Feature **`l2_design/`** 下按 ST 产出/更新 **`ST-xxx_<slug>.md`**（模板 `story_detail_design_template.md`），并更新 `epic-design.md` **§14.1 索引（含前置依赖列）与 §14.2 依赖总览**；若带范围则仅处理指定 FEAT 或 ST。
    - **all**：依次执行 arch → key → diagram -all → nfr → story → l2 的完整产出（含 l2）；适用于小 EPIC 或上下文充裕时一次性产出全部章节。
 
 5. **子文件引用规则**：§7 详细在 `key-func-design/KD_*_*.md`，**清单与引用在 `epic-design.md` §7.1/§7.2**；§8、§14 仍按原规则摘要 + 链接；§9 详细在 **`nfr.md`**，`epic-design.md` §9 仅摘要 + 链接（见 `.cursor/rules/aisdd-epicdesign.mdc`）。
@@ -170,5 +170,5 @@ $ARGUMENTS
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.claude/rules/mermaid-style-guide.mdc`
 - 图表内容须基于本工程**实际架构与真实代码**，遵循 `.claude/rules/specify-diagram-requirements.mdc`
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
-- **L2 详细设计统一分文件**：epic-design.md 的 §14 仅为索引表，详细设计写在各 Feature 的 `story_detail_design.md` 中
+- **L2 按 Story 分文件**：`epic-design.md` §14 为索引与依赖总览；正文在各 Feature 的 `l2_design/ST-xxx_<slug>.md` 中
 - **章节骨架先行**：首次（无参数）调用必须输出完整 §1~§14 骨架，未填充章节保留占位提示；后续调用仅更新指定章节

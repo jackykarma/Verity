@@ -20,7 +20,7 @@ flowchart TD
     UxDesign -.-> PlanMd
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
     UxDesign -.-> EpicDesign
-    EpicDesign --> StoryDesign["story_detail_design.md<br/>L2 Story 详细设计"]
+    EpicDesign --> StoryDesign["各 Feature l2_design/<br/>ST-xxx_*.md（每 Story 一文件）"]
     StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（含回填 spec 追溯表<br/>+ plan 变更记录同步）"]
     TasksMd --> Implement["Implement<br/>代码实现"]
     Implement --> Verify["Verify<br/>实现↔设计一致性验证"]
@@ -51,7 +51,7 @@ flowchart TD
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
 4. **技术规约与 UX** → 多 Feature：产出 `epic-plan.md`；单 Feature：可省略 `epic-plan.md`，在唯一 `plan.md` 中写入 EPIC 级约束。可选 `ux-design.md`
 5. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版（须在 `epic-plan.md` 约束下编写，或单 Feature 时在合并后的 `plan.md` 中自洽）
-6. **设计说明书** → 产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§九全文）、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、各 `story_detail_design.md`（无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`）
+6. **设计说明书** → 产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§九全文）、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、各 `features/*/l2_design/ST-xxx_*.md`（L2；§十四 索引与依赖总览；无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`）
 7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表；建议同步各 Feature `plan.md`「变更记录」）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
 
@@ -70,10 +70,10 @@ flowchart TD
 | **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
 | **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规格事实源（§一~§六）；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`（含完整场景矩阵）、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
-| **L2 详细设计** | 各 `story_detail_design.md` | 落码级设计事实源 | `epic-design.md` | — |
-| **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、`story_detail_design.md` | — |
+| **L2 详细设计** | 各 `features/*/l2_design/ST-xxx_*.md` | 落码级设计事实源 | `epic-design.md` | — |
+| **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md` | — |
 | **实现** | 代码 | — | `tasks.md` | Implement Ready |
-| **验证** | L1 Story 验证卡 / L2 Feature 验证报告 / L3 EPIC 验证报告（`--save` 时写入文件） | 实现↔设计一致性事实源 | 代码、`story_detail_design.md`、`plan.md`、`spec.md`、`epic-design.md` | Verify Pass |
+| **验证** | L1 Story 验证卡 / L2 Feature 验证报告 / L3 EPIC 验证报告（`--save` 时写入文件） | 实现↔设计一致性事实源 | 代码、各 Feature `l2_design/ST-xxx_*.md`、`plan.md`、`spec.md`、`epic-design.md` | Verify Pass |
 | **审批记录** | `gate-log.md` | 审批事实源 | 各关卡评审结果 | — |
 
 ---
@@ -103,7 +103,7 @@ flowchart TD
 | `epic-design.md` | 仅需 **Lite** 级：§一～§六 + §十三 Story 拆解 + §十四 L2 索引；§七～§十二 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
 | `key-func-design/*.md` | 无疑难点/亮点可省略，在 epic-design.md §七标注「本 EPIC 无关键疑难点/亮点，省略」；可不创建 KD 文件 | 可省 ~100 行 |
 | `key-diagram-epic.md` + 该 Feature 的 `key-diagram.md` | 仅需 EPIC 骨架类图 + 1 个 Feature 子类图 + 1 张关键时序图 | ~80 行（分散在两处） |
-| `story_detail_design.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
+| `l2_design/ST-xxx_*.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
 
 ### 4.2 纯修复/小改动（预估 ≤ 3 人天）
 
@@ -114,7 +114,7 @@ flowchart TD
 | `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十三 + 跳过其余） | ~200 行 |
 | `key-func-design/*.md` | **可跳过** | 0 |
 | `key-diagram-epic.md` + 受影响 Feature 的 `key-diagram.md` | 仅需关键变更涉及的类图片段 | ~50 行 |
-| `story_detail_design.md` | **可跳过** | 0 |
+| `l2_design/` 下 L2 文件 | **可跳过** | 0 |
 | Gate 评审 | Gate 0~4 可合并为一轮快速评审，Gate 5~6 按需 | — |
 
 ### 4.3 各档位预估总文档量（参考）
@@ -223,7 +223,7 @@ flowchart TD
 1. **创建 CR**：运行 `/aisdd.cr`（或手动使用模板 [change-request-template.md](./templates/change-request-template.md)），填写「变更内容」「变更原因与证据」「影响分析」「下游更新清单」
 2. **CR 评审**：结论为通过 / 有条件通过 / 不通过
 3. **按类型走流程**：
-   - **需求类变更**（Scope/FR/NFR/AC/边界）→ 走 [7.1 需求变更流程](#71-需求变更流程)：从更新 `spec.md` 起，自顶向下检查并更新 ux-design → plan → epic-design → story_detail_design → tasks
+   - **需求类变更**（Scope/FR/NFR/AC/边界）→ 走 [7.1 需求变更流程](#71-需求变更流程)：从更新 `spec.md` 起，自顶向下检查并更新 ux-design → plan → epic-design → l2_design（各 ST 文件）→ tasks
    - **技术方案类变更**（架构/接口/实现决策）→ 走 [7.2 技术方案变更流程](#72-技术方案变更流程)：从更新 `plan.md`/`epic-plan.md` 起，自中间向两端扩展，必要时先协商 NFR 再更新设计说明书与 tasks
 4. **执行下游更新清单**：只更新 CR 影响分析中列出的产物，每份文档更新后填写 Version 与变更记录表（`/aisdd.cr` 会分步执行并逐步确认）
 
@@ -253,7 +253,7 @@ flowchart TD
     UpdatePlan --> CheckDesign
     CheckDesign -->|是| UpdateDesign["更新 epic-design.md<br/>Story 拆解/类图/时序"]
     CheckDesign -->|否| UpdateTasks["更新 tasks.md<br/>调整/新增/删除 Task"]
-    UpdateDesign --> UpdateL2["更新 story_detail_design.md<br/>（如涉及 L2）"]
+    UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md<br/>与 epic-design §十四（如涉及 L2）"]
     UpdateL2 --> UpdateTasks
     UpdateTasks --> Continue([继续实现])
 
@@ -287,7 +287,7 @@ flowchart TD
     Scope -->|"Feature 级<br/>（接口/数据/实现）"| UpdatePlan["更新 plan.md<br/>技术规约"]
     UpdateEpicPlan --> UpdatePlan
     UpdatePlan --> UpdateDesign["更新 epic-design.md<br/>架构图/类图/时序图"]
-    UpdateDesign --> UpdateL2["更新 story_detail_design.md"]
+    UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md 与 §十四"]
     UpdateL2 --> CheckStory{Story 拆解需调整?}
     CheckStory -->|是| UpdateStory["调整 Story 拆解<br/>回填 spec.md 追溯"]
     CheckStory -->|否| UpdateTasks["更新 tasks.md<br/>调整受影响的 Task"]
@@ -312,12 +312,12 @@ flowchart TD
 
 | 变更类型 | 起点（事实源） | 可能影响的下游产物 |
 |----------|---------------|-------------------|
-| 需求范围/FR/AC | `spec.md` | `ux-design.md` → `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
+| 需求范围/FR/AC | `spec.md` | `ux-design.md` → `plan.md` → `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
 | NFR 指标调整 | `spec.md` | `plan.md`（预算） → **`nfr.md`**（§九 量化评估）与 `epic-design.md` §九 摘要 → `tasks.md`（验证阈值） |
 | 交互/视觉/动效 | `ux-design.md` | `plan.md`（UI 约束） → `epic-design.md`（类图/时序） → `tasks.md` |
-| EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `story_detail_design.md` → `tasks.md` |
-| Feature 级技术方案 | `plan.md` | `epic-design.md` → `story_detail_design.md` → `tasks.md` |
-| Story 拆解调整 | `epic-design.md` §十三 | `story_detail_design.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
+| EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
+| Feature 级技术方案 | `plan.md` | `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
+| Story 拆解调整 | `epic-design.md` §十三 | `l2_design/ST-xxx_*.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
 
 ---
 
@@ -329,7 +329,7 @@ flowchart TD
 
 | 角色 | 职责 | 在 AISDD 中的产出物 |
 |------|------|-------------------|
-| **SE（方案设计者）** | 驱动整个设计流程：需求分析、方案设计、Story 拆解、Task 拆分；设计评审与变更管理 | `epic.md`、`spec.md`、`epic-plan.md`、`plan.md`、`ux-design.md`、`epic-design.md`、`story_detail_design.md`、`tasks.md` |
+| **SE（方案设计者）** | 驱动整个设计流程：需求分析、方案设计、Story 拆解、Task 拆分；设计评审与变更管理 | `epic.md`、`spec.md`、`epic-plan.md`、`plan.md`、`ux-design.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md`、`tasks.md` |
 | **DEV（开发者）** | 按 `tasks.md` 执行代码实现；编写单元测试；提交代码与自验证 | 代码、单测、L1 Story 验证报告 |
 
 > **SE 同时可以是 DEV**——在小团队中 SE 既做设计也做实现，此时并行策略退化为串行流水线（自己设计完 Feature A → 开始实现 Feature A，同时设计 Feature B）。

@@ -59,7 +59,7 @@ epic.md            spec.md           epic-plan.md         tasks.md
                                      nfr.md
                                      key-diagram-epic.md
                                      features/*/key-diagram.md
-                                     story_detail_design.md
+                                     l2_design/ST-xxx_*.md
                                           ↓
                                      gate plan-ready
                                      gate design-ready
@@ -225,7 +225,7 @@ diagram       全景骨架类图                          key-diagram-epic.md
 diagram FEAT  Feature 子类图+完整时序图             features/<FEAT>/key-diagram.md
 nfr           §9→nfr.md + epic §10~§12             nfr.md + epic-design.md
 story         Story 列表+依赖关系图+FR/NFR 矩阵    epic-design.md §13
-l2            Story 落码级 L2 详细设计             story_detail_design.md
+l2            Story 落码级 L2 详细设计             features/*/l2_design/ST-xxx_*.md + epic §十四
 ```
 
 **推荐顺序**：(默认) → key → diagram → diagram FEAT-001 → … → nfr → story → l2
@@ -233,7 +233,7 @@ l2            Story 落码级 L2 详细设计             story_detail_design.md
 **关键设计约束**：
 - 所有图表使用 Mermaid，遵循 Material Design 配色（`#E3F2FD` 蓝色系为主调）
 - 图表内容必须基于本工程**实际架构与真实代码**，不能是教科书式示意图
-- L2 详细设计统一分文件，epic-design.md 的 §14 仅为索引表——避免主文档过大，支持 Feature 级独立评审
+- L2 按 Story 分文件（`l2_design/ST-xxx_<slug>.md`），epic-design.md **§十四** 为索引与依赖总览——避免单文件过大，支持按 Story 评审与并行编辑
 
 **设计分级**（根据 EPIC 复杂度裁剪）：
 - **Lite**：适合小改动，覆盖 0/1 层架构 + 关键类图 + Story 拆解
@@ -242,17 +242,17 @@ l2            Story 落码级 L2 详细设计             story_detail_design.md
 
 ### 4.8 任务拆解（featuretasks）
 
-**输入**：epic-design.md + story_detail_design.md + plan.md + spec.md
+**输入**：epic-design.md + 各 Feature `l2_design/ST-xxx_*.md` + plan.md + spec.md
 **产出**：`tasks.md`（可执行 Task，含设计追溯）
 
 tasks.md 的设计要求：
-- 每个 Task 必须包含**设计引用**（指向 epic-design.md 哪个章节或 story_detail_design.md 的哪个 ST-xxx）
+- 每个 Task 必须包含**设计引用**（指向 epic-design.md 哪个章节或 `l2_design/ST-xxx_<slug>.md` 中的段落）
 - Story 覆盖率 100%（所有 ST-xxx 均有对应 Task）
 - 同时回填 spec.md 的需求追溯表（FR/NFR → Task 的可追溯链路）
 
 ### 4.9 实现（implement）
 
-**输入**：tasks.md + epic-design.md + story_detail_design.md + plan.md + spec.md
+**输入**：tasks.md + epic-design.md + 各 Feature `l2_design/ST-xxx_*.md` + plan.md + spec.md
 **代码输出**
 
 实现阶段的核心约束：
@@ -266,7 +266,7 @@ tasks.md 的设计要求：
 - spec.md 的 FR/NFR/AC
 - plan.md 的技术规约
 - epic-design.md 的架构设计
-- story_detail_design.md 的 L2 详细设计
+- 各 Feature `l2_design/ST-xxx_*.md` 的 L2 详细设计
 
 支持三级验证模式：Story 级 / Feature 级 / EPIC 级（EPIC 级使用并行子 Agent 加速）。
 
@@ -288,7 +288,7 @@ key-func-design-feature-flows-template.md → key-func-design/feature-flows.md�
 nfr-template.md               → nfr.md
 key-diagram-epic-template.md  → key-diagram-epic.md
 key-diagram-feature-template.md → features/*/key-diagram.md
-story_detail_design_template.md → story_detail_design.md
+story_detail_design_template.md → features/*/l2_design/ST-xxx_<slug>.md（每 Story 一文件）
 tasks-template.md             → tasks.md
 gate-log-template.md          → gate-log.md
 ux-design-template.md         → ux-design.md
@@ -360,7 +360,7 @@ Git 分支策略：
           plan.md               ← Feature 技术规约
           tasks.md              ← 可执行任务
           key-diagram.md        ← §八 该 Feature 子类图与本 Feature 时序
-          story_detail_design.md← L2 详细设计
+          l2_design/            ← L2 详细设计（ST-xxx_*.md 每 Story 一文件）
           checklists/           ← 检查清单
 ```
 
@@ -380,7 +380,7 @@ Feature 是文档组织单位，不是代码交付单位。多个 Feature 的代
 
 ### 9.3 为什么有"快速通道"而不是一刀切？
 
-AISDD 认识到过度设计本身就是一种浪费。对于单 Feature EPIC 或小改动（≤3 人天），强制走完整流程是不合理的。快速通道允许跳过 epic-plan.md、ux-design.md、story_detail_design.md 等产物，但不允许跳过人工关卡和 spec.md——需求明确性是不可妥协的底线。
+AISDD 认识到过度设计本身就是一种浪费。对于单 Feature EPIC 或小改动（≤3 人天），强制走完整流程是不合理的。快速通道允许跳过 epic-plan.md、ux-design.md、各 Feature `l2_design/` 下 L2 正文等产物，但不允许跳过人工关卡和 spec.md——需求明确性是不可妥协的底线。
 
 ### 9.4 为什么用 `constitution.md` 而非硬编码约束？
 
@@ -453,7 +453,7 @@ AISDD 的产出质量上限取决于 AI 对现有代码的理解深度。在大�
 
 #### C. 文档一致性维护是持续负担
 
-AISDD 建立了严格的文档层级，但文档之间的一致性维护是长期成本。随着需求变更，一个 FR 的修改可能需要同步更新：spec.md → plan.md → epic-design.md → story_detail_design.md → tasks.md。
+AISDD 建立了严格的文档层级，但文档之间的一致性维护是长期成本。随着需求变更，一个 FR 的修改可能需要同步更新：spec.md → plan.md → epic-design.md → l2_design（各 ST 文件）→ tasks.md。
 
 虽然 `/aisdd.cr` 提供了 CR 流程，但每次变更的"影响分析 → 增量更新"闭环在实践中很容易被压缩省略，导致文档逐渐失真。
 

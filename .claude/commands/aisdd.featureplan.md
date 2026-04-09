@@ -11,7 +11,7 @@ handoffs:
     send: false
   - label: 输出 EPIC 软件设计说明书
     agent: aisdd.epicdesign
-    prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
+    prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 l2_design/ST-xxx_*.md（L2 设计）
     send: true
   - label: 创建检查清单
     agent: aisdd.checklist
@@ -257,7 +257,7 @@ plan.md 填写规则：
 - `plan.md` 路径
 - Plan Version
 - 已生成的章节清单
-- **下一步提示**：若所有 Feature plan 已完成 → 建议运行 **`/aisdd.challenge plan`**（多 Feature EPIC 推荐）→ `/aisdd.gate plan-ready`（审批关卡）→ `/aisdd.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 story_detail_design.md（L2 设计）
+- **下一步提示**：若所有 Feature plan 已完成 → 建议运行 **`/aisdd.challenge plan`**（多 Feature EPIC 推荐）→ `/aisdd.gate plan-ready`（审批关卡）→ `/aisdd.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 `l2_design/ST-xxx_*.md`（L2 设计）
 
 ---
 

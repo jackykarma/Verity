@@ -1,5 +1,5 @@
 ---
-description: Specify/Plan 图表内容规范——基于实际工程架构与真实代码，用于 plan.md、story_detail_design.md 等设计文档
+description: Specify/Plan 图表内容规范——基于实际工程架构与真实代码，用于 plan.md、features/*/l2_design/*.md 等设计文档
 globs: ["**/*.md"]
 alwaysApply: true
 ---
@@ -85,7 +85,7 @@ alwaysApply: true
   3. **工作过程与数据流**：中间状态如何变化（内存/缓存/持久化/网络等若图中涉及则须说明）；关键业务决策在何处做出。
   4. **分支与异常**：对图中每个 `alt/else`（及重要的 `opt/loop`）分别说明：进入条件、各分支的差异行为、最终对用户或调用方的可见结果。
   5. **结束条件**：正常结束与各类异常结束分别是什么；是否与流程图或其他设计章节一致。
-- **粒度**：文字说明应达到**未读图也能理解主干协作与分支差异**的程度；AISDD 产出的 `key-func-design/KD_*_*.md`、`key-diagram-epic.md`、`features/*/key-diagram.md`、`story_detail_design.md` 等凡含时序图者，**一律遵守**本条。
+- **粒度**：文字说明应达到**未读图也能理解主干协作与分支差异**的程度；AISDD 产出的 `key-func-design/KD_*_*.md`、`key-diagram-epic.md`、`features/*/key-diagram.md`、`features/*/l2_design/*.md` 等凡含时序图者，**一律遵守**本条。
 
 ---
 

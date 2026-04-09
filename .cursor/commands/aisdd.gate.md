@@ -21,7 +21,7 @@ $ARGUMENTS
 |------|----------|----------|----------|-------------|
 | **spec-ready** | 所有 Feature spec + clarify 完成后 | 各 `spec.md` | spec.md（状态→就绪） | epicuidesign / epicplan |
 | **plan-ready** | epicplan（或多 Feature 时等效）+ 各 Feature plan 完成后 | `epic-plan.md`（多 Feature 时；单 Feature 可省略）、各 `plan.md` | epic-plan.md（若存在）、plan.md | epicdesign |
-| **design-ready** | EPIC 软件设计说明书完成后 | `epic-design.md`（及 `story_detail_design.md`） | epic-design.md | tasks |
+| **design-ready** | EPIC 软件设计说明书完成后 | `epic-design.md`（及各 Feature `l2_design/ST-xxx_*.md`，若有 L2） | epic-design.md | tasks |
 | **tasks-ready** | tasks 生成 + analyze 通过后 | 各 `tasks.md` | tasks.md | implement |
 | **implement-done** | implement 完成 + verify 通过后 | 代码 + verify 报告 | — | 发布/合并 |
 
@@ -64,7 +64,7 @@ $ARGUMENTS
 #### design-ready
 - [ ] `epic-design.md` 存在且版本已填写
 - [ ] §1（0 层架构）、§2（1 层架构）、§4（全景类图/时序）、§5（Story 拆解）已完成
-- [ ] 各 Feature 的 `story_detail_design.md` 存在（若有 L2 设计）
+- [ ] 各 Feature 的 `l2_design/` 下所需 `ST-xxx_*.md` 齐备（若有 L2 设计）
 - [ ] Story 拆解的 FR/NFR 覆盖矩阵（§5.4）无遗漏
 - [ ] 设计说明书 Version 已填写
 

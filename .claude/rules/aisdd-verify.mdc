@@ -25,7 +25,7 @@ alwaysApply: false
 3. **`key-func-design/KD_*_*.md`**（若存在）：各 KD 核心方案与 §7.1 一致性
 4. **`nfr.md`**（若存在）：技术评估量化结论
 5. **`key-diagram-epic.md`** 与各 **`features/*/key-diagram.md`**：EPIC 全景骨架/跨 Feature 时序、各 Feature 子类图与本 Feature 时序
-6. **本 Feature 的 `story_detail_design.md`**：L2 详细设计
+6. **本 Feature 的 `l2_design/ST-xxx_*.md`**：L2 详细设计
 7. **本 Feature 的 `plan.md`**：技术规约、接口契约、NFR 预算
 8. **本 Feature 的 `spec.md`**：FR/NFR/AC
 9. **实际代码**：已实现的代码文件

@@ -26,7 +26,7 @@ $ARGUMENTS
 
 ## 目标
 
-在 EPIC 级别执行**跨 Feature 的一致性与质量分析**，检测各 Feature 的 spec/plan/tasks/story_detail_design 之间以及与 EPIC 级产物（epic.md、epic-plan.md、epic-design.md）之间的不一致、冲突、缺口问题。
+在 EPIC 级别执行**跨 Feature 的一致性与质量分析**，检测各 Feature 的 spec/plan/tasks/l2_design（各 ST 文件）之间以及与 EPIC 级产物（epic.md、epic-plan.md、epic-design.md）之间的不一致、冲突、缺口问题。
 
 **与 `/aisdd.analyze` 的区别**：
 - `/aisdd.analyze`：单 Feature 内的 spec↔plan↔tasks 一致性
@@ -65,7 +65,7 @@ $ARGUMENTS
 - `spec.md`：FR/NFR/AC/依赖/核心实体
 - `plan.md`：技术规约/接口契约/数据模型
 - `tasks.md`：Task 清单/设计引用
-- `story_detail_design.md`：L2 详细设计
+- `l2_design/ST-xxx_*.md`：L2 详细设计（每 Story 一文件）
 
 ### 4. 检测环节
 
@@ -101,14 +101,14 @@ $ARGUMENTS
 - epic-design.md 的 Story 拆解是否完整覆盖各 Feature 的 spec.md 需求
 - Story 间依赖关系是否有环
 - FR/NFR 覆盖矩阵是否有遗漏（某 FR/NFR 无 Story 覆盖）
-- 所有 Story 是否在 story_detail_design.md 中有对应 L2 设计
+- 所有 Story 是否在 `l2_design/` 下有对应 `ST-xxx_*.md` L2 设计，且与 epic-design §14 索引一致
 - tasks.md 中的 [ST-xxx] 标签是否与 epic-design.md 的 Story 拆解一致
 
 #### F. 架构一致性
 
 - 各 Feature plan.md §二 的架构约束是否与 epic-plan.md §2 一致
 - epic-design §五 一层架构中各模块/组件归属是否无冲突（如包名/模块名冲突）
-- 全景类图中的类与各 story_detail_design.md 中的类是否一致
+- 全景类图中的类与各 `l2_design/ST-xxx_*.md` 中的类是否一致
 - 依赖方向是否符合 epic-plan.md §2 分层约束
 
 #### G. 变更与审批一致性

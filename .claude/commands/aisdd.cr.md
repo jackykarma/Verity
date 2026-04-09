@@ -71,7 +71,7 @@ $ARGUMENTS
 
 4. **影响分析**：
    - **判断变更类型**：需求类（Scope/FR/NFR/AC）/ 交互类 / 技术方案类 / 混合
-   - **定位受影响的产物**：逐个检查 spec/ux-design/plan/epic-plan/epic-design/story_detail_design/tasks，列出需要更新的文件与章节
+   - **定位受影响的产物**：逐个检查 spec/ux-design/plan/epic-plan/epic-design/l2_design（各 ST 文件）/tasks，列出需要更新的文件与章节
    - **参考 workflow-overview.md §7.3 变更影响速查表**确定更新链路
    - **风险评估**：识别变更带来的风险（性能/兼容/工期等）
 
@@ -88,8 +88,8 @@ $ARGUMENTS
 7. **分步执行下游更新**（无参数/apply 模式）：
    - 提示用户确认下游更新清单
    - 按变更类型走对应流程（参考 workflow-overview.md §7.1 / §7.2）：
-     - **需求类**：更新 spec → 检查 ux-design → 检查 plan → 检查 epic-design → 检查 story_detail_design → 更新 tasks
-     - **技术方案类**：检查 NFR 是否需调整 → 更新 plan/epic-plan → 更新 epic-design → 更新 story_detail_design → 检查 Story 拆解 → 更新 tasks
+     - **需求类**：更新 spec → 检查 ux-design → 检查 plan → 检查 epic-design → 检查 l2_design（各 ST 文件）→ 更新 tasks
+     - **技术方案类**：检查 NFR 是否需调整 → 更新 plan/epic-plan → 更新 epic-design → 更新 l2_design（各 ST 文件）→ 检查 Story 拆解 → 更新 tasks
    - 每步更新后：
      - 更新文件的变更记录表（Version +0.0.1）
      - 输出已更新的文件与章节
@@ -104,7 +104,7 @@ $ARGUMENTS
    |------|---------|
    | 始终 | 运行 `/aisdd.analyze` 确认变更后各产物无矛盾 |
    | tasks.md 有更新 | 受影响的 Task（列出 Task ID）需重新执行 `/aisdd.implement`；实现完成后运行 `/aisdd.verify` 验证 |
-   | epic-design / story_detail_design 有更新 | 若 `design-ready` 关卡已冻结，建议重新运行 `/aisdd.gate design-ready` 更新冻结基线 |
+   | epic-design / l2_design 有更新 | 若 `design-ready` 关卡已冻结，建议重新运行 `/aisdd.gate design-ready` 更新冻结基线 |
    | tasks.md 有更新且 `tasks-ready` 已冻结 | 建议重新运行 `/aisdd.gate tasks-ready` 更新冻结基线 |
    | 代码已实现部分受影响的 Story | 实现完成后运行 `/aisdd.verify`（可指定范围：`story ST-xxx` 或 `feat FEAT-xxx`）验证实现与更新后设计一致 |
 

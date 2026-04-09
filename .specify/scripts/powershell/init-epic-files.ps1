@@ -6,7 +6,7 @@ Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-des
 .DESCRIPTION
 Creates EPIC-level design files in the EPIC directory from their respective templates.
 Only creates files that don't already exist (safe to re-run).
-Also creates story_detail_design.md and key-diagram.md in each Feature directory (if features exist).
+Also creates l2_design/.gitkeep (L2 目录占位) and key-diagram.md in each Feature directory (if features exist).
 
 .PARAMETER EpicId
 EPIC identifier (e.g. EPIC-001). Falls back to $env:SPECIFY_EPIC or current branch.
@@ -17,6 +17,7 @@ Overwrite existing files.
 .PARAMETER FilesOnly
 Comma-separated list of files to create. Default: all.
 Valid values: epic-plan, ux-design, epic-design, key-func-design-dir, nfr, key-diagram-epic, key-diagram-feature, key-diagram, gate-log, story-detail
+  (story-detail: per-Feature l2_design/.gitkeep；L2 正文由 /aisdd.epicdesign l2 按 ST 生成)
   (key-diagram is deprecated: same as key-diagram-epic + key-diagram-feature)
 
 .PARAMETER Json
@@ -47,7 +48,7 @@ if ($Help) {
     Write-Host "  key-diagram-epic.md       -> EPIC root (from key-diagram-epic-template.md)"
     Write-Host "  features/*/key-diagram.md -> per Feature (from key-diagram-feature-template.md)"
     Write-Host "  gate-log.md               -> EPIC root"
-    Write-Host "  story_detail_design.md    -> each Feature directory"
+    Write-Host "  features/*/l2_design/.gitkeep -> L2 目录占位（每 Story 独立 .md 由 epicdesign l2 产出）"
     Write-Host ""
     Write-Host "Note: key-diagram (legacy) expands to key-diagram-epic + key-diagram-feature."
     exit 0
@@ -88,8 +89,6 @@ $fileMap = @{
     'gate-log'         = @{ template = 'gate-log-template.md';         target = 'gate-log.md' }
 }
 
-$storyDetailTemplate = 'story_detail_design_template.md'
-$storyDetailTarget = 'story_detail_design.md'
 $keyDiagramFeatureTemplate = 'key-diagram-feature-template.md'
 $keyDiagramFeatureTarget = 'key-diagram.md'
 
@@ -135,9 +134,18 @@ foreach ($fileKey in $filesToCreate) {
             $featureDirs = Get-ChildItem -Path $featuresDir -Directory -ErrorAction SilentlyContinue
             foreach ($featDir in $featureDirs) {
                 if ($fileKey -eq 'story-detail') {
-                    $targetPath = Join-Path $featDir.FullName $storyDetailTarget
-                    $templatePath = Join-Path $templatesDir $storyDetailTemplate
-                    $rel = "$($featDir.Name)/$storyDetailTarget"
+                    $l2Dir = Join-Path $featDir.FullName 'l2_design'
+                    if (-not (Test-Path $l2Dir)) {
+                        New-Item -ItemType Directory -Path $l2Dir -Force | Out-Null
+                    }
+                    $gitkeepPath = Join-Path $l2Dir '.gitkeep'
+                    if ((Test-Path $gitkeepPath) -and -not $Force) {
+                        $results += @{ file = "$($featDir.Name)/l2_design/.gitkeep"; status = 'skipped (exists)' }
+                    } else {
+                        New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
+                        $results += @{ file = "$($featDir.Name)/l2_design/.gitkeep"; status = 'created' }
+                    }
+                    continue
                 } else {
                     $targetPath = Join-Path $featDir.FullName $keyDiagramFeatureTarget
                     $templatePath = Join-Path $templatesDir $keyDiagramFeatureTemplate
@@ -153,7 +161,7 @@ foreach ($fileKey in $filesToCreate) {
                 }
             }
         } else {
-            $label = if ($fileKey -eq 'story-detail') { 'story_detail_design.md' } else { 'key-diagram.md' }
+            $label = if ($fileKey -eq 'story-detail') { 'l2_design/.gitkeep' } else { 'key-diagram.md' }
             $results += @{ file = $label; status = 'no features directory' }
         }
         continue

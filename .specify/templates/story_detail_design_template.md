@@ -1,20 +1,32 @@
-# L2 Story 详细设计（二层详细设计）
+# L2 Story 详细设计：`ST-001_<slug>`（二层详细设计 · 单 Story 文件）
 
-本文档与 **EPIC 软件设计说明书**（`epic-design.md`）配套使用：`epic-design.md` 的 §14 为 L2 索引表，指向本文档中各 Story 的详细设计。本文档由 `/aisdd.epicdesign` 在各 Feature 目录下生成，是 `tasks.md` 和 `/aisdd.implement` 的**详细设计事实源**。
-
-**使用方式**：置于 Feature 目录下（`specs/epics/EPIC-xxx/features/FEAT-xxx/story_detail_design.md`），便于 Feature 级独立评审。
+> **文件位置**：`specs/epics/EPIC-xxx/features/FEAT-xxx/l2_design/ST-001_<短slug>.md`（**每个 Story 独占一个文件**；文件名必须以 `ST-xxx_` 开头。）
+>
+> **配套**：EPIC 软件设计说明书 `epic-design.md` 的 **§十四** 为全 EPIC 的 L2 **索引与依赖总览**；本文档须与 §14.1 / §14.2 及 §十三 Story 拆解中的依赖列 **一致**。
 
 **覆盖要求**：
-- **Standard 深度**：各 Story 写入概要（需求/DoD + 简要功能设计说明）
-- **Deep 深度**：所有 Story 必须补齐完整详细设计（类图/时序图/触发条件/系统响应），不得遗漏
+- **Standard 深度**：本 Story 写入概要（需求/DoD + 简要功能设计说明）
+- **Deep 深度**：本 Story 必须补齐完整详细设计（类图/时序图/触发条件/系统响应），不得遗漏
+
+---
+
+## L2 依赖与引用
+
+> **必须与 `epic-design.md` §14.1 / §14.2 对齐**：此处变更时同步更新 EPIC 设计说明书中的索引与依赖图（表）。
+
+| 类型 | 说明 |
+| --- | --- |
+| **前置 ST（本 Feature）** | [无则填「—」；若有，列出 ST-xxx，并链到同目录下文件，如 `./ST-000_foo.md`] |
+| **前置 ST（跨 Feature）** | [无则填「—」；若有，写清 ST-xxx 与相对路径，如 `../../FEAT-other/l2_design/ST-050_bar.md`] |
+| **对外契约** | [本 Story 完成后，其他 ST 可依赖的接口/模块边界摘要] |
 
 ---
 
 ## 文档约定
 
 **覆盖要求**：
-- 对每个 Story，必须同时覆盖：**需求描述**、**功能设计（类图/时序图/触发条件/系统响应）**。
-- **禁止省略或引用**：所有内容须在本文档内完整书写，不得使用「见 A3」「同上」「参见 plan.md」等省略或引用方式。
+- 必须覆盖：**需求描述**、**功能设计（类图/时序图/触发条件/系统响应）**。
+- **禁止省略或引用**：所有内容须在**本文件内**完整书写，不得使用「见 A3」「同上」「参见 plan.md」等省略或引用方式。
 
 **图表完整性**：
 - **类图**：须为**完整详细**的类图，覆盖本 Story 涉及的全部关键类、接口与方法签名；**不得引用** plan.md 组件设计（A3）的类图。
@@ -22,16 +34,16 @@
 - 类图、时序图须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 
 **引用约定**：
-- tasks.md 的每个 Task 应明确引用对应 Story 的详细设计入口（例如：`story_detail_design.md:ST-001:功能设计:时序图`）。
+- tasks.md 的每个 Task 应明确引用本文件中的设计段落（例如：`l2_design/ST-001_<slug>.md:功能设计:时序图`，或自 EPIC 根起的完整相对路径）。
 
 ---
 
-### ST-001 Detailed Design：[标题]
+## ST-001 Detailed Design：[标题]
 
 #### 1) 需求及描述
 
 - **需求描述**：[Story 做什么，为什么需要，关联的 FR/NFR]
-- **需求依赖**：[依赖的其他 Story、外部模块、前置条件]
+- **需求依赖**：[依赖的其他 Story、外部模块、前置条件——与上文「L2 依赖与引用」一致]
 - **使用范围**：[哪些模块/页面会使用，影响范围]
 - **使用接口**：[对外暴露的接口/方法签名]
 - **DoD（验收标准）**：
@@ -148,10 +160,4 @@ sequenceDiagram
 
 ---
 
-### ST-002 Detailed Design：[标题]
-
-（同 ST-001 结构）
-
----
-
-*更多 Story 按相同结构追加。*
+> **其他 Story**：在 `l2_design/` 下**另建** `ST-002_<slug>.md`、`ST-003_<slug>.md` … 复制本模板结构并替换 `ST-001` 与章节标题中的 Story ID。

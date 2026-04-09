@@ -6,7 +6,7 @@
 >
 > **输入**：`key-func-design/KD_*_*.md`、`epic-design.md` §五组件清单、各 `features/FEAT-xxx/key-diagram.md`（产出后用于一致性互校）
 >
-> **与 L2（story_detail_design.md）的区别**：本文件为 EPIC/跨 Feature 结构纵览；Story 级落码细节在各 Feature 的 `story_detail_design.md`。
+> **与 L2（`l2_design/`）的区别**：本文件为 EPIC/跨 Feature 结构纵览；Story 级落码细节在各 Feature 的 `l2_design/ST-xxx_*.md`。
 
 **Epic**：EPIC-[编号] - [名称]
 **关联文件**：`epic-design.md` | `key-func-design/KD_*_*.md` | 各 `features/*/key-diagram.md`

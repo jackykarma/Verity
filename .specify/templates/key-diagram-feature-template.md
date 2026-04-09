@@ -4,7 +4,7 @@
 >
 > **输入**：`key-func-design/KD_*_*.md`（与本 Feature 相关的 KD）、`epic-design.md` §五组件清单、`key-diagram-epic.md` §8.2
 >
-> **与 L2（story_detail_design.md）的区别**：本文件为 **Feature 级**全貌；Story 级落码细节在 `story_detail_design.md`。
+> **与 L2（`l2_design/`）的区别**：本文件为 **Feature 级**全貌；Story 级落码细节在各 `l2_design/ST-xxx_*.md` 单 Story 文件中。
 
 **Epic**：EPIC-[编号] - [名称]
 **Feature**：FEAT-[编号] - [名称]
@@ -73,7 +73,7 @@ classDiagram
 
 > **与 §七 关键类图 / 核心时序的区别**：§七 各 KD 中的**核心调用链时序**仅主干 + 关键异常；本节须**精确化 + 穷举全分支**，使可直接指导编码。
 >
-> **范围**：本 Feature 内挑选 **1-2 个最关键/最复杂的流程**绘制完整时序图。更多时序在 `story_detail_design.md` 中按 Story 粒度补充。**跨多个 Feature 的协作时序**写在 EPIC 根目录 `key-diagram-epic.md` §8.3。
+> **范围**：本 Feature 内挑选 **1-2 个最关键/最复杂的流程**绘制完整时序图。更多时序在 `l2_design/ST-xxx_*.md` 中按 Story 粒度补充。**跨多个 Feature 的协作时序**写在 EPIC 根目录 `key-diagram-epic.md` §8.3。
 >
 > **图后文字说明（必须）**：每张时序图代码块**紧下方**须有「**协作过程**」小节（见 `.cursor/rules/specify-diagram-requirements.mdc` §四）。
 

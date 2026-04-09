@@ -17,13 +17,13 @@ alwaysApply: false
 
 1. 本 Feature 的 `spec.md` 和 `plan.md` 已完成
 2. `epic-design.md` 已通过 Design Ready（`/aisdd.gate design-ready`）
-3. 本 Feature 的 `story_detail_design.md` 已完成（若有 L2 设计）
+3. 本 Feature 的 `l2_design/` 下各 Story 对应 `ST-xxx_*.md` 已完成（若有 L2 设计）
 
 ## 输入（必须阅读）
 
 1. **`epic-design.md`**：Story 拆解（§5 Story 列表、依赖关系、FR/NFR 覆盖矩阵）、全景类图与关键时序（§4）、架构图（§1、§2）
 2. **本 Feature 的 `plan.md`**：技术规约、接口契约、Story 索引表
-3. **本 Feature 的 `story_detail_design.md`**：L2 详细设计（Task 的设计引用来源）
+3. **本 Feature 的 `l2_design/ST-xxx_*.md`**：L2 详细设计（Task 的设计引用来源）
 4. **本 Feature 的 `spec.md`**：FR/NFR/AC（Task 验证须追溯）
 5. **`epic-plan.md`**（若存在）：EPIC 级技术约束
 6. **`.specify/templates/tasks-template.md`**：模板结构
@@ -71,7 +71,7 @@ alwaysApply: false
 ### 每个 Task 必须包含
 
 - **依赖**：T??? 或"无"
-- **设计引用**：指向 `epic-design.md:§4 全景类图/时序图` 或 `story_detail_design.md:ST-xxx:功能设计:类图/时序图`
+- **设计引用**：指向 `epic-design.md:§4 全景类图/时序图` 或 `l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`
 - **步骤**：编号步骤列表
 - **验证**：可执行的验证清单（含 NFR 阈值）
 - **产物**：涉及的文件

@@ -75,7 +75,7 @@ $ARGUMENTS
     - 最后阶段：优化与跨领域关注点
     - 所有任务必须遵循严格的清单格式（详见下文「任务生成规则」）
     - 每个任务需标注清晰的文件路径
-    - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` 中的 §4 全景类图/时序图，或各 Feature 的 `story_detail_design.md:ST-xxx:功能设计:类图/时序图`）
+    - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` 中的 §4 全景类图/时序图，或各 Feature 的 `l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`）
     - 展示 Story 完成顺序的依赖关系章节
     - 每个 Story 的并行执行示例
     - 增量交付策略
@@ -127,8 +127,8 @@ $ARGUMENTS
 
 ```text
 设计引用：epic-design.md:§4 全景类图/时序图
-设计引用：story_detail_design.md:ST-001:功能设计:类图
-设计引用：story_detail_design.md:ST-002:功能设计:时序图
+设计引用：l2_design/ST-001_<slug>.md:功能设计:类图
+设计引用：l2_design/ST-002_<slug>.md:功能设计:时序图
 ```
 
 ### 任务组织规则

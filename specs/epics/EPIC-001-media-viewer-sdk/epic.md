@@ -93,7 +93,7 @@
 | --- | ------------------------------------------ | ------------ | ----------------------------- |
 | M1  | 所有 Feature spec.md 完成                      | epic.md 评审通过 | /aisdd.gate spec-ready 通过     |
 | M2  | epic-plan.md + 所有 Feature plan.md 完成       | M1 完成        | /aisdd.gate plan-ready 通过     |
-| M3  | epic-design.md + story_detail_design.md 完成 | M2 完成        | /aisdd.gate design-ready 通过   |
+| M3  | epic-design.md + 各 Feature `l2_design/ST-xxx_*.md` 完成 | M2 完成        | /aisdd.gate design-ready 通过   |
 | M4  | 所有 tasks.md 完成                             | M3 完成        | /aisdd.gate tasks-ready 通过    |
 | M5  | SDK AAR + Demo App 完成交付                    | M4 完成        | /aisdd.gate implement-done 通过 |
 

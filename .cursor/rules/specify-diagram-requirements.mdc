@@ -1,5 +1,5 @@
 ---
-description: Specify/Plan 图表内容规范——基于实际工程架构与真实代码，用于 plan.md、story_detail_design.md 等设计文档
+description: Specify/Plan 图表内容规范——基于实际工程架构与真实代码，用于 plan.md、features/*/l2_design/*.md 等设计文档
 globs: ["**/*.md"]
 alwaysApply: true
 ---

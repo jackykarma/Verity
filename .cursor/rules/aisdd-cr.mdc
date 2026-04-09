@@ -46,7 +46,7 @@ alwaysApply: false
    - **技术方案类**：架构 / 接口 / 实现决策 / 契约
    - **混合**：跨类型
 3. 定位受影响产物与章节：
-   - 逐一检查 spec → ux-design → plan → epic-plan → epic-design → story_detail_design → tasks
+   - 逐一检查 spec → ux-design → plan → epic-plan → epic-design → l2_design（各 ST 文件）→ tasks
    - 参考 `workflow-overview.md §7.3 变更影响速查表`
 4. 风险评估：性能 / 兼容性 / 工期 / 依赖
 
@@ -85,8 +85,8 @@ alwaysApply: false
 
 1. **提示确认**：展示下游更新清单，等待用户确认
 2. **按变更类型走流程**（参考 `workflow-overview.md`）：
-   - **需求类** → 7.1 流程：spec → ux-design → plan → epic-design → story_detail_design → tasks
-   - **技术方案类** → 7.2 流程：检查 NFR → plan/epic-plan → epic-design → story_detail_design → Story 拆解 → tasks
+   - **需求类** → 7.1 流程：spec → ux-design → plan → epic-design → l2_design（各 ST 文件）→ tasks
+   - **技术方案类** → 7.2 流程：检查 NFR → plan/epic-plan → epic-design → l2_design（各 ST 文件）→ Story 拆解 → tasks
 3. **每步更新后**：
    - 更新文件的变更记录表（Version +0.0.1）
    - 输出已更新的文件与章节摘要

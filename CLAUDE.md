@@ -62,7 +62,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.epicuidesign` | `ux-design.md` | 可选，与 epicplan 并行 |
 | `/aisdd.featureplan` | 各 Feature `plan.md` | 需在 epic-plan（或单 Feature 合并 plan）完成后执行 |
 | `/aisdd.gate plan-ready` | gate 条目 | 所有 `plan.md` 完成后执行 |
-| `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、`story_detail_design.md` | 分阶段：`key` → `diagram` → `nfr` → `story` → `l2`（无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`） |
+| `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、各 `features/*/l2_design/ST-xxx_*.md` | 分阶段：`key` → `diagram` → `nfr` → `story` → `l2`（无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`） |
 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 含回填 spec 追溯表 |
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.verify` | 验证报告 | 实现↔设计一致性验证 |
@@ -71,7 +71,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 
 **单 Feature EPIC 快速通道**：跳过 `epic-plan.md`，将 EPIC 级约束合并写入唯一的 `plan.md`。
 
-**小改动快速通道**（预估 ≤3 人天）：跳过 `epic-plan.md`、`ux-design.md`、`story_detail_design.md`；`epic-design.md` 仅写 Story 拆解 + 关键类图。
+**小改动快速通道**（预估 ≤3 人天）：跳过 `epic-plan.md`、`ux-design.md`、各 Feature `l2_design/` 下 L2 正文；`epic-design.md` 仅写 Story 拆解 + 关键类图。
 
 ## 分支策略
 
@@ -141,6 +141,6 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 | `epic-design.md` | 架构与设计总览：0/1 层；§7.1 KD 清单与依赖、§7.2 引用；§8/§14 索引；§9 摘要并链至 `nfr.md` |
 | `key-func-design/KD_*_*.md` | §七各 KD 详细设计（核心方案、流程图、核心时序） |
 | `nfr.md` | §九技术评估（设计产出验证，9.1～9.7 量化全文） |
-| `story_detail_design.md` | L2 落码级详细设计 |
+| `features/*/l2_design/ST-xxx_*.md` | L2 落码级详细设计（每 Story 一文件） |
 | `tasks.md` | 执行：可操作 Task，含 spec/设计追溯 |
 | `gate-log.md` | 各阶段关卡审批记录 |

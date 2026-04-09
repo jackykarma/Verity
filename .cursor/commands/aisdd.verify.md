@@ -1,5 +1,5 @@
 ---
-description: "实现验证：在 implement 完成（全部或按阶段）后运行，独立验证代码实现是否符合 spec 的 FR/NFR/AC、plan 的技术规约、epic-design 的架构设计与 story_detail_design 的 L2 详细设计。支持三级验证模式（Story 级 / Feature 级 / EPIC 级），EPIC 级使用并行子 Agent ���速。严格只读（不修改设计文档），但会标记 tasks.md 中的验证结果。"
+description: "实现验证：在 implement 完成（全部或按阶段）后运行，独立验证代码实现是否符合 spec 的 FR/NFR/AC、plan 的技术规约、epic-design 的架构设计与 各 Feature `l2_design/ST-xxx_*.md` 的 L2 详细设计。支持三级验证模式（Story 级 / Feature 级 / EPIC 级），EPIC 级使用并行子 Agent ���速。严格只读（不修改设计文档），但会标记 tasks.md 中的验证结果。"
 handoffs:
   - label: 提交变更请求（发现偏离时）
     agent: aisdd.cr
@@ -64,7 +64,7 @@ $ARGUMENTS
 
 - **验证维度**：接口契约 + 行为一致性 + FR/NFR 覆盖（该 Story 涉及的 FR）
 - **跳过维度**：全量架构扫描（代价高、L2/L3 统一处理）
-- **加载范围**：仅该 Story 的 `story_detail_design.md`、相关 `plan.md` 章节
+- **加载范围**：仅该 Story 的 `l2_design/ST-xxx_<slug>.md`、相关 `plan.md` 章节
 - **输出**：轻量 Story 验证卡（pass/fail + 偏离摘要）
 - **适合场景**：边实现边验证，发现问题早修早止
 
@@ -91,7 +91,7 @@ $ARGUMENTS
 
 ## 操作约束
 
-- **设计文档只读**：不修改 spec/plan/epic-design/story_detail_design 的内容
+- **设计文档只读**：不修改 spec/plan/epic-design/l2_design（各 ST 文件）的内容
 - **可标记 tasks.md**：在 tasks.md 中对已验证的 Task 追加验证结论标注
 - **发现偏离时**：输出偏离报告，建议提交 CR 或回退实现，**不自动修改代码**
 - **`--save` 时写报告**：写入 `EPIC_DIR/verify-report-<YYYYMMDD>.md`，格式同输出报告
@@ -113,7 +113,7 @@ $ARGUMENTS
 **确定验证层级与范围**：
 
 - 从 `$ARGUMENTS` 中提取：层级关键字（`story` / `feat` / `epic` / 无）、范围标识（`ST-xxx` / `FEAT-xxx`）、标志（`--quick` / `--save`）
-- **L1**：解析 Story ID 列表，定位其所属 Feature 与 `story_detail_design.md`
+- **L1**：解析 Story ID 列表，定位其所属 Feature 与 `l2_design/ST-xxx_*.md`
 - **L2**：解析 Feature ID 列表，遍历各 Feature 下 tasks.md 中所有 Story
 - **L3**：遍历所有 Feature（`EPIC_DIR/features/*/`），收集全量 Story 列表
 
@@ -125,7 +125,7 @@ $ARGUMENTS
 
 | 文档 | L1 Story 级 | L2 Feature 级 | L3 EPIC 级 |
 |------|-------------|---------------|------------|
-| `story_detail_design.md`（目标 Story） | ✅ | ✅ | ✅ |
+| `l2_design/ST-xxx_*.md`（目标 Story） | ✅ | ✅ | ✅ |
 | `plan.md`（目标 Feature） | ✅（相关章节）| ✅ | ✅ |
 | `spec.md`（目标 Feature） | ✅（目标 FR/NFR） | ✅ | ✅ |
 | `epic-design.md`（架构章节） | ❌（跳过） | ✅ | ✅ |
@@ -137,12 +137,12 @@ $ARGUMENTS
 对每个目标 Story（ST-xxx）：
 
 **3A-1 接口契约验证**
-- 读取 `story_detail_design.md` 中该 Story 涉及的类图与接口定义
+- 读取该 Story 的 `l2_design/ST-xxx_*.md` 中涉及的类图与接口定义
 - 定位代码中对应的类/函数，对比方法签名（参数类型、返回类型、可见性）
 - 检查数据模型字段是否与 plan.md §三 的定义一致
 
 **3A-2 行为一致性验证**
-- 读取 `story_detail_design.md` 的时序图与触发条件表格
+- 读取该 Story 的 `l2_design/ST-xxx_*.md` 的时序图与触发条件表格
 - 追踪代码中的核心调用链，对照时序图每一跳
 - 检查 `alt/else` 分支是否均有对应实现
 
@@ -199,7 +199,7 @@ $ARGUMENTS
   spec.md:                [路径]
   plan.md:                [路径]
   epic-design.md（架构）: [路径]
-  story_detail_design.md: [路径（各 Story）]
+  l2_design/ST-xxx_<slug>.md: [路径（各 Story）]
   tasks.md:               [路径]
   epic-plan.md:           [路径（若存在）]
 
@@ -310,7 +310,7 @@ $ARGUMENTS
 对每个偏离项分类：
 
 - **代码偏离（应修复代码）**：实现未遵循设计，设计是正确的 → 建议修改代码以匹配设计
-- **设计缺口（应补充设计）**：实现中发现设计遗漏，实现是合理的 → 建议提交 CR，补充 story_detail_design.md 或 plan.md
+- **设计缺口（应补充设计）**：实现中发现设计遗漏，实现是合理的 → 建议提交 CR，补充对应 `l2_design/ST-xxx_*.md` 或 plan.md
 - **设计与实现均需调整**：双方都有问题 → 建议提交 CR，同时更新设计与代码
 - **可接受偏差**：细节不同但不影响功能正确性 → 记录为已知偏差，无需修改
 
