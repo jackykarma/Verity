@@ -35,7 +35,7 @@ $ARGUMENTS
 | 自由文本 / 无参数 | **综合调研** | 自动判断研究维度，组合多个研究类型 |
 
 **附加标志**：
-- `--save`：将报告写入文件（`EPIC_DIR/research-<topic>-<YYYYMMDD>.md`，若 EPIC 上下文存在）
+- `--save`：将报告写入文件（`EPIC_DIR/research/<topic>-<YYYYMMDD>.md`，若 EPIC 上下文存在）
 - `--parallel`：多个独立研究维度时，启动并行子 Agent（适合同时调研 2 个以上不相关主题）
 
 示例：
@@ -386,7 +386,7 @@ $ARGUMENTS
   - 若 ✅ → 直接进入 `/aisdd.epicspec` 或 `/aisdd.featureplan`（使用调研报告中的「下游文档输入建议」）
   - 若 ⚠️ → 先运行 `/aisdd.clarify` 解决不确定项后再进入规格阶段
   - 若 ❌ → 提示需调整需求边界（与 PM 对齐后再开始规格）
-  - 若 `--save` → 提示报告已写入 `research-<topic>-<date>.md`
+  - 若 `--save` → 提示报告已写入 `research/<topic>-<date>.md`；后续 `/aisdd.epicplan`、`/aisdd.featureplan`、`/aisdd.epicdesign` 会扫描 `research/` 目录作为参考性补充信息
 
 ---
 
@@ -406,7 +406,9 @@ $ARGUMENTS
 |------|------|------------------|
 | `/aisdd.epicspec` | 填写 EPIC 规格说明 | research 是其可选前置（高不确定性时） |
 | `/aisdd.featurespec` | 生成 Feature spec.md | research 为其提供 NFR / AC 的技术依据 |
-| `/aisdd.featureplan` | 生成 Feature plan.md | research 为其提供方案选型依据 |
+| `/aisdd.epicplan` | 生成 epic-plan.md | **扫描** `EPIC_DIR/research/` 作为**参考性补充信息**（非约束源），辅助了解技术背景 |
+| `/aisdd.featureplan` | 生成 Feature plan.md | **扫描** `EPIC_DIR/research/` 作为**参考性补充信息**（非约束源），辅助方案选型 |
+| `/aisdd.epicdesign` | 生成 EPIC 设计说明书 | **扫描** `EPIC_DIR/research/` 作为**参考性补充信息**（非约束源），辅助设计决策 |
 | `/aisdd.clarify` | 需求澄清 | research 发现的不确定项通过 clarify 解决 |
 | `/aisdd.challenge` | 对抗性挑战 | challenge 在 spec/plan 完成后运行；research 在更早期 |
 | `/aisdd.epicuidesign` | 设计稿解析 | 两者并行，不互相依赖 |

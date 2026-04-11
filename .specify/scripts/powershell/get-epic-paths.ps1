@@ -47,6 +47,8 @@ if (-not $hasEpicPlan -and (Test-Path -LiteralPath $featuresDir)) {
     }
 }
 $epicConstraintSource = if ($hasEpicPlan) { $epicPlanPath } elseif ($singleFeatureWithoutEpicPlanOk) { $soleFeaturePlan } else { $null }
+$researchDir = Join-Path $p.EPIC_DIR 'research'
+$hasResearch = Test-Path -LiteralPath $researchDir
 
 if ($Json) {
     [PSCustomObject]@{
@@ -54,6 +56,8 @@ if ($Json) {
         EPIC_UX_DESIGN   = $p.EPIC_UX_DESIGN
         EPIC_DESIGN_DIR  = $p.EPIC_DESIGN_DIR
         EPIC_PLAN        = $p.EPIC_PLAN
+        EPIC_RESEARCH_DIR = $researchDir
+        HAS_RESEARCH     = $hasResearch
         HAS_EPIC_PLAN    = $hasEpicPlan
         SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK = $singleFeatureWithoutEpicPlanOk
         SOLE_FEATURE_PLAN = $soleFeaturePlan
@@ -64,6 +68,8 @@ if ($Json) {
     'EPIC_UX_DESIGN: ' + $p.EPIC_UX_DESIGN | Write-Output
     'EPIC_DESIGN_DIR: ' + $p.EPIC_DESIGN_DIR | Write-Output
     'EPIC_PLAN: ' + $p.EPIC_PLAN | Write-Output
+    'EPIC_RESEARCH_DIR: ' + $researchDir | Write-Output
+    'HAS_RESEARCH: ' + $hasResearch | Write-Output
     'HAS_EPIC_PLAN: ' + $hasEpicPlan | Write-Output
     'SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK: ' + $singleFeatureWithoutEpicPlanOk | Write-Output
     if ($soleFeaturePlan) { 'SOLE_FEATURE_PLAN: ' + $soleFeaturePlan | Write-Output }

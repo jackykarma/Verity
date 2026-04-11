@@ -105,6 +105,7 @@ alwaysApply: false
 
 - `epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`key-diagram-epic-template.md`、`key-diagram-feature-template.md`、`story_detail_design_template.md`
 - `specify-diagram-requirements.mdc`、`mermaid-style-guide.mdc`、`constitution.md`
+- `research/` 目录下的调研报告（若存在，**参考性补充信息**）：辅助了解技术背景，**不作为约束源或结论**，设计仍须独立完整分析
 
 ## 完成后
 

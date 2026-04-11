@@ -35,10 +35,14 @@ $ARGUMENTS
 
 **核心定位**：从设计稿（交互稿/视觉稿）中**提取并结构化**交互逻辑与视觉规范，供团队验证 AI 理解是否完整、正确。**不是** AI 凭空创作 UX 设计。
 
-**输入源**（三选一或组合）：
-- **图片文件**：截图/导出图放在 `design/` 目录下（.png/.jpg/.webp），AI 通过 Read 工具读取图片进行视觉分析
+**输入源**（五种，可组合；按置信度从高到低）：
+- **设计说明文档**（`design/design-notes.md`）：设计师/产品手写的结构化上下文——聚焦图片关系、交互行为、导航、动效、适配等 AI 无法从截图推断的信息（模板：`.specify/templates/design-notes-template.md`）
+- **Design Token 文件**（`design/design-tokens.json`）：从设计工具导出的精确色值/间距/字号/圆角/高程等数值，与 design-notes 互补无重叠（模板：`.specify/templates/design-tokens-template.json`）
 - **Pencil 文件**：`.pen` 文件放在 `design/` 目录下，AI 通过 Pencil MCP 工具读取（`batch_get` 获取节点树、`get_screenshot` 获取截图、`snapshot_layout` 获取布局信息）
+- **图片文件**：截图/导出图放在 `design/` 目录下（.png/.jpg/.webp），AI 通过 Read 工具读取图片进行视觉分析。推荐命名约定：`[序号]-[界面简称]-[状态].png`
 - **Figma 链接**：用户在 `$ARGUMENTS` 中提供 Figma URL，或在 `design/figma-links.md` 中索引
+
+**输入优先级**：design-notes 文字 > design-tokens 数值 > Pencil 节点树 > 图片视觉识别。冲突时采信高优先级来源。
 
 **兜底模式**：当 `design/` 为空且无 Figma 链接时，AI 基于 spec.md 提出 UX 建议草案，所有内容标记为 `[AI 建议 - 待设计师确认]`。
 
@@ -73,23 +77,40 @@ $ARGUMENTS
 
 扫描 `EPIC_DESIGN_DIR`（`design/`）目录和 `$ARGUMENTS`，按类型分类收集设计素材：
 
-**3a. 图片文件**（`.png` / `.jpg` / `.jpeg` / `.webp`）：
-- 使用 Read 工具逐个读取图片
+**3a. 设计说明文档**（`design/design-notes.md`）— **上下文与行为的权威来源**：
+- 若存在，**必须首先读取**，其中的信息将作为后续图片解析的上下文锚点
+- 聚焦：图片归属与关系（同界面不同状态、跳转关系）、隐式交互行为、导航结构、动效参数、适配策略
+- **不重复精确数值**（色值/间距等由 design-tokens 承载）；若未提供 design-tokens，notes §一可含简要数值
 
-**3b. Pencil 文件**（`.pen`）：
+**3b. Design Token 文件**（`design/design-tokens.json`）— **精确数值的权威来源**：
+- 若存在，读取并解析 JSON 结构
+- Token 中的色值、间距、字号、圆角、高程等数值直接引用，**不再从截图中猜测**这些数值
+- 与 design-notes 互补：notes 提供上下文与行为，tokens 提供精确数值
+- 在 ux-design.md 的视觉规范章节中引用 Token 值时标注 `✅ 高`（来源：design-tokens.json）
+
+**3c. 图片文件**（`.png` / `.jpg` / `.jpeg` / `.webp`）：
+- 使用 Read 工具逐个读取图片
+- 若图片有命名约定（`[序号]-[界面]-[状态].png`），自动推断界面归属和状态分组
+- 若无命名约定且无 design-notes，将每张图的归属列入「待确认项」
+
+**3d. Pencil 文件**（`.pen`）：
 - 使用 Pencil MCP `open_document(filePath)` 打开文件
 - 使用 `batch_get(filePath)` 读取顶层节点树，了解整体结构
 - 使用 `snapshot_layout(filePath)` 获取布局信息
 - 对关键 Frame 使用 `get_screenshot(filePath, nodeId)` 获取截图以辅助视觉分析
 
-**3c. Figma 链接**：
+**3e. Figma 链接**：
 - 从 `$ARGUMENTS` 中提取 Figma URL
 - 若 `design/figma-links.md` 存在，读取其中的链接列表
 - 记录链接，提示用户 AI 无法直接访问 Figma，需要用户将相关页面导出为截图放入 `design/`，或在 Pencil 中打开
 
-**3d. 判断模式**：
-- 若以上扫描均无设计素材 → 进入**兜底模式**（步骤 5c）
-- 否则 → 记录所有素材清单，进入**解析模式**（步骤 5a/5b）
+**3f. 评估输入质量等级**：
+- **A 级**：design-notes + design-tokens + 图片/Pencil 齐备
+- **B 级**：有 design-notes 或 design-tokens 之一 + 图片/Pencil
+- **C 级**：仅有图片/Pencil（无结构化补充）
+- **D 级**：无任何设计素材 → 进入**兜底模式**（步骤 5c）
+
+记录输入质量等级，写入 ux-design.md 元信息。非 D 级进入**解析模式**（步骤 5a/5b）。
 
 ### 4. 加载需求上下文
 
@@ -97,6 +118,8 @@ $ARGUMENTS
 - `EPIC_DIR/epic.md`：背景、范围、Feature 列表
 - 各 `EPIC_DIR/features/*/spec.md`：FR、NFR、AC、用户旅程、边界场景
 - `.specify/templates/ux-design-template.md`：输出模板结构
+- `design/design-notes.md`（若存在，已在步骤 3a 读取）：作为图片解析的上下文参照
+- `design/design-tokens.json`（若存在，已在步骤 3b 读取）：作为精确数值参照
 
 ### 5. 解析与提取
 
@@ -114,7 +137,9 @@ $ARGUMENTS
 7. **导航与手势**：返回行为、手势交互、Deep Link
 8. **交叉比对**：将提取结果与 spec.md 中的 FR/AC/用户旅程逐条比对，标出设计稿未覆盖的场景 → 写入「遗漏与待确认」章节
 
-每条提取的规则**必须标注来源设计稿**（文件名/页面/区域）。
+**输入融合规则**：若 design-notes 中有某界面的交互说明，以 design-notes 为准并标 `✅ 高`；若仅从图片推断则标 `⚠️ 中` 或 `❓ 低`。
+
+每条提取的规则**必须标注来源**（文件名/页面/区域）**及置信度**（`✅ 高` / `⚠️ 中` / `❓ 低`）。
 
 **5b. 视觉稿解析**（当侧重为「视觉」或「全量」时执行）：
 
@@ -127,7 +152,12 @@ $ARGUMENTS
 6. **无障碍**：触控区域、对比度、内容描述等
 7. **交叉比对**：将提取结果与 spec.md 中的 NFR（性能/适配/无障碍要求）比对，标出差异
 
-每项提取的规范**必须标注来源设计稿**。
+**输入融合规则**：
+- 色值/间距/字号/圆角/高程 → 若 design-tokens.json 有值则直接引用（`✅ 高`），否则从图片推测（`❓ 低`）
+- 动效参数 → 若 design-notes 有说明则采信（`✅ 高`），否则标 `❓ 低`（AI 无法从静态图片识别动效）
+- 组件类型/布局结构 → 图片可较可靠识别（`⚠️ 中`），有 design-notes 佐证时升为 `✅ 高`
+
+每项提取的规范**必须标注来源及置信度**。
 
 **5c. 兜底模式**（当无任何设计素材时执行）：
 
@@ -143,7 +173,8 @@ $ARGUMENTS
 元信息须包含：
 - **Epic / Epic Version / ux-design Version / 日期**
 - **解析模式**：交互 / 视觉 / 全量 / 兜底
-- **设计稿来源**：列出所有解析的设计素材
+- **输入质量等级**：A / B / C / D（步骤 3f 的评估结果）
+- **设计稿来源**：列出所有解析的设计素材（含 design-notes / design-tokens 的有无状态）
 - **需求参照**：`epic.md`、各 `features/*/spec.md`
 
 确保从**整个 EPIC 需求整体**视角填充，保证跨 Feature 导航、风格与交互一致。
@@ -152,11 +183,25 @@ $ARGUMENTS
 
 输出：
 1. `ux-design.md` 路径
-2. 解析统计：解析了多少设计素材、提取了多少交互规则/视觉规范
-3. **遗漏摘要**：设计稿未覆盖的 spec 场景数量及关键项
-4. **待确认摘要**：AI 无法确定的细节数量
-5. 提示下一步：
+2. **输入质量等级**：A / B / C / D 及其依据
+3. 解析统计：解析了多少设计素材、提取了多少交互规则/视觉规范
+4. **置信度分布**：`✅ 高` / `⚠️ 中` / `❓ 低` 各多少条
+5. **遗漏摘要**：设计稿未覆盖的 spec 场景数量及关键项
+6. **待确认摘要**：AI 无法确定的细节数量
+7. 提示下一步：
    - 请 review ux-design.md 中的「遗漏与待确认」章节
+   - **重点关注 `❓ 低` 置信度条目**，确认或纠正
    - 若有遗漏，补充设计稿后可重新运行或说明更新范围做增量更新
    - 若尚未做 EPIC 技术规约可运行 `/aisdd.epicplan "EPIC-xxx"`
    - 对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/aisdd.featureplan`
+
+**若输入质量为 C/D 级**，在完成报告中额外醒目提示：
+
+```
+📋 输入质量提升建议：当前为 [C/D] 级，AI 对视觉细节的理解精度有限。建议补充：
+- design/design-notes.md（模板：.specify/templates/design-notes-template.md）
+  → 补充图片间关系、交互细节、动效参数等 AI 无法从截图推断的信息
+- design/design-tokens.json（模板：.specify/templates/design-tokens-template.json）
+  → 补充精确色值、间距、字号、圆角等数值
+补充后说明更新范围，AI 可做增量更新以提升准确度。
+```

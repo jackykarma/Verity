@@ -224,6 +224,7 @@ plan.md 填写规则：
 - 读取 `FEATURE_SPEC`（提取：Epic/Feature 元信息、FR/NFR、验收与边界场景、依赖）——**spec 需求**为方案设计的主要输入。
 - 若 `EPIC_PLAN` 存在（**EPIC 级** epic-plan.md）：读取 epic-plan.md，提取 **EPIC 级技术约束与规约**；技术规约须在其约束下展开，不得违反 EPIC 规约。
 - 若 `UX_DESIGN` 存在：读取 ux-design.md（设计稿解析结果），提取信息架构、交互规则（含页面流转图、逐屏交互规则）、视觉规范（色板、布局标注、组件清单）、设计稿索引（按所属 Feature 过滤）；关注「遗漏与待确认」章节中与本 Feature 相关的未覆盖场景。
+- 若 `EPIC_DIR/research/` 存在且非空：扫描与本 Feature 相关的调研报告（`/aisdd.research --save` 产出）作为**参考性补充信息**——了解 API 限制、库评估、风险等技术背景；调研报告**不是约束源或结论**，plan 仍须独立完整分析并做出自己的技术决策。
 - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
 - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
 - 读取 `.claude/rules/specify-diagram-requirements.mdc`，确保图表基于本工程实际架构

@@ -27,7 +27,7 @@ $ARGUMENTS
 
 在执行下方步骤**之前**，你**必须**：
 
-1. **提醒用户**核对 EPIC 根目录 `gate-log.md`（若存在）中 **spec-ready** 是否已记录为通过或有条件通过（关卡定义见 `.cursor/commands/aisdd.gate.md`）。
+1. **提醒用户**核对 EPIC 根目录 `gate-log.md`（若存在）中 **spec-ready** 是否已记录为通过或有条件通过（关卡定义见 `.claude/commands/aisdd.gate.md`）。
 2. 若 `gate-log.md` 不存在、或 **spec-ready** 未通过、或用户未确认可进入，须**再次提示**先运行 `/aisdd.gate spec-ready`（或说明为何跳过）；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate（如「跳过关卡」「探索性」）时，可记录风险后继续。
 
 **本命令对应的准入关卡**：**spec-ready**（放行的下一步含 epicplan / epicuidesign）。
@@ -60,6 +60,7 @@ $ARGUMENTS
    - 读取 `.specify/memory/constitution.md`（MUST/SHOULD 约束）
    - 读取 `.specify/templates/epic-plan-template.md`（作为结构与输出格式）
    - 若 `EPIC_DIR/ux-design.md` 存在：读取其交互规则与视觉约束，用于校准 UX 相关技术规约（如动效性能预算、UI 线程约束、组件复杂度等）
+   - 若 `EPIC_DIR/research/` 存在且非空：扫描调研报告（`/aisdd.research --save` 产出）作为**参考性补充信息**——了解 API 限制、库评估、风险等技术背景；调研报告**不是约束源或结论**，plan 仍须独立完整分析并做出自己的技术决策
    - **分析现有工程代码**：架构分层、模块划分、包组织、现有框架，确保规约与现有工程一致
 
 4. **填充 epic-plan.md**：按 **epic.md、各 feature spec、constitution、现有代码**，填充 epic-plan-template 各章节，写入 `EPIC_PLAN`。必须包含：

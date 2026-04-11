@@ -26,6 +26,7 @@ alwaysApply: false
 3. **`.specify/templates/epic-plan-template.md`**：模板结构
 4. **`.specify/memory/constitution.md`**：章程约束（尤其§三 技术栈、§二 演进式设计）
 5. **现有工程代码**：实际技术栈、分层、模块结构
+6. **`research/` 目录下的调研报告**（若存在，**参考性补充信息**）：`/aisdd.research --save` 的产出，含 API 限制、库评估、风险等技术背景——辅助了解但**不作为约束源或结论**，plan 仍须独立完整分析
 
 ## 输出
 

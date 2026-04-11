@@ -147,6 +147,7 @@ $ARGUMENTS
    - 读取 EPIC 级技术约束：**若存在** `epic-plan.md` 则读取之；**若单 Feature 省略 epic-plan**（`SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK`）则**必须**读取 `SOLE_FEATURE_PLAN` 指向的 `plan.md`，将其中的 EPIC 级约束与 Feature 规约一并作为技术约束输入
    - 读取各 `EPIC_DIR/features/*/spec.md`（含「完整场景矩阵」，P0 场景须在设计中可追溯）、`plan.md`
    - 若存在：读取 `EPIC_DIR/ux-design.md`
+   - 若 `EPIC_DIR/research/` 存在且非空：扫描调研报告作为**参考性补充信息**——了解 API 限制、库评估、风险等技术背景；调研报告**不是约束源或结论**，设计仍须独立完整分析并做出自己的设计决策
    - 读取 `.specify/memory/constitution.md`
    - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`key-diagram-epic-template.md`、`key-diagram-feature-template.md`、`story_detail_design_template.md`
    - 读取 `.claude/rules/specify-diagram-requirements.mdc`、`.claude/rules/mermaid-style-guide.mdc`

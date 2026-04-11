@@ -133,7 +133,20 @@ ux-design.md（怎么呈现）─┘
 2. 向用户列出疑似越界条目并标注建议归属
 3. 等待用户选择：移入 spec.md 补充清单 / 确认保留 / 拆分处理
 
-### 8.3 AI 视觉理解验证图
+### 8.3 结构化输入增强 AI 理解
+
+规则位于 `.cursor/rules/aisdd-epicuidesign.mdc`「设计素材」和「输入质量分级与置信度」章节。
+
+纯图片识别存在精度瓶颈（间距 ±4dp、色值偏差、动效不可见），因此工作流引入两种结构化补充输入：
+
+- **`design/design-notes.md`**（模板：`.specify/templates/design-notes-template.md`）：设计师/产品手写的结构化上下文，覆盖图片间关系、精确色值与间距、交互细节、动效参数、导航结构等 AI 无法从截图推断的信息
+- **`design/design-tokens.json`**（模板：`.specify/templates/design-tokens-template.json`）：从 Figma/设计工具导出的精确色值、间距、字号、圆角、高程等设计变量
+
+**输入优先级**：design-notes 文字 > design-tokens 数值 > Pencil 节点树 > 图片视觉识别。当不同来源冲突时采信高优先级，并在 ux-design.md「输入源冲突」章节记录。
+
+AI 对每条提取结果标注置信度（`✅ 高` / `⚠️ 中` / `❓ 低`），帮助 reviewer 快速聚焦需要人工确认的条目。
+
+### 8.4 AI 视觉理解验证图
 
 规则位于 `.cursor/rules/aisdd-epicuidesign.mdc`「AI 视觉理解验证图」章节，模板位于 `.specify/templates/ux-design-template.md`「AI 视觉理解验证图」章节。
 
@@ -153,3 +166,4 @@ AI 在解析视觉稿后，必须用绘图方式展现其对 UI 结构、布局�
 |------|------|----------|
 | v0.1.0 | 2026-04-04 | 初版：spec 与 ux-design 边界说明 |
 | v0.2.0 | 2026-04-04 | 新增：边界守护机制（§八）与 AI 视觉理解验证图说明 |
+| v0.3.0 | 2026-04-11 | 新增：§8.3 结构化输入增强 AI 理解（design-notes / design-tokens），原 §8.3 改为 §8.4 |
