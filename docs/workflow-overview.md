@@ -51,7 +51,7 @@ flowchart TD
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
 4. **技术规约与 UX** → 多 Feature：产出 `epic-plan.md`；单 Feature：可省略 `epic-plan.md`，在唯一 `plan.md` 中写入 EPIC 级约束。可选 `ux-design.md`
 5. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版（须在 `epic-plan.md` 约束下编写，或单 Feature 时在合并后的 `plan.md` 中自洽）
-6. **设计说明书** → 产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§九全文）、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、各 `features/*/l2_design/ST-xxx_*.md`（L2；§十四 索引与依赖总览；无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`）
+6. **设计说明书** → 按 `key → diagram → nfr → story → l2` 分阶段推进（范围递减、精度递增）：**`key`**（§七）论证关键设计方案可行性，图表为方案论证辅助证据；**`diagram`**（§八）在方案确认后精确化到可编码级别（全量签名 + 全分支时序）；**`nfr`**（§九~§十二）量化验证设计方案是否满足 NFR；**`story`**（§十三）拆解为可独立交付的 Story；**`l2`**（§十四）按 Story 切片产出落码级详细设计。产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§九全文）、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、各 `features/*/l2_design/ST-xxx_*.md`（L2；§十四 索引与依赖总览；无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`）
 7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表；建议同步各 Feature `plan.md`「变更记录」）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
 

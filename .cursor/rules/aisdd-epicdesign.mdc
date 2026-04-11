@@ -74,11 +74,25 @@ alwaysApply: false
 
 **§八、§十四**：§八 为 `key-diagram-epic.md` + 各 Feature `features/FEAT-xxx/key-diagram.md` 的摘要 + 链接；§十四 为各 Feature `l2_design/ST-xxx_*.md` 的索引、前置依赖列与 EPIC 级依赖总览（见 `epic-design-doc-template.md`）。
 
+## §七 / §八 / §十四 定位与粒度约束
+
+设计说明书的 `key → diagram → l2` 三个阶段**范围递减、精度递增**，禁止混淆粒度：
+
+| 阶段 | 定位 | 核心问题 | 图表粒度 |
+|------|------|----------|----------|
+| **`key`**（§七） | **方案论证** — 想清楚关键设计的策略与决策 | 方案行不行？方向对不对？ | 类图/时序仅为方案论证的**辅助证据**：关键类最小集合 + 核心调用链主干，**不必追求全量签名** |
+| **`diagram`**（§八） | **详细设计（编码蓝图）** — 精确化到可编码级别 | 按这张图能不能直接写代码？ | Feature 子类图**全量**公共 API + 完整方法签名 + 变更标识；时序**穷举全分支** |
+| **`l2`**（§十四） | **Story 级落码设计** — 按 Story 切片 | 拿到这份文档能不能直接写这个 Story？ | 单 Story 的**完整**详细类图/时序（局部但详尽） |
+
+- **§七 图表粒度红线**：§七 各 KD 中的关键类图与核心时序是「方案可行性的证据」，**不得**趋向 §八 的全量精度——只需覆盖「讲清主干方案所必需的最小类/方法集合」与「主干 + 1~2 个关键异常的调用链」。全量签名、全分支覆盖留给 §八。
+- **§八 对 §七 的精确化**：§八 的产出必须以 §七 各 KD 的关键类图/核心时序为**输入基线**，在此基础上补全——不是独立重做。
+- **§十四 对 §八 的切片**：L2 在 §八 Feature 全貌基础上，按 Story 范围切片并补充该 Story 的详细设计；复杂 Story 必做，简单 Story 可仅写概要。
+
 ## 行为约束
 
 - **基于真实代码**：类图/时序图须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）。
 - **KD 核心方案（必须）**：每个 `key-func-design/KD_*_*.md` 按 `.specify/templates/key-func-design-kd-template.md` 撰写；**全覆盖**技术点、**全链路**、**每环可落地**、与图互证。
-- **KD 关键类图（必须）**：每个 KD 须含**关键类图**（真实类/接口名 + 与方案相关的关键字段与方法）；与**核心调用链时序图** participant 一致；**全量**精确化见 §八 **`key-diagram-epic.md`** 与各 **`features/FEAT-xxx/key-diagram.md`**。
+- **KD 关键类图（必须）**：每个 KD 须含**关键类图**（真实类/接口名 + 与方案相关的关键字段与方法，控制在「讲清主干方案」的最小集合）；与**核心调用链时序图** participant 一致；**全量**精确化见 §八 **`key-diagram-epic.md`** 与各 **`features/FEAT-xxx/key-diagram.md`**。
 - **KD 内流程图（必须）**：每个 KD 的**方案流程图**（及按需架构图）**直接绘制在该 KD 的 `KD_*_*.md` 内**；`feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不得**作为省略 KD 内流程图的替代。
 - **KD 依赖（必须）**：`epic-design.md` §7.1 与各 KD 文首「依赖的其他 KD」**一致**；依赖关系须为 **DAG**，**禁止循环依赖**。
 - **时序图图后说明（必须）**：凡含 `sequenceDiagram` 的 `key-func-design/KD_*_*.md`、`key-diagram-epic.md`、`features/*/key-diagram.md`、`features/*/l2_design/*.md` 等，每张时序图**紧下方**须有详细协作者与过程说明（`.cursor/rules/specify-diagram-requirements.mdc` §四）。
