@@ -17,15 +17,13 @@
 
 | 文件 / 目录 | 对应章节 | 内容 |
 | ----------- | -------- | ---- |
-| `epic-design.md`（本文件） | 全部章节（摘要/引用） | EPIC 设计总览；**§七**含关键设计清单（含依赖）与逐文件引用；**§九**仅摘要并链接 `nfr.md` |
-| `key-func-design/` 目录 | §七 | 各关键设计**独立文件**，命名 **`KD_${三位序号}_${精炼slug}.md`**（例：`KD_001_session_framework.md`）；**每个 KD 文件内须包含**：按需模型/方案架构图、**方案流程图**、**关键类图**（关键类/接口 + 关键字段与方法）、**核心调用链时序图**。按需 **`feature-flows.md`**（仅跨 KD/跨 Feature 补充流程，不替代 KD 内流程图）。撰稿见 **`key-func-design-kd-template.md`**；**每张时序图紧下方须有详细协作者与过程说明**（见 `specify-diagram-requirements.mdc` §四） |
-| `nfr.md` | §九 | 技术评估（设计产出验证，必须量化），模板见 `.specify/templates/nfr-template.md` |
-| `interface-design.md` | §十 | 对外/外部接口详述，模板见 `.specify/templates/epic-design-interface-template.md` |
-| `database-design.md` | §十一 | 库表、ER、迁移与数据策略，模板见 `.specify/templates/epic-design-database-template.md` |
-| `analytics-tracking.md` | §十二 | 埋点事件与字段规约，模板见 `.specify/templates/epic-design-analytics-tracking-template.md` |
-| `key-diagram-epic.md` | §八（EPIC 级） | 全景骨架类图、可选跨 Feature 完整时序（`diagram` 无范围）；模板 `key-diagram-epic-template.md`；**不再**使用 EPIC 根目录单一 `key-diagram.md` |
-| `features/FEAT-xxx/key-diagram.md` | §八（按 Feature） | 该 Feature 子类图（全量签名与变更标识）+ 本 Feature 内完整时序（`diagram FEAT-xxx`）；模板 `key-diagram-feature-template.md`；**每张时序图紧下方须有详细协作过程说明** |
-| `features/FEAT-xxx/l2_design/` | §十四 | 各 Story 落码级详细设计（L2）；**每 Story 独立一个 Markdown 文件**（建议命名 `ST-xxx_<短slug>.md`），依赖关系由 §14.1 索引表与 §14.2 总览共同维护 |
+| `epic-design.md`（本文件） | 全部章节（摘要/引用） | EPIC 设计总览；**§七**含关键设计清单（含依赖）与逐文件引用；**§八**链接 `nfr.md` |
+| `key-func-design/` 目录 | §七 | 各关键设计**独立文件**，命名 **`KD_${三位序号}_${精炼slug}.md`**（例：`KD_001_session_framework.md`）；**每个 KD 文件内须包含**：按需模型/方案架构图、**方案流程图**、**关键类图**（全量公共方法签名）、**核心调用链时序图**（穷举全异常分支）。按需 **`feature-flows.md`**（仅跨 KD/跨 Feature 补充流程，不替代 KD 内流程图）。撰稿见 **`key-func-design-kd-template.md`**；**每张时序图紧下方须有详细协作者与过程说明**（见 `specify-diagram-requirements.mdc` §四） |
+| `nfr.md` | §八 | 技术评估（设计产出验证，必须量化），模板见 `.specify/templates/nfr-template.md` |
+| `interface-design.md` | §九 | 对外/外部接口详述，模板见 `.specify/templates/epic-design-interface-template.md` |
+| `database-design.md` | §十 | 库表、ER、迁移与数据策略，模板见 `.specify/templates/epic-design-database-template.md` |
+| `analytics-tracking.md` | §十一 | 埋点事件与字段规约，模板见 `.specify/templates/epic-design-analytics-tracking-template.md` |
+| `features/FEAT-xxx/l2_design/` | §十三 | 各 Story 落码级详细设计（L2）；**每 Story 独立一个 Markdown 文件**（建议命名 `ST-xxx_<短slug>.md`），依赖关系由 §十三.1 索引表与 §十三.2 总览共同维护 |
 
 ---
 
@@ -76,14 +74,14 @@
 
 | Feature | 场景ID | 场景名称 | 类别 | 覆盖的设计章节/图表 | 状态 |
 |---------|--------|----------|------|---------------------|------|
-| FEAT-001 | SC-001 | [从 spec.md 摘录] | 正常 | §八 SEQ-xxx / §七 KD-xxx | 已覆盖 / 未覆盖 / 部分覆盖 |
-| FEAT-001 | SC-003 | [从 spec.md 摘录] | 异常 | §八 SEQ-xxx alt 分支 | 已覆盖 / 未覆盖 |
-| FEAT-002 | SC-004 | [从 spec.md 摘录] | 跨Feature | §七 KD-xxx + §八 SEQ-xxx | 已覆盖 / 未覆盖 |
+| FEAT-001 | SC-001 | [从 spec.md 摘录] | 正常 | §七 KD-xxx SEQ-xxx / §七 KD-xxx | 已覆盖 / 未覆盖 / 部分覆盖 |
+| FEAT-001 | SC-003 | [从 spec.md 摘录] | 异常 | §七 KD-xxx SEQ-xxx alt 分支 | 已覆盖 / 未覆盖 |
+| FEAT-002 | SC-004 | [从 spec.md 摘录] | 跨Feature | §七 KD-xxx + §五.1 框架图 | 已覆盖 / 未覆盖 |
 
 > **设计走查规则**：
 > - 每个 P0 场景须在至少一处设计产物（时序图/流程图/类图方法签名/Story 拆解）中可追溯
 > - 异常类 P0 场景须在时序图的 `alt/else` 分支中体现
-> - 跨 Feature 集成 P0 场景须在全景类图的依赖关系或跨 Feature 时序图中体现
+> - 跨 Feature 集成 P0 场景须在 §五.1 一层框架图的跨 Feature 依赖关系中体现
 > - 若某 P0 场景确认无需在设计层面体现（纯配置/数据变更），在「状态」列标注 `N/A：[理由]`
 
 ### 前置检查结论
@@ -383,9 +381,9 @@ flowchart LR
 
 > 📌 **占位**：待产出（随 `arch` 或后续扩展参数一并产出）。
 
-> **定位**：在进入关键设计（§七）之前，先识别技术风险并枚举关键边界与异常场景，为后续设计提供**约束输入**——确保 §七 关键设计、§八 全景类图/时序图能充分考虑这些风险与边界的处理。
+> **定位**：在进入关键设计（§七）之前，先识别技术风险并枚举关键边界与异常场景，为后续设计提供**约束输入**——确保 §七 关键设计能充分考虑这些风险与边界的处理。
 >
-> **与 §九 技术评估的分工**：本节识别"**设计前已知的约束**"（风险、边界场景），§九 基于设计方案进行"**设计后的量化验证**"（性能、功耗、内存等是否达标）。
+> **与 §八 技术评估的分工**：本节识别"**设计前已知的约束**"（风险、边界场景），§八 基于设计方案进行"**设计后的量化验证**"（性能、功耗、内存等是否达标）。
 
 ### 6.1 技术风险与消解策略（绑定 Feature/Story）
 
@@ -417,7 +415,7 @@ flowchart LR
 
 #### 6.2.1 场景 → 应对措施对照表（必须）
 
-> 目的：把"枚举"落到"可执行对策"，并与 §八 全景类图/时序图的异常分支互校。设计完成后如发现新场景，须回补本表。
+> 目的：把"枚举"落到"可执行对策"，并与 §七 KD 时序图的异常分支互校。设计完成后如发现新场景，须回补本表。
 >
 > **对策类型说明**：
 >
@@ -436,7 +434,7 @@ flowchart LR
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign key` 产出。
 
-> **定位**：面向方案评审，将重难点模块的**设计策略与决策逻辑**讲清楚。每个设计点须在其 **`key-func-design/KD_*_*.md` 文档内**直接给出**方案流程图**（验逻辑分支）、**关键类图**（关键类/接口及关键字段与方法，验类型层面可行性）与**核心调用链时序图**（验协作主干），使 §七 阶段即可判断方案是否 ok——**更完整的类型与全量签名、Feature 子类图、全分支时序**在 §八 **`key-diagram-epic.md`**（全景骨架与跨 Feature 时序）及各 **`features/FEAT-xxx/key-diagram.md`**（按 Feature）精确化。可选的 `feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不替代**各 KD 内流程图。
+> **定位**：面向方案评审，将重难点模块的**设计策略与决策逻辑**讲清楚。每个设计点须在其 **`key-func-design/KD_*_*.md` 文档内**直接给出**方案流程图**（验逻辑分支）、**关键类图**（全量公共方法签名，验类型层面可行性）与**核心调用链时序图**（穷举全异常分支，验协作主干），使 §七 阶段即可判断方案是否 ok——全量签名与全分支时序由本节直接保障。可选的 `feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不替代**各 KD 内流程图。
 >
 > **核心方案（各 KD 必填）**：用清晰易懂的中文**详写设计方案与实现**；须**全覆盖**本设计点涉及的技术点，**写全每条相关的技术链路**（含方案明确纳入的异常/降级路径），并对链上**每一环说明如何达成**（机制、职责、数据/状态传递与约束）；**与**该 KD 文件内模型/方案架构图（若有）、流程图、**关键类图**、时序图**互证**，不得仅用标题或条目堆砌代替叙述。细则见 `.specify/templates/key-func-design-kd-template.md`。
 >
@@ -450,10 +448,10 @@ flowchart LR
 
 > 本表为 §七 **权威清单**；须与 `key-func-design/KD_*_*.md` 文首「依赖的其他 KD」一致。
 
-| 编号   | 设计点名称   | 层级/类型   | 前置 KD / 依赖 | 关联 §八      | 设计文档路径 |
-| ------ | ------------ | ----------- | -------------- | ------------- | ------------ |
-| KD-001 | [设计点名称] | 基础框架/业务/横切/… | —              | SEQ-xxx / §8.2 [类名] / — | `./key-func-design/KD_001_[slug].md` |
-| KD-002 | [设计点名称] | 业务        | KD-001         | —             | `./key-func-design/KD_002_[slug].md` |
+| 编号   | 设计点名称   | 层级/类型   | 前置 KD / 依赖 | 设计文档路径 |
+| ------ | ------------ | ----------- | -------------- | ------------ |
+| KD-001 | [设计点名称] | 基础框架/业务/横切/… | —              | `./key-func-design/KD_001_[slug].md` |
+| KD-002 | [设计点名称] | 业务        | KD-001         | `./key-func-design/KD_002_[slug].md` |
 
 > （可选）**KD 依赖图**（仅 KD 编号与依赖边，勿与类图混淆）：
 
@@ -471,63 +469,17 @@ flowchart LR
 
 ---
 
-## 八、全景类图与关键流程/时序（EPIC 或主 Feature 级）
-
-> 📌 **占位**：待运行 `/aisdd.epicdesign diagram` 产出。
-
-> **定位**：在 §七 确认方案可行后，本节将设计**精确化到可编码级别**——全景类图（含完整方法签名）+ 完整时序图（穷举所有异常分支），供 Task 拆解与 implement 阶段直接引用。
->
-> **与 §七 的分工**：§七 在各 KD 中验方案主干——**关键类图**（关键类型与成员是否撑得起方案）+ **核心调用链时序**（协作是否走得通）；§八 在 **`key-diagram-epic.md`**（EPIC 全景骨架、跨 Feature 时序）与各 **`features/FEAT-xxx/key-diagram.md`**（该 Feature 子类图与本 Feature 完整时序）中补全精度（**全量**方法签名与字段、变更标识、**全分支**时序）。
->
-> **内容文件**：EPIC 级图表写在 **`key-diagram-epic.md`**（模板 `.specify/templates/key-diagram-epic-template.md`）；各 Feature 图表写在 **`features/FEAT-xxx/key-diagram.md`**（模板 `.specify/templates/key-diagram-feature-template.md`）。**不再**使用 EPIC 根目录单一 **`key-diagram.md`**。本节仅保留摘要与引用。
->
-> **与 §十四 L2（`l2_design/`）的区别**：
->
-> | 维度     | §八 本节（全景级）                                      | §十四 L2（Story 级）                        |
-> | ------ | ------------------------------------------------ | ---------------------------------------- |
-> | 层级     | EPIC / 主 Feature 级                              | Story 级（每 ST 独立文件，见 `features/FEAT-xxx/l2_design/ST-xxx_*.md`） |
-> | 类图/时序图 | 骨架类图 + Feature 子类图（**全量**签名与变更标识）+ 完整时序图（全异常分支） | 本 Story 的完整详细类图/时序图                      |
-> | 目的     | 在 §七 **关键类图/核心时序** 上精确化与全量补全；Task 引用设计所在章节                 | tasks/implement 的详细设计事实源，落码级指导           |
-> | 何时必做   | 本节必须产出                                           | 仅当 Story 技术复杂度高或需落码级指导时补充                |
-
-### 8.1 图表概览（摘要）
-
-> 列出 `key-diagram-epic.md` 与各 Feature `key-diagram.md` 中的骨架类图、子类图和时序图，便于评审者快速定位。详细图表见引用文件。
-
-**骨架类图（EPIC）**：→ [`key-diagram-epic.md`](./key-diagram-epic.md) §8.2
-
-**Feature 子类图清单**：
-
-| Feature    | 子类图文件                        | 关键类/接口（Top3）    |
-| ---------- | -------------------------------- | -------------------- |
-| FEAT-001   | [`features/FEAT-001-xxx/key-diagram.md`](./features/FEAT-001-xxx/key-diagram.md)「子类图」 | [类名1, 类名2, 类名3] |
-| FEAT-002   | [`features/FEAT-002-xxx/key-diagram.md`](./features/FEAT-002-xxx/key-diagram.md)「子类图」 | [类名1, 类名2]        |
-
-**时序图索引**：
-
-| Seq ID  | 所属 Feature | 流程名称   | 关联 KD    |
-| ------- | ---------- | ------ | -------- |
-| SEQ-001 | FEAT-001   | [流程名称] | KD-xxx / — |
-| SEQ-002 | FEAT-002   | [流程名称] | —        |
-
-### 8.2 详细图表引用
-
-→ **[`key-diagram-epic.md`](./key-diagram-epic.md)**（全景骨架类图、可选跨 Feature 时序、EPIC 级一致性自检）  
-→ **各 Feature** `./features/<FEAT-目录名>/key-diagram.md`（含该 Feature 子类图、本 Feature 完整时序、Feature 级自检）
-
----
-
-## 九、技术评估（设计产出验证，必须量化）
+## 八、技术评估（设计产出验证，必须量化）
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign nfr` 产出 **`nfr.md`**（模板见 `.specify/templates/nfr-template.md`）。
 
-> **定位**：基于 §七/§八 的设计方案，对算法/功耗/性能/内存/安全/兼容性进行**量化评估与实测验证**。各子节标注「如适用」的，若不适用须标注 N/A 并简述原因。
+> **定位**：基于 §七 的设计方案，对算法/功耗/性能/内存/安全/兼容性进行**量化评估与实测验证**。各子节标注「如适用」的，若不适用须标注 N/A 并简述原因。
 >
 > **与 §六 的分工**：§六 在设计前识别风险与边界场景（设计输入），本节在设计完成后验证方案是否满足 NFR 目标（设计产出验证）。
 >
 > **与 spec.md NFR 的关系**：`spec.md` 的 NFR 定义**验收目标**（如"p95 ≤ 200ms"）；本节基于设计方案进行**技术评估与实测**，验证方案是否满足 NFR 目标。若评估结果超标，须调整设计方案或协商 NFR 目标变更（走 CR 流程）。
 >
-> **正文位置**：算法/功耗/性能/内存/安全/兼容性/RomSize 等**全部量化表格与结论**写在 EPIC 根目录 **[`nfr.md`](./nfr.md)**（章节编号 **9.1～9.7** 与模板一致），本节不重复粘贴。
+> **正文位置**：算法/功耗/性能/内存/安全/兼容性/RomSize 等**全部量化表格与结论**写在 EPIC 根目录 **[`nfr.md`](./nfr.md)**（章节编号 **8.1～8.7** 与模板一致），本节不重复粘贴。
 
 **摘要**：（`nfr` 产出后填写 2～3 句：是否达标、主要风险项）
 
@@ -535,11 +487,11 @@ flowchart LR
 
 ---
 
-## 十、接口设计
+## 九、接口设计
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign nfr`（或与 `all` 一并）产出 **`interface-design.md`**（模板见 `.specify/templates/epic-design-interface-template.md`）。
 
-> **定位**：面向方案评审的接口契约详述；**正文**在 EPIC 根目录 **[`interface-design.md`](./interface-design.md)**（章节编号 **10.1～10.3** 与模板一致），本节不重复粘贴。
+> **定位**：面向方案评审的接口契约详述；**正文**在 EPIC 根目录 **[`interface-design.md`](./interface-design.md)**（章节编号 **9.1～9.3** 与模板一致），本节不重复粘贴。
 
 **摘要**：（产出后填写 2～3 句：对外接口数量级、关键外部依赖、主要评审关注点）
 
@@ -547,11 +499,11 @@ flowchart LR
 
 ---
 
-## 十一、数据库设计
+## 十、数据库设计
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign nfr`（或与 `all` 一并）产出 **`database-design.md`**（模板见 `.specify/templates/epic-design-database-template.md`）。
 
-> **定位**：面向方案评审的数据模型与表结构；**正文**在 EPIC 根目录 **[`database-design.md`](./database-design.md)**（章节编号 **11.1～11.4** 与模板一致），本节不重复粘贴。
+> **定位**：面向方案评审的数据模型与表结构；**正文**在 EPIC 根目录 **[`database-design.md`](./database-design.md)**（章节编号 **10.1～10.4** 与模板一致），本节不重复粘贴。
 
 **摘要**：（产出后填写 2～3 句：涉及存储类型、核心表数量级、迁移或一致性要点）
 
@@ -559,11 +511,11 @@ flowchart LR
 
 ---
 
-## 十二、埋点技术方案
+## 十一、埋点技术方案
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign nfr`（或与 `all` 一并）产出 **`analytics-tracking.md`**（模板见 `.specify/templates/epic-design-analytics-tracking-template.md`）。
 
-> **定位**：本 EPIC 新增/变更埋点的事件与字段规约；**正文**在 EPIC 根目录 **[`analytics-tracking.md`](./analytics-tracking.md)**（章节编号 **12.1～12.2** 与模板一致），本节不重复粘贴。
+> **定位**：本 EPIC 新增/变更埋点的事件与字段规约；**正文**在 EPIC 根目录 **[`analytics-tracking.md`](./analytics-tracking.md)**（章节编号 **11.1～11.2** 与模板一致），本节不重复粘贴。
 
 **摘要**：（产出后填写 2～3 句：事件规模、与存量埋点关系、合规注意点）
 
@@ -571,7 +523,7 @@ flowchart LR
 
 ---
 
-## 十三、Story 拆解
+## 十二、Story 拆解
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign story` 产出。
 
@@ -579,7 +531,7 @@ flowchart LR
 >
 > **下游同步**：`/aisdd.featuretasks` 执行时会自动回填各 Feature 的 `spec.md`「需求追溯表」，并建议同步更新各 Feature `plan.md`「变更记录」，确保上下游一致。
 
-### 13.1 拆解策略
+### 12.1 拆解策略
 
 #### 拆解目标
 
@@ -616,7 +568,7 @@ Story 拆解的好坏取决于是否满足两个核心价值：
 | 纯按时间排期拆分 | 技术依赖未理清，返工风险高 | 先理清依赖，再按技术模块拆分 |
 
 
-### 13.2 拆分约束
+### 12.2 拆分约束
 
 - **工作量**：工作量是粒度的**参考信号，不是拆分的强约束**；拆分决策首先看改动路径独立性与技术边界合理性，工作量作为辅助判断
   - 典型区间 **2～5 人天**（含编码、联调、CR、自检，按普通程序员评估）
@@ -635,7 +587,7 @@ Story 拆解的好坏取决于是否满足两个核心价值：
 | 并行性 | 内部存在可独立进行的子工作 | — |
 
 
-### 13.3 Story 自检清单（必须通过）
+### 12.3 Story 自检清单（必须通过）
 
 每个 Story 须通过以下检查：
 
@@ -647,9 +599,9 @@ Story 拆解的好坏取决于是否满足两个核心价值：
 - **可验证**：能否写出开发者可自验的验证条件？
 - **依赖可控**：依赖关系清晰、无循环？
 - **架构遵从**：实现是否遵循设计说明书中的架构与模块划分，未擅自新增未定义的组件？
-- **FR 覆盖**：本 Feature 下所有 FR/NFR 是否已在 §13.6 覆盖矩阵中被至少一个 Story 覆盖？（无未覆盖的 FR）
+- **FR 覆盖**：本 Feature 下所有 FR/NFR 是否已在 §十二.6 覆盖矩阵中被至少一个 Story 覆盖？（无未覆盖的 FR）
 
-### 13.4 Story 列表（按 Feature 分组）
+### 12.4 Story 列表（按 Feature 分组）
 
 > **组织方式**：按 Feature 分组，每个 Feature 下按**开发顺序**排列 Story（前置依赖在前，可并行的标注）。所有 Story 必须归属到某个 Feature。
 >
@@ -689,7 +641,7 @@ Story 拆解的好坏取决于是否满足两个核心价值：
 
 > （结构同 FEAT-001：拆解思路 → Story 列表按开发顺序排列）
 
-### 13.5 Story 依赖关系与并行度（推荐）
+### 12.5 Story 依赖关系与并行度（推荐）
 
 > 按 Feature 分组展示 Story 间的依赖关系与并行机会。各 Feature 的 Story 用 subgraph 分组。可并行的 Story 用绿色高亮，阻塞性前置用橙色。跨 Feature 依赖用虚线箭头标注。
 
@@ -723,7 +675,7 @@ flowchart TD
 
 > **图例**：🟠 橙色 = 阻塞性前置 | 🟢 绿色 = 可并行 | 🔵 蓝色 = 顺序执行。实线箭头 = Feature 内依赖；虚线箭头 = 跨 Feature 依赖。
 
-### 13.6 Feature → Story 覆盖矩阵
+### 12.6 Feature → Story 覆盖矩阵
 
 > 确保每个 Feature 的 FR/NFR 被其下属 Story 完整覆盖，无遗漏。共享 Story 在 Owner Feature 行中标注，消费方 Feature 行中以「依赖 ST-xxx（Owner: FEAT-yyy）」形式引用。
 
@@ -735,7 +687,7 @@ flowchart TD
 | FEAT-002 | （依赖） | 依赖 ST-101（Owner: FEAT-001） | 跨 Feature 依赖 |
 
 
-### 13.7 Story 工作量汇总（按 Feature 分组）
+### 12.7 Story 工作量汇总（按 Feature 分组）
 
 | Feature | Story ID | 共享 | 预估工作量（人天） | 依赖关系 | 可并行 |
 |---|---|---|---|---|---|
@@ -754,23 +706,23 @@ flowchart TD
 
 ---
 
-## 十四、二层 Story 详细设计（L2）索引
+## 十三、二层 Story 详细设计（L2）索引
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign l2` 产出。
 
-> **定位**：按 **Story** 的完整详细设计（含完整类图/时序图、触发条件与系统响应），是 tasks.md 与 implement 阶段的**详细设计事实源**，提供落码级指导。与 §八（全景类图/关键流程）的关系：§八 为 EPIC/主 Feature 级纵览，本节所索引的 L2 为各 Story 的局部完整设计，二者层级与粒度不同（参见 §八 开头的对比表）。
+> **定位**：按 **Story** 的完整详细设计（含完整类图/时序图、触发条件与系统响应），是 tasks.md 与 implement 阶段的**详细设计事实源**，提供落码级指导。本节所索引的 L2 为各 Story 的局部完整设计，二者层级与粒度不同。
 >
 > **规则**：
 > - 每个 Story 对应 **一个独立 Markdown 文件**，统一放在所属 Feature 目录下的 **`l2_design/`** 子目录中（路径示例：`features/FEAT-xxx/l2_design/ST-001_session_login.md`）。
-> - **文件命名**：必须以 Story ID 为前缀，建议 `ST-xxx_<短slug>.md`（slug 用小写英文/数字与连字符，与 §十三 中 Story 标题语义一致即可），保证全局可通过 ID 唯一定位。
-> - **依赖关系**：§14.1 索引表须列出每行 Story 的 **前置依赖 ST**（可为空）；§14.2 给出 EPIC 级依赖总览（表 + 可选 Mermaid 图），且须与各 Story 文件首部的「L2 依赖与引用」小节 **一致**（双向可核对）。
+> - **文件命名**：必须以 Story ID 为前缀，建议 `ST-xxx_<短slug>.md`（slug 用小写英文/数字与连字符，与 §十二 中 Story 标题语义一致即可），保证全局可通过 ID 唯一定位。
+> - **依赖关系**：§十三.1 索引表须列出每行 Story 的 **前置依赖 ST**（可为空）；§十三.2 给出 EPIC 级依赖总览（表 + 可选 Mermaid 图），且须与各 Story 文件首部的「L2 依赖与引用」小节 **一致**（双向可核对）。
 > - 单 Story 文件撰稿模板见 `.specify/templates/story_detail_design_template.md`；本节保留索引与依赖总览，不内嵌 L2 正文。
 >
 > **何时需要 L2**：当 Story 的技术复杂度较高、涉及多组件协作或需要落码级指导时，须补充 L2 详细设计（按 Story 覆盖，不得遗漏）。
 >
 > tasks.md 的每个 Task 须明确引用对应 L2 文件中的设计段落，例如：`features/FEAT-xxx/l2_design/ST-001_xxx.md:功能设计:类图` 或 `...:功能设计:时序图`。
 
-### 14.1 L2 设计索引表
+### 13.1 L2 设计索引表
 
 | Story ID | 标题   | 所属 Feature | L2 文件路径（相对 EPIC 根） | 前置依赖（须先完成的 ST，可跨 Feature；无则填「—」） | 状态      |
 | -------- | ---- | ---------- | ------------------- | -------------------------------- | ------- |
@@ -778,11 +730,11 @@ flowchart TD
 | ST-002   | [标题] | FEAT-xxx   | `features/FEAT-xxx/l2_design/ST-002_<slug>.md` | ST-001                           | 待设计/已完成 |
 
 
-### 14.2 L2 Story 依赖关系（EPIC 总览）
+### 13.2 L2 Story 依赖关系（EPIC 总览）
 
-> **要求**：与 §十三 拆解表中的依赖列一致；若某 Story 仅依赖本 Feature 内其他 ST，仍须在此汇总，便于评审关键路径与并行度。
+> **要求**：与 §十二.4 Story 列表中的依赖列一致；若某 Story 仅依赖本 Feature 内其他 ST，仍须在此汇总，便于评审关键路径与并行度。
 >
-> **依赖表**（可与 §14.1 合并维护时以 §14.1 为准，此处侧重**跨 Feature** 与**图示**）：
+> **依赖表**（可与 §十三.1 合并维护时以 §十三.1 为准，此处侧重**跨 Feature** 与**图示**）：
 
 | Story ID | 前置依赖 ST（可多值，逗号分隔） | 备注（如：跨 Feature、并行组） |
 | -------- | ------------------- | ---------------- |
@@ -805,11 +757,11 @@ flowchart TB
     style ST103 fill:#E3F2FD,stroke:#1976D2,stroke-width:2px
 ```
 
-### 14.3 L2 覆盖度检查
+### 13.3 L2 覆盖度检查
 
-- 所有 §十三 Story 拆解中的 ST-xxx 在 §14.1 索引表中有对应条目，且 **l2_design/** 下存在同名前缀文件 `ST-xxx_*.md`
+- 所有 §十二 Story 拆解中的 ST-xxx 在 §十三.1 索引表中有对应条目，且 **l2_design/** 下存在同名前缀文件 `ST-xxx_*.md`
 - 所有 L2 设计状态为「已完成」（design-ready 关卡前置条件）
-- §14.1「前置依赖」与 §14.2、各 L2 文件首部「L2 依赖与引用」**无矛盾**
+- §十三.1「前置依赖」与 §十三.2、各 L2 文件首部「L2 依赖与引用」**无矛盾**
 
 ---
 
@@ -823,14 +775,13 @@ flowchart TB
 | 三、领域模型                            | —                 | 命名权威参考                                         |
 | 四、零层架构                            | plan.md §一 技术背景与工程上下文 | 阶段/边界参考                                        |
 | 五、一层架构                            | plan.md §二 架构约束与演进规则   | 模块/组件参考                                        |
-| 六、技术风险与边界场景（设计输入）                 | —                 | NFR/风险参考；§七/§八 的设计约束输入                         |
-| 七、疑难点/亮点（策略+流程图）                  | —                 | 设计决策参考：`epic-design.md` §7.1 清单 + `key-func-design/KD_*_*.md`；评审时配合 §8 类图/时序讲解 |
-| 八、全景类图/流程图/时序                     | —                 | 具体 Task 引用 §8 或 §14.x                          |
-| 九、技术评估（设计产出验证）                    | —                 | **`nfr.md`**：NFR 量化验证；Task 验收标准；其中 **9.7 RomSize** 作为包体发布决策依据 |
-| 十、接口设计（→ `interface-design.md`）       | plan.md §四 能力承诺与约束规则对齐 | **`interface-design.md`**：接口设计事实源；Task 接口实现依据           |
-| 十一、数据库设计（→ `database-design.md`）     | plan.md §三 数据存储约束（§3.1/§3.2）对齐   | **`database-design.md`**：数据表结构参考；Task 数据层实现依据         |
-| 十二、埋点技术方案（→ `analytics-tracking.md`） | —                 | **`analytics-tracking.md`**：埋点事件与字段规约参考                |
-| 十三、Story 拆解                       | tasks.md 直接引用      | 每个 Task 绑定 ST-xxx                              |
-| 十四、L2 索引 → `features/*/l2_design/ST-xxx_*.md` | —                 | 设计引用：`features/FEAT-xxx/l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图` |
+| 六、技术风险与边界场景（设计输入）                 | —                 | NFR/风险参考；§七 的设计约束输入                         |
+| 七、疑难点/亮点（策略+流程图）                  | —                 | 设计决策参考：`epic-design.md` §7.1 清单 + `key-func-design/KD_*_*.md`；KD 内类图/时序图即为完整编码蓝图 |
+| 八、技术评估（设计产出验证）                    | —                 | **`nfr.md`**：NFR 量化验证；Task 验收标准；其中 **8.7 RomSize** 作为包体发布决策依据 |
+| 九、接口设计（→ `interface-design.md`）       | plan.md §四 能力承诺与约束规则对齐 | **`interface-design.md`**：接口设计事实源；Task 接口实现依据           |
+| 十、数据库设计（→ `database-design.md`）     | plan.md §三 数据存储约束（§3.1/§3.2）对齐   | **`database-design.md`**：数据表结构参考；Task 数据层实现依据         |
+| 十一、埋点技术方案（→ `analytics-tracking.md`） | —                 | **`analytics-tracking.md`**：埋点事件与字段规约参考                |
+| 十二、Story 拆解                       | tasks.md 直接引用      | 每个 Task 绑定 ST-xxx                              |
+| 十三、二层 Story 详细设计（L2）索引 → `features/*/l2_design/ST-xxx_*.md` | —                 | 设计引用：`features/FEAT-xxx/l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图` |
 
 

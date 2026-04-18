@@ -57,8 +57,6 @@ epic.md            spec.md           epic-plan.md         tasks.md
                   gate               epic-design.md
                   spec-ready         key-func-design/KD_*_*.md
                                      nfr.md
-                                     key-diagram-epic.md
-                                     features/*/key-diagram.md
                                      l2_design/ST-xxx_*.md
                                           ↓
                                      gate plan-ready
@@ -220,20 +218,18 @@ plan.md 的六个章节：
 ────────      ──────────────────────────────────   ──────────────────────
 (无参数)      完整章节骨架 + §1~§6 填充             epic-design.md
 arch          0 层/1 层架构（覆盖已有）             epic-design.md §1~§6
-key           各 KD 文件 + epic-design §7 清单/引用  key-func-design/KD_*_*.md（无根目录 key-func-design.md）
-diagram       全景骨架类图                          key-diagram-epic.md
-diagram FEAT  Feature 子类图+完整时序图             features/<FEAT>/key-diagram.md
-nfr           §9→nfr.md；§10～§12→三子文件          nfr.md + interface-design.md + database-design.md + analytics-tracking.md + epic-design.md（§9～§12 仅摘要+链接）
-story         Story 列表+依赖关系图+FR/NFR 矩阵    epic-design.md §13
-l2            Story 落码级 L2 详细设计             features/*/l2_design/ST-xxx_*.md + epic §十四
+key           各 KD 文件 + epic-design §7 清单/引用  key-func-design/KD_*_*.md（无根目录 key-func-design.md；KD 内类图须全量签名，时序须穷举全分支）
+nfr           §8→nfr.md；§9～§11→三子文件            nfr.md + interface-design.md + database-design.md + analytics-tracking.md + epic-design.md（§8～§11 仅摘要+链接）
+story         Story 列表+依赖关系图+FR/NFR 矩阵    epic-design.md §12
+l2            Story 落码级 L2 详细设计             features/*/l2_design/ST-xxx_*.md + epic §十三
 ```
 
-**推荐顺序**：(默认) → key → diagram → diagram FEAT-001 → … → nfr → story → l2
+**推荐顺序**：(默认) → key → nfr → story → l2
 
 **关键设计约束**：
 - 所有图表使用 Mermaid，遵循 Material Design 配色（`#E3F2FD` 蓝色系为主调）
 - 图表内容必须基于本工程**实际架构与真实代码**，不能是教科书式示意图
-- L2 按 Story 分文件（`l2_design/ST-xxx_<slug>.md`），epic-design.md **§十四** 为索引与依赖总览——避免单文件过大，支持按 Story 评审与并行编辑
+- L2 按 Story 分文件（`l2_design/ST-xxx_<slug>.md`），epic-design.md **§十三** 为索引与依赖总览——避免单文件过大，支持按 Story 评审与并行编辑
 
 **设计分级**（根据 EPIC 复杂度裁剪）：
 - **Lite**：适合小改动，覆盖 0/1 层架构 + 关键类图 + Story 拆解
@@ -286,8 +282,6 @@ epic-design-doc-template.md   → epic-design.md
 key-func-design-kd-template.md  → key-func-design/KD_*_*.md（每 KD 一篇）
 key-func-design-feature-flows-template.md → key-func-design/feature-flows.md（按需）
 nfr-template.md               → nfr.md
-key-diagram-epic-template.md  → key-diagram-epic.md
-key-diagram-feature-template.md → features/*/key-diagram.md
 story_detail_design_template.md → features/*/l2_design/ST-xxx_<slug>.md（每 Story 一文件）
 tasks-template.md             → tasks.md
 gate-log-template.md          → gate-log.md
@@ -350,8 +344,7 @@ Git 分支策略：
       epic-plan.md              ← EPIC 级技术约束
       epic-design.md            ← EPIC 软件设计说明书（§7 清单与 KD 引用）
       key-func-design/          ← 各 KD 独立 md（KD_*_*.md）与按需 feature-flows.md
-      nfr.md                    ← §九 技术评估（量化全文）
-      key-diagram-epic.md       ← EPIC 全景骨架与跨 Feature 时序
+      nfr.md                    ← §八 技术评估（量化全文）
       ux-design.md              ← 设计稿解析（可选）
       gate-log.md               ← 关卡审批记录
       features/
@@ -359,7 +352,6 @@ Git 分支策略：
           spec.md               ← Feature 需求规格
           plan.md               ← Feature 技术规约
           tasks.md              ← 可执行任务
-          key-diagram.md        ← §八 该 Feature 子类图与本 Feature 时序
           l2_design/            ← L2 详细设计（ST-xxx_*.md 每 Story 一文件）
           checklists/           ← 检查清单
 ```
@@ -426,7 +418,7 @@ AISDD 本质上是一套**约束驱动的 AI 工作流**，它的设计解决了
 
 #### D. 分阶段产出避免一次性上下文爆炸
 
-`/aisdd.epicdesign` 的参数化分阶段设计（arch → key → diagram → story → l2）是务实的工程选择。一次性让 AI 产出完整的 EPIC 设计说明书往往质量很差，分阶段则允许在每个层次充分聚焦，人类也可以在每个节点介入修正方向。
+`/aisdd.epicdesign` 的参数化分阶段设计（arch → key → nfr → story → l2）是务实的工程选择。一次性让 AI 产出完整的 EPIC 设计说明书往往质量很差，分阶段则允许在每个层次充分聚焦，人类也可以在每个节点介入修正方向。
 
 #### E. 支持快速通道，不强迫过度设计
 

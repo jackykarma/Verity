@@ -51,7 +51,7 @@ flowchart TD
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
 4. **技术规约与 UX** → 多 Feature：产出 `epic-plan.md`；单 Feature：可省略 `epic-plan.md`，在唯一 `plan.md` 中写入 EPIC 级约束。可选 `ux-design.md`
 5. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版（须在 `epic-plan.md` 约束下编写，或单 Feature 时在合并后的 `plan.md` 中自洽）
-6. **设计说明书** → 按 `key → diagram → nfr → story → l2` 分阶段推进（范围递减、精度递增）：**`key`**（§七）论证关键设计方案可行性，图表为方案论证辅助证据；**`diagram`**（§八）在方案确认后精确化到可编码级别（全量签名 + 全分支时序）；**`nfr`**（§九~§十二）量化验证设计方案是否满足 NFR；**`story`**（§十三）拆解为可独立交付的 Story；**`l2`**（§十四）按 Story 切片产出落码级详细设计。产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§九全文）、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`key-diagram-epic.md`、各 `features/*/key-diagram.md`、各 `features/*/l2_design/ST-xxx_*.md`（L2；§十四 索引与依赖总览；无根目录 `key-func-design.md`；**不再**使用 EPIC 根 `key-diagram.md`）
+6. **设计说明书** → 按 `key → nfr → story → l2` 分阶段推进（范围递减、精度递增）：**`key`**（§七）论证关键设计方案可行性，KD 内图表（类图全量签名 + 时序穷举全分支）为完整编码蓝图；**`nfr`**（§八~§十一）量化验证设计方案是否满足 NFR；**`story`**（§十二）拆解为可独立交付的 Story；**`l2`**（§十三）按 Story 切片产出落码级详细设计。产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§八全文）、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 `features/*/l2_design/ST-xxx_*.md`（L2；§十三 索引与依赖总览；无根目录 `key-func-design.md`）
 7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表；建议同步各 Feature `plan.md`「变更记录」）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
 
@@ -102,7 +102,6 @@ flowchart TD
 | `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）。`/aisdd.epicdesign` 前置条件以 `get-epic-paths.ps1 -Json` 的 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为准 | 节省 ~140 行 |
 | `epic-design.md` | 仅需 **Lite** 级：§一～§六 + §十三 Story 拆解 + §十四 L2 索引；§七～§十二 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
 | `key-func-design/*.md` | 无疑难点/亮点可省略，在 epic-design.md §七标注「本 EPIC 无关键疑难点/亮点，省略」；可不创建 KD 文件 | 可省 ~100 行 |
-| `key-diagram-epic.md` + 该 Feature 的 `key-diagram.md` | 仅需 EPIC 骨架类图 + 1 个 Feature 子类图 + 1 张关键时序图 | ~80 行（分散在两处） |
 | `l2_design/ST-xxx_*.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
 
 ### 4.2 纯修复/小改动（预估 ≤ 3 人天）
@@ -111,9 +110,8 @@ flowchart TD
 |------|----------|-----------|
 | `epic-plan.md` | **可跳过** | 0 |
 | `ux-design.md` | **可跳过** | 0 |
-| `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十三 + 跳过其余） | ~200 行 |
+| `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十二 + 跳过其余） | ~200 行 |
 | `key-func-design/*.md` | **可跳过** | 0 |
-| `key-diagram-epic.md` + 受影响 Feature 的 `key-diagram.md` | 仅需关键变更涉及的类图片段 | ~50 行 |
 | `l2_design/` 下 L2 文件 | **可跳过** | 0 |
 | Gate 评审 | Gate 0~4 可合并为一轮快速评审，Gate 5~6 按需 | — |
 
@@ -176,7 +174,7 @@ flowchart TD
     Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>默认：逐个执行（依赖顺序）<br/>可选：--batch 依赖感知并行生成"]
     Step4b --> Step6
     Step5 -.-> Step6
-    Step6 --> Step7["/aisdd.epicdesign<br/>key → diagram（骨架）<br/>→ diagram FEAT-xxx（按 Feature）<br/>→ story → l2"]
+    Step6 --> Step7["/aisdd.epicdesign<br/>key → nfr<br/>→ story → l2"]
     Step7 --> Step8["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（含回填 plan/spec）"]
     Step8 --> Step9["/aisdd.implement<br/>按 Task 逐个实现代码"]
     Step9 --> Step9b["/aisdd.verify story ST-xxx（可选）<br/>L1 Story 级增量验证"]
@@ -201,7 +199,7 @@ flowchart TD
 | 5 | `/aisdd.epicuidesign` | `ux-design.md`（解析设计稿 → 结构化交互/视觉规范） | 每个 EPIC 一次（可选，与步骤 4 或单 Feature 路径并行） |
 | 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | **默认**：每个 Feature 单独触发一次（依赖顺序）；**`--batch` 模式**：一次触发，依赖感知并行生成（Capability Owner 先，Product Consumer 后；无依赖则完全并行），生成后自动做接口契约与 NFR 预算快速检查 |
 | 6.5 | `/aisdd.challenge plan` | 挑战报告（不写入文件）：从三视角对抗性检测架构风险、技术债务、可测试性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate plan-ready` 前运行 |
-| 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `diagram` 骨架 / `diagram FEAT-xxx` 按 Feature / `story` / `l2`） | 分阶段；建议 `diagram` 先无范围出骨架，再 `diagram FEAT-001`、`FEAT-002`… 逐个 check。前置：`get-epic-paths.ps1 -Json` 中 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true |
+| 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `nfr` / `story` / `l2`） | 分阶段。前置：`get-epic-paths.ps1 -Json` 中 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true |
 | 7.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate design-ready` 前运行 |
 | 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（含回填 plan/spec） | 每个 Feature 一次 |
 | 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |

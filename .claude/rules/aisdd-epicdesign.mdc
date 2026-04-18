@@ -21,7 +21,7 @@ alwaysApply: false
 | `key-func-design/KD_*_*.md` | §七（详细） | 每关键设计一篇；须含**关键类图**（关键类/接口 + 关键字段与方法）与核心时序等；命名 `KD_${三位序号}_${精炼slug}.md` |
 | `key-func-design/feature-flows.md` | §七（可选） | Feature 流程图集 |
 | `nfr.md` | §九（详细） | 技术评估 9.1～9.7 全文 |
-| `interface-design.md` | §十（详细） | 接口设计 10.1～10.3 全文 |
+| `interface-design.md` | §九（详细） | 接口设计 9.1～9.3 全文 |
 | `database-design.md` | §十一（详细） | 数据库设计 11.1～11.4 全文 |
 | `analytics-tracking.md` | §十二（详细） | 埋点方案 12.1～12.2 全文 |
 | `key-diagram-epic.md` | §八（EPIC 级） | 全景骨架类图、可选跨 Feature 完整时序；**不再**使用 EPIC 根目录单一 `key-diagram.md` |
