@@ -21,7 +21,7 @@ alwaysApply: false
 
 ## 输入（必须阅读）
 
-1. **`epic-design.md`**：Story 拆解（§5 Story 列表、依赖关系、FR/NFR 覆盖矩阵）、全景类图与关键时序（§4）、架构图（§1、§2）
+1. **`epic-design.md`**：Story 拆解（§十二 Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、全景类图与关键时序（§七 KD / §八 key-diagram）、架构图（§四 零层、§五 一层）
 2. **本 Feature 的 `plan.md`**：技术规约、接口契约、Story 索引表
 3. **本 Feature 的 `l2_design/ST-xxx_*.md`**：L2 详细设计（Task 的设计引用来源）
 4. **本 Feature 的 `spec.md`**：FR/NFR/AC（Task 验证须追溯）
@@ -40,7 +40,7 @@ alwaysApply: false
 |---|---|---|---|
 | FR-001 | ST-xxx | （tasks.md 产出后补填） | |
 
-数据来源：`epic-design.md` §5 覆盖矩阵。
+数据来源：`epic-design.md` §十二.6 覆盖矩阵。
 
 ### 2. 确认 plan.md 与 design 一致性
 
@@ -49,7 +49,7 @@ alwaysApply: false
 ### 回填约束
 
 - **精准更新**：仅修改 spec.md 追溯表和 plan.md 变更记录表，不得修改 plan.md 正文章节
-- **数据一致**：所有回填数据必须与 `epic-design.md` §5 的内容完全一致
+- **数据一致**：所有回填数据必须与 `epic-design.md` §十二 Story 拆解的内容完全一致
 - **版本更新**：回填完成后，更新 plan.md 的变更记录表（版本号 +0.0.1）
 
 ## 输出
@@ -65,7 +65,7 @@ alwaysApply: false
 - 复选框 `- [ ]`（完成后改 `- [x]`）
 - 任务 ID（T001、T002…全局递增）
 - `[P]` 标记可并行任务
-- `[ST-xxx]` 绑定 Story ID（来自 EPIC 设计说明书 §5 Story 拆解，不得擅自发明新 Story）
+- `[ST-xxx]` 绑定 Story ID（来自 EPIC 设计说明书 §十二 Story 拆解，不得擅自发明新 Story）
 - 路径使用工程真实文件路径
 
 ### 每个 Task 必须包含

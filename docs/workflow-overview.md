@@ -100,7 +100,7 @@ flowchart TD
 | 产物 | 裁剪规则 | 预估文档量 |
 |------|----------|-----------|
 | `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）。`/aisdd.epicdesign` 前置条件以 `get-epic-paths.ps1 -Json` 的 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为准 | 节省 ~140 行 |
-| `epic-design.md` | 仅需 **Lite** 级：§一～§六 + §十三 Story 拆解 + §十四 L2 索引；§七～§十二 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
+| `epic-design.md` | 仅需 **Lite** 级：§一～§六 + §十二 Story 拆解 + §十三 L2 索引；§七～§十一 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
 | `key-func-design/*.md` | 无疑难点/亮点可省略，在 epic-design.md §七标注「本 EPIC 无关键疑难点/亮点，省略」；可不创建 KD 文件 | 可省 ~100 行 |
 | `l2_design/ST-xxx_*.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
 
@@ -251,7 +251,7 @@ flowchart TD
     UpdatePlan --> CheckDesign
     CheckDesign -->|是| UpdateDesign["更新 epic-design.md<br/>Story 拆解/类图/时序"]
     CheckDesign -->|否| UpdateTasks["更新 tasks.md<br/>调整/新增/删除 Task"]
-    UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md<br/>与 epic-design §十四（如涉及 L2）"]
+    UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md<br/>与 epic-design §十三（如涉及 L2）"]
     UpdateL2 --> UpdateTasks
     UpdateTasks --> Continue([继续实现])
 
@@ -285,7 +285,7 @@ flowchart TD
     Scope -->|"Feature 级<br/>（接口/数据/实现）"| UpdatePlan["更新 plan.md<br/>技术规约"]
     UpdateEpicPlan --> UpdatePlan
     UpdatePlan --> UpdateDesign["更新 epic-design.md<br/>架构图/类图/时序图"]
-    UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md 与 §十四"]
+    UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md 与 §十三"]
     UpdateL2 --> CheckStory{Story 拆解需调整?}
     CheckStory -->|是| UpdateStory["调整 Story 拆解<br/>回填 spec.md 追溯"]
     CheckStory -->|否| UpdateTasks["更新 tasks.md<br/>调整受影响的 Task"]
@@ -315,7 +315,7 @@ flowchart TD
 | 交互/视觉/动效 | `ux-design.md` | `plan.md`（UI 约束） → `epic-design.md`（类图/时序） → `tasks.md` |
 | EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
 | Feature 级技术方案 | `plan.md` | `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
-| Story 拆解调整 | `epic-design.md` §十三 | `l2_design/ST-xxx_*.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
+| Story 拆解调整 | `epic-design.md` §十二 | `l2_design/ST-xxx_*.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
 
 ---
 

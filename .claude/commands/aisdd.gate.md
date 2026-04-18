@@ -65,7 +65,7 @@ $ARGUMENTS
 - [ ] `epic-design.md` 存在且版本已填写
 - [ ] §1（0 层架构）、§2（1 层架构）、§4（全景类图/时序）、§5（Story 拆解）已完成
 - [ ] 各 Feature 的 `l2_design/` 下所需 `ST-xxx_*.md` 齐备（若有 L2 设计）
-- [ ] Story 拆解的 FR/NFR 覆盖矩阵（§5.4）无遗漏
+- [ ] Story 拆解的 FR/NFR 覆盖矩阵（§十二.6）无遗漏
 - [ ] 设计说明书 Version 已填写
 
 #### tasks-ready

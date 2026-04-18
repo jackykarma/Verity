@@ -101,7 +101,7 @@ $ARGUMENTS
 - epic-design.md 的 Story 拆解是否完整覆盖各 Feature 的 spec.md 需求
 - Story 间依赖关系是否有环
 - FR/NFR 覆盖矩阵是否有遗漏（某 FR/NFR 无 Story 覆盖）
-- 所有 Story 是否在 `l2_design/` 下有对应 `ST-xxx_*.md` L2 设计，且与 epic-design §14 索引一致
+- 所有 Story 是否在 `l2_design/` 下有对应 `ST-xxx_*.md` L2 设计，且与 epic-design §十三 索引一致
 - tasks.md 中的 [ST-xxx] 标签是否与 epic-design.md 的 Story 拆解一致
 
 #### F. 架构一致性
