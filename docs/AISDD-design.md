@@ -280,7 +280,6 @@ epic-plan-template.md         → epic-plan.md
 plan-template.md              → plan.md
 epic-design-doc-template.md   → epic-design.md
 key-func-design-kd-template.md  → key-func-design/KD_*_*.md（每 KD 一篇）
-key-func-design-feature-flows-template.md → key-func-design/feature-flows.md（按需）
 nfr-template.md               → nfr.md
 story_detail_design_template.md → features/*/l2_design/ST-xxx_<slug>.md（每 Story 一文件）
 tasks-template.md             → tasks.md
@@ -343,7 +342,7 @@ Git 分支策略：
       epic.md                   ← EPIC 容器
       epic-plan.md              ← EPIC 公共约束（按需）
       epic-design.md            ← EPIC 软件设计说明书（§7 清单与 KD 引用）
-      key-func-design/          ← 各 KD 独立 md（KD_*_*.md）与按需 feature-flows.md
+      key-func-design/          ← 各 KD 独立 md（KD_*_*.md）
       nfr.md                    ← §八 技术评估（量化全文）
       ux-design.md              ← 设计稿解析（可选）
       gate-log.md               ← 关卡审批记录

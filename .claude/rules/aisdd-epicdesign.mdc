@@ -19,12 +19,11 @@ alwaysApply: false
 |-------------|----------|------|
 | `epic-design.md` | §1～§6、§7 清单与引用、§8 摘要+`nfr.md`、§9～§11 摘要+三子文件链接、§十二 Story 拆解、§十三 L2 索引 | 设计总览；**§7.1** 为 KD 权威清单（含层级、前置 KD、路径）；**§8** 技术评估摘要链 **`nfr.md`**；**§9～§11** 不粘贴 interface/database/analytics 正文 |
 | `key-func-design/KD_*_*.md` | §七（详细） | 每关键设计一篇；须含方案流程图、**关键类图（全量公共方法签名）**、**核心调用链时序图（穷举全异常分支）**；命名 `KD_${三位序号}_${精炼slug}.md` |
-| `key-func-design/feature-flows.md` | §七（可选） | 跨 KD/跨 Feature 补充流程，**不替代**各 KD 内流程图 |
 | `nfr.md` | §八（详细） | 技术评估 8.1～8.7 全文（模板 `nfr-template.md`） |
 | `interface-design.md` | §九（详细） | 接口设计 9.1～9.3 全文 |
 | `database-design.md` | §十（详细） | 数据库设计 10.1～10.4 全文 |
 | `analytics-tracking.md` | §十一（详细） | 埋点方案 11.1～11.2 全文 |
-| `features/FEAT-xxx/l2_design/ST-xxx_*.md` | §十三 | L2 详细设计（**每 Story 一文件**）；EPIC 根 **`epic-design.md` §十三.1/§十三.2** 为索引与依赖总览 |
+| `features/FEAT-xxx/l2_design/ST-xxx_*.md` | §十三 | L2 详细设计（**每 Story 一文件**）；EPIC 根 **`epic-design.md` §十三.1/§十三.2** 为索引、关联 KD 与依赖总览 |
 
 **禁止**：新 EPIC **不得**创建 EPIC 根目录 **`key-func-design.md`**（已废弃）。**不再**产出 **`key-diagram-epic.md`**、**`features/*/key-diagram.md`**（全景/子类图与完整时序已收敛在 **§七各 KD** 与 **§十三 L2**）。
 
@@ -70,7 +69,7 @@ alwaysApply: false
 → 详见 [analytics-tracking.md](./analytics-tracking.md)
 ```
 
-**§十三**：各 Feature `l2_design/ST-xxx_*.md` 的**索引、前置依赖列与 EPIC 级依赖总览**写在 **`epic-design.md` §十三**（见 `epic-design-doc-template.md`）；**L2 正文**在各 Story 独立 Markdown 文件中。
+**§十三**：各 Feature `l2_design/ST-xxx_*.md` 的**索引、关联 KD、前置依赖列与 EPIC 级依赖总览**写在 **`epic-design.md` §十三**（见 `epic-design-doc-template.md`）；**L2 正文**在各 Story 独立 Markdown 文件中。
 
 ## §七 / §八 / §九～§十一 / §十三 定位与粒度约束
 
@@ -81,19 +80,20 @@ alwaysApply: false
 | **`key`**（§七） | `key-func-design/KD_*.md` | **方案论证 + 编码级图表** — KD 内须含全量公共方法签名的类图与时序全分支 | 单 KD 内完成「可评审、可互证」的类图/时序，**不**拆到单独 diagram 文件 |
 | **`nfr`**（§八） | `nfr.md` | **设计产出验证** — 量化评估是否满足 NFR | 实测与表格在 `nfr.md`，`epic-design.md` §八 仅摘要+链 |
 | **契约与数据**（§九～§十一） | 三子文件 | 接口 / 库表与迁移 / 埋点规约 | 正文在子文件，epic 仅摘要+链 |
-| **`l2`**（§十三） | `l2_design/ST-*.md` + epic §十三索引 | **Story 级落码设计** — 按 Story 切片 | 单 Story 的完整类图/时序（局部但详尽）；索引在 epic §十三 |
+| **`l2`**（§十三） | `l2_design/ST-*.md` + epic §十三索引 | **Story 级落码设计** — 按 Story 切片并继承 KD | 单 Story 的完整类图/时序（局部但详尽）；涉及 KD 时须沿用 KD 的核心类、接口契约、状态流转、异常策略和协作链；索引在 epic §十三 |
 
-- **§七 图表粒度（模板要求）**：每个 KD 内**关键类图为全量公共方法签名**，**核心调用链时序图穷举全异常分支**，与长文方案互证；可选 `feature-flows.md` 仅作跨 KD 补充。
+- **§七 图表粒度（模板要求）**：每个 KD 内**关键类图为全量公共方法签名**，**核心调用链时序图穷举全异常分支**，与长文方案互证；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
 - **§八 与 §七**：§八 基于 §七 方案做 NFR 量化验证，**不**承担「补全类图精度」职责（该精度由 §七 KD 保证）。
-- **§十三 与 §七**：L2 在 §七 KD 与 §五/§六 架构上下文基础上**按 Story 范围切片**并补充落码细节；复杂 Story 必做 L2，简单 Story 可概要。
+- **§十三 与 §七**：L2 在 §七 KD 与 §五/§六 架构上下文基础上**按 Story 范围切片**并补充落码细节；若 Story 涉及 KD 已定义的关键能力、核心类、接口契约、状态流转、异常策略或跨模块协作，L2 必须继承 KD 决策，只做 Story 级细化，不得脱离 KD 另起一套技术方案；复杂 Story 必做 L2，简单 Story 可概要。
 
 ## 行为约束
 
 - **基于真实代码**：类图/时序图须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）。
 - **KD 核心方案（必须）**：每个 `key-func-design/KD_*_*.md` 按 `.specify/templates/key-func-design-kd-template.md` 撰写；**全覆盖**技术点、**全链路**、**每环可落地**、与图互证。
 - **KD 关键类图与时序（必须）**：每个 KD 须含**关键类图**（全量公共方法签名）与**核心调用链时序图**（穷举全异常分支）；**不再**使用 `key-diagram-epic.md` / `features/*/key-diagram.md` 作为补全层。
-- **KD 内流程图（必须）**：每个 KD 的**方案流程图**（及按需架构图）**直接绘制在该 KD 的 `KD_*_*.md` 内**；`feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不得**作为省略 KD 内流程图的替代。
+- **KD 内流程图（必须）**：每个 KD 的**方案流程图**（及按需架构图）**直接绘制在该 KD 的 `KD_*_*.md` 内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明，**不再**单独产出流程图集。
 - **KD 依赖（必须）**：`epic-design.md` §7.1 与各 KD 文首「依赖的其他 KD」**一致**；依赖关系须为 **DAG**，**禁止循环依赖**。
+- **L2 继承 KD（必须）**：生成 `features/*/l2_design/ST-*.md` 前须判定关联 KD，并在 `epic-design.md` §13.1 与 L2 文首「L2 依赖与引用」中记录；L2 的类图、时序图与功能设计须沿用关联 KD 的核心类/接口、依赖方向、调用职责、成功/失败语义和关键约束。若需要改变 KD 决策，先更新 KD 或记录设计变更，禁止只在 L2 中另写冲突方案。
 - **时序图图后说明（必须）**：凡含 `sequenceDiagram` 的 `key-func-design/KD_*_*.md`、`features/*/l2_design/*.md` 等，每张时序图**紧下方**须有详细协作者与过程说明（`.cursor/rules/specify-diagram-requirements.mdc` §四）。
 - **Mermaid 样式**：遵循 `.cursor/rules/mermaid-style-guide.mdc`。
 - **演进式设计**：不得提出整体重写（`.specify/memory/constitution.md`）。
@@ -102,7 +102,7 @@ alwaysApply: false
 
 ## 输入模板（须读取）
 
-- `epic-design-doc-template.md`、`key-func-design-kd-template.md`、`key-func-design-feature-flows-template.md`（按需）、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`
+- `epic-design-doc-template.md`、`key-func-design-kd-template.md`、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`
 - `specify-diagram-requirements.mdc`、`mermaid-style-guide.mdc`、`constitution.md`
 - `research/` 目录下的调研报告（若存在，**参考性补充信息**）：辅助了解技术背景，**不作为约束源或结论**，设计仍须独立完整分析
 

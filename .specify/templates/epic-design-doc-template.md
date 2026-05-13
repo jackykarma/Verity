@@ -18,7 +18,7 @@
 | 文件 / 目录 | 对应章节 | 内容 |
 | ----------- | -------- | ---- |
 | `epic-design.md`（本文件） | 全部章节（摘要/引用） | EPIC 设计总览；**§七**含关键设计清单（含依赖）与逐文件引用；**§八**链接 `nfr.md` |
-| `key-func-design/` 目录 | §七 | 各关键设计**独立文件**，命名 **`KD_${三位序号}_${精炼slug}.md`**（例：`KD_001_session_framework.md`）；**每个 KD 文件内须包含**：按需模型/方案架构图、**方案流程图**、**关键类图**（全量公共方法签名）、**核心调用链时序图**（穷举全异常分支）。按需 **`feature-flows.md`**（仅跨 KD/跨 Feature 补充流程，不替代 KD 内流程图）。撰稿见 **`key-func-design-kd-template.md`**；**每张时序图紧下方须有详细协作者与过程说明**（见 `specify-diagram-requirements.mdc` §四） |
+| `key-func-design/` 目录 | §七 | 各关键设计**独立文件**，命名 **`KD_${三位序号}_${精炼slug}.md`**（例：`KD_001_session_framework.md`）；**每个 KD 文件内须包含**：按需模型/方案架构图、**方案流程图**、**关键类图**（全量公共方法签名）、**核心调用链时序图**（穷举全异常分支）。跨 KD / 跨 Feature 流程须在相关 KD 中互链说明，不再单独产出流程图集。撰稿见 **`key-func-design-kd-template.md`**；**每张时序图紧下方须有详细协作者与过程说明**（见 `specify-diagram-requirements.mdc` §四） |
 | `nfr.md` | §八 | 技术评估（设计产出验证，必须量化），模板见 `.specify/templates/nfr-template.md` |
 | `interface-design.md` | §九 | 对外/外部接口详述，模板见 `.specify/templates/epic-design-interface-template.md` |
 | `database-design.md` | §十 | 库表、ER、迁移与数据策略，模板见 `.specify/templates/epic-design-database-template.md` |
@@ -434,7 +434,7 @@ flowchart LR
 
 > 📌 **占位**：待运行 `/aisdd.epicdesign key` 产出。
 
-> **定位**：面向方案评审，将重难点模块的**设计策略与决策逻辑**讲清楚。每个设计点须在其 **`key-func-design/KD_*_*.md` 文档内**直接给出**方案流程图**（验逻辑分支）、**关键类图**（全量公共方法签名，验类型层面可行性）与**核心调用链时序图**（穷举全异常分支，验协作主干），使 §七 阶段即可判断方案是否 ok——全量签名与全分支时序由本节直接保障。可选的 `feature-flows.md` 仅作跨 KD/跨 Feature 补充，**不替代**各 KD 内流程图。
+> **定位**：面向方案评审，将重难点模块的**设计策略与决策逻辑**讲清楚。每个设计点须在其 **`key-func-design/KD_*_*.md` 文档内**直接给出**方案流程图**（验逻辑分支）、**关键类图**（全量公共方法签名，验类型层面可行性）与**核心调用链时序图**（穷举全异常分支，验协作主干），使 §七 阶段即可判断方案是否 ok——全量签名与全分支时序由本节直接保障。跨 KD / 跨 Feature 流程须在相关 KD 中互链说明，不再单独产出流程图集。
 >
 > **核心方案（各 KD 必填）**：用清晰易懂的中文**详写设计方案与实现**；须**全覆盖**本设计点涉及的技术点，**写全每条相关的技术链路**（含方案明确纳入的异常/降级路径），并对链上**每一环说明如何达成**（机制、职责、数据/状态传递与约束）；**与**该 KD 文件内模型/方案架构图（若有）、流程图、**关键类图**、时序图**互证**，不得仅用标题或条目堆砌代替叙述。细则见 `.specify/templates/key-func-design-kd-template.md`。
 >
@@ -465,7 +465,6 @@ flowchart LR
 
 - [KD-001 设计点名称](./key-func-design/KD_001_[slug].md)
 - [KD-002 设计点名称](./key-func-design/KD_002_[slug].md)
-- （按需）[Feature 流程图集](./key-func-design/feature-flows.md)
 
 ---
 
@@ -715,6 +714,7 @@ flowchart TD
 > **规则**：
 > - 每个 Story 对应 **一个独立 Markdown 文件**，统一放在所属 Feature 目录下的 **`l2_design/`** 子目录中（路径示例：`features/FEAT-xxx/l2_design/ST-001_session_login.md`）。
 > - **文件命名**：必须以 Story ID 为前缀，建议 `ST-xxx_<短slug>.md`（slug 用小写英文/数字与连字符，与 §十二 中 Story 标题语义一致即可），保证全局可通过 ID 唯一定位。
+> - **KD 继承**：若 Story 涉及 §七 `key-func-design/KD_*_*.md` 中已定义的关键能力、核心类、接口契约、状态流转、异常策略或跨模块协作，L2 必须引用并继承对应 KD；L2 只能做 Story 级细化，不得脱离 KD 另起一套技术方案。若必须调整 KD 决策，须先更新 KD 或发起设计变更，再更新 L2。
 > - **依赖关系**：§十三.1 索引表须列出每行 Story 的 **前置依赖 ST**（可为空）；§十三.2 给出 EPIC 级依赖总览（表 + 可选 Mermaid 图），且须与各 Story 文件首部的「L2 依赖与引用」小节 **一致**（双向可核对）。
 > - 单 Story 文件撰稿模板见 `.specify/templates/story_detail_design_template.md`；本节保留索引与依赖总览，不内嵌 L2 正文。
 >
@@ -724,10 +724,10 @@ flowchart TD
 
 ### 13.1 L2 设计索引表
 
-| Story ID | 标题   | 所属 Feature | L2 文件路径（相对 EPIC 根） | 前置依赖（须先完成的 ST，可跨 Feature；无则填「—」） | 状态      |
-| -------- | ---- | ---------- | ------------------- | -------------------------------- | ------- |
-| ST-001   | [标题] | FEAT-xxx   | `features/FEAT-xxx/l2_design/ST-001_<slug>.md` | —                                | 待设计/已完成 |
-| ST-002   | [标题] | FEAT-xxx   | `features/FEAT-xxx/l2_design/ST-002_<slug>.md` | ST-001                           | 待设计/已完成 |
+| Story ID | 标题   | 所属 Feature | 关联 KD（无则填「—」） | L2 文件路径（相对 EPIC 根） | 前置依赖（须先完成的 ST，可跨 Feature；无则填「—」） | 状态      |
+| -------- | ---- | ---------- | ------------------ | ------------------- | -------------------------------- | ------- |
+| ST-001   | [标题] | FEAT-xxx   | KD-001              | `features/FEAT-xxx/l2_design/ST-001_<slug>.md` | —                                | 待设计/已完成 |
+| ST-002   | [标题] | FEAT-xxx   | —                  | `features/FEAT-xxx/l2_design/ST-002_<slug>.md` | ST-001                           | 待设计/已完成 |
 
 
 ### 13.2 L2 Story 依赖关系（EPIC 总览）
@@ -761,6 +761,8 @@ flowchart TB
 
 - 所有 §十二 Story 拆解中的 ST-xxx 在 §十三.1 索引表中有对应条目，且 **l2_design/** 下存在同名前缀文件 `ST-xxx_*.md`
 - 所有 L2 设计状态为「已完成」（design-ready 关卡前置条件）
+- 所有涉及 §七 KD 关键设计的 Story，在 §十三.1「关联 KD」与 L2 文件首部「L2 依赖与引用」中均已列出对应 KD
+- 所有 L2 中与关联 KD 重叠的核心类、接口契约、状态流转、异常策略、并发/持久化策略与 KD 保持一致；若存在调整，已先更新 KD 或记录设计变更
 - §十三.1「前置依赖」与 §十三.2、各 L2 文件首部「L2 依赖与引用」**无矛盾**
 
 ---
