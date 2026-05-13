@@ -234,7 +234,7 @@ l2            Story 落码级 L2 详细设计             features/*/l2_design/S
 **设计分级**（根据 EPIC 复杂度裁剪）：
 - **Lite**：适合小改动，覆盖 0/1 层架构 + 关键类图 + Story 拆解
 - **Standard**：默认，Lite + 关键功能疑难设计 + 各 Story 概要
-- **Deep**：高风险 EPIC，所有 Story 完整 L2 设计
+- **Deep**：高风险 EPIC，复杂/高风险 Story 完整 L2 设计，简单 Story 可由 tasks.md 的设计引用与 DoD 承接
 
 ### 4.8 任务拆解（featuretasks）
 
@@ -244,7 +244,7 @@ l2            Story 落码级 L2 详细设计             features/*/l2_design/S
 tasks.md 的设计要求：
 - 每个 Task 必须包含**设计引用**（指向 epic-design.md 哪个章节或 `l2_design/ST-xxx_<slug>.md` 中的段落）
 - Story 覆盖率 100%（所有 ST-xxx 均有对应 Task）
-- 同时回填 spec.md 的需求追溯表（FR/NFR → Task 的可追溯链路）
+- 在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵，不反向修改已冻结的 `spec.md` 或 `plan.md`
 
 ### 4.9 实现（implement）
 
@@ -281,7 +281,7 @@ plan-template.md              → plan.md
 epic-design-doc-template.md   → epic-design.md
 key-func-design-kd-template.md  → key-func-design/KD_*_*.md（每 KD 一篇）
 nfr-template.md               → nfr.md
-story_detail_design_template.md → features/*/l2_design/ST-xxx_<slug>.md（每 Story 一文件）
+story_detail_design_template.md → features/*/l2_design/ST-xxx_<slug>.md（复杂/高风险 Story 按需一文件）
 tasks-template.md             → tasks.md
 gate-log-template.md          → gate-log.md
 ux-design-template.md         → ux-design.md
@@ -351,7 +351,7 @@ Git 分支策略：
           spec.md               ← Feature 需求规格
           plan.md               ← Feature 轻量技术规约
           tasks.md              ← 可执行任务
-          l2_design/            ← L2 详细设计（ST-xxx_*.md 每 Story 一文件）
+          l2_design/            ← L2 详细设计（复杂/高风险 Story 按需 ST-xxx_*.md）
           checklists/           ← 检查清单
 ```
 

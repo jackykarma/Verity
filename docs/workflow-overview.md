@@ -20,8 +20,8 @@ flowchart TD
     UxDesign -.-> PlanMd
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
     UxDesign -.-> EpicDesign
-    EpicDesign --> StoryDesign["各 Feature l2_design/<br/>ST-xxx_*.md（每 Story 一文件）"]
-    StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（含回填 spec 追溯表<br/>+ plan 变更记录同步）"]
+    EpicDesign --> StoryDesign["各 Feature l2_design/<br/>ST-xxx_*.md（复杂/高风险 Story 按需）"]
+    StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（内置 FR/NFR → Story → Task 追溯矩阵）"]
     TasksMd --> Implement["Implement<br/>代码实现"]
     Implement --> Verify["Verify<br/>实现↔设计一致性验证"]
     Verify --> Done([交付])
@@ -51,8 +51,8 @@ flowchart TD
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
 4. **技术规约与 UX** → 多 Feature 且存在跨 Feature 约束时产出 `epic-plan.md`；单 Feature 或小改动可省略 `epic-plan.md`，在唯一 `plan.md` 中写入必要 EPIC 级约束。可选 `ux-design.md`
 5. **Feature 轻量技术规约** → 各 Feature 产出 `plan.md` 初版（只写增量约束、能力边界、数据/NFR/安全硬约束与 Design 输入清单；详细设计不进入 plan）
-6. **设计说明书** → 按 `key → nfr → story → l2` 分阶段推进（范围递减、精度递增）：**`key`**（§七）论证关键设计方案可行性，KD 内图表（类图全量签名 + 时序穷举全分支）为完整编码蓝图；**`nfr`**（§八~§十一）量化验证设计方案是否满足 NFR；**`story`**（§十二）拆解为可独立交付的 Story；**`l2`**（§十三）按 Story 切片产出落码级详细设计。产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§八全文）、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 `features/*/l2_design/ST-xxx_*.md`（L2；§十三 索引与依赖总览；无根目录 `key-func-design.md`）
-7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表；建议同步各 Feature `plan.md`「变更记录」）
+6. **设计说明书** → 按 `key → nfr → story → l2` 分阶段推进（范围递减、精度递增）：**`key`**（§七）按需论证关键设计方案可行性，KD 内图表（类图全量签名 + 时序穷举全分支）为完整编码蓝图；**`nfr`**（§八~§十一）按需量化验证设计方案是否满足 NFR，并仅在适用时产出 `nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`；**`story`**（§十二）拆解为可开发的 Story；**`l2`**（§十三）仅为复杂/高风险 Story 产出落码级详细设计，简单 Story 可由 `tasks.md` 的设计引用与 DoD 承接。产出 `epic-design.md`（§七清单 + 按需引用 `key-func-design/KD_*_*.md`；无根目录 `key-func-design.md`）
+7. **Task 拆解** → 各 Feature 产出 `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵；不反向修改已冻结的 `spec.md` 或 `plan.md`）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
 
 具体命令与产出物对应关系见**六、命令执行顺序**；各阶段事实源与关卡见下表。
@@ -70,10 +70,10 @@ flowchart TD
 | **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
 | **Feature 轻量技术规约** | 各 `plan.md`（初版） | Feature 约束事实源：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`（含完整场景矩阵）、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
-| **L2 详细设计** | 各 `features/*/l2_design/ST-xxx_*.md` | 落码级设计事实源 | `epic-design.md` | — |
-| **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md` | — |
+| **L2 详细设计** | 各 `features/*/l2_design/ST-xxx_*.md`（复杂/高风险 Story 按需） | 落码级设计事实源 | `epic-design.md` | — |
+| **Task 拆解** | 各 `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 执行事实源 | `plan.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md`（若有） | — |
 | **实现** | 代码 | — | `tasks.md` | Implement Ready |
-| **验证** | L1 Story 验证卡 / L2 Feature 验证报告 / L3 EPIC 验证报告（`--save` 时写入文件） | 实现↔设计一致性事实源 | 代码、各 Feature `l2_design/ST-xxx_*.md`、`plan.md`、`spec.md`、`epic-design.md` | Verify Pass |
+| **验证** | L1 Story 验证卡 / L2 Feature 验证报告 / L3 EPIC 验证报告（`--save` 时写入文件） | 实现↔设计一致性事实源 | 代码、`tasks.md` 追溯矩阵、各 Feature `l2_design/ST-xxx_*.md`（若有）、`plan.md`、`spec.md`、`epic-design.md` | Verify Pass |
 | **审批记录** | `gate-log.md` | 审批事实源 | 各关卡评审结果 | — |
 
 ---
@@ -102,7 +102,7 @@ flowchart TD
 | `epic-plan.md` | **可省略**，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）。`/aisdd.epicdesign` 前置条件以 `get-epic-paths.ps1 -Json` 的 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为准 | 节省 ~140 行 |
 | `epic-design.md` | 仅需 **Lite** 级：§一～§六 + §十二 Story 拆解 + §十三 L2 索引；§七～§十一 按需裁剪（无风险则 N/A） | ~500 行（vs 完整 1400+） |
 | `key-func-design/*.md` | 无疑难点/亮点可省略，在 epic-design.md §七标注「本 EPIC 无关键疑难点/亮点，省略」；可不创建 KD 文件 | 可省 ~100 行 |
-| `l2_design/ST-xxx_*.md` | 视复杂度，简单 Story 可仅写概要（需求+DoD，功能设计部分省略类图/时序图） | ~30 行/Story |
+| `l2_design/ST-xxx_*.md` | 复杂/高风险 Story 按需生成；简单 Story 在 §十三标注由 `tasks.md` 设计引用与 DoD 承接 | ~30 行/Story |
 
 ### 4.2 纯修复/小改动（预估 ≤ 3 人天）
 
@@ -175,7 +175,7 @@ flowchart TD
     Step4b --> Step6
     Step5 -.-> Step6
     Step6 --> Step7["/aisdd.epicdesign<br/>key → nfr<br/>→ story → l2"]
-    Step7 --> Step8["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（含回填 plan/spec）"]
+    Step7 --> Step8["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（内置追溯矩阵）"]
     Step8 --> Step9["/aisdd.implement<br/>按 Task 逐个实现代码"]
     Step9 --> Step9b["/aisdd.verify story ST-xxx（可选）<br/>L1 Story 级增量验证"]
     Step9b --> Step10["/aisdd.verify（L3 EPIC 级，默认）<br/>全量验证 + 跨 Feature 一致性"]
@@ -201,7 +201,7 @@ flowchart TD
 | 6.5 | `/aisdd.challenge plan` | 挑战报告（不写入文件）：从三视角对抗性检测架构风险、技术债务、可测试性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate plan-ready` 前运行 |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `nfr` / `story` / `l2`） | 分阶段。前置：`get-epic-paths.ps1 -Json` 中 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true |
 | 7.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate design-ready` 前运行 |
-| 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（含回填 plan/spec） | 每个 Feature 一次 |
+| 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 每个 Feature 一次 |
 | 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | 9.5 | `/aisdd.verify story ST-xxx` | **L1 Story 级验证报告**（接口 + 行为 + FR 覆盖） | **可选**；每个 Story 实现后随时运行，增量验证，发现偏离早修早止 |
 | 9.6 | `/aisdd.verify feat FEAT-xxx` | **L2 Feature 级验证报告**（全 5 维度） | **可选**；Feature 全部 Story 完成后运行；`--quick` 跳过架构维度提速 |
@@ -287,7 +287,7 @@ flowchart TD
     UpdatePlan --> UpdateDesign["更新 epic-design.md<br/>架构图/类图/时序图"]
     UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md 与 §十三"]
     UpdateL2 --> CheckStory{Story 拆解需调整?}
-    CheckStory -->|是| UpdateStory["调整 Story 拆解<br/>回填 spec.md 追溯"]
+    CheckStory -->|是| UpdateStory["调整 Story 拆解<br/>更新 tasks.md 追溯矩阵"]
     CheckStory -->|否| UpdateTasks["更新 tasks.md<br/>调整受影响的 Task"]
     UpdateStory --> UpdateTasks
     UpdateTasks --> Continue([继续实现])
@@ -311,11 +311,11 @@ flowchart TD
 | 变更类型 | 起点（事实源） | 可能影响的下游产物 |
 |----------|---------------|-------------------|
 | 需求范围/FR/AC | `spec.md` | `ux-design.md` → `plan.md` → `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
-| NFR 指标调整 | `spec.md` | `plan.md`（预算） → **`nfr.md`**（§九 量化评估）与 `epic-design.md` §九 摘要 → `tasks.md`（验证阈值） |
+| NFR 指标调整 | `spec.md` | `plan.md`（预算） → **`nfr.md`**（§八 量化评估）与 `epic-design.md` §八 摘要 → `tasks.md`（验证阈值） |
 | 交互/视觉/动效 | `ux-design.md` | `plan.md`（UI 约束） → `epic-design.md`（类图/时序） → `tasks.md` |
 | EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
 | Feature 级技术规约 | `plan.md` | `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
-| Story 拆解调整 | `epic-design.md` §十二 | `l2_design/ST-xxx_*.md` → `spec.md`（追溯表） → `tasks.md` |
+| Story 拆解调整 | `epic-design.md` §十二 | `l2_design/ST-xxx_*.md`（若有） → `tasks.md` 追溯矩阵 |
 
 ---
 

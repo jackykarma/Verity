@@ -24,8 +24,8 @@ alwaysApply: false
 2. **`epic-design.md`**：架构、§7.1 KD 清单与依赖、类图索引、技术风险、Story 拆解
 3. **`key-func-design/KD_*_*.md`**（若存在）：各 KD 核心方案与 §7.1 一致性
 4. **`nfr.md`**（若存在）：技术评估量化结论
-5. **`key-diagram-epic.md`** 与各 **`features/*/key-diagram.md`**：EPIC 全景骨架/跨 Feature 时序、各 Feature 子类图与本 Feature 时序
-6. **本 Feature 的 `l2_design/ST-xxx_*.md`**：L2 详细设计
+5. **`key-func-design/KD_*_*.md`**（若存在）：关键设计、核心类图与核心调用链时序
+6. **本 Feature 的 `l2_design/ST-xxx_*.md`**：复杂/高风险 Story 的 L2 详细设计（若有）；简单 Story 对照 `tasks.md` 设计引用与 DoD
 7. **本 Feature 的 `plan.md`**：技术规约、接口契约、NFR 预算
 8. **本 Feature 的 `spec.md`**：FR/NFR/AC
 9. **实际代码**：已实现的代码文件
@@ -40,7 +40,7 @@ alwaysApply: false
 
 ### 2. 类/接口一致性
 
-- `key-diagram-epic.md` 与各 Feature `key-diagram.md` 中定义的类是否在代码中存在
+- `key-func-design/KD_*_*.md` 与各 Feature `l2_design/ST-xxx_*.md` 中定义的核心类/接口是否在代码中存在；简单 Story 无独立 L2 时，对照 `tasks.md` 的设计引用与 DoD
 - 方法签名是否与类图一致（参数、返回值）
 - 职责划分是否与设计一致
 
@@ -50,7 +50,7 @@ alwaysApply: false
 - 异常分支是否已实现
 - 错误处理是否与设计一致
 - **时序图图后说明**：每张关键时序图下方是否存在**详细**文字说明（协作链、工作过程、`alt/else` 分支语义、结束条件）；若缺失或仅有概括性一句话，视为设计文档不合格项（在验证报告中记录）
-- （若存在 `key-func-design/KD_*_*.md`）`epic-design.md` §7.1 与各 KD 文首「依赖的其他 KD」是否一致，依赖是否为 DAG；各 KD **核心方案**是否覆盖技术点与**相关技术链路**、链上**如何达成**是否可与代码或 §八 图表文件（`key-diagram-epic.md`、`features/*/key-diagram.md`）交叉核对；**核心方案**与对应流程图、核心时序图是否一致
+- （若存在 `key-func-design/KD_*_*.md`）`epic-design.md` §7.1 与各 KD 文首「依赖的其他 KD」是否一致，依赖是否为 DAG；各 KD **核心方案**是否覆盖技术点与**相关技术链路**、链上**如何达成**是否可与代码、KD 内流程图和核心时序图交叉核对；**核心方案**与对应流程图、核心时序图是否一致
 
 ### 4. 接口契约一致性
 
@@ -67,7 +67,7 @@ alwaysApply: false
 
 - 每条 FR 是否有对应实现
 - 每条 AC 是否可验证通过
-- spec.md 需求追溯表中的 Story→Task 链路是否完整
+- `tasks.md` 中 FR/NFR → Story → Task 追溯矩阵是否完整
 
 ## 输出
 

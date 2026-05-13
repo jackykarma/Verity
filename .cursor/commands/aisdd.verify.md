@@ -166,9 +166,9 @@ $ARGUMENTS
 对目标 Feature（FEAT-xxx）的全部 Story，先执行 3A 的全部检查，**另加**：
 
 **3B-1 架构一致性验证**（除非 `--quick`）
-- 代码的包/模块结构是否与 `epic-design.md` §2（1 层架构）一致
+- 代码的包/模块结构是否与 `epic-design.md` §二（1 层架构）一致
 - 类的分层是否符合 `plan.md` §二 的依赖方向
-- 全景类图（`key-diagram-epic.md`）与各 Feature `key-diagram.md` 中定义的类是否均已实现
+- 关键设计（`key-func-design/KD_*_*.md`）与各 Feature `l2_design/ST-xxx_*.md` 中定义的核心类/接口是否均已实现；简单 Story 无独立 L2 时，对照 `tasks.md` 的设计引用与 DoD
 - 代码中新增但设计未定义的**核心类**是否有说明（辅助类可豁免）
 
 **3B-2 技术规约遵从验证**（除非 `--quick`）

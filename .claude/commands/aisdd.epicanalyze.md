@@ -66,7 +66,7 @@ $ARGUMENTS
 - `plan.md`：轻量技术规约/能力边界/数据与 NFR 硬约束
 - `interface-design.md`、`database-design.md`、各 L2：接口契约与数据模型详细设计
 - `tasks.md`：Task 清单/设计引用
-- `l2_design/ST-xxx_*.md`：L2 详细设计（每 Story 一文件）
+- `l2_design/ST-xxx_*.md`：复杂/高风险 Story 的 L2 详细设计（若有）；简单 Story 以 §十三索引和 `tasks.md` DoD 承接
 
 ### 4. 检测环节
 
@@ -80,8 +80,8 @@ $ARGUMENTS
 
 #### B. 接口契约兼容性
 
-- 共享能力的 Owner Feature 在 plan.md §4.1 声明的能力承诺，与消费方 Feature 在 plan.md §4.2 引用的依赖是否对齐
-- 错误码/错误类型体系是否跨 Feature 统一（与 epic-plan §4 对齐）
+- 共享能力的 Owner Feature 在 plan.md §三声明的能力承诺，与消费方 Feature 在 plan.md §三引用的依赖是否对齐
+- 错误码/错误类型体系是否跨 Feature 统一（与 epic-plan 的统一运行时/错误处理约束对齐）
 - 数据模型字段命名/类型是否跨 Feature 一致
 
 #### C. NFR 预算一致性
@@ -93,8 +93,8 @@ $ARGUMENTS
 #### D. 共享能力完整性
 
 - epic.md「跨 Feature 技术策略」与 epic-plan.md §8 的共享能力是否完全对齐
-- Owner Feature 的 plan.md §4.1 是否已声明共享能力承诺（状态=已声明）
-- 消费方 Feature 的 plan.md §4.2 是否正确引用 Owner Feature 的接口
+- Owner Feature 的 plan.md §三是否已声明共享能力承诺（状态=已声明）
+- 消费方 Feature 的 plan.md §三是否正确引用 Owner Feature 的接口
 - 是否有重复设计（多个 Feature 各自实现了相同能力）
 
 #### E. Story 依赖与覆盖完整性
@@ -120,7 +120,7 @@ $ARGUMENTS
 
 #### H. 章程合规
 
-- 各 Feature plan.md 是否通过了前置检查清单
+- 各 Feature plan.md 是否通过了 Plan 前置检查，并与 EPIC 级约束保持一致
 - 是否存在违反 constitution MUST 条款的设计
 
 ### 5. 严重程度赋值

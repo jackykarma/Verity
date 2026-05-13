@@ -132,9 +132,9 @@
 - **假设**：[若假设不成立会怎样？触发什么降级/回滚？]
 - **约束**：[平台/版本/兼容性/法律合规等]
 
-## 需求追溯（预留，Story 拆解后填写）
+## 需求追溯（参考，执行追溯以 tasks.md 为准）
 
-> 说明：此表由 `/aisdd.featuretasks` 执行时自动回填（数据来源：`epic-design.md` §十二 Story 拆解中的 FR/NFR 覆盖矩阵，即 §十二.6），用于确保 FR/NFR 被 Story 覆盖；Implement 不得擅自改写 FR/NFR。
+> 说明：本节用于人工 review 需求覆盖关系。`/aisdd.featuretasks` 不再自动回填本文件；执行期追溯以 `tasks.md` 中的 FR/NFR → Story → Task 矩阵为准。Implement 不得擅自改写 FR/NFR。
 
 | FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
 |---|---|---|---|

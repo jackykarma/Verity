@@ -63,11 +63,11 @@ $ARGUMENTS
 |------|----------|----------|------|
 | **无参数**（默认） | §1~§6 填充；§7~§13 占位 | `epic-design.md`（完整章节骨架） | 首次调用：建立完整 §1~§13 骨架 + 填充§1~§6（架构 + 技术风险与边界场景），其余占位 |
 | **arch** | §1~§6 | `epic-design.md` §1~§6 | 重新生成零层/一层架构（覆盖已有） |
-| **key** | §7 | `key-func-design/KD_*_*.md` + `epic-design.md` §7 | **不**产出根目录 `key-func-design.md`；每 KD 一文件，命名 `KD_${三位序号}_${slug}.md`；§7.1 清单含层级/前置 KD/路径（DAG、无环）；§7.2 逐文件引用；KD 内类图须含全量公共方法签名，时序须穷举全异常分支；跨 KD / 跨 Feature 流程在相关 KD 中互链说明 |
-| **nfr** | §8~§11 | **`nfr.md`** + **`interface-design.md`** + **`database-design.md`** + **`analytics-tracking.md`** + `epic-design.md` §8~§11 | **§8 正文**→ EPIC 根 **`nfr.md`**（模板 `nfr-template.md`）；**§9～§11 正文**→ 分别为 **`interface-design.md`**、`database-design.md`、`analytics-tracking.md`（模板 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`）；`epic-design.md` §8～§11 **仅摘要 + 链接**对应子文件；建议在 `key` 完成后、`story` 前执行 |
+| **key** | §7 | `key-func-design/KD_*_*.md` + `epic-design.md` §7 | **按需产出**：仅当存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计时生成 KD；无此类风险时在 §7 标注 N/A，不创建 KD 文件。若生成 KD，**不**产出根目录 `key-func-design.md`；每 KD 一文件，命名 `KD_${三位序号}_${slug}.md`；§7.1 清单含层级/前置 KD/路径（DAG、无环）；§7.2 逐文件引用；KD 内类图须含全量公共方法签名，时序须穷举全异常分支；跨 KD / 跨 Feature 流程在相关 KD 中互链说明 |
+| **nfr** | §8~§11 | **`nfr.md`** + **`interface-design.md`** + **`database-design.md`** + **`analytics-tracking.md`** + `epic-design.md` §8~§11 | **按需产出**：仅当 EPIC 涉及量化 NFR、外部接口、数据库/持久化或埋点时生成对应子文件；不适用时在 `epic-design.md` §8～§11 标注 N/A 与原因。适用时：**§8 正文**→ EPIC 根 **`nfr.md`**（模板 `nfr-template.md`）；**§9～§11 正文**→ 分别为 **`interface-design.md`**、`database-design.md`、`analytics-tracking.md`（模板 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`）；`epic-design.md` §8～§11 **仅摘要 + 链接**对应子文件；建议在 `key` 完成后、`story` 前执行 |
 | **story** | §12 | `epic-design.md` §12 | 拆解策略说明、Story 列表（含预估工作量）、依赖关系图、FR/NFR 覆盖矩阵、工作量汇总；须通过模板 §12.3 Story 自检清单 |
-| **l2** | §13 | 各 `features/FEAT-xxx/l2_design/ST-xxx_<slug>.md` + `epic-design.md` §13（索引、关联 KD、前置依赖、依赖总览） | 按 Story **每 ST 一文件**产出 L2；先判定并继承关联 KD，再维护 §13.1/§13.2 与各文件首部「L2 依赖与引用」一致；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
-| **all** | §1~§13 全量 | 上述所有对应文件（含 l2） | 小 EPIC 或上下文充裕时一次性产出全部章节；依次执行 arch → key → nfr → story → l2 |
+| **l2** | §13 | 各 `features/FEAT-xxx/l2_design/ST-xxx_<slug>.md`（按需） + `epic-design.md` §13（索引、关联 KD、前置依赖、依赖总览） | **复杂/高风险 Story 必做独立 L2**；简单 Story 可不创建独立 L2 文件，在 §13 索引中标注「由 `tasks.md` 设计引用与 DoD 承接」，并说明无需独立类图/时序的原因。生成 L2 时须先判定并继承关联 KD，再维护 §13.1/§13.2 与各文件首部「L2 依赖与引用」一致；可限定范围：`l2 FEAT-001` 或 `l2 ST-001` |
+| **all** | §1~§13 全量 | 上述所有适用文件（含按需 L2） | 高风险 EPIC 或上下文充裕时一次性产出适用章节；依次执行 arch → key → nfr → story → l2，并对不适用子文件标注 N/A 而非强制创建 |
 | **-h** | — | — | 仅输出参数帮助，不产出任何文件 |
 
 **推荐顺序**：（无参数）→ arch → key → nfr → story → l2
@@ -79,15 +79,15 @@ $ARGUMENTS
 
   (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充 §1~§6（架构 + 技术风险与边界场景），§7~§13 占位
   arch       重新生成零层/一层架构（§1~§6）
-  key        产出关键设计（§7）→ key-func-design/KD_*_*.md（不产出根目录 key-func-design.md）；更新 epic-design.md §7.1 清单与 §7.2 引用；KD 撰稿遵循 key-func-design-kd-template.md；**KD 内类图须含全量公共方法签名，时序须穷举全异常分支**
-  nfr        产出 nfr.md（§8 全文）+ interface-design.md + database-design.md + analytics-tracking.md；
+  key        按需产出关键设计（§7）→ key-func-design/KD_*_*.md（不产出根目录 key-func-design.md）；无关键疑难点时 §7 标注 N/A；更新 epic-design.md §7.1 清单与 §7.2 引用；KD 撰稿遵循 key-func-design-kd-template.md；**KD 内类图须含全量公共方法签名，时序须穷举全异常分支**
+  nfr        按需产出 nfr.md（§8 全文）+ interface-design.md + database-design.md + analytics-tracking.md；
              epic-design.md §8～§11 均为摘要 + 链接（不粘贴子文件正文）
              建议在 key 完成后、story 前执行
   story      产出 Story 拆解（§12）
-  l2         产出 L2 详细设计（§13）→ 各 Feature 的 l2_design/ST-xxx_<slug>.md（每 Story 一文件）+ epic-design §13.1/13.2
+  l2         按需产出 L2 详细设计（§13）→ 复杂/高风险 Story 生成 l2_design/ST-xxx_<slug>.md；简单 Story 可仅在 epic-design §13.1/13.2 标注由 tasks.md DoD 承接
              若 Story 涉及 KD 关键设计，必须继承对应 KD 的核心类、接口契约、状态流转、异常策略和协作链，不得另起技术方案
              可指定范围：l2 FEAT-001 或 l2 ST-001
-  all        一次性产出全部章节 §1~§13（含 l2），适用于小 EPIC 或上下文充裕时
+  all        一次性产出全部适用章节 §1~§13（含按需 l2），适用于高风险 EPIC 或上下文充裕时
              依次执行：arch → key → nfr → story → l2
   -h         显示本帮助信息
 
@@ -148,8 +148,8 @@ $ARGUMENTS
 4. **根据参数产出**：
    - **无参数**：生成/更新 `epic-design.md`，含完整 §1~§13 骨架；§1~§6 填充内容，§7~§13 占位（提示运行对应参数产出）。
    - **arch**：重写 `epic-design.md` 的 §1~§6。
-   - **key**：确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。**禁止**创建 EPIC 根目录 `key-func-design.md`，**不再**单独产出流程图集。KD 类图须含**全量公共方法签名**，时序须**穷举全异常分支**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
-   - **nfr**：先按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §8.1～§8.7 全文）；再分别按 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md` 产出/更新 **`EPIC_DIR/interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**（各子节如不适用须标注 N/A 并简述原因）；最后更新 `epic-design.md` **§8～§11** 均为摘要 + 分别指向 `./nfr.md`、`./interface-design.md`、`./database-design.md`、`./analytics-tracking.md` 的链接（**禁止**在 `epic-design.md` 内重复粘贴上述子文件正文）。
+   - **key**：先判断是否存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计；若不存在，在 `epic-design.md` §7 标注 N/A 与原因，不创建 KD 文件。若适用，确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。**禁止**创建 EPIC 根目录 `key-func-design.md`，**不再**单独产出流程图集。KD 类图须含**全量公共方法签名**，时序须**穷举全异常分支**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
+   - **nfr**：先判断 §8～§11 各子文件是否适用；不适用时只在 `epic-design.md` 对应章节标注 N/A 与原因，不创建空子文件。适用时，按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §8.1～§8.7 全文）；按需分别按 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md` 产出/更新 **`EPIC_DIR/interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**（各子节如不适用须标注 N/A 并简述原因）；最后更新 `epic-design.md` **§8～§11** 为摘要 + 链接或 N/A 说明（**禁止**在 `epic-design.md` 内重复粘贴上述子文件正文）。
    - **story**：按模板「§12.1 拆解策略（拆解维度 → 反模式筛查）→ §12.2 拆分约束（拆分首看改动路径独立性与技术边界，工作量仅为参考信号：典型 2～5 人天，>7 人天检查是否可拆，<1 人天检查是否可合并）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §12（拆解策略说明、Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵、工作量汇总）。
    - **l2**：
      - **前置：KD 关联与继承检查**（每个 Story 生成 L2 前必须执行）：
@@ -163,7 +163,8 @@ $ARGUMENTS
           - **现有类**（代码中已存在）：必须使用代码中的真实完整类名，不得改名或使用示例类名
           - **新增类**（设计新增，代码中尚不存在）：在类图中该类旁注明 `// 新增类：[一句话说明新增理由]`
        3. 若无法确认某类是否存在，在类图旁标注 `// 待确认：[类名]`，由人工评审时核实
-     - 完成 KD 关联与类名检查后，在各 Feature **`l2_design/`** 下按 ST 产出/更新 **`ST-xxx_<slug>.md`**（模板 `story_detail_design_template.md`），并更新 `epic-design.md` **§13.1 索引（含关联 KD、前置依赖列）与 §13.2 依赖总览**；若带范围则仅处理指定 FEAT 或 ST。
+     - 完成 KD 关联与类名检查后，判断 Story 是否需要独立 L2：涉及新增核心类、跨模块协作、复杂状态/并发/持久化、关键异常分支或高风险 NFR 的 Story 必须生成；简单 Story 可不创建独立 L2 文件，在 `epic-design.md` **§13.1 索引**标注「由 `tasks.md` 设计引用与 DoD 承接」及原因。
+     - 对需独立 L2 的 Story，在各 Feature **`l2_design/`** 下按 ST 产出/更新 **`ST-xxx_<slug>.md`**（模板 `story_detail_design_template.md`），并更新 `epic-design.md` **§13.1 索引（含关联 KD、前置依赖列、L2 状态）与 §13.2 依赖总览**；若带范围则仅处理指定 FEAT 或 ST。
    - **all**：依次执行 arch → key → nfr → story → l2 的完整产出（含 l2）；适用于小 EPIC 或上下文充裕时一次性产出全部章节。
 
 5. **子文件引用规则**：§7 详细在 `key-func-design/KD_*_*.md`，**清单与引用在 `epic-design.md` §7.1/§7.2**；§8 详细在 **`nfr.md`**；§9～§11 详细分别在 **`interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**；`epic-design.md` §8～§11 仅摘要 + 链接；§13 L2 正文在各 Feature `l2_design/ST-xxx_<slug>.md`，**索引与依赖总览在 `epic-design.md` §13.1/§13.2**。
@@ -173,12 +174,12 @@ $ARGUMENTS
    - key 完成 → 提示继续 `nfr`
    - nfr 完成 → 提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（自动含回填 spec.md 需求追溯表 + plan.md 变更记录 design 一致性确认）
+   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
 
 核心规则：
 - 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的**方案流程图须直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举全异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，覆盖技术点与**全链路**，链上**每一环如何达成**写清，并与类图/流程图/时序图一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.claude/rules/mermaid-style-guide.mdc`
 - 图表内容须基于本工程**实际架构与真实代码**，遵循 `.claude/rules/specify-diagram-requirements.mdc`
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
-- **L2 按 Story 分文件并继承 KD**：`epic-design.md` §13 为索引、关联 KD 与依赖总览；正文在各 Feature 的 `l2_design/ST-xxx_<slug>.md` 中。凡涉及 KD 的 L2 必须继承 KD 关键方案，只能细化 Story 局部落码细节，不得与 KD 冲突或另起方案
+- **L2 按需分文件并继承 KD**：`epic-design.md` §13 为索引、关联 KD、L2 状态与依赖总览；复杂/高风险 Story 的正文在各 Feature 的 `l2_design/ST-xxx_<slug>.md` 中，简单 Story 可由 `tasks.md` 的设计引用与 DoD 承接。凡涉及 KD 的 L2 必须继承 KD 关键方案，只能细化 Story 局部落码细节，不得与 KD 冲突或另起方案
 - **章节骨架先行**：首次（无参数）调用必须输出完整 §1~§13 骨架，未填充章节保留占位提示；后续调用仅更新指定章节

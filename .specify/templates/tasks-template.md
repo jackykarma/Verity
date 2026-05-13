@@ -25,16 +25,17 @@ description: "Story → Task 落地任务清单模板"
 - **复选框**：必须以 `- [ ]` 开头（完成后改为 `- [x]`）
 - **任务 ID**：T001、T002…（全局递增）
 - **[P]**：可并行执行（不改同一文件，且无依赖）
-- **[ST-xxx]**：必须绑定到 Plan 中的 Story ID
+- **[ST-xxx]**：必须绑定到 `epic-design.md` §十二中的 Story ID
 - **路径**：必须写出影响的关键文件路径（真实路径）
 
 ### Task 详细信息（紧随首行的子项）
 
 - **依赖**：T???（无则写“无”）
 - **设计引用**：
-  - 架构级：`epic-design.md:§4 全景类图/时序图`
-  - Story 级：`l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`
-  - （若该 Story 的 L2 设计尚未补齐，则写 `N/A` 并在对应 Feature 的 `l2_design/` 下补齐该 ST 文件）
+  - 架构级：`epic-design.md:§一～§六 架构与边界`
+  - 关键设计级（若有）：`key-func-design/KD_001_<slug>.md:关键类图/核心调用链时序图`
+  - Story 级（复杂/高风险 Story）：`l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`
+  - 简单 Story 无独立 L2 时：引用 `epic-design.md:§十三 L2 索引` 中的承接说明，并在本 Task 的 DoD 写清验证条件
 - **步骤**：
   - 1) …
   - 2) …
@@ -58,7 +59,7 @@ description: "Story → Task 落地任务清单模板"
 重要提示：以下内容为示例，用于说明格式与逻辑。
 
 /aisdd.featuretasks 命令必须基于以下内容替换为实际任务：
-- plan.md 的 Story Breakdown（ST-xxx）
+- epic-design.md §十二 Story 拆解（ST-xxx）
 - spec.md 的 FR/NFR（用于验证与追溯）
 - （可选）data-model.md、contracts/、research.md、quickstart.md
 
@@ -75,7 +76,7 @@ description: "Story → Task 落地任务清单模板"
 
 **目标**：对齐版本、冻结设计输入，避免 Implement 期返工
 
-- [ ] T001 在 `specs/[###-feature-short-name]/` 中核对 `spec.md`、`plan.md`、EPIC 软件设计说明书（若存在）的 Version 字段一致性并补齐变更记录
+- [ ] T001 在 `specs/[###-feature-short-name]/` 中核对 `spec.md`、`plan.md`、EPIC 软件设计说明书（若存在）的 Version 字段一致性，并在本 `tasks.md` 中记录输入基线
   - **依赖**：无
   - **步骤**：
     - 1) 确认 `Feature Version`、`Plan Version` 已填写
@@ -293,7 +294,7 @@ description: "Story → Task 落地任务清单模板"
 ## 备注
 
 - [P] 标记的任务 = 涉及不同文件，无依赖关系
-- [ST-xxx] 标签将任务关联至 Plan 的 Story，便于追溯
+- [ST-xxx] 标签将任务关联至 `epic-design.md` §十二的 Story，便于追溯
 - 每个 Story 需可独立完成、独立验证
 - 实现前验证测试用例执行失败
 - 完成单个任务或逻辑分组后提交代码

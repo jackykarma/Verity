@@ -1,5 +1,5 @@
 ---
-描述：基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、plan.md 的技术规约与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序的 tasks.md 文件（Story → Task），严禁改写设计方案的技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
+描述：基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、plan.md 的技术规约与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序且内置追溯矩阵的 tasks.md 文件（Story → Task），严禁反向改写已冻结的 spec/plan/design 技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
 交接项：
   - 标签：一致性分析
     执行主体：aisdd.analyze
@@ -41,17 +41,17 @@ $ARGUMENTS
 
 2. **加载设计文档**：从 FEATURE_DIR 及 EPIC 目录中读取以下文档：
     - **必需文档**：
-        - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三）、**关键类图与关键时序**（§七 KD）、**架构图**（§四 零层、§五 一层）
+        - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三，若有）、**关键类图与关键时序**（§七 KD，若有）、**架构章节**（§一～§六）
         - plan.md（**轻量技术规约**：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
     - **可选文档**：epic-plan.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
     - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。
 
-3. **回填 spec.md 与确认 plan.md 一致性**（原 `/aisdd.backfill` 职责，现合并至此）：
-    - 回填本 Feature 的 `spec.md`「需求追溯表」：从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射填入
-    - 确认 `plan.md` 轻量规约与 `epic-design.md` 设计无矛盾：对照零层/一层架构、接口设计、数据库设计与 L2，逐项核对 plan.md §二（增量约束）、§三（能力边界与外部依赖）、§四（数据/NFR/安全硬约束）、§五（Design 输入清单）是否已被设计说明书承接
-    - 在 `plan.md`「变更记录」表中追加一条 design 一致性确认记录（版本号 +0.0.1，变更摘要写"design 一致性确认"）
-    - **精准更新**：仅修改 spec.md 追溯表和 plan.md 变更记录表，不得修改 plan.md 正文章节
+3. **追溯矩阵生成与一致性核对（只写入 tasks.md）**：
+    - 从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射，并在 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵。
+    - 核对 `plan.md` 轻量规约是否已被 `epic-design.md` 承接：对照 §一～§六架构、§七 KD（若有）、接口/数据库/埋点子文件（若有）与 L2（若有），逐项检查 plan.md §二（增量约束）、§三（能力边界与外部依赖）、§四（数据/NFR/安全硬约束）、§五（Design 输入清单）。
+    - 若发现 spec/plan 与 design 矛盾或缺失，**停止生成 tasks.md**，输出差异并建议走 `/aisdd.cr` 或更新指定设计章节；不得在本命令中反向修改已冻结的 `spec.md` 或 `plan.md`。
+    - **只写执行事实源**：本步骤只创建/更新 `tasks.md`，不回填 `spec.md` 追溯表，不追加 `plan.md` 变更记录。
 
 4. **执行任务生成流程**：
     - 加载 plan.md 并提取轻量技术规约、能力边界、数据/NFR/安全硬约束与 Design 输入清单
@@ -76,6 +76,7 @@ $ARGUMENTS
     - 所有任务必须遵循严格的清单格式（详见下文「任务生成规则」）
     - 每个任务需标注清晰的文件路径
     - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` §七 KD 清单、`key-func-design/KD_*_*.md` 中关键类图/时序图，或各 Feature 的 `l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`）
+    - FR/NFR → Story → Task 追溯矩阵（作为执行期追溯事实源）
     - 展示 Story 完成顺序的依赖关系章节
     - 每个 Story 的并行执行示例
     - 增量交付策略

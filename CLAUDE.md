@@ -63,7 +63,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.featureplan` | 各 Feature `plan.md` | 产出轻量技术规约；需在 epic-plan（若存在）或单 Feature 合并 plan 约束下执行 |
 | `/aisdd.gate plan-ready` | gate 条目 | 所有 `plan.md` 完成后执行 |
 | `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 `features/*/l2_design/ST-xxx_*.md` | 分阶段（范围递减、精度递增）：**`key`**（§七）论证方案可行性，KD 内类图须含全量公共方法签名、时序须穷举全异常分支 → **`nfr`**（§八~§十一）量化验证 → **`story`**（§十二）拆解 → **`l2`**（§十三）Story 级落码设计（§八~§十一 正文在三份独立 md 中，`epic-design.md` 仅引用） |
-| `/aisdd.featuretasks` | 各 Feature `tasks.md` | 含回填 spec 追溯表 |
+| `/aisdd.featuretasks` | 各 Feature `tasks.md` | 内置 FR/NFR → Story → Task 追溯矩阵，不反向改写冻结 spec/plan |
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.verify` | 验证报告 | 实现↔设计一致性验证 |
 | `/aisdd.cr` | CR 文件 + 下游产物更新 | 变更请求 |
@@ -141,6 +141,6 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 | `epic-design.md` | 架构与设计总览：0/1 层；§7.1 KD 清单与依赖、§7.2 引用；§8/§14 索引；§9 摘要并链至 `nfr.md`；§10～§12 摘要并链至 `interface-design.md` / `database-design.md` / `analytics-tracking.md` |
 | `key-func-design/KD_*_*.md` | §七各 KD 详细设计（核心方案、流程图、核心时序） |
 | `nfr.md` | §九技术评估（设计产出验证，9.1～9.7 量化全文） |
-| `features/*/l2_design/ST-xxx_*.md` | L2 落码级详细设计（每 Story 一文件） |
+| `features/*/l2_design/ST-xxx_*.md` | L2 落码级详细设计（复杂/高风险 Story 按需一文件） |
 | `tasks.md` | 执行：可操作 Task，含 spec/设计追溯 |
 | `gate-log.md` | 各阶段关卡审批记录 |

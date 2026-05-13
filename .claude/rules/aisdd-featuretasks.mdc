@@ -11,46 +11,30 @@ alwaysApply: false
 
 ## 目的
 
-基于 EPIC 软件设计说明书的 Story 拆解（§5）、plan.md 的技术规约与 spec.md 的 FR/NFR，将 Story 拆解为可执行的 Task 清单，产出当前 Feature 目录下的 `tasks.md`。
+基于 EPIC 软件设计说明书的 Story 拆解（§十二）、plan.md 的技术规约与 spec.md 的 FR/NFR，将 Story 拆解为可执行的 Task 清单，产出当前 Feature 目录下的 `tasks.md`，并在 `tasks.md` 内维护 FR/NFR → Story → Task 追溯矩阵。
 
 ## 前置条件
 
 1. 本 Feature 的 `spec.md` 和 `plan.md` 已完成
 2. `epic-design.md` 已通过 Design Ready（`/aisdd.gate design-ready`）
-3. 本 Feature 的 `l2_design/` 下各 Story 对应 `ST-xxx_*.md` 已完成（若有 L2 设计）
+3. 本 Feature 的 `l2_design/` 下复杂/高风险 Story 对应 `ST-xxx_*.md` 已完成；简单 Story 可由 `epic-design.md` §十三索引标注由 `tasks.md` 设计引用与 DoD 承接
 
 ## 输入（必须阅读）
 
-1. **`epic-design.md`**：Story 拆解（§十二 Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、全景类图与关键时序（§七 KD / §八 key-diagram）、架构图（§四 零层、§五 一层）
-2. **本 Feature 的 `plan.md`**：技术规约、接口契约、Story 索引表
-3. **本 Feature 的 `l2_design/ST-xxx_*.md`**：L2 详细设计（Task 的设计引用来源）
+1. **`epic-design.md`**：Story 拆解（§十二 Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、关键设计（§七 KD，若有）、架构与边界章节（§一～§六）、L2 索引（§十三）
+2. **本 Feature 的 `plan.md`**：轻量技术规约、能力边界、数据/NFR/安全硬约束、Design 输入清单
+3. **本 Feature 的 `l2_design/ST-xxx_*.md`**：复杂/高风险 Story 的 L2 详细设计（Task 的设计引用来源，若有）
 4. **本 Feature 的 `spec.md`**：FR/NFR/AC（Task 验证须追溯）
 5. **`epic-plan.md`**（若存在）：EPIC 级技术约束
 6. **`.specify/templates/tasks-template.md`**：模板结构
 
-## 前置步骤：回填 plan.md 与 spec.md
+## 前置步骤：追溯矩阵与一致性核对
 
-在产出 `tasks.md` **之前**，自动执行以下回填操作（原 `/aisdd.backfill` 的职责）：
+在产出 `tasks.md` **之前**，只做只读核对与 tasks 内追溯建模：
 
-### 1. 回填 spec.md「需求追溯表」
-
-在本 Feature 的 `spec.md`「需求追溯」表中填入 FR/NFR → Story 的映射：
-
-| FR/NFR ID | 计划覆盖的 Story ID（Plan） | 任务覆盖（Tasks） | 备注 |
-|---|---|---|---|
-| FR-001 | ST-xxx | （tasks.md 产出后补填） | |
-
-数据来源：`epic-design.md` §十二.6 覆盖矩阵。
-
-### 2. 确认 plan.md 与 design 一致性
-
-对照 `epic-design.md` 的零层架构和一层架构，逐项核对本 Feature `plan.md` 的 §二（架构约束）、§三（数据存储约束）、§四（接口契约）是否与设计说明书无矛盾。在 `plan.md`「变更记录」表中追加一条 design 一致性确认记录（版本号 +0.0.1，变更摘要写"design 一致性确认"）。
-
-### 回填约束
-
-- **精准更新**：仅修改 spec.md 追溯表和 plan.md 变更记录表，不得修改 plan.md 正文章节
-- **数据一致**：所有回填数据必须与 `epic-design.md` §十二 Story 拆解的内容完全一致
-- **版本更新**：回填完成后，更新 plan.md 的变更记录表（版本号 +0.0.1）
+1. 从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射，并准备写入 `tasks.md` 的 FR/NFR → Story → Task 追溯矩阵。
+2. 核对 `plan.md` §二～§五是否已被设计说明书承接；若发现 spec/plan 与 design 矛盾或缺失，停止生成并建议走 `/aisdd.cr` 或更新指定设计章节。
+3. **不得反向修改**已冻结的 `spec.md` 或 `plan.md`；不得回填 spec 追溯表，不得追加 plan 变更记录。
 
 ## 输出
 
@@ -71,7 +55,7 @@ alwaysApply: false
 ### 每个 Task 必须包含
 
 - **依赖**：T??? 或"无"
-- **设计引用**：指向 `epic-design.md:§4 全景类图/时序图` 或 `l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`
+- **设计引用**：指向 `epic-design.md:§一～§六`、`key-func-design/KD_*_*.md`、复杂/高风险 Story 的 `l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`；简单 Story 无独立 L2 时引用 `epic-design.md:§十三` 的承接说明
 - **步骤**：编号步骤列表
 - **验证**：可执行的验证清单（含 NFR 阈值）
 - **产物**：涉及的文件
@@ -93,7 +77,8 @@ alwaysApply: false
 
 - **禁止改写技术决策**：Task 只拆解与执行既定设计，不得新增未决策的方案
 - **设计引用必填**：每个 Task 必须有明确的设计引用
-- **Story 绑定**：每个 Task 必须绑定 `[ST-xxx]`（来自 §5）
+- **Story 绑定**：每个 Task 必须绑定 `[ST-xxx]`（来自 §十二）
+- **追溯矩阵必填**：`tasks.md` 必须包含 FR/NFR → Story → Task 追溯矩阵
 - **真实路径**：使用工程实际文件路径，不用示例路径
 - **模板结构保护**：不得增删模板已定义的章节
 - **独立可验证**：每个 Story 完成后可独立测试

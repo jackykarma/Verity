@@ -13,10 +13,6 @@ handoffs:
     agent: aisdd.epicdesign
     prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 l2_design/ST-xxx_*.md（L2 设计）
     send: true
-  - label: 创建检查清单
-    agent: aisdd.checklist
-    prompt: 为以下领域创建检查清单……
-    send: false
 ---
 
 ## 用户输入

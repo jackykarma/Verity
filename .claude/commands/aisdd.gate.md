@@ -63,8 +63,10 @@ $ARGUMENTS
 
 #### design-ready
 - [ ] `epic-design.md` 存在且版本已填写
-- [ ] §1（0 层架构）、§2（1 层架构）、§4（全景类图/时序）、§5（Story 拆解）已完成
-- [ ] 各 Feature 的 `l2_design/` 下所需 `ST-xxx_*.md` 齐备（若有 L2 设计）
+- [ ] §一～§六架构与边界章节已完成
+- [ ] §七关键设计已按需完成：有关键疑难点时存在 `key-func-design/KD_*_*.md` 并在 §7.1/§7.2 建立清单与引用；无关键疑难点时已标注 N/A 与原因
+- [ ] §十二 Story 拆解已完成
+- [ ] §十三 L2 索引已完成：复杂/高风险 Story 的 `l2_design/ST-xxx_*.md` 齐备；简单 Story 已标注由 `tasks.md` 设计引用与 DoD 承接
 - [ ] Story 拆解的 FR/NFR 覆盖矩阵（§十二.6）无遗漏
 - [ ] 设计说明书 Version 已填写
 
@@ -156,7 +158,7 @@ $ARGUMENTS
 | plan-ready | `/aisdd.epicdesign` |
 | design-ready | `/aisdd.featuretasks` |
 | tasks-ready | `/aisdd.analyze`（若未运行）→ `/aisdd.implement` |
-| implement-done | `/aisdd.verify`（若未运行）→ 合并/发布 |
+| implement-done | 合并/发布 |
 
 ## 与现有命令的关系
 

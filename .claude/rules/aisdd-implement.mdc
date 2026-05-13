@@ -16,14 +16,14 @@ alwaysApply: false
 ## 前置条件
 
 1. 本 Feature 的 `tasks.md` 已完成（Implement Ready）
-2. 检查清单状态（若 `checklists/` 目录存在）：所有检查清单项已完成，否则默认停止（除非用户显式指定"继续/强制/force"）
+2. `tasks-ready` 关卡已通过，或用户显式声明跳过并接受风险；`checklists/` 仅用于 spec-ready 前的需求质量评审，不作为 implement 阶段阻塞条件
 
 ## 输入（必须阅读）
 
 1. **本 Feature 的 `tasks.md`**：完整任务列表和执行计划
 2. **本 Feature 的 `plan.md`**：技术规格（约束/契约/边界）
 3. **`epic-design.md`**：架构设计、全景类图、关键时序、Story 拆解——架构事实源
-4. **各 Feature 的 `l2_design/ST-xxx_*.md`**：Story L2 详细设计（类图、时序图、触发条件）——详细设计事实源
+4. **各 Feature 的 `l2_design/ST-xxx_*.md`**：复杂/高风险 Story 的 L2 详细设计（若有）；简单 Story 以 `tasks.md` 的设计引用与 DoD 承接
 5. **本 Feature 的 `spec.md`**：FR/NFR 与验收边界
 6. **`epic-plan.md`**（若存在）：EPIC 级技术约束
 7. **现有工程代码**：被修改的文件及其上下文

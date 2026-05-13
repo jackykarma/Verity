@@ -23,7 +23,7 @@
 | `interface-design.md` | §九 | 对外/外部接口详述，模板见 `.specify/templates/epic-design-interface-template.md` |
 | `database-design.md` | §十 | 库表、ER、迁移与数据策略，模板见 `.specify/templates/epic-design-database-template.md` |
 | `analytics-tracking.md` | §十一 | 埋点事件与字段规约，模板见 `.specify/templates/epic-design-analytics-tracking-template.md` |
-| `features/FEAT-xxx/l2_design/` | §十三 | 各 Story 落码级详细设计（L2）；**每 Story 独立一个 Markdown 文件**（建议命名 `ST-xxx_<短slug>.md`），依赖关系由 §十三.1 索引表与 §十三.2 总览共同维护 |
+| `features/FEAT-xxx/l2_design/` | §十三 | 复杂/高风险 Story 的落码级详细设计（L2）；按需生成独立 Markdown 文件（建议命名 `ST-xxx_<短slug>.md`），依赖关系与 L2 状态由 §十三.1 索引表与 §十三.2 总览共同维护 |
 
 ---
 
@@ -528,7 +528,7 @@ flowchart LR
 
 > **说明**：Story 是 Feature 内的**技术开发分解单位**，从技术视角拆分，服务于**并行开发**和**分笔 git 提交**。Feature 才是最小交付单位（面向 PM/QA 演示验收），Story 不要求独立可交付。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）对应 Feature `l2_design/ST-xxx_<slug>.md` 中的 L2 详细设计。
 >
-> **下游同步**：`/aisdd.featuretasks` 执行时会自动回填各 Feature 的 `spec.md`「需求追溯表」，并建议同步更新各 Feature `plan.md`「变更记录」，确保上下游一致。
+> **下游追溯**：`/aisdd.featuretasks` 执行时在各 Feature 的 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵；不反向修改已冻结的 `spec.md` 或 `plan.md`。若发现上下游矛盾，须先通过 CR 或指定设计章节更新后再生成任务。
 
 ### 12.1 拆解策略
 
