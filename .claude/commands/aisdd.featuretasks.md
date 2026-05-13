@@ -41,24 +41,24 @@ $ARGUMENTS
 
 2. **加载设计文档**：从 FEATURE_DIR 及 EPIC 目录中读取以下文档：
     - **必需文档**：
-        - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三）、**全景类图与关键时序**（§七 KD / §八 key-diagram）、**架构图**（§四 零层、§五 一层）
-        - plan.md（**技术规格**：架构约束、数据存储约束、接口契约、项目结构）
+        - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三）、**关键类图与关键时序**（§七 KD）、**架构图**（§四 零层、§五 一层）
+        - plan.md（**轻量技术规约**：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
     - **可选文档**：epic-plan.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
     - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。
 
 3. **回填 spec.md 与确认 plan.md 一致性**（原 `/aisdd.backfill` 职责，现合并至此）：
     - 回填本 Feature 的 `spec.md`「需求追溯表」：从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射填入
-    - 确认 `plan.md` 技术规格与 `epic-design.md` 设计无矛盾：对照零层/一层架构，逐项核对 plan.md §二（架构约束）、§三（数据存储约束）、§四（接口契约）是否与设计说明书一致
+    - 确认 `plan.md` 轻量规约与 `epic-design.md` 设计无矛盾：对照零层/一层架构、接口设计、数据库设计与 L2，逐项核对 plan.md §二（增量约束）、§三（能力边界与外部依赖）、§四（数据/NFR/安全硬约束）、§五（Design 输入清单）是否已被设计说明书承接
     - 在 `plan.md`「变更记录」表中追加一条 design 一致性确认记录（版本号 +0.0.1，变更摘要写"design 一致性确认"）
     - **精准更新**：仅修改 spec.md 追溯表和 plan.md 变更记录表，不得修改 plan.md 正文章节
 
 4. **执行任务生成流程**：
-    - 加载 plan.md 并提取技术栈、技术规约、项目结构信息
+    - 加载 plan.md 并提取轻量技术规约、能力边界、数据/NFR/安全硬约束与 Design 输入清单
     - 从 **EPIC 软件设计说明书**的 **§十二 Story 拆解** 提取 Story 列表（ST-xxx），包括：目标、改动范围、依赖、覆盖 FR/NFR、验证条件
     - 从 spec.md 提取 FR/NFR 与 AC（验收标准）
-    - 若存在 data-model.md：提取实体并映射至对应 Story
-    - 若存在 contracts/ 目录：将接口端点映射至对应 Story
+    - 从 `database-design.md` 或各 L2 提取实体/表结构并映射至对应 Story
+    - 从 `interface-design.md`、contracts/ 目录或各 L2 提取接口端点并映射至对应 Story
     - 若存在 research.md：提取决策信息并纳入环境搭建阶段任务
     - 按 Story 组织生成任务（详见下文「任务生成规则」）
     - 生成展示 Story 完成顺序的依赖关系章节（Story/Task 双层）
@@ -75,7 +75,7 @@ $ARGUMENTS
     - 最后阶段：优化与跨领域关注点
     - 所有任务必须遵循严格的清单格式（详见下文「任务生成规则」）
     - 每个任务需标注清晰的文件路径
-    - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` 中 §八 key-diagram 全景类图/时序图，或各 Feature 的 `l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`）
+    - 每个 Task 必须提供 **设计引用**（指向 `epic-design.md` §七 KD 清单、`key-func-design/KD_*_*.md` 中关键类图/时序图，或各 Feature 的 `l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图`）
     - 展示 Story 完成顺序的依赖关系章节
     - 每个 Story 的并行执行示例
     - 增量交付策略
@@ -126,7 +126,7 @@ $ARGUMENTS
 每个 Task 必须包含 **设计引用**，指向 EPIC 软件设计说明书中的对应设计：
 
 ```text
-设计引用：epic-design.md:§八 key-diagram 全景类图/时序图
+设计引用：key-func-design/KD_001_<slug>.md:关键类图/核心调用链时序图
 设计引用：l2_design/ST-001_<slug>.md:功能设计:类图
 设计引用：l2_design/ST-002_<slug>.md:功能设计:时序图
 ```
@@ -137,11 +137,11 @@ $ARGUMENTS
     - 每个 Story（ST-xxx）对应一个独立阶段
     - 标注 Story 间依赖（以设计说明书为准）
 
-2. **基于接口契约**：
-    - 将每个契约/接口端点映射至其服务对应的 Story
+2. **基于接口设计**：
+    - 将 `interface-design.md`、contracts/ 或 L2 中的每个契约/接口端点映射至其服务对应的 Story
 
-3. **基于数据模型**：
-    - 将每个实体映射至其所属 Story
+3. **基于数据设计**：
+    - 将 `database-design.md` 或 L2 中的每个实体/表结构映射至其所属 Story
 
 4. **基于环境搭建/基础设施**：
     - 共享基础设施 → 环境搭建阶段（第 1 阶段）

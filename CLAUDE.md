@@ -58,9 +58,9 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.epicspec` | `epic.md` | EPIC 入口，运行 `create-new-epic.ps1` |
 | `/aisdd.featurespec` | 各 Feature `spec.md` | FR / NFR / AC |
 | `/aisdd.gate spec-ready` | `gate-log.md` 条目 | 所有 `spec.md` 完成后执行 |
-| `/aisdd.epicplan` | `epic-plan.md` | 多 Feature EPIC 必选 |
+| `/aisdd.epicplan` | `epic-plan.md` | 多 Feature 且存在跨 Feature 约束时使用 |
 | `/aisdd.epicuidesign` | `ux-design.md` | 可选，与 epicplan 并行 |
-| `/aisdd.featureplan` | 各 Feature `plan.md` | 需在 epic-plan（或单 Feature 合并 plan）完成后执行 |
+| `/aisdd.featureplan` | 各 Feature `plan.md` | 产出轻量技术规约；需在 epic-plan（若存在）或单 Feature 合并 plan 约束下执行 |
 | `/aisdd.gate plan-ready` | gate 条目 | 所有 `plan.md` 完成后执行 |
 | `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 `features/*/l2_design/ST-xxx_*.md` | 分阶段（范围递减、精度递增）：**`key`**（§七）论证方案可行性，KD 内类图须含全量公共方法签名、时序须穷举全异常分支 → **`nfr`**（§八~§十一）量化验证 → **`story`**（§十二）拆解 → **`l2`**（§十三）Story 级落码设计（§八~§十一 正文在三份独立 md 中，`epic-design.md` 仅引用） |
 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 含回填 spec 追溯表 |
@@ -69,7 +69,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.cr` | CR 文件 + 下游产物更新 | 变更请求 |
 | `/aisdd.gate` | `gate-log.md` | 关卡：`spec-ready`、`plan-ready`、`design-ready`、`tasks-ready`、`implement-done` |
 
-**单 Feature EPIC 快速通道**：跳过 `epic-plan.md`，将 EPIC 级约束合并写入唯一的 `plan.md`。
+**单 Feature EPIC 快速通道**：跳过 `epic-plan.md`，将必要 EPIC 级约束合并写入唯一的 `plan.md`。
 
 **小改动快速通道**（预估 ≤3 人天）：跳过 `epic-plan.md`、`ux-design.md`、各 Feature `l2_design/` 下 L2 正文；`epic-design.md` 仅写 Story 拆解 + 关键类图。
 
@@ -110,7 +110,7 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 
 **适用范围**：本项目所有文档中出现的时序图，包括但不限于 AISDD 设计文档、技术实现文档、功能文档、需求文档等。
 
-每张 `sequenceDiagram` 代码块**紧下方**必须有独立文字说明（标题统���为「协作者与过程说明」），内容须覆盖：
+每张 `sequenceDiagram` 代码块**紧下方**必须有独立文字说明（标题统一为「协作者与过程说明」），内容须覆盖：
 
 1. **触发与入口**：谁、在什么条件下发起交互
 2. **协作链与职责**：沿调用方向说明每一跳「谁调用谁、为了什么、输入/输出语义」
@@ -136,8 +136,8 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 |------|-----------|
 | `spec.md` | 需求：FR / NFR / AC / 范围边界 / 完整场景矩阵（设计走查与验证追溯基线） |
 | `ux-design.md` | 体验呈现：交互规则、视觉规范、设计稿索引 |
-| `epic-plan.md`（或合并后的 `plan.md`） | EPIC 级技术约束 |
-| `plan.md` | Feature 级技术规格：技术约束、接口契约、数据存储边界 |
+| `epic-plan.md`（或合并后的 `plan.md`） | EPIC 级公共约束：跨 Feature 边界、共享能力 Owner、NFR 总预算 |
+| `plan.md` | Feature 级轻量技术规约：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单 |
 | `epic-design.md` | 架构与设计总览：0/1 层；§7.1 KD 清单与依赖、§7.2 引用；§8/§14 索引；§9 摘要并链至 `nfr.md`；§10～§12 摘要并链至 `interface-design.md` / `database-design.md` / `analytics-tracking.md` |
 | `key-func-design/KD_*_*.md` | §七各 KD 详细设计（核心方案、流程图、核心时序） |
 | `nfr.md` | §九技术评估（设计产出验证，9.1～9.7 量化全文） |

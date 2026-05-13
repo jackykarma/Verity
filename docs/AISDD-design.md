@@ -92,9 +92,9 @@ epic.md            spec.md           epic-plan.md         tasks.md
 ────────────      ──────────────────────────────────
 spec.md         → 需求：FR/NFR/AC/范围边界
 ux-design.md    → 体验：交互规则/视觉规范/设计稿索引
-epic-plan.md    → EPIC 级技术约束：全局技术栈/分层规则/NFR 预算
-plan.md         → Feature 级技术规格：接口契约/数据存储/实现约束
-epic-design.md  → 架构与设计：0/1 层架构/全景类图/时序/Story 拆解
+epic-plan.md    → EPIC 公共约束：跨 Feature 边界/共享能力 Owner/NFR 总预算
+plan.md         → Feature 轻量规约：增量约束/能力边界/数据与 NFR 硬约束/Design 输入
+epic-design.md  → 架构与详细设计：0/1 层架构/接口/数据库/类图/时序/Story 拆解
 tasks.md        → 执行：可操作 Task，含设计追溯
 gate-log.md     → 审批：各阶段关卡评审记录
 ```
@@ -181,33 +181,33 @@ challenge 在关键时机是强烈推荐的：多 Feature EPIC 的 spec 全部�
 ### 4.5 EPIC 技术规约（epicplan）
 
 **输入**：所有 Feature 的 spec.md + 现有工程代码
-**产出**：`epic-plan.md`（全局技术约束，不含架构图）
+**产出**：`epic-plan.md`（EPIC 公共约束，不含架构图和详细设计）
 
 epic-plan.md 的核心内容：
-- 全局技术栈约束（哪些库/框架/API 可用）
-- 分层规则与模块约束（哪层调哪层，禁止跨层）
+- 跨 Feature 公共约束（哪些库/框架/API 被锁定）
+- 跨 Feature 边界与依赖规则（谁是 Owner，谁是 Consumer）
 - 共享能力识别（哪些能力跨 Feature 复用，Owner 是谁）
 - NFR 预算框架（全局内存/性能/启动时间上限，各 Feature 从这里分配）
-- 统一错误码规范
+- 统一运行时原则（线程、错误、日志、安全）
 
-**单 Feature EPIC 快速通道**：可省略 epic-plan.md，将 EPIC 级约束合并写入唯一 Feature 的 plan.md。
+**裁剪规则**：单 Feature EPIC 可省略 epic-plan.md，将必要 EPIC 级约束合并写入唯一 Feature 的 plan.md；多 Feature 但无跨 Feature 约束时也可按需省略。
 
-### 4.6 Feature 技术规约（featureplan）
+### 4.6 Feature 轻量技术规约（featureplan）
 
 **输入**：spec.md + epic-plan.md + ux-design.md + 现有工程代码
-**产出**：`plan.md`（Feature 级技术规格）
+**产出**：`plan.md`（Feature 级轻量技术规约）
 
 plan.md 的六个章节：
 ```
-§一  本 Feature 特有技术上下文（相对 epic-plan §一 的增量差异）
-§二  架构约束与演进规则（在 epic-plan §2 分层内）
-§三  数据存储约束
-§四  接口与契约规范（能力承诺/外部依赖约束/接口约束规则；含 §4.1/§4.2）
-§五  合规性与安全约束
-§六  项目结构约定（本 Feature 文档目录）
+§一  规约摘要
+§二  Feature 增量约束
+§三  能力边界与外部依赖
+§四  数据、NFR 与安全硬约束
+§五  Design 输入清单
+§六  待确认问题
 ```
 
-**差距分析**是这个阶段最重要的输出：明确每条需求对应的现有模块现状 → 目标状态，这直接约束了后续的架构设计和 Story 拆解。
+**职责边界**：plan 只冻结约束和边界，不写架构图、类图、时序图、Story、接口字段、数据库表结构或埋点字段。详细设计由 epicdesign 及其子文件承接。
 
 ### 4.7 EPIC 软件设计说明书（epicdesign）
 
@@ -341,7 +341,7 @@ Git 分支策略：
   specs/epics/
     EPIC-001-short-name/
       epic.md                   ← EPIC 容器
-      epic-plan.md              ← EPIC 级技术约束
+      epic-plan.md              ← EPIC 公共约束（按需）
       epic-design.md            ← EPIC 软件设计说明书（§7 清单与 KD 引用）
       key-func-design/          ← 各 KD 独立 md（KD_*_*.md）与按需 feature-flows.md
       nfr.md                    ← §八 技术评估（量化全文）
@@ -350,7 +350,7 @@ Git 分支策略：
       features/
         FEAT-001-xxx/
           spec.md               ← Feature 需求规格
-          plan.md               ← Feature 技术规约
+          plan.md               ← Feature 轻量技术规约
           tasks.md              ← 可执行任务
           l2_design/            ← L2 详细设计（ST-xxx_*.md 每 Story 一文件）
           checklists/           ← 检查清单

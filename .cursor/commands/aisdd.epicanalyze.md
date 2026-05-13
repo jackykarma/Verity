@@ -63,7 +63,8 @@ $ARGUMENTS
 
 对每个 Feature 目录，加载（按存在性渐进）：
 - `spec.md`：FR/NFR/AC/依赖/核心实体
-- `plan.md`：技术规约/接口契约/数据模型
+- `plan.md`：轻量技术规约/能力边界/数据与 NFR 硬约束
+- `interface-design.md`、`database-design.md`、各 L2：接口契约与数据模型详细设计
 - `tasks.md`：Task 清单/设计引用
 - `l2_design/ST-xxx_*.md`：L2 详细设计（每 Story 一文件）
 
@@ -85,7 +86,7 @@ $ARGUMENTS
 
 #### C. NFR 预算一致性
 
-- 各 Feature spec.md 的 NFR 指标之和是否超出 epic-plan.md §7 的 EPIC 级预算上限
+- 各 Feature spec.md 的 NFR 指标之和是否超出 epic-plan.md §六 的 EPIC 级预算上限
 - 性能、功耗、内存预算是否有 Feature 未明确分配
 - 若 epic.md 记录了完成约束，是否与 epic-plan.md 和各 Feature 的验收口径一致
 
@@ -145,7 +146,7 @@ $ARGUMENTS
 
 | ID | 类别 | 严重程度 | 涉及 Feature | 位置 | 摘要 | 建议 |
 |----|------|----------|-------------|------|------|------|
-| EA1 | 接口契约 | CRITICAL | FEAT-001, FEAT-002 | plan.md:§四 | ... | ... |
+| EA1 | 接口契约 | CRITICAL | FEAT-001, FEAT-002 | interface-design.md / L2 | ... | ... |
 
 ### NFR 预算汇总
 

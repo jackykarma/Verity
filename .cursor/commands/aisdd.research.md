@@ -5,9 +5,9 @@ handoffs:
     agent: aisdd.epicspec
     prompt: 调研完成，基于调研结论填写 EPIC 规格说明（调研报告中的「输入建议」可直接参考）
     send: false
-  - label: 进入 Feature 技术规约
+  - label: 进入 Feature 轻量技术规约
     agent: aisdd.featureplan
-    prompt: 调研完成，基于调研结论制定 Feature 技术规约（调研报告中的「推荐方案」可直接参考）
+    prompt: 调研完成，基于调研结论制定 Feature 轻量技术规约（调研报告中的「推荐约束/风险」可直接参考，详细设计留给 epicdesign）
     send: false
   - label: 澄清剩余不确定项
     agent: aisdd.clarify
@@ -227,7 +227,7 @@ $ARGUMENTS
    - 相关模块是否存在已知技术债（硬编码 / 过时 API / 不规范实现）
    - 技术债是否影响本次需求的实现难度
 
-4. **接口契约**
+4. **接口与数据事实**
    - 现有模块对外暴露的接口（方法签名 / 数据模型）
    - 与新需求的接口兼容性
 
@@ -311,7 +311,7 @@ $ARGUMENTS
 | ID | 风险描述 | 严重程度 | 消解方案 |
 |----|---------|---------|---------|
 | R-001 | MediaStore 在 API 29 以下行为不一致 | 中 | 按版本分支处理，低版本使用旧 API |
-| R-002 | 后台录音被系统策略限制（Android 11+） | 高 | 改为前台 Service + 通���，或改变需求边界 |
+| R-002 | 后台录音被系统策略限制（Android 11+） | 高 | 改为前台 Service + 通知，或改变需求边界 |
 
 ---
 
@@ -352,9 +352,9 @@ $ARGUMENTS
 - FR-xxx：需明确「后台权限」的用户感知范围（前台 Service 通知文案）
 
 **→ plan.md 建议补充**：
-- §三 架构约束：MediaStore 访问须在 Data 层，禁止 UI 层直接调用
-- §五 接口契约：`MediaRepository.queryMedia(type, apiLevel)` 需处理版本分支
-- §四 数据模型：`MediaFile` 实体须包含 `uri`（非 path），兼容 Scoped Storage
+- §二 Feature 增量约束：MediaStore 访问不得由 UI 层直接触发
+- §三 能力边界与外部依赖：媒体查询能力需区分 API 版本并声明降级约束
+- §五 Design 输入清单：`MediaRepository.queryMedia(...)` 接口与 `MediaFile` 数据结构需在 `interface-design.md` / `database-design.md` 或 L2 中详细设计
 
 **→ epic-plan.md 建议补充**（若为 EPIC 级结论）：
 - 跨 Feature 共享能力：MediaRepository 作为 Capability Feature，避免多 Feature 各自实现

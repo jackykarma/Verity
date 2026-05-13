@@ -1,7 +1,7 @@
 ---
-description: "**EPIC 级**技术规约与约束。须在**所有 Feature 的 spec 均已输出**之后运行；基于 epic.md 与各 feature spec.md 及**现有工程代码**，产出 EPIC 根下的 epic-plan.md（全局技术约束与规约，不含 0 层/1 层架构图）。各 Feature 的 plan 必须在其约束下编写。0 层/1 层架构图在后续 /aisdd.epicdesign 阶段产出。"
+description: "**EPIC 级**轻量技术规约与约束。仅在多 Feature 且存在跨 Feature 技术约束时运行；基于 epic.md 与各 feature spec.md 及现有工程代码，产出 EPIC 根下的 epic-plan.md（公共约束、共享能力 Owner、NFR 总预算、Feature plan 裁剪策略）。不含架构图、类图、时序、接口字段、表结构或 Story 拆解，这些在 /aisdd.epicdesign 阶段产出。"
 handoffs:
-  - label: 制定 Feature 技术规约
+  - label: 制定 Feature 轻量技术规约
     agent: aisdd.featureplan
     prompt: 完成 EPIC Plan 后，基于 epic-plan 约束制定各 Feature 的 plan
     send: true
@@ -34,7 +34,9 @@ $ARGUMENTS
 
 ## 大纲
 
-目标：在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）下产出 `epic-plan.md`，为**各 Feature 的 plan** 提供**EPIC 级技术约束与规约**。内容为纯文字约束（技术栈、分层、线程、错误处理、数据、接口、NFR 预算、共享能力等），**不含 0 层/1 层架构图**（架构图在 `/aisdd.epicdesign` 阶段产出）。
+目标：在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）下产出 `epic-plan.md`，为**各 Feature 的 plan** 提供**EPIC 级公共约束**。内容为轻量文字规约（技术栈锁定、跨 Feature 边界、统一运行时约束、数据/接口原则、NFR 总预算、共享能力 Owner、Feature plan 裁剪策略），**不含 0 层/1 层架构图、类图、时序图、接口字段、表结构或 Story 拆解**（这些在 `/aisdd.epicdesign` 阶段产出）。
+
+**裁剪规则**：单 Feature EPIC 可省略 `epic-plan.md`，将必要 EPIC 级约束合并到唯一 Feature 的 `plan.md`；纯修复/≤3 人天小改动可跳过本命令。
 
 **须在 epic.md 已存在、EPIC 根下 epic-plan.md 尚不存在时运行**；若已存在，可直接说明要更新的章节或范围，由 AI 做增量更新。
 
@@ -64,16 +66,14 @@ $ARGUMENTS
    - **分析现有工程代码**：架构分层、模块划分、包组织、现有框架，确保规约与现有工程一致
 
 4. **填充 epic-plan.md**：按 **epic.md、各 feature spec、constitution、现有代码**，填充 epic-plan-template 各章节，写入 `EPIC_PLAN`。必须包含：
-   - **技术栈与工程约束**（全局锁定）
-   - **分层与模块约束**（架构原则，依赖方向，模块边界）
-   - **线程与并发模型**
-   - **错误处理规范**
-   - **数据与存储约束**（SoR、缓存、迁移）
-   - **接口与契约原则**
+   - **EPIC 级公共约束**（只写跨 Feature 或实现期不可擅改的约束）
+   - **跨 Feature 边界与依赖规则**（不画架构图，不列组件清单）
+   - **统一运行时约束**（线程/错误/日志/安全原则）
+   - **数据与存储总约束**（SoR、缓存、迁移原则，不写表结构）
+   - **接口与契约原则**（能力级原则，不写方法签名/字段）
    - **NFR 预算框架**（性能/功耗/内存/安全，各 Feature 分配）
-   - **跨 Feature 共享能力识别**（与 epic.md 对齐）
-   - **日志与可观测性**
-   - **安全与合规约束**（如适用）
+   - **跨 Feature 共享能力识别**（Owner、消费方、后续详细设计位置）
+   - **Feature Plan 裁剪规则**（每个 Feature 用 Lite 还是 Standard，必填重点是什么）
    - **变更记录**：初版写入一条
 
 5. **与 epic.md 的「跨 Feature 技术策略」对齐**：epic-plan 中的共享能力、技术约束应与 epic.md 的轻量登记一致，并将详细约束补齐到 epic-plan；若 epic.md 该节尚为占位，可根据 epic-plan 输出建议其内容。

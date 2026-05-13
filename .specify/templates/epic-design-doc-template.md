@@ -66,7 +66,7 @@
 | [例如：错误处理]    | FEAT-001      | FEAT-002           | 本文 §5.3 / FEAT-001 plan.md §四      |
 
 
-> 若某共享能力 Owner 的 plan 尚未完成，后续 Feature 的 plan 需**等待**或与其**协商接口契约**后再设计（见各 Feature plan.md 前置检查）。
+> 若某共享能力 Owner 的 plan 尚未完成，后续 Feature 的 plan 需**等待**或与其**协商能力边界**后再设计（见各 Feature plan.md 前置检查）。
 
 ### P0 场景覆盖快照（与各 Feature spec.md 完整场景矩阵对照）
 
@@ -307,7 +307,7 @@ flowchart TB
 
 > **目的**：用带分区的流程图展示组件之间的**端到端协作流程**，覆盖正常 + 关键异常路径。每个 subgraph 分区对应 5.2 中的组件/模块边界，与 5.1 框架图形成互补——5.1 展示静态结构，本图展示动态控制流与异常分支。
 >
-> 本图从架构视角设计，须与各 Feature plan.md 中定义的接口契约保持**双向一致**；若全局视角下发现组件协作方式与 Feature 契约存在矛盾，须通过增量变更流程双向同步。
+> 本图从架构视角设计，须与各 Feature plan.md 中定义的能力边界保持**双向一致**；若全局视角下发现组件协作方式与 Feature 规约存在矛盾，须通过增量变更流程双向同步。
 >
 > **要求**：
 >
@@ -773,13 +773,13 @@ flowchart TB
 | 一、简介                              | —                 | 范围/背景参考                                        |
 | 二、需求概述                            | —                 | 需求边界参考                                         |
 | 三、领域模型                            | —                 | 命名权威参考                                         |
-| 四、零层架构                            | plan.md §一 技术背景与工程上下文 | 阶段/边界参考                                        |
-| 五、一层架构                            | plan.md §二 架构约束与演进规则   | 模块/组件参考                                        |
+| 四、零层架构                            | plan.md §一/§二 的约束摘要与增量边界 | 阶段/边界参考                                        |
+| 五、一层架构                            | plan.md §二/§三 的增量约束、能力边界与外部依赖 | 模块/组件参考                                        |
 | 六、技术风险与边界场景（设计输入）                 | —                 | NFR/风险参考；§七 的设计约束输入                         |
 | 七、疑难点/亮点（策略+流程图）                  | —                 | 设计决策参考：`epic-design.md` §7.1 清单 + `key-func-design/KD_*_*.md`；KD 内类图/时序图即为完整编码蓝图 |
 | 八、技术评估（设计产出验证）                    | —                 | **`nfr.md`**：NFR 量化验证；Task 验收标准；其中 **8.7 RomSize** 作为包体发布决策依据 |
-| 九、接口设计（→ `interface-design.md`）       | plan.md §四 能力承诺与约束规则对齐 | **`interface-design.md`**：接口设计事实源；Task 接口实现依据           |
-| 十、数据库设计（→ `database-design.md`）     | plan.md §三 数据存储约束（§3.1/§3.2）对齐   | **`database-design.md`**：数据表结构参考；Task 数据层实现依据         |
+| 九、接口设计（→ `interface-design.md`）       | plan.md §三 能力边界与外部依赖对齐；plan 不写方法签名/字段 | **`interface-design.md`**：接口设计事实源；Task 接口实现依据           |
+| 十、数据库设计（→ `database-design.md`）     | plan.md §四 数据硬约束对齐；plan 不写表结构/字段/索引   | **`database-design.md`**：数据表结构参考；Task 数据层实现依据         |
 | 十一、埋点技术方案（→ `analytics-tracking.md`） | —                 | **`analytics-tracking.md`**：埋点事件与字段规约参考                |
 | 十二、Story 拆解                       | tasks.md 直接引用      | 每个 Task 绑定 ST-xxx                              |
 | 十三、二层 Story 详细设计（L2）索引 → `features/*/l2_design/ST-xxx_*.md` | —                 | 设计引用：`features/FEAT-xxx/l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图` |

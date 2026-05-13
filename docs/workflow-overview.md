@@ -12,10 +12,10 @@ flowchart TD
     Research["（可选）research 调研报告<br/>platform / library / feasibility / codebase"] -.-> Start
     Start([需求输入]) --> EpicMd["epic.md<br/>EPIC 规格说明"]
     EpicMd --> SpecMd["各 Feature spec.md<br/>Feature 规格说明"]
-    SpecMd --> EpicPlan["epic-plan.md<br/>EPIC 技术规约<br/>（多 Feature 必选）"]
+    SpecMd --> EpicPlan["epic-plan.md<br/>EPIC 公共约束<br/>（多 Feature 按需）"]
     SpecMd --> PlanSingle["唯一 Feature plan.md<br/>含合并的 EPIC 级约束<br/>（单 Feature 可省略 epic-plan）"]
     SpecMd --> UxDesign["ux-design.md<br/>设计稿解析"]
-    EpicPlan --> PlanMd["各 Feature plan.md 初版<br/>Feature 技术规约"]
+    EpicPlan --> PlanMd["各 Feature plan.md 初版<br/>Feature 轻量技术规约"]
     PlanSingle --> PlanMd
     UxDesign -.-> PlanMd
     PlanMd --> EpicDesign["epic-design.md<br/>EPIC 软件设计说明书"]
@@ -40,7 +40,7 @@ flowchart TD
     style TasksMd fill:#E3F2FD,stroke:#1976D2
 ```
 
-**说明**：实线箭头表示顺序依赖，虚线箭头表示可选输入。`ux-design.md` 与 `epic-plan.md` 可并行产出（均依赖所有 `spec.md` 完成）。**单 Feature EPIC** 可不走 `epic-plan.md`，将 EPIC 级技术约束合并进唯一的 `plan.md`（与 `constitution.md` §八、`get-epic-paths.ps1` 的 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 判定一致）；**多 Feature EPIC** 仍须产出 `epic-plan.md` 后再写各 Feature `plan.md`（或与 `ux-design` 并行窗口内完成）。
+**说明**：实线箭头表示顺序依赖，虚线箭头表示可选输入。`ux-design.md` 与 `epic-plan.md` 可并行产出（均依赖所有 `spec.md` 完成）。**单 Feature EPIC** 可不走 `epic-plan.md`，将 EPIC 级技术约束合并进唯一的 `plan.md`（与 `constitution.md` §八、`get-epic-paths.ps1` 的 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 判定一致）；**多 Feature EPIC** 仅在存在跨 Feature 技术约束、共享能力 Owner、NFR 总预算或执行顺序约束时产出 `epic-plan.md`。Feature `plan.md` 是轻量技术规约，只记录增量约束、能力边界、数据/NFR/安全硬约束与 Design 输入清单，详细设计由 `epic-design.md` 及子文件承接。
 
 ### 新需求如何走流程
 
@@ -49,8 +49,8 @@ flowchart TD
 1. **（可选）前置调研** → 若技术方向不确定（涉及陌生平台 API / 需要评估引入新库 / 需求可行性存疑），先运行 `/aisdd.research`（支持 `platform` / `library` / `feasibility` / `codebase` 等研究类型，`--parallel` 多主题并行）；调研报告中的「下游文档输入建议」直接喂给后续步骤
 2. **需求输入** → 运行 `create-new-epic.ps1` 创建 EPIC 目录与空 `epic.md`；**默认**同时新建并切换 `epic/EPIC-xxx-*` 分支，**可选** `-UseCurrentBranch` 保留当前 Git 分支（见 `/aisdd.epicspec`）→ `/aisdd.epicspec` 填充 `epic.md`（EPIC 规格 + Feature 拆分）
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
-4. **技术规约与 UX** → 多 Feature：产出 `epic-plan.md`；单 Feature：可省略 `epic-plan.md`，在唯一 `plan.md` 中写入 EPIC 级约束。可选 `ux-design.md`
-5. **Feature 技术规约** → 各 Feature 产出 `plan.md` 初版（须在 `epic-plan.md` 约束下编写，或单 Feature 时在合并后的 `plan.md` 中自洽）
+4. **技术规约与 UX** → 多 Feature 且存在跨 Feature 约束时产出 `epic-plan.md`；单 Feature 或小改动可省略 `epic-plan.md`，在唯一 `plan.md` 中写入必要 EPIC 级约束。可选 `ux-design.md`
+5. **Feature 轻量技术规约** → 各 Feature 产出 `plan.md` 初版（只写增量约束、能力边界、数据/NFR/安全硬约束与 Design 输入清单；详细设计不进入 plan）
 6. **设计说明书** → 按 `key → nfr → story → l2` 分阶段推进（范围递减、精度递增）：**`key`**（§七）论证关键设计方案可行性，KD 内图表（类图全量签名 + 时序穷举全分支）为完整编码蓝图；**`nfr`**（§八~§十一）量化验证设计方案是否满足 NFR；**`story`**（§十二）拆解为可独立交付的 Story；**`l2`**（§十三）按 Story 切片产出落码级详细设计。产出 `epic-design.md`（§七清单 + 引用 `key-func-design/KD_*_*.md`）、`nfr.md`（§八全文）、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 `features/*/l2_design/ST-xxx_*.md`（L2；§十三 索引与依赖总览；无根目录 `key-func-design.md`）
 7. **Task 拆解** → 各 Feature 产出 `tasks.md`（含回填 spec 追溯表；建议同步各 Feature `plan.md`「变更记录」）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
@@ -66,9 +66,9 @@ flowchart TD
 | **（可选）前置调研** | `research-<topic>-<date>.md`（`--save` 时写入；否则仅输出报告） | 技术调研事实源（平台 API / 库评估 / 可行性 / 存量代码） | 需求描述、现有代码 | — |
 | **EPIC 规格** | `epic.md` | 需求边界与 Feature 拆分 | 需求描述、调研报告（可选） | — |
 | **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC/完整场景矩阵） | `epic.md` | Spec Ready |
-| **EPIC 技术规约** | `epic-plan.md`（多 Feature 必选；单 Feature 可省略） | EPIC 技术规约事实源 | `epic.md`、各 `spec.md` | — |
+| **EPIC 技术规约** | `epic-plan.md`（多 Feature 且存在跨 Feature 约束时使用；单 Feature 可省略） | EPIC 公共约束事实源 | `epic.md`、各 `spec.md` | — |
 | **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
-| **Feature 技术规约** | 各 `plan.md`（初版） | Feature 技术规格事实源（§一~§六）；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
+| **Feature 轻量技术规约** | 各 `plan.md`（初版） | Feature 约束事实源：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`（含完整场景矩阵）、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
 | **L2 详细设计** | 各 `features/*/l2_design/ST-xxx_*.md` | 落码级设计事实源 | `epic-design.md` | — |
 | **Task 拆解** | 各 `tasks.md`（含回填 plan/spec） | 执行事实源 | `plan.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md` | — |
@@ -168,7 +168,7 @@ flowchart TD
     Step0["/aisdd.research（可选）<br/>前置技术调研<br/>platform / library / feasibility / codebase<br/>支持 --parallel 多主题并行"] -.-> Step1
     Step1["create-new-epic.ps1<br/>EPIC 目录 + epic.md 模板<br/>默认：新建 epic/* 分支<br/>可选：-UseCurrentBranch"] --> Step2["/aisdd.epicspec<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
     Step2 --> Step3["/aisdd.featurespec<br/>创建 Feature 目录 + 产出 spec.md<br/>默认：逐个 Feature 执行<br/>可选：--batch 批量并行生成"]
-    Step3 --> Step4["/aisdd.epicplan<br/>产出 epic-plan.md<br/>（多 Feature 必选）"]
+    Step3 --> Step4["/aisdd.epicplan<br/>产出 epic-plan.md<br/>（多 Feature 按需）"]
     Step3 --> Step5["/aisdd.epicuidesign<br/>解析设计稿 → ux-design.md"]
     Step3 --> Step4b["单 Feature：跳过 epicplan<br/>合并 EPIC 约束 → plan.md"]
     Step4 --> Step6["/aisdd.featureplan<br/>产出各 Feature plan.md 初版<br/>默认：逐个执行（依赖顺序）<br/>可选：--batch 依赖感知并行生成"]
@@ -195,9 +195,9 @@ flowchart TD
 | 2 | `/aisdd.epicspec` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
 | 3 | `/aisdd.featurespec` | Feature 目录 + `spec.md`（填充内容） | **默认**：每个 Feature 单独触发一次；**`--batch` 模式**：一次触发，顺序创建所有 Feature 目录后并行生成各 `spec.md`（从 `epic.md` Feature 列表读取，适合多 Feature EPIC） |
 | 3.5 | `/aisdd.challenge spec` | 挑战报告（不写入文件）：从三视角对抗性检测 spec 漏洞、NFR 可行性、范围边界 | **可选**；多 Feature EPIC 强烈推荐；单 Feature/≤3人天可跳过。`gate spec-ready` 前运行 |
-| 4 | `/aisdd.epicplan` | `epic-plan.md` | **多 Feature**：每个 EPIC 一次；**单 Feature**：可跳过，EPIC 级约束在步骤 6 合并写入唯一 `plan.md` |
+| 4 | `/aisdd.epicplan` | `epic-plan.md` | **多 Feature 且存在跨 Feature 约束**：每个 EPIC 一次；**单 Feature/小改动**：可跳过，EPIC 级约束在步骤 6 合并写入唯一 `plan.md` |
 | 5 | `/aisdd.epicuidesign` | `ux-design.md`（解析设计稿 → 结构化交互/视觉规范） | 每个 EPIC 一次（可选，与步骤 4 或单 Feature 路径并行） |
-| 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | **默认**：每个 Feature 单独触发一次（依赖顺序）；**`--batch` 模式**：一次触发，依赖感知并行生成（Capability Owner 先，Product Consumer 后；无依赖则完全并行），生成后自动做接口契约与 NFR 预算快速检查 |
+| 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | **默认**：每个 Feature 单独触发一次（依赖顺序）；**`--batch` 模式**：一次触发，依赖感知并行生成（Capability Owner 先，Product Consumer 后；无依赖则完全并行），生成后自动做能力边界与 NFR 预算快速检查 |
 | 6.5 | `/aisdd.challenge plan` | 挑战报告（不写入文件）：从三视角对抗性检测架构风险、技术债务、可测试性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate plan-ready` 前运行 |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `nfr` / `story` / `l2`） | 分阶段。前置：`get-epic-paths.ps1 -Json` 中 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true |
 | 7.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate design-ready` 前运行 |
@@ -222,7 +222,7 @@ flowchart TD
 2. **CR 评审**：结论为通过 / 有条件通过 / 不通过
 3. **按类型走流程**：
    - **需求类变更**（Scope/FR/NFR/AC/边界）→ 走 [7.1 需求变更流程](#71-需求变更流程)：从更新 `spec.md` 起，自顶向下检查并更新 ux-design → plan → epic-design → l2_design（各 ST 文件）→ tasks
-   - **技术方案类变更**（架构/接口/实现决策）→ 走 [7.2 技术方案变更流程](#72-技术方案变更流程)：从更新 `plan.md`/`epic-plan.md` 起，自中间向两端扩展，必要时先协商 NFR 再更新设计说明书与 tasks
+   - **技术方案类变更**（公共约束、能力边界、接口/实现决策）→ 走 [7.2 技术方案变更流程](#72-技术方案变更流程)：从更新 `plan.md`/`epic-plan.md` 或设计说明书起，自中间向两端扩展，必要时先协商 NFR 再更新设计说明书与 tasks
 4. **执行下游更新清单**：只更新 CR 影响分析中列出的产物，每份文档更新后填写 Version 与变更记录表（`/aisdd.cr` 会分步执行并逐步确认）
 
 核心规则：
@@ -246,7 +246,7 @@ flowchart TD
     CheckUX -->|是| UpdateUX["更新 ux-design.md"]
     CheckUX -->|否| CheckPlan{涉及技术方案?}
     UpdateUX --> CheckPlan
-    CheckPlan -->|是| UpdatePlan["更新 plan.md<br/>契约/预算/风险"]
+    CheckPlan -->|是| UpdatePlan["更新 plan.md<br/>约束/边界/风险"]
     CheckPlan -->|否| CheckDesign{涉及架构/Story?}
     UpdatePlan --> CheckDesign
     CheckDesign -->|是| UpdateDesign["更新 epic-design.md<br/>Story 拆解/类图/时序"]
@@ -281,8 +281,8 @@ flowchart TD
     NegotiateNFR --> Review
     Review -->|不通过| Reject([驳回])
     Review -->|通过| Scope{变更范围?}
-    Scope -->|"EPIC 级<br/>（架构/分层/共享能力）"| UpdateEpicPlan["更新 epic-plan.md<br/>技术约束"]
-    Scope -->|"Feature 级<br/>（接口/数据/实现）"| UpdatePlan["更新 plan.md<br/>技术规约"]
+    Scope -->|"EPIC 级<br/>（公共约束/共享能力）"| UpdateEpicPlan["更新 epic-plan.md<br/>公共约束"]
+    Scope -->|"Feature 级<br/>（增量约束/能力边界）"| UpdatePlan["更新 plan.md<br/>轻量规约"]
     UpdateEpicPlan --> UpdatePlan
     UpdatePlan --> UpdateDesign["更新 epic-design.md<br/>架构图/类图/时序图"]
     UpdateDesign --> UpdateL2["更新 l2_design/ST-xxx_*.md 与 §十三"]
@@ -302,9 +302,9 @@ flowchart TD
 ```
 
 **关键原则**：
-- 方案变更从 `plan.md` / `epic-plan.md` 出发，**自中间向两端**扩展——向上检查是否需要调整 NFR 目标（`spec.md`），向下更新设计说明书和 Task
+- 方案变更从受影响的事实源出发：公共约束/能力边界先更新 `plan.md` / `epic-plan.md`，详细设计变更先更新 EPIC 软件设计说明书；再向上检查是否需要调整 NFR 目标（`spec.md`），向下更新 Task
 - 若变更导致 NFR 超标，必须先与产品协商 NFR 目标调整（走 CR），再继续方案变更
-- EPIC 级变更（架构/分层/共享能力）须先更新 `epic-plan.md`（多 Feature），或单 Feature EPIC 时在**唯一** `plan.md` 中更新合并的 EPIC 级约束，再视需要级联更新设计说明书与 tasks
+- EPIC 级公共约束变更（共享能力 Owner、NFR 总预算、统一运行时原则）须先更新 `epic-plan.md`（多 Feature），或单 Feature EPIC 时在**唯一** `plan.md` 中更新合并的 EPIC 级约束；EPIC 级架构细节变更应更新设计说明书，再视需要级联更新 tasks
 
 ### 7.3 变更影响速查表
 
@@ -314,8 +314,8 @@ flowchart TD
 | NFR 指标调整 | `spec.md` | `plan.md`（预算） → **`nfr.md`**（§九 量化评估）与 `epic-design.md` §九 摘要 → `tasks.md`（验证阈值） |
 | 交互/视觉/动效 | `ux-design.md` | `plan.md`（UI 约束） → `epic-design.md`（类图/时序） → `tasks.md` |
 | EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
-| Feature 级技术方案 | `plan.md` | `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
-| Story 拆解调整 | `epic-design.md` §十二 | `l2_design/ST-xxx_*.md` → `plan.md`（索引表） → `spec.md`（追溯表） → `tasks.md` |
+| Feature 级技术规约 | `plan.md` | `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` |
+| Story 拆解调整 | `epic-design.md` §十二 | `l2_design/ST-xxx_*.md` → `spec.md`（追溯表） → `tasks.md` |
 
 ---
 
@@ -365,7 +365,7 @@ gantt
 **关键规则**：
 
 1. **Feature 级交付是最小可并行单元**——SE 产出某 Feature 的 `tasks.md` 后，该 Feature 即可交给 DEV 开始实现
-2. **SE 必须先完成 EPIC 级产物**（`epic.md`、全部 `spec.md`、`epic-plan.md`）再进入 Feature 级设计，因为 Feature 级设计依赖 EPIC 级约束
+2. **SE 必须先完成必要的 EPIC 级产物**（`epic.md`、全部 `spec.md`，以及按需的 `epic-plan.md`）再进入 Feature 级设计，因为 Feature 级设计依赖 EPIC 级约束
 3. **Feature 内部 Story/Task 可以按依赖关系进一步拆分给多个 DEV**（见 §8.4）
 
 ### 8.3 多 Feature 并行策略
@@ -407,8 +407,8 @@ flowchart LR
 | 依赖类型 | SE 策略 | DEV 策略 |
 |----------|---------|---------|
 | **无依赖**（Feature 间独立） | 按复杂度排序逐个设计，或 `--batch` 并行生成 plan | 各 DEV 分别认领独立 Feature，完全并行实现 |
-| **接口依赖**（B 调用 A 的 API） | 先设计 A 的 `plan.md`（接口契约），B 的 `plan.md` 引用 A 的契约 | DEV-1 先实现 A 的接口层（Stub/空实现）→ DEV-2 可基于接口开始 B 的实现 |
-| **数据依赖**（B 消费 A 产出的数据） | 先设计 A 的数据模型和存储方案，B 引用该方案 | A 的数据层实现完毕后 B 才能联调；B 可先用 Mock 数据并行开发 |
+| **接口依赖**（B 调用 A 的 API） | 先在 A 的 `plan.md` 记录能力边界与调用约束，详细接口在 `interface-design.md` 或 L2 中设计；B 的 `plan.md` 引用该能力边界 | DEV-1 先实现 A 的接口层（Stub/空实现）→ DEV-2 可基于接口开始 B 的实现 |
+| **数据依赖**（B 消费 A 产出的数据） | 先在 A 的 `plan.md` 记录 SoR 与生命周期等数据约束，详细数据模型和存储方案在 `database-design.md` 或 L2 中设计，B 引用该方案 | A 的数据层实现完毕后 B 才能联调；B 可先用 Mock 数据并行开发 |
 | **紧耦合依赖**（A/B 共享状态/深度交互） | 考虑合并为同一 Feature，或在 `epic-plan.md` 中定义共享契约 | 同一 DEV 负责两者，或两 DEV 频繁同步 |
 
 ### 8.4 多 Story / 多 Task 在同一 Feature 内的分工
@@ -470,7 +470,7 @@ DEV-B:                                                          [====== FEAT-2 �
 |------|------|---------|
 | **设计变更波及已实现代码** | SE 设计 FEAT-3 时发现需修改 FEAT-1 的接口 | 走 `/aisdd.cr` 变更流程；SE 评估影响范围后通知 DEV-A 同步修改 |
 | **DEV 等待 SE 设计** | SE 设计速度跟不上 DEV 实现速度 | SE 优先产出被依赖最多的 Feature；DEV 空闲时可协助 Review 或写单测 |
-| **跨 Feature 接口不一致** | DEV-A 和 DEV-B 对共享接口理解不同 | `epic-plan.md` 中明确跨 Feature 接口契约；SE 在交接时重点说明接口约束 |
+| **跨 Feature 接口不一致** | DEV-A 和 DEV-B 对共享接口理解不同 | `epic-plan.md` 中明确共享能力 Owner 与能力边界，`interface-design.md` 中明确详细接口；SE 在交接时重点说明接口约束 |
 | **Story 间依赖导致阻塞** | DEV-B 的 Story 依赖 DEV-A 尚未完成的 Story | 依赖方先用 Mock/Stub 并行开发；SE 在 `tasks.md` 中标注依赖关系和建议的实现顺序 |
 | **合并冲突** | 多 DEV 同时修改相近模块 | 按分层/模块划分 Story 归属，减少文件级冲突；频繁 rebase 主分支 |
 

@@ -1,5 +1,5 @@
 ---
-description: "实现验证：在 implement 完成（全部或按阶段）后运行，独立验证代码实现是否符合 spec 的 FR/NFR/AC、plan 的技术规约、epic-design 的架构设计与 各 Feature `l2_design/ST-xxx_*.md` 的 L2 详细设计。支持三级验证模式（Story 级 / Feature 级 / EPIC 级），EPIC 级使用并行子 Agent ���速。严格只读（不修改设计文档），但会标记 tasks.md 中的验证结果。"
+description: "实现验证：在 implement 完成（全部或按阶段）后运行，独立验证代码实现是否符合 spec 的 FR/NFR/AC、plan 的轻量技术规约、epic-design 的架构设计与 各 Feature `l2_design/ST-xxx_*.md` 的 L2 详细设计。支持三级验证模式（Story 级 / Feature 级 / EPIC 级），EPIC 级使用并行子 Agent 加速。严格只读（不修改设计文档），但会标记 tasks.md 中的验证结果。"
 handoffs:
   - label: 提交变更请求（发现偏离时）
     agent: aisdd.cr
@@ -139,7 +139,7 @@ $ARGUMENTS
 **3A-1 接口契约验证**
 - 读取该 Story 的 `l2_design/ST-xxx_*.md` 中涉及的类图与接口定义
 - 定位代码中对应的类/函数，对比方法签名（参数类型、返回类型、可见性）
-- 检查数据模型字段是否与 plan.md §三 的定义一致
+- 检查数据模型字段是否与 `database-design.md` 或对应 L2 的定义一致，并确认不违反 plan.md §四的数据硬约束
 
 **3A-2 行为一致性验证**
 - 读取该 Story 的 `l2_design/ST-xxx_*.md` 的时序图与触发条件表格
@@ -177,7 +177,7 @@ $ARGUMENTS
 - 命名规范：是否与架构模块划分一致
 
 **3B-3 NFR 量化评估**
-- 对 spec.md NFR 中可静态评估的项（如 Room 查询是否加索引、是否有���存泄漏风险）进行代码层扫描
+- 对 spec.md NFR 中可静态评估的项（如 Room 查询是否加索引、是否有内存泄漏风险）进行代码层扫描
 - 运行时 NFR（如响应时间、启动时间）标记为「⚠️ 需运行时验证」
 
 ### 3C. L3 EPIC 级验证（并行子 Agent）
@@ -259,7 +259,7 @@ $ARGUMENTS
 
 | ID | Story | Feature | 验证维度 | 严重程度 | 设计期望 | 实际实现 | 建议操作 |
 |----|-------|---------|----------|----------|----------|----------|----------|
-| V001 | ST-001 | FEAT-001 | 接口契约 | 阻塞 | plan.md:§四 ... | 实际代码 ... | 修改代码 / 提交 CR |
+| V001 | ST-001 | FEAT-001 | 接口契约 | 阻塞 | interface-design.md / L2 ... | 实际代码 ... | 修改代码 / 提交 CR |
 
 ---
 
