@@ -51,7 +51,7 @@ $ARGUMENTS
 .specify/scripts/powershell/get-epic-paths.ps1 -EpicId "EPIC-xxx" -Json
 ```
 
-��析 `EPIC_DIR`，读取 `epic.md`，**从 Feature 拆分列表章节**提取所有 Feature 的：
+解析 `EPIC_DIR`，读取 `epic.md`，**从 Feature 拆分列表章节**提取所有 Feature 的：
 
 | 字段 | 说明 |
 |------|------|
