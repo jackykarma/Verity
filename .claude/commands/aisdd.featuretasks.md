@@ -5,10 +5,6 @@
     执行主体：aisdd.analyze
     提示语：运行项目一致性分析
     发送状态：是
-  - 标签：审批关卡（tasks-ready）
-    执行主体：aisdd.gate
-    提示语：tasks-ready 关卡——冻结 tasks 后进入实施
-    发送状态：否
   - 标签：项目实施
     执行主体：aisdd.implement
     提示语：分阶段启动实施工作
@@ -24,14 +20,9 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。
 
-## 进入本阶段前（Gate 提醒）
+## 前置条件
 
-在执行下方步骤**之前**，你**必须**：
-
-1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **design-ready** 是否已通过（`epic-design.md` 等设计说明书已冻结或可进入 Task 拆解）。
-2. 若 **design-ready** 未通过或用户未确认，须**再次提示**先运行 `/aisdd.gate design-ready`（及建议先 `/aisdd.epicanalyze`）；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
-
-**本命令对应的准入关卡**：**design-ready**。
+`epic-design.md` 及按需 L2 设计应已完成。建议在进入 implement 前运行 `/aisdd.epicanalyze`（多 Feature EPIC）与 `/aisdd.analyze`（各 Feature）。
 
 ## 大纲
 

@@ -5,10 +5,6 @@ handoffs:
     agent: aisdd.challenge
     prompt: 所有 Feature plan 生成后，运行 /aisdd.challenge plan 对 plan 进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
     send: false
-  - label: 审批关卡（plan-ready，在所有 Feature plan 完成后）
-    agent: aisdd.gate
-    prompt: plan-ready 关卡——冻结 epic-plan 与各 plan 后进入设计说明书阶段
-    send: false
   - label: 输出 EPIC 软件设计说明书
     agent: aisdd.epicdesign
     prompt: 各 Feature plan 完成后，产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 l2_design/ST-xxx_*.md（L2 设计）
@@ -30,15 +26,9 @@ $ARGUMENTS
 
 ---
 
-## 进入本阶段前（Gate 提醒）
+## 前置条件
 
-在执行下方步骤**之前**，你**必须**：
-
-1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **spec-ready** 是否已通过（各 Feature `spec.md` 已冻结或可进入 Plan）。
-2. **多 Feature EPIC**：还须提醒确认已具备 `epic-plan.md`（或用户已选择单 Feature 合并路径且 `get-epic-paths.ps1 -Json` 将来可满足 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK`）。
-3. 若 **spec-ready** 未通过或用户未确认，须**再次提示**先运行 `/aisdd.gate spec-ready`（及按需 `/aisdd.epicplan`）；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
-
-**本命令对应的准入关卡**：**spec-ready**（技术规约编写的前置关卡）。
+各 Feature 的 `spec.md` 应已完成。多 Feature EPIC 时建议先完成 `/aisdd.epicplan`（若存在跨 Feature 约束）或确认单 Feature 合并路径（`get-epic-paths.ps1 -Json` 中 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK`）。可选先运行 `/aisdd.epicuidesign`。
 
 ---
 
@@ -192,7 +182,7 @@ plan.md 填写规则：
 
 1. **（推荐）** `/aisdd.challenge plan` — 三视角对抗性质量挑战，多 Feature EPIC 强烈推荐
 2. 需深度跨 Feature 分析：`/aisdd.epicanalyze`
-3. 所有 plan 确认无误后：`/aisdd.gate plan-ready`
+3. 所有 plan 确认无误后：`/aisdd.epicdesign`
 ```
 
 ---
@@ -221,7 +211,7 @@ plan.md 填写规则：
 - 若 `EPIC_PLAN` 存在（**EPIC 级** epic-plan.md）：读取 epic-plan.md，提取 **EPIC 级技术约束与规约**；技术规约须在其约束下展开，不得违反 EPIC 规约。
 - 若 `UX_DESIGN` 存在：读取 ux-design.md（设计稿解析结果），提取信息架构、交互规则（含页面流转图、逐屏交互规则）、视觉规范（色板、布局标注、组件清单）、设计稿索引（按所属 Feature 过滤）；关注「遗漏与待确认」章节中与本 Feature 相关的未覆盖场景。
 - 若 `EPIC_DIR/research/` 存在且非空：扫描与本 Feature 相关的调研报告（`/aisdd.research --save` 产出）作为**参考性补充信息**——了解 API 限制、库评估、风险等技术背景；调研报告**不是约束源或结论**，plan 仍须独立完整分析并做出自己的技术决策。
-- 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 关卡）
+- 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 约束检查）
 - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
 - 注意：plan.md 不产出图表；若发现需要类图、时序图、流程图或表结构，记录到“Design 输入清单”，交由 `/aisdd.epicdesign` 展开。
 
@@ -253,7 +243,7 @@ plan.md 填写规则：
 - `plan.md` 路径
 - Plan Version
 - 已生成的章节清单
-- **下一步提示**：若所有 Feature plan 已完成 → 建议运行 **`/aisdd.challenge plan`**（多 Feature EPIC 推荐）→ `/aisdd.gate plan-ready`（审批关卡）→ `/aisdd.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 `l2_design/ST-xxx_*.md`（L2 设计）
+- **下一步提示**：若所有 Feature plan 已完成 → 建议运行 **`/aisdd.challenge plan`**（多 Feature EPIC 推荐）→ `/aisdd.epicdesign` 产出 EPIC 软件设计说明书（含架构图、Story 拆解）+ 各 Feature 的 `l2_design/ST-xxx_*.md`（L2 设计）
 
 ---
 

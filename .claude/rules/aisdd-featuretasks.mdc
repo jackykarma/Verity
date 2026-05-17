@@ -16,7 +16,7 @@ alwaysApply: false
 ## 前置条件
 
 1. 本 Feature 的 `spec.md` 和 `plan.md` 已完成
-2. `epic-design.md` 已通过 Design Ready（`/aisdd.gate design-ready`）
+2. `epic-design.md` 及按需 L2 设计已完成
 3. 本 Feature 的 `l2_design/` 下复杂/高风险 Story 对应 `ST-xxx_*.md` 已完成；简单 Story 可由 `epic-design.md` §十三索引标注由 `tasks.md` 设计引用与 DoD 承接
 
 ## 输入（必须阅读）
@@ -90,5 +90,4 @@ alwaysApply: false
 提示用户：
 1. 评审 tasks.md
 2. 建议运行 `/aisdd.analyze`（一致性分析）
-3. 运行 `/aisdd.gate tasks-ready`（审批关卡）
-4. 审批通过后运行 `/aisdd.implement` 分阶段实现代码
+3. 运行 `/aisdd.implement` 分阶段实现代码（建议先完成 `/aisdd.analyze`）

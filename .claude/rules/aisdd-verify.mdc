@@ -92,5 +92,4 @@ alwaysApply: false
 提示用户：
 1. 验证报告结论
 2. 若不通过：列出修复建议，用户决定是否修复或走 CR
-3. 若通过：可更新 `gate-log.md` 的 Verify Pass 记录
-4. 所有 Feature 验证通过 → EPIC 可合并主分支
+3. 若通过：EPIC 可合并主分支（L3 验证报告 `--save` 为交付事实源）

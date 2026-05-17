@@ -55,26 +55,25 @@ flowchart TD
 7. **Task 拆解** → 各 Feature 产出 `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵；不反向修改已冻结的 `spec.md` 或 `plan.md`）
 8. **实现与验证** → 按 tasks 实现代码，运行 `/aisdd.verify`（支持 L1 Story / L2 Feature / L3 EPIC 三级）做实现↔设计一致性验证后交付
 
-具体命令与产出物对应关系见**六、命令执行顺序**；各阶段事实源与关卡见下表。
+具体命令与产出物对应关系见**六、命令执行顺序**；各阶段事实源见下表。
 
 ---
 
 ## 二、各阶段产出物与事实源
 
-| 阶段 | 产出物 | 事实源归属 | 输入 | 关卡 |
-|------|--------|-----------|------|------|
-| **（可选）前置调研** | `research-<topic>-<date>.md`（`--save` 时写入；否则仅输出报告） | 技术调研事实源（平台 API / 库评估 / 可行性 / 存量代码） | 需求描述、现有代码 | — |
-| **EPIC 规格** | `epic.md` | 需求边界与 Feature 拆分 | 需求描述、调研报告（可选） | — |
-| **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC/完整场景矩阵） | `epic.md` | Spec Ready |
-| **EPIC 技术规约** | `epic-plan.md`（多 Feature 且存在跨 Feature 约束时使用；单 Feature 可省略） | EPIC 公共约束事实源 | `epic.md`、各 `spec.md` | — |
-| **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） | — |
-| **Feature 轻量技术规约** | 各 `plan.md`（初版） | Feature 约束事实源：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） | Plan Ready |
-| **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`（含完整场景矩阵）、各 `plan.md`、`ux-design.md`（可选） | Design Ready |
-| **L2 详细设计** | 各 `features/*/l2_design/ST-xxx_*.md`（复杂/高风险 Story 按需） | 落码级设计事实源 | `epic-design.md` | — |
-| **Task 拆解** | 各 `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 执行事实源 | `plan.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md`（若有） | — |
-| **实现** | 代码 | — | `tasks.md` | Implement Ready |
-| **验证** | L1 Story 验证卡 / L2 Feature 验证报告 / L3 EPIC 验证报告（`--save` 时写入文件） | 实现↔设计一致性事实源 | 代码、`tasks.md` 追溯矩阵、各 Feature `l2_design/ST-xxx_*.md`（若有）、`plan.md`、`spec.md`、`epic-design.md` | Verify Pass |
-| **审批记录** | `gate-log.md` | 审批事实源 | 各关卡评审结果 | — |
+| 阶段 | 产出物 | 事实源归属 | 输入 |
+|------|--------|-----------|------|
+| **（可选）前置调研** | `research-<topic>-<date>.md`（`--save` 时写入；否则仅输出报告） | 技术调研事实源（平台 API / 库评估 / 可行性 / 存量代码） | 需求描述、现有代码 |
+| **EPIC 规格** | `epic.md` | 需求边界与 Feature 拆分 | 需求描述、调研报告（可选） |
+| **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC/完整场景矩阵） | `epic.md` |
+| **EPIC 技术规约** | `epic-plan.md`（多 Feature 且存在跨 Feature 约束时使用；单 Feature 可省略） | EPIC 公共约束事实源 | `epic.md`、各 `spec.md` |
+| **UX 设计** | `ux-design.md` | 设计稿结构化解析事实源 | `epic.md`、各 `spec.md`、设计素材（图片/Pencil/Figma） |
+| **Feature 轻量技术规约** | 各 `plan.md`（初版） | Feature 约束事实源：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单；单 Feature 时同一份 `plan.md` 可兼作 EPIC 级约束载体 | `spec.md`、`epic-plan.md`（若存在）、`ux-design.md`（可选） |
+| **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、**EPIC 级约束**（`epic-plan.md` **或** 单 Feature 时 `get-epic-paths.ps1` 给出的 `EPIC_CONSTRAINT_SOURCE`）、各 `spec.md`（含完整场景矩阵）、各 `plan.md`、`ux-design.md`（可选） |
+| **L2 详细设计** | 各 `features/*/l2_design/ST-xxx_*.md`（复杂/高风险 Story 按需） | 落码级设计事实源 | `epic-design.md` |
+| **Task 拆解** | 各 `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 执行事实源 | `plan.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md`（若有） |
+| **实现** | 代码 | — | `tasks.md` |
+| **验证** | L1 Story 验证卡 / L2 Feature 验证报告 / L3 EPIC 验证报告（`--save` 时写入文件） | 实现↔设计一致性事实源（EPIC 交付收口） | 代码、`tasks.md` 追溯矩阵、各 Feature `l2_design/ST-xxx_*.md`（若有）、`plan.md`、`spec.md`、`epic-design.md` |
 
 ---
 
@@ -113,7 +112,6 @@ flowchart TD
 | `epic-design.md` | 可精简为仅含 **Story 拆解 + 关键类图**（§一～§四简写 + §十二 + 跳过其余） | ~200 行 |
 | `key-func-design/*.md` | **可跳过** | 0 |
 | `l2_design/` 下 L2 文件 | **可跳过** | 0 |
-| Gate 评审 | Gate 0~4 可合并为一轮快速评审，Gate 5~6 按需 | — |
 
 ### 4.3 各档位预估总文档量（参考）
 
@@ -194,18 +192,18 @@ flowchart TD
 | 1 | `create-new-epic.ps1` | **默认**：新建 `epic/EPIC-xxx-*` 分支 + EPIC 目录 + `epic.md`（空模板）；**可选** `-UseCurrentBranch`：不切换分支，仅创建目录与模板 | 每个 EPIC 一次 |
 | 2 | `/aisdd.epicspec` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
 | 3 | `/aisdd.featurespec` | Feature 目录 + `spec.md`（填充内容） | **默认**：每个 Feature 单独触发一次；**`--batch` 模式**：一次触发，顺序创建所有 Feature 目录后并行生成各 `spec.md`（从 `epic.md` Feature 列表读取，适合多 Feature EPIC） |
-| 3.5 | `/aisdd.challenge spec` | 挑战报告（不写入文件）：从三视角对抗性检测 spec 漏洞、NFR 可行性、范围边界 | **可选**；多 Feature EPIC 强烈推荐；单 Feature/≤3人天可跳过。`gate spec-ready` 前运行 |
+| 3.5 | `/aisdd.challenge spec` | 挑战报告（不写入文件）：从三视角对抗性检测 spec 漏洞、NFR 可行性、范围边界 | **可选**；多 Feature EPIC 强烈推荐；单 Feature/≤3人天可跳过。进入 `epicplan` 前运行 |
 | 4 | `/aisdd.epicplan` | `epic-plan.md` | **多 Feature 且存在跨 Feature 约束**：每个 EPIC 一次；**单 Feature/小改动**：可跳过，EPIC 级约束在步骤 6 合并写入唯一 `plan.md` |
 | 5 | `/aisdd.epicuidesign` | `ux-design.md`（解析设计稿 → 结构化交互/视觉规范） | 每个 EPIC 一次（可选，与步骤 4 或单 Feature 路径并行） |
 | 6 | `/aisdd.featureplan` | 各 Feature `plan.md` 初版 | **默认**：每个 Feature 单独触发一次（依赖顺序）；**`--batch` 模式**：一次触发，依赖感知并行生成（Capability Owner 先，Product Consumer 后；无依赖则完全并行），生成后自动做能力边界与 NFR 预算快速检查 |
-| 6.5 | `/aisdd.challenge plan` | 挑战报告（不写入文件）：从三视角对抗性检测架构风险、技术债务、可测试性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate plan-ready` 前运行 |
+| 6.5 | `/aisdd.challenge plan` | 挑战报告（不写入文件）：从三视角对抗性检测架构风险、技术债务、可测试性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。进入 `epicdesign` 前运行 |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `nfr` / `story` / `l2`） | 分阶段。前置：`get-epic-paths.ps1 -Json` 中 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true |
-| 7.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。`gate design-ready` 前运行 |
+| 7.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。进入 `featuretasks` 前运行 |
 | 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 每个 Feature 一次 |
 | 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | 9.5 | `/aisdd.verify story ST-xxx` | **L1 Story 级验证报告**（接口 + 行为 + FR 覆盖） | **可选**；每个 Story 实现后随时运行，增量验证，发现偏离早修早止 |
 | 9.6 | `/aisdd.verify feat FEAT-xxx` | **L2 Feature 级验证报告**（全 5 维度） | **可选**；Feature 全部 Story 完成后运行；`--quick` 跳过架构维度提速 |
-| 10 | `/aisdd.verify` / `/aisdd.verify --save` | **L3 EPIC 级验证报告**（全量 + 跨 Feature 一致性；并行子 Agent） | 所有 Feature 完成后；`--save` 将报告写入文件；是 `gate implement-done` 的前置 |
+| 10 | `/aisdd.verify` / `/aisdd.verify --save` | **L3 EPIC 级验证报告**（全量 + 跨 Feature 一致性；并行子 Agent） | 所有 Feature 完成后；`--save` 将报告写入文件；作为 EPIC 交付收口 |
 | — | `/aisdd.cr` | CR 文件 + 下游产物增量更新 | 变更时按需（自动影响分析 → 生成 CR → 分步更新） |
 
 ---
@@ -446,7 +444,7 @@ flowchart TD
 
 | 阶段 | SE 产出 | 交接动作 | DEV 动作 |
 |------|--------|---------|---------|
-| **Spec Ready Gate** | 全部 `spec.md` | SE 发起 Gate 评审，DEV 参与 Review（提前了解需求） | 阅读 spec，反馈技术可行性疑问 |
+| **全部 spec 完成** | 全部 `spec.md` | SE 组织 spec Review，DEV 参与（提前了解需求） | 阅读 spec，反馈技术可行性疑问 |
 | **Feature tasks.md 完成** | 某 Feature 的 `tasks.md` | **正式交接点**——SE 将该 Feature 的 Task 列表交给 DEV | DEV 认领 Task，开始实现 |
 | **实现过程中** | SE 继续设计下一个 Feature | DEV 遇到设计疑问 → 同步 SE 确认 | DEV 按 Task 提交代码，完成 Story 后运行 L1 验证 |
 | **Feature 实现完成** | — | DEV 提交 L2 Feature 验证报告 | SE Review 验证报告，确认实现↔设计一致 |

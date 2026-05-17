@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-design.md, nfr.md, gate-log.md) and directory key-func-design/.
+Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-design.md, nfr.md) and directory key-func-design/.
 
 .DESCRIPTION
 Creates EPIC-level design files in the EPIC directory from their respective templates.
@@ -16,7 +16,7 @@ Overwrite existing files.
 
 .PARAMETER FilesOnly
 Comma-separated list of files to create. Default: all.
-Valid values: epic-plan, ux-design, epic-design, key-func-design-dir, nfr, gate-log, story-detail
+Valid values: epic-plan, ux-design, epic-design, key-func-design-dir, nfr, story-detail
   (story-detail: per-Feature l2_design/.gitkeep；L2 正文由 /aisdd.epicdesign l2 按复杂/高风险 Story 生成)
 
 .PARAMETER Json
@@ -34,7 +34,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 if ($Help) {
-    Write-Host 'Usage: ./init-epic-files.ps1 [-EpicId EPIC-001] [-Force] [-FilesOnly epic-plan,gate-log] [-Json]'
+    Write-Host 'Usage: ./init-epic-files.ps1 [-EpicId EPIC-001] [-Force] [-FilesOnly epic-plan,nfr] [-Json]'
     Write-Host ''
     Write-Host 'Creates EPIC-level design files from templates. Safe to re-run (skips existing unless -Force).'
     Write-Host ''
@@ -44,7 +44,6 @@ if ($Help) {
     Write-Host '  epic-design.md            -> EPIC root'
     Write-Host '  key-func-design/          -> EPIC subdirectory (empty + .gitkeep)'
     Write-Host '  nfr.md                    -> EPIC root (from nfr-template.md)'
-    Write-Host '  gate-log.md               -> EPIC root'
     Write-Host '  features/*/l2_design/.gitkeep -> L2 placeholder directory'
     Write-Host ''
     exit 0
@@ -81,13 +80,12 @@ $fileMap = @{
     'ux-design'        = @{ template = 'ux-design-template.md';        target = 'ux-design.md' }
     'epic-design'      = @{ template = 'epic-design-doc-template.md'; target = 'epic-design.md' }
     'nfr'              = @{ template = 'nfr-template.md';             target = 'nfr.md' }
-    'gate-log'         = @{ template = 'gate-log-template.md';         target = 'gate-log.md' }
 }
 
 $filesToCreate = if ($FilesOnly) {
     $FilesOnly -split ',' | ForEach-Object { $_.Trim() }
 } else {
-    @('epic-plan', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'gate-log', 'story-detail')
+    @('epic-plan', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'story-detail')
 }
 
 # Legacy key-diagram files are deprecated and no longer created.

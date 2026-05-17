@@ -1,13 +1,9 @@
 ---
-description: "对抗性方案挑战：从多个独立视角对 spec / plan / design 进行非破坏性质量挑战，识别漏洞、风险与不可行点。在对应 gate 关卡前可选运行；多 Feature EPIC 或 CR 变更后强烈推荐。"
+description: "对抗性方案挑战：从多个独立视角对 spec / plan / design 进行非破坏性质量挑战，识别漏洞、风险与不可行点。在阶段转换前可选运行；多 Feature EPIC 或 CR 变更后强烈推荐。"
 handoffs:
   - label: 修复 BLOCK/WARN 问题
     agent: aisdd.cr
     prompt: 根据 challenge 报告中的 BLOCK/WARN 发现，发起变更请求
-    send: false
-  - label: 进入 gate 关卡
-    agent: aisdd.gate
-    prompt: challenge 通过后进入对应关卡（spec-ready / plan-ready / design-ready）
     send: false
 ---
 
@@ -35,7 +31,7 @@ $ARGUMENTS
 
 ## 目标
 
-在进入 gate 关卡前，以**三个独立对抗角色**对目标文档进行质量挑战，发现单视角生成时的盲区：遗漏场景、可行性风险、范围蔓延、架构反模式等问题。
+在进入下一阶段前，以**三个独立对抗角色**对目标文档进行质量挑战，发现单视角生成时的盲区：遗漏场景、可行性风险、范围蔓延、架构反模式等问题。
 
 输出结构化挑战报告（不写入文件），供人类评审后决定是否触发 `/aisdd.cr`。
 
@@ -44,7 +40,7 @@ $ARGUMENTS
 - `/aisdd.challenge`：对抗性挑战（从不同角色视角主动找漏洞、风险、可行性问题）
 
 **可选性说明**：
-- 单 Feature EPIC（≤3 人天）：可跳过，gate 人工审批已足够
+- 单 Feature EPIC（≤3 人天）：可跳过
 - 多 Feature EPIC：**强烈推荐**（尤其 spec 和 plan 阶段）
 - CR 变更后：**必须运行**（变更影响面不确定性高）
 
@@ -151,8 +147,8 @@ $ARGUMENTS
 | 级别 | 判定标准 |
 |------|---------|
 | **BLOCK** | 若不修复，方案在实现阶段将遭遇确定性失败、安全漏洞、架构崩溃，或违反 constitution MUST 条款 |
-| **WARN** | 存在较高风险，建议在 gate 前修复；若跳过须人工确认风险自担 |
-| **NOTE** | 改进建议，不影响 gate 通过，可记录为已知优化项或纳入后续迭代 |
+| **WARN** | 存在较高风险，建议进入下一阶段前修复；若跳过须人工确认风险自担 |
+| **NOTE** | 改进建议，不影响进入下一阶段，可记录为已知优化项或纳入后续迭代 |
 
 ### 5. 生成挑战报告
 
@@ -203,8 +199,8 @@ $ARGUMENTS
 
 | 评级 | 条件 |
 |------|------|
-| ✅ 可进入 gate | 0 BLOCK，WARN ≤ 3 |
-| ⚠️ 建议修复后进入 gate | 0 BLOCK，WARN > 3 |
+| ✅ 可进入下一阶段 | 0 BLOCK，WARN ≤ 3 |
+| ⚠️ 建议修复后进入下一阶段 | 0 BLOCK，WARN > 3 |
 | ❌ 存在阻塞问题 | BLOCK ≥ 1 |
 
 **本次评级**：[✅ / ⚠️ / ❌] — [一句话说明原因]
@@ -214,12 +210,9 @@ $ARGUMENTS
 ### 后续建议
 
 - **若存在 BLOCK**：运行 `/aisdd.cr` 发起变更请求修复后，可重新运行 `/aisdd.challenge [目标]` 验证
-- **若存在 WARN**：评估风险后选择修复（`/aisdd.cr`）或在 `gate-log.md` 中记录「已知风险，人工确认自担」后继续
+- **若存在 WARN**：评估风险后选择修复（`/aisdd.cr`）或记录「已知风险，人工确认自担」后继续
 - **NOTE 问题**：可作为技术债务记录，纳入后续迭代
-- **进入关卡**：评级 ✅ 或 ⚠️（人工确认后） → `/aisdd.gate [关卡]`
-  - spec → `spec-ready`
-  - plan → `plan-ready`
-  - design → `design-ready`
+- **进入下一阶段**：评级 ✅ 或 ⚠️（人工确认后）→ spec 后 `/aisdd.epicplan` 或 `/aisdd.epicuidesign`；plan 后 `/aisdd.epicdesign`；design 后 `/aisdd.featuretasks`
 ```
 
 ### 6. 提供整改建议
@@ -239,20 +232,19 @@ $ARGUMENTS
 
 | 命令 | 职责 | 适用阶段 | 性质 |
 |------|------|----------|------|
-| `/aisdd.challenge spec` | 对抗性挑战 spec 漏洞、NFR 可行性、范围边界 | `featurespec` 完成后，`gate spec-ready` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.challenge plan` | 对抗性挑战架构风险、技术债务、可测试性 | `featureplan/epicplan` 完成后，`gate plan-ready` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.challenge design` | 对抗性挑战安全、性能可达性、生态兼容性 | `epicdesign` 完成后，`gate design-ready` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.analyze` | 一致性检查（spec↔plan↔tasks 映射） | `featuretasks` 后，`gate tasks-ready` 前 | 已有 |
-| `/aisdd.epicanalyze` | EPIC 跨 Feature 一致性分析 | `epicdesign` 后，`gate design-ready` 前 | 已有 |
+| `/aisdd.challenge spec` | 对抗性挑战 spec 漏洞、NFR 可行性、范围边界 | `featurespec` 完成后，进入 `epicplan` 前 | **可选（多 Feature 推荐）** |
+| `/aisdd.challenge plan` | 对抗性挑战架构风险、技术债务、可测试性 | `featureplan/epicplan` 完成后，进入 `epicdesign` 前 | **可选（多 Feature 推荐）** |
+| `/aisdd.challenge design` | 对抗性挑战安全、性能可达性、生态兼容性 | `epicdesign` 完成后，进入 `featuretasks` 前 | **可选（多 Feature 推荐）** |
+| `/aisdd.analyze` | 一致性检查（spec↔plan↔tasks 映射） | `featuretasks` 后，进入 `implement` 前 | 已有 |
+| `/aisdd.epicanalyze` | EPIC 跨 Feature 一致性分析 | `epicdesign` 后，进入 `featuretasks` 前 | 已有 |
 | `/aisdd.cr` | 变更请求（修复 challenge 发现的 BLOCK/WARN） | challenge 后发现问题时 | 已有 |
-| `/aisdd.gate` | 人工审批关卡 | challenge + analyze 通过后 | 已有 |
 
 **建议执行顺序**（多 Feature EPIC）：
 
 ```
-/aisdd.featurespec × N  →  /aisdd.challenge spec  →  /aisdd.gate spec-ready
-/aisdd.featureplan × N  →  /aisdd.challenge plan  →  /aisdd.epicanalyze  →  /aisdd.gate plan-ready
-/aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.epicanalyze  →  /aisdd.gate design-ready
-/aisdd.featuretasks × N →  /aisdd.analyze × N     →  /aisdd.gate tasks-ready
-/aisdd.implement        →  /aisdd.verify           →  /aisdd.gate implement-done
+/aisdd.featurespec × N  →  /aisdd.challenge spec  →  /aisdd.epicplan / epicuidesign
+/aisdd.featureplan × N  →  /aisdd.challenge plan  →  /aisdd.epicanalyze  →  /aisdd.epicdesign
+/aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.epicanalyze  →  /aisdd.featuretasks
+/aisdd.featuretasks × N →  /aisdd.analyze × N     →  /aisdd.implement
+/aisdd.implement        →  /aisdd.verify           →  合并/发布
 ```

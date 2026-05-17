@@ -38,12 +38,6 @@ $ARGUMENTS
 
 ---
 
-## 进入本阶段前（Gate 提醒）
-
-本命令**无**必须通过的上一关卡。执行前可**轻量提醒**用户：当前 EPIC 的 `epic.md` 应已由 `/aisdd.epicspec` 填充；当**最后一个** Feature 的 `spec.md` 完成后，应在进入 `/aisdd.epicplan` / `/aisdd.epicuidesign` 前申报 **`/aisdd.gate spec-ready`**。
-
----
-
 ## 批量模式执行步骤（`--batch` / `--all`）
 
 > **适用场景**：EPIC 已完成 Feature 拆分（`epic.md` 已填充），需要一次性为所有 Feature 并行生成 `spec.md`，而非逐个手动触发。
@@ -196,7 +190,7 @@ EPIC 上下文：
 1. **（推荐）** `/aisdd.challenge spec` — 三视角对抗性质量挑战，多 Feature EPIC 强烈推荐
 2. 需澄清具体 Feature 细节：`/aisdd.clarify`（逐个运行）
 3. 若 UX/视觉稿已就绪：`/aisdd.epicuidesign "EPIC-xxx"`
-4. 所有 spec 确认无误后：`/aisdd.gate spec-ready`
+4. 所有 spec 确认无误后：`/aisdd.epicplan` 或 `/aisdd.epicuidesign`（可选）
 ```
 
 ---
@@ -251,7 +245,7 @@ EPIC 上下文：
 - 若 UX/视觉稿已就绪且尚未运行：**`/aisdd.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
 - 若尚未做 EPIC 技术规约：**`/aisdd.epicplan "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → epicplan → 各 Feature plan
 - 或直接 `/aisdd.featureplan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
-- 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`** 再进入 gate
+- 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`**，再进入 `/aisdd.epicplan` 或 `/aisdd.epicuidesign`
 
 ---
 

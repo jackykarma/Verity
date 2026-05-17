@@ -68,4 +68,4 @@ alwaysApply: false
 
 提示用户：
 1. 评审 plan.md
-2. 所有 Feature 的 plan 完成后 → `/aisdd.gate plan-ready`（审批关卡）→ `/aisdd.epicdesign` 产出 EPIC 软件设计说明书
+2. 所有 Feature 的 plan 完成后 → `/aisdd.epicdesign` 产出 EPIC 软件设计说明书（可选先 `/aisdd.challenge plan`）

@@ -97,7 +97,7 @@
 
 | ID | 问题 | 影响 | Owner | 决策截止点 |
 |---|---|---|---|---|
-| Q-001 | [待确认问题；无则写 N/A] | [影响的约束/设计/实现] | [PM/UX/Backend/Android] | plan-ready / design-ready / implement |
+| Q-001 | [待确认问题；无则写 N/A] | [影响的约束/设计/实现] | [PM/UX/Backend/Android] | epicplan / epicdesign / implement |
 
 ---
 

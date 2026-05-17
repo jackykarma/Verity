@@ -15,8 +15,8 @@ alwaysApply: false
 
 ## 前置条件
 
-1. 本 Feature 的 `tasks.md` 已完成（Implement Ready）
-2. `tasks-ready` 关卡已通过，或用户显式声明跳过并接受风险；`checklists/` 仅用于 spec-ready 前的需求质量评审，不作为 implement 阶段阻塞条件
+1. 本 Feature 的 `tasks.md` 已完成
+2. 建议已运行 `/aisdd.analyze`（非阻塞）；`checklists/` 仅用于进入 plan 前的需求质量评审，不作为 implement 阶段阻塞条件
 
 ## 输入（必须阅读）
 
@@ -61,4 +61,4 @@ alwaysApply: false
 提示用户：
 1. 输出最终状态，汇总已完成的工作
 2. 检查已实现功能是否匹配 `spec.md` 的 FR/NFR/AC
-3. 运行 `/aisdd.verify` 进行独立验证 → `/aisdd.gate implement-done` 通过完成关卡
+3. 运行 `/aisdd.verify`（建议 `--save`）进行独立验证，通过后合并/发布

@@ -5,10 +5,6 @@ handoffs:
     agent: aisdd.cr
     prompt: 实现偏离设计时，可说明要更新的 plan/design 范围由 AI 更新，或提交 CR
     send: false
-  - label: 通过审批关卡
-    agent: aisdd.gate
-    prompt: implement-done 关卡——验证通过后合并/发布
-    send: true
 ---
 
 ## 用户输入
@@ -35,16 +31,9 @@ $ARGUMENTS
 
 ---
 
-## 进入本阶段前（Gate 提醒）
+## 前置条件
 
-在执行下方步骤**之前**，你**必须**：
-
-1. **提醒用户**核对：进入 **implement** 前应已通过 **tasks-ready**（见 `gate-log.md`）；若缺失记录，须提示补跑 `/aisdd.gate tasks-ready` 或说明本次验证为阶段性抽检。
-2. **验证完成后**，须**提醒**用户：在结论可接受时运行 `/aisdd.gate implement-done` 关闭实现阶段关卡。
-
-**本命令关联的关卡**：**tasks-ready**（实现前基线）→ 验证 → **implement-done**（通过后合并/发布）。
-
----
+对应范围的代码实现应已完成（L1/L2/L3 按参数而定）。L3 EPIC 级验证通常在全部 Feature 实现完成后运行，作为交付收口。
 
 ## 目标
 
@@ -79,7 +68,7 @@ $ARGUMENTS
 
 ### L3 EPIC 级（全量并行，默认）
 
-> **适用时机**：所有 Feature 实现完成，做 EPIC 级全量验证后再申请 gate implement-done。
+> **适用时机**：所有 Feature 实现完成，做 EPIC 级全量验证后作为交付收口。
 
 - **验证维度**：全部 5 个维度 + 跨 Feature 架构一致性
 - **加载范围**：所有设计文档
@@ -298,8 +287,8 @@ $ARGUMENTS
 
 | 评级 | 条件 |
 |------|------|
-| ✅ 可进入 gate implement-done | 0 BLOCK，WARN ≤ 3 |
-| ⚠️ 建议修复后进入 gate | 0 BLOCK，WARN > 3 |
+| ✅ 可交付 | 0 BLOCK，WARN ≤ 3 |
+| ⚠️ 建议修复后交付 | 0 BLOCK，WARN > 3 |
 | ❌ 存在阻塞偏离 | BLOCK ≥ 1 |
 
 **本次评级**：[✅ / ⚠️ / ❌] — [一句话说明]
@@ -332,7 +321,7 @@ $ARGUMENTS
 - 整体通过率与综合评级
 - 阻塞性偏离数量（BLOCK）
 - 建议下一步：
-  - 若无阻塞性偏离 → `/aisdd.gate implement-done`
+  - 若无阻塞性偏离 → 合并/发布（EPIC 分支合并回主分支）
   - 若有阻塞性偏离 → 修复后重新运行 `/aisdd.verify [原范围]`（增量重验）
   - 若有设计缺口 → 使用 `/aisdd.cr` 提交变更，更新设计后重新验证
   - 若使用了 `--save` → 提示报告已写入 `verify-report-<date>.md`
@@ -359,13 +348,13 @@ $ARGUMENTS
 实现 ST-002 → /aisdd.verify story ST-002
 ……
 FEAT-001 全部 Story 完成 → /aisdd.verify feat FEAT-001
-所有 Feature 完成 → /aisdd.verify --save → /aisdd.gate implement-done
+所有 Feature 完成 → /aisdd.verify --save → 合并/发布
 ```
 
 **快速通道（小 EPIC / 单 Feature）**：
 
 ```
-全部实现完成 → /aisdd.verify --quick --save → /aisdd.gate implement-done
+全部实现完成 → /aisdd.verify --quick --save → 合并/发布
 ```
 
 ---
@@ -377,5 +366,4 @@ FEAT-001 全部 Story 完成 → /aisdd.verify feat FEAT-001
 | `/aisdd.implement` | 执行实现 | verify 在 implement 完成后运行 |
 | `/aisdd.analyze` | 分析 spec↔plan↔tasks 文档一致性 | verify 分析代码↔设计一致性 |
 | `/aisdd.challenge design` | 对抗性挑战设计质量 | verify 之前的设计阶段质量门 |
-| `/aisdd.gate implement-done` | verify 通过后可运行 implement-done 关卡 | verify 是其前置 |
 | `/aisdd.cr` | 变更请求 | verify 发现偏离时触发 CR 流程 |

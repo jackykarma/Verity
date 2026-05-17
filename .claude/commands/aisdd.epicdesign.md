@@ -5,11 +5,7 @@ handoffs:
     agent: aisdd.challenge
     prompt: epicdesign 完成（至少 story 阶段）后，运行 /aisdd.challenge design 对设计进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
     send: false
-  - label: 审批关卡（design-ready）
-    agent: aisdd.gate
-    prompt: design-ready 关卡——冻结设计说明书后进入 tasks 拆解
-    send: false
-  - label: EPIC 级跨 Feature 分析（建议在 design-ready 关卡前）
+  - label: EPIC 级跨 Feature 分析（建议在 featuretasks 前）
     agent: aisdd.epicanalyze
     prompt: 运行跨 Feature 一致性与质量分析
     send: false
@@ -33,14 +29,9 @@ $ARGUMENTS
 
 **当参数为 `-h` 时**：仅输出下方「参数说明」帮助信息，不执行任何文件操作。
 
-## 进入本阶段前（Gate 提醒）
+## 前置条件
 
-在非 `-h` 调用、即将读写设计说明书前，你**必须**：
-
-1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **plan-ready** 是否已通过（各 `plan.md` 与 `epic-plan.md`（若存在）已冻结或可进入设计说明书阶段）。
-2. 若 **plan-ready** 未通过或用户未确认，须**再次提示**先运行 `/aisdd.gate plan-ready`；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
-
-**本命令对应的准入关卡**：**plan-ready**（放行的下一步为 epicdesign）。
+各 Feature 的 `plan.md` 应已完成；多 Feature EPIC 时须具备 `epic-plan.md` 或满足 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK`。可选先运行 `/aisdd.challenge plan`。
 
 ## 设计阶段分步逻辑（先想清楚 → 按 Story 切片）
 
@@ -174,7 +165,7 @@ $ARGUMENTS
    - key 完成 → 提示继续 `nfr`
    - nfr 完成 → 提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.gate design-ready` → `/aisdd.featuretasks`（在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
+   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.featuretasks`（在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
 
 核心规则：
 - 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的**方案流程图须直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举全异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，覆盖技术点与**全链路**，链上**每一环如何达成**写清，并与类图/流程图/时序图一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环

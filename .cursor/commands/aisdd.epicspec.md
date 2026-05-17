@@ -5,10 +5,6 @@ handoffs:
     agent: aisdd.featurespec
     prompt: 为某个 Feature 创建文档目录与 spec.md。Feature 描述如下……
     send: false
-  - label: 审批关卡（spec-ready，在所有 Feature spec 完成后）
-    agent: aisdd.gate
-    prompt: spec-ready 关卡——冻结各 spec 后进入 epicuidesign/epicplan 阶段
-    send: false
 ---
 
 ## 用户输入
@@ -18,10 +14,6 @@ $ARGUMENTS
 ```
 
 在继续操作前，你**必须**参考用户输入（若不为空）。
-
-## 进入本阶段前（Gate 提醒）
-
-本命令为 EPIC 入口，**无**必须通过的上一关卡。完成各 Feature `spec.md` 后，须在进入 `/aisdd.epicplan` / `/aisdd.epicuidesign` 前提醒用户运行 **`/aisdd.gate spec-ready`**（见 `.cursor/commands/aisdd.gate.md`）。
 
 ## 大纲
 

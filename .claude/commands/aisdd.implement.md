@@ -5,10 +5,6 @@ handoffs:
     agent: aisdd.verify
     prompt: 验证代码实现是否符合设计方案
     send: true
-  - label: 完成审批关卡
-    agent: aisdd.gate
-    prompt: implement-done 关卡
-    send: false
 ---
 
 ## 用户输入
@@ -19,14 +15,9 @@ $ARGUMENTS
 
 在继续操作前，你**必须**考虑用户输入（若不为空）。
 
-## 进入本阶段前（Gate 提醒）
+## 前置条件
 
-在执行下方步骤**之前**，你**必须**：
-
-1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **tasks-ready** 是否已通过（各 `tasks.md` 已冻结或可进入实现）。
-2. 若 **tasks-ready** 未通过或用户未确认，须**再次提示**先运行 `/aisdd.analyze`（若未跑）与 `/aisdd.gate tasks-ready`；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate（如「继续」「强制」「force」）时，可记录风险后继续。
-
-**本命令对应的准入关卡**：**tasks-ready**。
+各 Feature 的 `tasks.md` 应已完成。建议先运行 `/aisdd.analyze` 做一致性检查（非阻塞，用户可跳过）。
 
 ## 大纲
 
@@ -81,8 +72,7 @@ $ARGUMENTS
     - 确认实施过程符合 `plan.md` 的技术规约与 `epic-design.md` 的设计方案
     - 输出最终状态，汇总已完成的工作
 
-8. **关卡检查提示**：
-    - 若 `EPIC_DIR/gate-log.md` 存在且 `tasks-ready` 关卡**未通过**：输出警告（非阻塞，由用户决定是否继续）
-    - 完成后提示下一步：运行 `/aisdd.verify` 进行独立验证 → `/aisdd.gate implement-done` 通过完成关卡
+8. **完成提示**：
+    - 完成后提示下一步：运行 `/aisdd.verify`（建议 `--save`）进行实现↔设计一致性验证，通过后合并/发布
 
 注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/aisdd.featuretasks` 重新生成任务列表。

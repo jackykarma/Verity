@@ -15,14 +15,9 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。可用于：**EPIC 标识**（如 `EPIC-002`）、侧重分析范围（如 `仅 NFR 预算`、`仅接口契约`）。
 
-## 进入本阶段前（Gate 提醒）
+## 前置条件
 
-在执行下方步骤**之前**，你**必须**：
-
-1. **提醒用户**核对 EPIC 根 `gate-log.md`（若存在）中 **plan-ready** 是否已通过（本分析假定各 Feature `plan.md` 与 EPIC 技术规约基线已就绪）。
-2. 若 **plan-ready** 未通过，须**再次提示**：建议先完成 plan 评审与 `/aisdd.gate plan-ready`，再继续迭代 `epic-design.md` 与本次跨 Feature 分析；仅当用户在 `$ARGUMENTS` 中**显式声明**跳过 gate 时，可记录风险后继续。
-
-**本命令对应的准入关卡**：**plan-ready**（建议在申报 **design-ready** 前运行本分析）。
+各 Feature 的 `plan.md` 应已完成；建议在 `/aisdd.epicdesign` 完成后、`/aisdd.featuretasks` 前运行（也可在 tasks 生成后做全量复核）。
 
 ## 目标
 
@@ -56,7 +51,6 @@ $ARGUMENTS
 - `epic-plan.md`：技术栈、分层约束、NFR 预算框架、共享能力识别
 - `epic-design.md`：0/1 层架构、全景类图/时序、Story 拆解、L2 索引
 - `ux-design.md`（若存在）：信息架构、交互说明、设计稿索引
-- `gate-log.md`（若存在）：审批关卡记录
 - `.specify/memory/constitution.md`
 
 ### 3. 加载各 Feature 产物
@@ -112,11 +106,10 @@ $ARGUMENTS
 - 全景类图中的类与各 `l2_design/ST-xxx_*.md` 中的类是否一致
 - 依赖方向是否符合 epic-plan.md §2 分层约束
 
-#### G. 变更与审批一致性
+#### G. 变更与版本一致性
 
 - 各产物的版本号是否一致（spec Version ↔ plan 中引用的 Feature Version）
 - 是否有产物变更后未更新下游（通过变更记录日期推断）
-- gate-log.md 中关卡状态与当前产物版本是否匹配
 
 #### H. 章程合规
 
@@ -176,7 +169,7 @@ $ARGUMENTS
 ### 7. 后续行动建议
 
 - 若存在 CRITICAL：列出必须在 `/aisdd.implement` 前解决的问题及建议命令
-- 若存在 HIGH：列出建议在 design-ready 关卡前解决的问题
+- 若存在 HIGH：列出建议在进入 `featuretasks` / `implement` 前解决的问题
 - 给出 EPIC 整体健康度评分（A/B/C/D/F）
 
 ### 8. 提供整改建议
@@ -185,7 +178,6 @@ $ARGUMENTS
 
 ## 与现有命令的关系
 
-- **`/aisdd.analyze`**：单 Feature 内的 spec↔plan↔tasks 分析（Feature 级质量关卡）
-- **`/aisdd.epicanalyze`**：EPIC 级跨 Feature 分析（EPIC 级质量关卡）
-- **`/aisdd.gate`**：审批关卡——建议在 `design-ready` 关卡前运行 epicanalyze
-- 建议执行顺序：各 Feature `/aisdd.analyze` → `/aisdd.epicanalyze` → `/aisdd.gate design-ready`
+- **`/aisdd.analyze`**：单 Feature 内的 spec↔plan↔tasks 分析（Feature 级质量检查）
+- **`/aisdd.epicanalyze`**：EPIC 级跨 Feature 分析（EPIC 级质量检查）
+- 建议执行顺序：`/aisdd.epicdesign` 完成 → `/aisdd.epicanalyze` → `/aisdd.featuretasks` → 各 Feature `/aisdd.analyze` → `/aisdd.implement`
