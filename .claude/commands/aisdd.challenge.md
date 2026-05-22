@@ -236,7 +236,7 @@ $ARGUMENTS
 | `/aisdd.challenge plan` | 对抗性挑战架构风险、技术债务、可测试性 | `featureplan/epicplan` 完成后，进入 `epicdesign` 前 | **可选（多 Feature 推荐）** |
 | `/aisdd.challenge design` | 对抗性挑战安全、性能可达性、生态兼容性 | `epicdesign` 完成后，进入 `featuretasks` 前 | **可选（多 Feature 推荐）** |
 | `/aisdd.analyze feature` | 单 Feature 一致性（spec↔plan↔tasks） | **可选**；`tasks` 就绪后、`implement` 前 | 默认 scope |
-| `/aisdd.analyze epic` | EPIC 跨 Feature 一致性 | **可选**；原 epicanalyze | 不 gate implement |
+| `/aisdd.analyze epic` | EPIC 跨 Feature 一致性 | **可选**；`epicdesign` 后或全量 tasks 后 | 不 gate implement |
 | `/aisdd.cr` | 变更请求（修复 challenge 发现的 BLOCK/WARN） | challenge 后发现问题时 | 已有 |
 
 **建议执行顺序**（多 Feature EPIC）：

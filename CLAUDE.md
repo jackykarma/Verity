@@ -66,7 +66,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.cr` | CR 文件 + 下游产物更新 | 变更请求 |
 | `/aisdd.challenge` | 挑战报告（不写入文件） | 阶段转换前可选：spec / plan / design |
-| `/aisdd.analyze` | 分析报告（不写入文件，**可选、非阻塞**） | **feature** / **epic** / **epic pre-tasks**；不 gate `implement`；原 `epicanalyze` 已合并 |
+| `/aisdd.analyze` | 分析报告（不写入文件，**可选、非阻塞**） | **feature** / **epic** / **epic pre-tasks**；不 gate `implement` |
 
 **单 Feature EPIC 快速通道**：跳过 `epic-plan.md`，将必要 EPIC 级约束合并写入唯一的 `plan.md`。
 

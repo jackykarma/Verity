@@ -490,6 +490,7 @@ DEV-B:                                                          [====== FEAT-2 �
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
+| v1.6.5 | 2026-05-22 | 删除已合并的 `/aisdd.epicanalyze` 重定向命令文件（`.cursor` / `.claude`）；统一使用 `/aisdd.analyze epic` |
 | v1.6.4 | 2026-05-22 | 文档边界与 Story 拆解迁至 Cursor Rule：合并 `aisdd-document-boundaries.mdc`、新增 `aisdd-story-splitting.mdc`；删除 `docs/aisdd/spec-vs-*-boundary.md` 与 `story-splitting-guide.md` |
 | v1.6.3 | 2026-05-22 | 明确 `/aisdd.analyze` 全流程可选、非阻塞，不 gate `implement`；`featuretasks` 默认 handoff 仅指向 implement |
 | v1.6.2 | 2026-05-22 | 合并 `/aisdd.epicanalyze` → `/aisdd.analyze epic`（保留 epicanalyze 为重定向说明）；删除 checklist 命令 |
