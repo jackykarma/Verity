@@ -103,7 +103,7 @@ alwaysApply: false
 - specs/epics/EPIC-xxx/features/FEAT-001/plan.md（v0.1.3）
 - specs/epics/EPIC-xxx/features/FEAT-001/tasks.md（v0.1.2）
 
-**建议**：运行 `/aisdd.verify` 确认变更后各产物无矛盾
+**建议**：CR 更新下游产物后，由负责人对照 spec/plan/design 与代码做一致性自检
 ```
 
 ## 核心规则

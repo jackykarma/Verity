@@ -90,7 +90,7 @@ $ARGUMENTS
 | 文件 | 对应章节 | 内容 |
 |------|----------|------|
 | `epic-design.md` | §1~§6、§7 清单与引用、§8~§11 摘要+四子文件链接、§12、§13 索引 | 设计总览；**§7.1** 为 KD 权威清单（含依赖） |
-| `key-func-design/KD_*_*.md` | §七（详细） | 每关键设计一篇；**核心方案**、方案流程图、**关键类图**（全量公共方法签名）、核心调用链时序图（穷举全异常分支）；文首「依赖的其他 KD」须与 §7.1 一致 |
+| `key-func-design/KD_*_*.md` | §七（详细） | 每关键设计一篇；**核心方案**、**关键类图**（全量公共方法签名）、核心调用链时序图（穷举关键异常分支）；按需可加方案架构图；文首「依赖的其他 KD」须与 §7.1 一致 |
 | `nfr.md` | §八（详细） | 技术评估量化全文（8.1～8.7），模板 `nfr-template.md` |
 | `interface-design.md` | §九（详细） | 对外/外部接口（9.1～9.3），模板 `epic-design-interface-template.md` |
 | `database-design.md` | §十（详细） | 库表与数据策略（10.1～10.4），模板 `epic-design-database-template.md` |
@@ -137,9 +137,12 @@ $ARGUMENTS
    - **分析现有工程代码**：架构分层、模块划分、包组织、现有框架
 
 4. **根据参数产出**：
+
+   > **各阶段通用禁令（arch / key / nfr / story / l2 / all 均适用）**：本阶段仅产出设计事实源（`epic-design.md` 及子文件）；对 `spec.md`、各 Feature `plan.md`、`epic-plan.md` **仅只读消费**。**禁止**反向修改上述规格/规约文件的任何章节。发现 spec/plan 缺口须**停止本阶段**，引导 `/aisdd.cr` 或 `/aisdd.clarify`；不得在 design 产物中「顺便」回写 spec/plan。详见 `docs/aisdd/spec-vs-plan-design-boundary.md`。
+
    - **无参数**：生成/更新 `epic-design.md`，含完整 §1~§13 骨架；§1~§6 填充内容，§7~§13 占位（提示运行对应参数产出）。
    - **arch**：重写 `epic-design.md` 的 §1~§6。
-   - **key**：先判断是否存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计；若不存在，在 `epic-design.md` §7 标注 N/A 与原因，不创建 KD 文件。若适用，确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。**禁止**创建 EPIC 根目录 `key-func-design.md`，**不再**单独产出流程图集。KD 类图须含**全量公共方法签名**，时序须**穷举全异常分支**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
+   - **key**：先判断是否存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计；若不存在，在 `epic-design.md` §7 标注 N/A 与原因，不创建 KD 文件。若适用，确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。**禁止**创建 EPIC 根目录 `key-func-design.md`，**不再**单独产出流程图集。KD 须含**核心方案**+**关键类图**（全量公共方法签名）+**核心调用链时序图**（穷举关键异常分支），按需可加方案架构图；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
    - **nfr**：先判断 §8～§11 各子文件是否适用；不适用时只在 `epic-design.md` 对应章节标注 N/A 与原因，不创建空子文件。适用时，按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §8.1～§8.7 全文）；按需分别按 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md` 产出/更新 **`EPIC_DIR/interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**（各子节如不适用须标注 N/A 并简述原因）；最后更新 `epic-design.md` **§8～§11** 为摘要 + 链接或 N/A 说明（**禁止**在 `epic-design.md` 内重复粘贴上述子文件正文）。
    - **story**：按模板「§12.1 拆解策略（拆解维度 → 反模式筛查）→ §12.2 拆分约束（拆分首看改动路径独立性与技术边界，工作量仅为参考信号：典型 2～5 人天，>7 人天检查是否可拆，<1 人天检查是否可合并）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §12（拆解策略说明、Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵、工作量汇总）。
    - **l2**：
@@ -168,9 +171,10 @@ $ARGUMENTS
    - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.featuretasks`（在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
 
 核心规则：
-- 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的**方案流程图须直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举全异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，覆盖技术点与**全链路**，链上**每一环如何达成**写清，并与类图/流程图/时序图一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环
+- 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的图表（关键类图、核心调用链时序图，及按需方案架构图）**直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**必须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举关键异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，**把核心技术方案与实现思路讲明白**——覆盖关键技术点、关键链路与每个关键环节如何达成，并与类图/时序图（及若有的方案架构图）一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环
 - 所有图表必须使用 **Mermaid 格式**，遵循 `.claude/rules/mermaid-style-guide.mdc`
 - 图表内容须基于本工程**实际架构与真实代码**，遵循 `.claude/rules/specify-diagram-requirements.mdc`
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
 - **L2 按需分文件并继承 KD**：`epic-design.md` §13 为索引、关联 KD、L2 状态与依赖总览；复杂/高风险 Story 的正文在各 Feature 的 `l2_design/ST-xxx_<slug>.md` 中，简单 Story 可由 `tasks.md` 的设计引用与 DoD 承接。凡涉及 KD 的 L2 必须继承 KD 关键方案，只能细化 Story 局部落码细节，不得与 KD 冲突或另起方案
 - **章节骨架先行**：首次（无参数）调用必须输出完整 §1~§13 骨架，未填充章节保留占位提示；后续调用仅更新指定章节
+- **spec / plan 单向消费（禁写红线）**：本命令对 `spec.md`、各 Feature `plan.md`、`epic-plan.md`（若存在）仅**只读**消费——读取 FR/NFR/AC/边界/场景矩阵与轻量技术规约作为设计输入；**禁止**反向修改上述文件的任何章节（含 spec「变更记录」、plan §一～§四）。设计过程中发现的 spec/plan 缺口（如缺失场景、NFR 缺失指标、FR 歧义、能力边界未声明等）必须**停止本命令**，引导用户走 `/aisdd.cr` 或 `/aisdd.clarify`；不得在设计说明书或子文件中"顺便"回写 spec/plan。§12 Story 拆解**不得**将 Story 定义反写入 spec。详见 `docs/aisdd/spec-vs-plan-design-boundary.md`

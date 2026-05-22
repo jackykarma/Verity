@@ -354,7 +354,7 @@ $ARGUMENTS
 **→ plan.md 建议补充**：
 - §二 Feature 增量约束：MediaStore 访问不得由 UI 层直接触发
 - §三 能力边界与外部依赖：媒体查询能力需区分 API 版本并声明降级约束
-- §五 Design 输入清单：`MediaRepository.queryMedia(...)` 接口与 `MediaFile` 数据结构需在 `interface-design.md` / `database-design.md` 或 L2 中详细设计
+- 下游设计：`MediaRepository.queryMedia(...)` 接口与 `MediaFile` 数据结构需在 `interface-design.md` / `database-design.md` 或 L2 中详细设计（`/aisdd.epicdesign` 阶段）
 
 **→ epic-plan.md 建议补充**（若为 EPIC 级结论）：
 - 跨 Feature 共享能力：MediaRepository 作为 Capability Feature，避免多 Feature 各自实现

@@ -1,5 +1,5 @@
 ---
-description: "EPIC 级跨 Feature 一致性与质量分析。在 EPIC 软件设计说明书及各 Feature tasks.md 产出后运行，检测跨 Feature 的术语漂移、接口契约冲突、NFR 预算超支、共享能力不一致、Story 依赖完整性等问题。严格只读，不修改任何文件。"
+description: "EPIC 级跨 Feature 一致性与质量分析。在 EPIC 软件设计说明书及各 Feature tasks.md 产出后运行，检测跨 Feature 的术语漂移、接口契约冲突、spec 与 nfr.md 量化不一致、共享能力不一致、Story 依赖完整性等问题。严格只读，不修改任何文件。"
 handoffs:
   - label: 修复发现的问题
     agent: aisdd.epicplan
@@ -13,7 +13,7 @@ handoffs:
 $ARGUMENTS
 ```
 
-在继续操作前，你**必须**参考用户输入（若不为空）。可用于：**EPIC 标识**（如 `EPIC-002`）、侧重分析范围（如 `仅 NFR 预算`、`仅接口契约`）。
+在继续操作前，你**必须**参考用户输入（若不为空）。可用于：**EPIC 标识**（如 `EPIC-002`）、侧重分析范围（如 `仅 NFR`、`仅接口契约`）。
 
 ## 前置条件
 
@@ -48,15 +48,16 @@ $ARGUMENTS
 ### 2. 加载 EPIC 级产物
 
 - `epic.md`：范围、Feature 拆分、跨 Feature 关注点与 Capability 决策、跨 Feature 技术策略、EPIC 完成条件
-- `epic-plan.md`：技术栈、分层约束、NFR 预算框架、共享能力识别
+- `epic-plan.md`：技术栈、分层约束、共享能力识别、统一运行时原则
 - `epic-design.md`：0/1 层架构、全景类图/时序、Story 拆解、L2 索引
+- `nfr.md`（若存在）：NFR 量化评估与验证结论（`/aisdd.epicdesign nfr` 产出）
 - `ux-design.md`（若存在）：信息架构、交互说明、设计稿索引
 - `.specify/memory/constitution.md`
 
 ### 3. 加载各 Feature 产物
 
 对每个 Feature 目录，加载（按存在性渐进）：
-- `spec.md`：FR/NFR/AC/依赖/核心实体
+- `spec.md`：FR/NFR/AC/依赖/场景矩阵
 - `plan.md`：轻量技术规约/能力边界/数据与 NFR 硬约束
 - `interface-design.md`、`database-design.md`、各 L2：接口契约与数据模型详细设计
 - `tasks.md`：Task 清单/设计引用
@@ -70,7 +71,7 @@ $ARGUMENTS
 
 - 跨 Feature 的同一概念是否使用不同术语（如 Feature A 称"用户配置"，Feature B 称"用户设置"）
 - 与 epic.md/epic-plan.md 中术语是否一致
-- 核心实体命名是否跨 Feature 统一
+- FR/场景中的业务术语是否跨 Feature 统一
 
 #### B. 接口契约兼容性
 
@@ -78,15 +79,15 @@ $ARGUMENTS
 - 错误码/错误类型体系是否跨 Feature 统一（与 epic-plan 的统一运行时/错误处理约束对齐）
 - 数据模型字段命名/类型是否跨 Feature 一致
 
-#### C. NFR 预算一致性
+#### C. NFR 量化一致性
 
-- 各 Feature spec.md 的 NFR 指标之和是否超出 epic-plan.md §六 的 EPIC 级预算上限
-- 性能、功耗、内存预算是否有 Feature 未明确分配
-- 若 epic.md 记录了完成约束，是否与 epic-plan.md 和各 Feature 的验收口径一致
+- 各 Feature `spec.md` 的 NFR 指标是否在 `nfr.md` 中有对应量化评估与验证结论（若 `nfr.md` 不存在则标注为待 epicdesign）
+- `nfr.md` 的评估结论是否满足各 Feature spec 中的 NFR 目标（未达标须标 CRITICAL/HIGH）
+- EPIC 级 NFR（若 epic.md 有记录）是否与 `nfr.md` 及各 Feature 验收口径一致
 
 #### D. 共享能力完整性
 
-- epic.md「跨 Feature 技术策略」与 epic-plan.md §8 的共享能力是否完全对齐
+- epic.md「跨 Feature 技术策略」与 epic-plan.md §五 的共享能力是否完全对齐
 - Owner Feature 的 plan.md §三是否已声明共享能力承诺（状态=已声明）
 - 消费方 Feature 的 plan.md §三是否正确引用 Owner Feature 的接口
 - 是否有重复设计（多个 Feature 各自实现了相同能力）
@@ -118,7 +119,7 @@ $ARGUMENTS
 
 ### 5. 严重程度赋值
 
-- **CRITICAL**：章程违规、接口契约冲突（阻塞集成）、NFR 预算超支、Story 覆盖遗漏
+- **CRITICAL**：章程违规、接口契约冲突（阻塞集成）、NFR 量化未达标或 spec↔nfr 严重不一致、Story 覆盖遗漏
 - **HIGH**：共享能力重复设计、术语严重漂移、架构依赖违规
 - **MEDIUM**：版本不一致、变更未同步、L2 设计缺失
 - **LOW**：轻微术语不一致、格式问题
@@ -141,11 +142,11 @@ $ARGUMENTS
 |----|------|----------|-------------|------|------|------|
 | EA1 | 接口契约 | CRITICAL | FEAT-001, FEAT-002 | interface-design.md / L2 | ... | ... |
 
-### NFR 预算汇总
+### NFR 验证汇总（spec ↔ nfr.md）
 
-| NFR 维度 | EPIC 上限 | Feature 分配总和 | 余量 | 状态 |
-|----------|-----------|-----------------|------|------|
-| 性能 | ... | ... | ... | ✅/⚠️/❌ |
+| NFR ID / 维度 | spec 目标 | nfr.md 评估结论 | 状态 |
+|---------------|-----------|----------------|------|
+| NFR-xxx | ... | ... | ✅/⚠️/❌ |
 
 ### 共享能力覆盖
 
@@ -161,7 +162,7 @@ $ARGUMENTS
 
 - Feature 总数 / 已分析数
 - 总发现数（CRITICAL / HIGH / MEDIUM / LOW）
-- NFR 预算使用率
+- NFR 验证覆盖率（spec NFR 在 nfr.md 中有评估的比例）
 - Story↔FR/NFR 覆盖率
 - 共享能力一致性率
 ```

@@ -78,6 +78,40 @@ $ARGUMENTS
 - 面向业务相关方编写，而非开发人员。
 - 请勿在规格说明中嵌入任何检查清单，检查清单需通过单独命令生成。
 
+### epic.md 纯净度边界守护（必须）
+
+> 参见 `docs/aisdd/spec-vs-plan-design-boundary.md` 了解 spec 与 plan / epic-design 的三方边界。
+
+`epic.md`（EPIC 规格 + Feature 拆分）与下游 `spec.md` 同属**产品规格事实源**，**禁止**含技术实现细节。写入 `epic.md` 与 Feature 拆分条目时，**必须逐条扫描**是否含以下「技术污染」特征，命中即按 block_ask 流程拦截：
+
+| 污染类别 | 识别特征（关键词 / 模式） | 正确归属 |
+|----------|---------------------------|----------|
+| 类名 / 接口名 | PascalCase 带技术后缀：`*ViewModel` / `*Repository` / `*UseCase` / `*Manager` / `*Service` / `*Mapper` 等 | `plan.md` / `epic-design.md` |
+| 框架 / 库名 | Hilt / Dagger / Room / Compose / Coroutines / Flow / LiveData / Retrofit / OkHttp / WorkManager 等 | `epic-plan.md §技术栈` / `plan.md §二` |
+| 数据存储 | Room / DAO / Entity / 表名 / 字段名 / SQL / 索引 | `database-design.md` |
+| API / 接口 | URL 路径、HTTP 方法、状态码、DTO 字段 | `interface-design.md` |
+| 代码结构 | 包路径、文件路径、Gradle 模块名、代码片段 | `epic-design.md §一～§六` |
+| 线程 / 并发原语 | `Dispatchers.*` / `viewModelScope` / 锁、信号量 | `plan.md` / `epic-design.md` |
+| 设计模式实现 | "用单例 / 观察者 / 工厂模式实现……"涉及代码语义 | `epic-design.md` |
+| 埋点字段 | 事件名、参数 key、SDK 名 | `analytics-tracking.md` |
+
+**判断分界点**：「删掉这条后，EPIC 的业务范围与拆分逻辑是否仍完整？」仍完整 → 删除；不完整 → 改写为业务语言后保留。
+
+**Feature 拆分条目的合法字段**：Feature 名称（业务语言）、Feature 类型（Product / Capability）、目标、In Scope / Out of Scope、依赖关系（Feature 间 / 外部团队）、验收意图、拆分动机。**禁止**在 Feature 条目里出现"该 Feature 将使用 xxx 框架/库/类实现"等技术决策——这些属于 `epic-plan.md` 或各 Feature `plan.md`。
+
+**拦截提示格式**：
+
+```
+⚠️ 边界检查：以下内容疑似属于 plan.md / epic-plan.md / epic-design.md 而非 epic.md：
+
+1. [原文条目] → 命中类别：[...] → 建议归入 [...]
+
+请确认：
+(a) 改写为业务语言后留在 epic.md（推荐）
+(b) 移出 epic.md，记入待写清单交由 epic-plan / epic-design 处理
+(c) 确认保留（需说明理由）
+```
+
 ### 章节要求
 
 - **必填章节**：每个功能都必须完成

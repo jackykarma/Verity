@@ -1,10 +1,5 @@
 ---
 description: "执行实施计划，处理并执行 tasks.md 中定义的所有任务（开发者在 Story 分支执行；严格遵循 EPIC 分支冻结的 spec/plan/epic-design/tasks）"
-handoffs:
-  - label: 实现验证
-    agent: aisdd.verify
-    prompt: 验证代码实现是否符合设计方案
-    send: true
 ---
 
 ## 用户输入
@@ -73,6 +68,7 @@ $ARGUMENTS
     - 输出最终状态，汇总已完成的工作
 
 8. **完成提示**：
-    - 完成后提示下一步：运行 `/aisdd.verify`（建议 `--save`）进行实现↔设计一致性验证，通过后合并/发布
+    - 完成后对照 `spec.md` FR/NFR/AC、`plan.md` 约束与 `epic-design.md` / L2 设计完成实现自检；通过即可合并/发布
+    - 若发现实现与设计偏离：走 `/aisdd.cr` 更新设计或修复代码，勿在 implement 阶段擅自改写冻结的 spec/plan/design
 
 注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/aisdd.featuretasks` 重新生成任务列表。

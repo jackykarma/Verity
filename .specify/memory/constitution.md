@@ -120,11 +120,11 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 
 - `spec.md` 是 **需求事实源**：范围（In/Out）、FR/NFR、验收标准、边界与异常场景
 - `ux-design.md`（EPIC 级）是 **体验呈现事实源**：信息架构、交互规则与状态、视觉规范、动效清单与说明、设计稿索引
-- `epic-plan.md`（EPIC 级，按需）是 **EPIC 公共约束事实源**：仅在多 Feature 且存在跨 Feature 约束时记录全局技术栈锁定、共享能力 Owner、统一运行时原则、NFR 总预算、Feature plan 裁剪策略；不得写详细设计
-- `plan.md`（Feature 级）是 **Feature 轻量技术规约事实源**：记录本 Feature 的增量约束、能力边界、数据/NFR/安全硬约束与 Design 输入清单；不得写架构图、类图、时序图、Story、接口字段、表结构等详细设计
+- `epic-plan.md`（EPIC 级，按需）是 **EPIC 公共约束事实源**：仅在多 Feature 且存在跨 Feature 约束时记录全局技术栈锁定、共享能力 Owner、统一运行时原则、Feature plan 裁剪策略；不得写详细设计；**NFR 量化评估**由 `nfr.md`（`/aisdd.epicdesign nfr`）承接
+- `plan.md`（Feature 级）是 **Feature 轻量技术规约事实源**：记录本 Feature 的增量约束、能力边界、数据/NFR/安全硬约束；不得写架构图、类图、时序图、Story、接口字段、表结构等详细设计
 - **EPIC 软件设计说明书**（EPIC 级）是 **架构与详细设计事实源**：0 层/1 层架构图、全景类图与关键时序、关键功能与疑难设计、接口字段、数据库表结构、Story 拆解与 L2 索引（§十三）；L2 详细设计按 Story 分文件写在各 Feature 的 **`l2_design/ST-xxx_<slug>.md`** 中；供人类评审与 Task/Implement 阶段引用
 - `tasks.md` 是 **执行事实源**：将设计说明书中的 Story 拆解为可执行 Task，并引用 plan 约束与对应 `l2_design/ST-xxx_*.md` 中的设计片段
-- `/aisdd.verify` 产出的验证报告（L3 EPIC 级建议 `--save` 写入文件）是 **实现↔设计一致性事实源**：记录代码与设计方案的偏离项，作为 EPIC 交付前收口依据
+- **实现交付**：代码实现须对照 `spec.md`、`plan.md`、`epic-design.md` 与 L2 设计完成自检；发现偏离时走 CR 流程更新设计或修复实现，不在 implement 阶段擅自改写冻结文档
 
 ### 七.1 分支策略（Branch Strategy）
 
@@ -172,7 +172,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
   - `l2_design/` 下 L2 文件可跳过
 - **多 Feature 但无跨 Feature 约束**：
   - `epic-plan.md` 可按需省略；各 Feature `plan.md` 只写自身增量约束
-  - 若后续发现共享能力或 NFR 总预算冲突，再补建 `epic-plan.md` 并通过 CR 同步下游
+  - 若后续发现共享能力或跨 Feature 技术约束冲突，再补建 `epic-plan.md` 并通过 CR 同步下游
 - 详细裁剪规则与判断流程见 `workflow-overview.md` §四
 
 ## AI 在 Plan 阶段的职责边界
@@ -219,7 +219,7 @@ Plan 阶段的规约输出 MUST 满足以下标准：
 
 1. **轻量性**：只冻结约束和边界，不提前展开详细设计
 2. **可评审性**：工程师能判断约束是否合理、是否与现有工程冲突
-3. **可设计输入性**：能为 EPIC 软件设计说明书提供明确的 Design 输入清单
+3. **可设计输入性**：plan 中的约束与能力边界能为 EPIC 软件设计说明书提供明确输入
 4. **可治理性**：关键约束变更能通过版本与变更记录追踪
 
 验证清单：

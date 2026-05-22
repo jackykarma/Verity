@@ -125,7 +125,7 @@ EPIC 上下文：
 1. 读取 .specify/templates/spec-template.md
 2. 按模板填充 SPEC_FILE（规则见下方）
 3. 在 FEATURE_DIR/checklists/requirements.md 生成需求质量清单
-4. 返回：{ feature_id, spec_file, status: "ok"|"error", summary: "一句话摘要" }
+4. 返回：{ feature_id, spec_file, status: "ok"|"error"|"blocked", summary: "一句话摘要", purity_issues: [{text, category, suggested_target}] }
 
 规格填写规则：
 - Epic 字段：[EPIC_ID - EPIC 名称]
@@ -135,6 +135,8 @@ EPIC 上下文：
 - AC 必须引用 FR/NFR ID
 - 完整场景矩阵须覆盖 7 类场景，不适用的标注 N/A；每条场景关联 FR/NFR ID + 优先级（P0/P1/P2）
 - 遵循 .specify/memory/constitution.md 的 MUST 条款
+- **写入前纯净度自检（强制）**：写入 SPEC_FILE 前，按本命令 §「spec / 技术细节边界守护」8 类清单扫描每条 FR/NFR/AC/场景；命中污染时**不得直接写入**，须在返回中设置 status: "blocked"，并在 purity_issues 列出原文、命中类别与建议归属（plan.md / epic-design.md / database-design.md 等）；改写为业务语言且无技术词汇后方可写入
+- **epic.md 技术词汇剥离**：若 epic.md「验收意图/拆分动机」含技术词汇，写入 spec 前须改写为业务语言，不得原样搬运
 ```
 
 **降级方案**（若 Agent 工具不可用）：按 features[] 数组顺序生成每个 Feature 的 spec.md，逻辑与子 Agent 任务一致。
@@ -147,11 +149,16 @@ EPIC 上下文：
 
 | 检查项 | 说明 | 级别 |
 |--------|------|------|
-| **术语同步** | 核心实体/概念在多个 spec 中命名是否一致 | WARN |
+| **术语同步** | FR/场景中的业务术语在多个 spec 中命名是否一致 | WARN |
 | **NFR 对齐** | 各 Feature 的 NFR 是否与 epic.md 声明的跨 Feature 关注点对齐 | WARN |
 | **范围重叠** | 不同 Feature 的 In Scope 是否出现重叠（同一能力被多个 Feature 声明） | BLOCK |
 | **Capability 引用方向** | Capability Feature 是否被正确的 Product Feature 引用（方向不能反） | WARN |
 | **依赖链完整性** | Feature A 依赖 Feature B，Feature B 的 spec 中是否有对应的接口/能力声明 | WARN |
+| **技术污染** | 各 spec.md 是否命中 8 类技术污染清单（含子 Agent 返回的 blocked/purity_issues）；命中则不得进入下一阶段直至用户确认改写/移出 | BLOCK |
+
+**主 Agent 对子 Agent 返回的处理**：
+- 若某 Feature 的 `status` 为 `blocked` 或 `purity_issues` 非空：汇总污染条目，按 §「spec / 技术细节边界守护」block_ask 格式向用户展示，待用户四选一（改写/移出/保留并说明/拆分）后再写入或重跑该 Feature 子 Agent
+- 批量生成完成报告中须单独列出「纯净度拦截」Feature 及待处理条目
 
 输出简要检查结果（不超过 20 条），格式：
 
@@ -294,6 +301,53 @@ EPIC 上下文：
 **spec.md 中关于异常/状态的正确写法**：只写「系统必须……」级别的行为结果与量化指标，不写交互形态与视觉表现。例如：
 - ✅ spec：「网络失败时系统须提示错误并提供重试能力；已加载数据不丢失」
 - ❌ spec：「网络失败时显示错误插画 + 重试按钮（FilledButton），背景 #FFEBEE」← 属于 ux-design
+
+### spec / 技术细节边界守护（必须）
+
+> 参见 `docs/aisdd/spec-vs-plan-design-boundary.md` 了解 spec 与 plan / epic-design 的三方边界。
+
+`spec.md` 是**纯粹的产品规格**，只写「系统必须做什么」与可测试的需求；**禁止**任何技术实现细节。写入 `spec.md` 时，**必须逐条扫描**是否含以下「技术污染」特征，命中即按 block_ask 流程拦截：
+
+| 污染类别 | 识别特征（关键词 / 模式） | 正确归属 |
+|----------|---------------------------|----------|
+| 类名 / 接口名 | PascalCase 带技术后缀：`*ViewModel` / `*Repository` / `*UseCase` / `*Manager` / `*Service` / `*DataSource` / `*Mapper` / `*Provider` / `*Helper` / `*Controller` / `*Presenter` | `plan.md §三 能力边界` / `epic-design.md` 类图 |
+| 框架 / 库名 | Hilt / Dagger / Room / Compose / Coroutines / Flow / LiveData / Retrofit / OkHttp / WorkManager / Glide / Coil / RxJava / Moshi / Gson / Kotlinx.serialization 等命名 | `plan.md §二 增量约束 / 技术栈` |
+| 数据存储细节 | Room / DAO / Entity / 表名 / 字段名 / 字段类型 / SQL 语句 / 索引 / 主键 / 外键 / 触发器 | `database-design.md` |
+| API / 接口细节 | URL 路径（`/v1/...`、`/api/...`） / HTTP 方法（GET/POST 等） / 状态码 / Header / DTO 字段 / 请求体 schema | `interface-design.md` |
+| 代码结构 | 包路径（`com.xxx.yyy`） / 文件路径（`*.kt`/`*.java`） / Gradle 模块名 / 代码片段 / 函数签名 | `epic-design.md §一～§六` 架构 |
+| 线程 / 并发原语 | `Dispatchers.IO/Main/Default` / `viewModelScope` / `launch` / `withContext` / `Mutex` / `Semaphore` / `synchronized` | `plan.md §二` / `epic-design.md` |
+| 设计模式实现 | "用单例 / 观察者 / 策略 / 工厂模式实现……"且涉及代码语义而非业务语义 | `epic-design.md` |
+| 埋点字段 | 事件名（如 `click_gallery_btn`） / 参数 key / SDK 名（Firebase / 友盟 / 神策 / Mixpanel 等） | `analytics-tracking.md` |
+
+**判断分界点**（自问）：「删掉这条后，'系统必须做什么 + 在什么前提下 + 达到什么可验收结果' 是否仍完整？」
+- **仍完整** → 这是技术细节，应删除或改写
+- **不完整** → 这是需求，**改写为业务语言**后保留
+
+**NFR 例外**：量化指标本身（如 `p95 ≤ 300ms`、`内存峰值 ≤ 200MB`、`日均功耗增量 ≤ 5mAh`）属于 NFR 合法内容，不算污染；但**「用 xxx 库实现 xxx 优化」属于污染**，应归 `plan.md`。
+
+**拦截后的提示格式**：
+
+```
+⚠️ 边界检查：以下内容疑似属于 plan.md / epic-design.md 而非 spec.md：
+
+1. [具体条目，原文引用] → 命中类别：[类名/框架/数据存储/...] → 建议归入 [plan.md §x / epic-design.md §y / database-design.md / interface-design.md / analytics-tracking.md]
+2. [具体条目，原文引用] → 命中类别：... → 建议归入 ...
+
+请确认：
+(a) 改写为业务语言后留在 spec.md（推荐——保留业务意图，剥离技术词汇）
+(b) 移出 spec.md，记入待写清单交由 plan / epic-design 处理（推荐，若该信息属于技术决策）
+(c) 确认保留原文（需说明理由——例如该术语已成为业务固定称呼）
+(d) 拆分：业务部分留 spec，技术部分移入下游
+```
+
+**正反例**：
+
+- ❌ spec：「使用 Room 数据库缓存最近 100 张照片」（含 `Room` 框架名）
+- ✅ spec：「系统须本地缓存最近 100 张照片，支持离线浏览；缓存命中率 ≥ 95%」
+- ❌ spec：「`PhotoRepository` 须提供 `loadRecent(limit: Int): Flow<List<Photo>>` 接口」（类名 + 方法签名）
+- ✅ spec：「系统须支持按数量批量加载最近照片，并在新照片入库时通知订阅方」（业务能力描述）
+- ❌ spec：「Top5% 用户单日新增 ≤ 5mAh，通过 `WorkManager` 调度后台任务实现」（含 `WorkManager`）
+- ✅ NFR：「Top5% 用户单日新增 ≤ 5mAh（前提：单日触发上限 200 次、单次任务 ≤ 30s）」
 
 ### AI 生成规则
 

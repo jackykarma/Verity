@@ -18,7 +18,7 @@ alwaysApply: false
 | 文件 / 目录 | 对应章节 | 内容 |
 |-------------|----------|------|
 | `epic-design.md` | §1～§6、§7 清单与引用、§8 摘要+`nfr.md`、§9～§11 摘要+三子文件链接、§十二 Story 拆解、§十三 L2 索引 | 设计总览；**§7.1** 为 KD 权威清单（含层级、前置 KD、路径）；**§8** 技术评估摘要链 **`nfr.md`**；**§9～§11** 不粘贴 interface/database/analytics 正文 |
-| `key-func-design/KD_*_*.md` | §七（详细） | 按需生成，每关键设计一篇；须含方案流程图、**关键类图（全量公共方法签名）**、**核心调用链时序图（穷举全异常分支）**；无关键疑难点时 §七标注 N/A |
+| `key-func-design/KD_*_*.md` | §七（详细） | 按需生成，每关键设计一篇；须含**核心方案**、**关键类图（全量公共方法签名）**、**核心调用链时序图（穷举关键异常分支）**；按需可加方案架构图；无关键疑难点时 §七标注 N/A |
 | `nfr.md` | §八（详细） | 按需生成；技术评估 8.1～8.7 全文（模板 `nfr-template.md`） |
 | `interface-design.md` | §九（详细） | 按需生成；接口设计 9.1～9.3 全文 |
 | `database-design.md` | §十（详细） | 按需生成；数据库设计 10.1～10.4 全文 |
@@ -91,7 +91,7 @@ alwaysApply: false
 - **基于真实代码**：类图/时序图须使用工程真实类名与方法名（`.cursor/rules/specify-diagram-requirements.mdc`）。
 - **KD 核心方案（按需，若生成则必须）**：每个 `key-func-design/KD_*_*.md` 按 `.specify/templates/key-func-design-kd-template.md` 撰写；**全覆盖**技术点、**全链路**、**每环可落地**、与图互证。
 - **KD 关键类图与时序（若生成 KD 则必须）**：每个 KD 须含**关键类图**（全量公共方法签名）与**核心调用链时序图**（穷举全异常分支）；**不再**使用 `key-diagram-epic.md` / `features/*/key-diagram.md` 作为补全层。
-- **KD 内流程图（若生成 KD 则必须）**：每个 KD 的**方案流程图**（及按需架构图）**直接绘制在该 KD 的 `KD_*_*.md` 内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明，**不再**单独产出流程图集。
+- **KD 图表归属（若生成 KD 则必须）**：每个 KD 的**关键类图**与**核心调用链时序图**（及按需的方案架构图）**直接绘制在该 KD 的 `KD_*_*.md` 内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明，**不再**单独产出流程图集。
 - **KD 依赖（必须）**：`epic-design.md` §7.1 与各 KD 文首「依赖的其他 KD」**一致**；依赖关系须为 **DAG**，**禁止循环依赖**。
 - **L2 继承 KD（适用时必须）**：生成 `features/*/l2_design/ST-*.md` 前须判定关联 KD，并在 `epic-design.md` §13.1 与 L2 文首「L2 依赖与引用」中记录；L2 的类图、时序图与功能设计须沿用关联 KD 的核心类/接口、依赖方向、调用职责、成功/失败语义和关键约束。若简单 Story 不生成独立 L2，须在 §13.1 写明由 `tasks.md` 设计引用与 DoD 承接。若需要改变 KD 决策，先更新 KD 或记录设计变更，禁止只在 L2 中另写冲突方案。
 - **时序图图后说明（必须）**：凡含 `sequenceDiagram` 的 `key-func-design/KD_*_*.md`、`features/*/l2_design/*.md` 等，每张时序图**紧下方**须有详细协作者与过程说明（`.cursor/rules/specify-diagram-requirements.mdc` §四）。

@@ -1,5 +1,5 @@
 ---
-description: "**EPIC 级**轻量技术规约与约束。仅在多 Feature 且存在跨 Feature 技术约束时运行；基于 epic.md 与各 feature spec.md 及现有工程代码，产出 EPIC 根下的 epic-plan.md（公共约束、共享能力 Owner、NFR 总预算、Feature plan 裁剪策略）。不含架构图、类图、时序、接口字段、表结构或 Story 拆解，这些在 /aisdd.epicdesign 阶段产出。"
+description: "**EPIC 级**轻量技术规约与约束。仅在多 Feature 且存在跨 Feature 技术约束时运行；基于 epic.md 与各 feature spec.md 及现有工程代码，产出 EPIC 根下的 epic-plan.md（公共约束、共享能力 Owner、Feature plan 裁剪策略）。NFR 量化评估在 /aisdd.epicdesign nfr 产出 nfr.md。不含架构图、类图、时序、接口字段、表结构或 Story 拆解，这些在 /aisdd.epicdesign 阶段产出。"
 handoffs:
   - label: 制定 Feature 轻量技术规约
     agent: aisdd.featureplan
@@ -29,7 +29,7 @@ $ARGUMENTS
 
 ## 大纲
 
-目标：在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）下产出 `epic-plan.md`，为**各 Feature 的 plan** 提供**EPIC 级公共约束**。内容为轻量文字规约（技术栈锁定、跨 Feature 边界、统一运行时约束、数据/接口原则、NFR 总预算、共享能力 Owner、Feature plan 裁剪策略），**不含 0 层/1 层架构图、类图、时序图、接口字段、表结构或 Story 拆解**（这些在 `/aisdd.epicdesign` 阶段产出）。
+目标：在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）下产出 `epic-plan.md`，为**各 Feature 的 plan** 提供**EPIC 级公共约束**。内容为轻量文字规约（技术栈锁定、跨 Feature 边界、统一运行时约束、数据原则、共享能力 Owner、Feature plan 裁剪策略），**不含 NFR 预算**（见 `nfr.md`）、**不含接口/契约原则**（见 `interface-design.md`）、**不含 0/1 层架构图、类图、时序、方法签名、表结构或 Story 拆解**（这些在 `/aisdd.epicdesign` 阶段产出）。
 
 **裁剪规则**：单 Feature EPIC 可省略 `epic-plan.md`，将必要 EPIC 级约束合并到唯一 Feature 的 `plan.md`；纯修复/≤3 人天小改动可跳过本命令。
 
@@ -53,7 +53,7 @@ $ARGUMENTS
 
 3. **加载上下文**：
    - 读取 `EPIC_DIR/epic.md`（范围、Feature 拆分、跨 Feature 关注点与 Capability 决策、跨 Feature 技术策略、EPIC 完成条件）
-   - 读取各 `EPIC_DIR/features/*/spec.md`（FR/NFR、依赖、核心实体）
+   - 读取各 `EPIC_DIR/features/*/spec.md`（FR/NFR、依赖）
    - 读取 `.specify/memory/constitution.md`（MUST/SHOULD 约束）
    - 读取 `.specify/templates/epic-plan-template.md`（作为结构与输出格式）
    - 若 `EPIC_DIR/ux-design.md` 存在：读取其交互规则与视觉约束，用于校准 UX 相关技术规约（如动效性能预算、UI 线程约束、组件复杂度等）
@@ -65,8 +65,6 @@ $ARGUMENTS
    - **跨 Feature 边界与依赖规则**（不画架构图，不列组件清单）
    - **统一运行时约束**（线程/错误/日志/安全原则）
    - **数据与存储总约束**（SoR、缓存、迁移原则，不写表结构）
-   - **接口与契约原则**（能力级原则，不写方法签名/字段）
-   - **NFR 预算框架**（性能/功耗/内存/安全，各 Feature 分配）
    - **跨 Feature 共享能力识别**（Owner、消费方、后续详细设计位置）
    - **Feature Plan 裁剪规则**（每个 Feature 用 Lite 还是 Standard，必填重点是什么）
    - **变更记录**：初版写入一条

@@ -34,26 +34,25 @@ EPIC 根目录下的 `epic-plan.md`，覆盖模板全部章节：
 
 | 章节 | 内容 |
 |------|------|
-| 一、技术栈与工程约束 | 锁定语言、框架、构建、API 级别等 |
-| 二、分层与模块约束 | 依赖方向、模块边界、跨层禁止 |
-| 三、线程与并发模型 | 协程调度、主线程约束 |
-| 四、错误处理规范 | 统一错误类型、传播规则、用户提示 |
-| 五、数据与存储约束 | SoR、缓存、迁移 |
-| 六、接口与契约原则 | 版本策略、错误响应格式 |
-| 七、NFR 预算框架 | EPIC 级性能/功耗/内存/安全上限与分配 |
-| 八、跨 Feature 共享能力 | 与 epic.md 对齐，确定 Owner 与执行顺序 |
-| 九、日志与可观测性 | 结构化日志、脱敏、埋点 |
-| 十、安全与合规约束 | 加密、权限、隐私 |
+| 一、EPIC 级公共约束 | 锁定语言、框架、构建、API 级别等 |
+| 二、跨 Feature 边界与依赖规则 | 依赖方向、Feature 边界、跨层禁止 |
+| 三、统一运行时约束 | 线程/协程、错误处理、日志、权限与安全原则 |
+| 四、数据与存储总约束 | SoR、缓存、迁移原则 |
+| 五、跨 Feature 共享能力 | 与 epic.md 对齐，确定 Owner 与执行顺序 |
+| 六、Feature Plan 裁剪规则 | 各 Feature 用 Lite 还是 Standard |
+
+**不在 epic-plan**：NFR 量化 → `nfr.md`；接口/契约 → `interface-design.md`（均由 `/aisdd.epicdesign` 产出）。
 
 ## 行为约束
 
 - **基于现有代码**：技术栈、分层必须反映工程实际（constitution §一、§三）
 - **模板结构保护**：不得增删章节（constitution §九）
-- **与 epic.md 双向对齐**：§八 必须与 epic.md「跨 Feature 技术策略」一致；若有差异须提示用户同步
+- **与 epic.md 双向对齐**：§五 必须与 epic.md「跨 Feature 技术策略」一致；若有差异须提示用户同步
 - 变更记录填写初始版本 v0.1.0
 
 ## 完成后
 
 提示用户：
 1. 评审 epic-plan.md
-2. 后续各 Feature 按 §八 确定的执行顺序逐个运行 `/aisdd.featureplan`
+2. 后续各 Feature 按 §五 确定的执行顺序逐个运行 `/aisdd.featureplan`
+3. NFR 与接口详细设计在 epicdesign 阶段由 `nfr.md`、`interface-design.md` 完成

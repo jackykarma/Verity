@@ -97,13 +97,13 @@ $ARGUMENTS
 根据挑战目标，加载对应文档：
 
 **`spec` 模式** — 加载：
-- 各 Feature `spec.md`（FR / NFR / AC / 边界场景 / 核心实体）
+- 各 Feature `spec.md`（FR / NFR / AC / 场景矩阵）
 - `epic.md`（EPIC 范围声明、Feature 拆分边界）
 - `.specify/memory/constitution.md`
 
 **`plan` 模式** — 加载：
-- `epic-plan.md`（若存在；EPIC 技术规约与 NFR 预算框架）
-- 各 Feature `plan.md`（轻量技术规约、能力边界、数据/NFR/安全硬约束、Design 输入清单）
+- `epic-plan.md`（若存在；EPIC 技术规约与共享能力约束）
+- 各 Feature `plan.md`（轻量技术规约、能力边界、数据/NFR/安全硬约束）
 - 各 Feature `spec.md`（作为 plan 的需求基线对照）
 - `.specify/memory/constitution.md`
 
@@ -246,5 +246,5 @@ $ARGUMENTS
 /aisdd.featureplan × N  →  /aisdd.challenge plan  →  /aisdd.epicanalyze  →  /aisdd.epicdesign
 /aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.epicanalyze  →  /aisdd.featuretasks
 /aisdd.featuretasks × N →  /aisdd.analyze × N     →  /aisdd.implement
-/aisdd.implement        →  /aisdd.verify           →  合并/发布
+/aisdd.implement        →  实现自检 / 合并发布
 ```

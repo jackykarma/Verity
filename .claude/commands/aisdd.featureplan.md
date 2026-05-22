@@ -1,5 +1,5 @@
 ---
-description: "生成 Feature 轻量技术规约（增量约束/能力边界/数据与 NFR 硬约束/待确认项），在 epic-plan.md 的 EPIC 级约束下编写。系统设计（架构图、类图、时序、Story 拆解、L2 设计、接口字段、表结构）在 /aisdd.epicdesign 阶段产出。支持 --batch 模式从已有 spec.md 并行生成所有 Feature 的 plan.md。"
+description: "生成 Feature 轻量技术规约（增量约束/能力边界/数据与 NFR 硬约束），在 epic-plan.md 的 EPIC 级约束下编写。系统设计（架构图、类图、时序、Story 拆解、L2 设计、接口字段、表结构）在 /aisdd.epicdesign 阶段产出。支持 --batch 模式从已有 spec.md 并行生成所有 Feature 的 plan.md。"
 handoffs:
   - label: 对抗性挑战（多 Feature 推荐）
     agent: aisdd.challenge
@@ -89,7 +89,7 @@ $ARGUMENTS
 你是专注于单一 Feature 轻量技术规约生成的子 Agent，只做一件事：生成指定 Feature 的 plan.md。
 
 共享 EPIC 约束（只读）：
-  epic-plan.md 摘要: [EPIC 级技术约束：技术栈/分层规则/NFR 预算框架/共享能力识别/错误码规范]
+  epic-plan.md 摘要: [EPIC 级技术约束：技术栈/分层规则/共享能力识别/错误码规范]
   ux-design.md 摘要: [与本 Feature 相关的交互规则与视觉规范（按 Feature 过滤）]
   constitution MUST 条款: [演进式设计/差距分析/最小改动/模板保护]
 
@@ -102,37 +102,35 @@ $ARGUMENTS
   依赖的 Owner Feature（若有）: [FEAT-yyy 的能力边界摘要，由主 Agent 注入]
 
 执行步骤：
-1. 读取 SPEC_FILE（提取 FR/NFR/AC/依赖/核心实体）
+1. 读取 SPEC_FILE（提取 FR/NFR/AC/依赖）
 2. 读取 .specify/templates/plan-template.md
 3. 读取现有工程代码中与本 Feature 相关的模块（差距分析：可复用/需扩展/需新增）
 4. 按模板填充 PLAN_FILE（规则见下方）
-5. 返回：{ feature_id, plan_file, plan_version, status, ability_boundaries: [...], nfr_allocations: {...} }
+5. 返回：{ feature_id, plan_file, plan_version, status, ability_boundaries: [...] }
 
 plan.md 填写规则：
 - Plan Version: v0.1.0
 - 必须在 epic-plan.md 约束下展开，不得违反 EPIC 规约
-- Plan 前置检查：验证 EPIC 级规约遵从、共享能力依赖、是否适用 Lite 填法
-- §一 规约摘要：Feature 目标、适用档位、EPIC 约束来源、现有代码边界、关键技术决策
+- Plan 前置检查：验证 EPIC 级规约遵从、共享能力依赖、差距分析
+- §一 规约摘要：Feature 目标、EPIC 约束来源、现有代码边界
 - §二 Feature 增量约束：只写相对 epic-plan 或现有工程默认规则的增量
 - §三 能力边界与外部依赖：只写能力级承诺与调用约束，不写方法签名/DTO 字段
 - §四 数据、NFR 与安全硬约束：只写 SoR、生命周期、规模、NFR、安全等约束，不写表结构/字段/索引
-- §五 Design 输入清单：列出后续 epicdesign 必须展开的设计点，不在 plan 阶段提前设计
-- §六 待确认问题：记录影响设计或实现的未决事项
 - 禁止在 plan.md 中输出架构图、类图、时序图、流程图、Story 拆解、L2 设计、接口方法签名、数据库表字段、埋点字段
+- **spec 单向消费（禁写红线）**：对 SPEC_FILE 仅只读消费；**禁止**反向修改 spec.md 的任何章节（含 FR/NFR/AC/变更记录）。若发现 spec 缺失/歧义/与现实冲突：返回时附带 `spec_gaps: [...]`，由主 Agent 引导 `/aisdd.cr` 或 `/aisdd.clarify`；不得在 plan 中「顺便」回写 spec
 ```
 
 **降级方案**（若 Agent 工具不可用）：按依赖拓扑顺序（Owner 先）顺序生成每个 Feature 的 plan.md，逻辑与子 Agent 任务一致。
 
-收集所有子 Agent 返回结果，汇总 `ability_boundaries` 和 `nfr_allocations` 供 B-4 使用。失败的 Feature 记录错误原因，不阻塞其他 Feature。
+收集所有子 Agent 返回结果，汇总 `ability_boundaries` 供 B-4 使用。失败的 Feature 记录错误原因，不阻塞其他 Feature。
 
-### B-4. 跨 Feature 能力边界与 NFR 预算检查
+### B-4. 跨 Feature 能力边界检查
 
 所有 plan.md 生成完成后，执行**跨 Feature 一致性快速检查**（比 featurespec 的检查更侧重技术层面）：
 
 | 检查项 | 说明 | 级别 |
 |--------|------|------|
 | **能力边界对齐** | Capability Feature（Owner）§三声明的能力边界，与 Product Feature（Consumer）§三引用的依赖是否对齐（能力覆盖、约束规则一致） | BLOCK |
-| **NFR 预算合计** | 各 Feature 的性能/内存/功耗 NFR 分配之和是否超出 epic-plan.md §六 的 EPIC 级预算上限 | BLOCK |
 | **增量约束一致性** | 各 Feature §二 的增量约束是否与 epic-plan.md 的公共约束一致 | WARN |
 | **共享能力重复设计** | 是否有多个 Feature 各自实现了相同能力（而非引用同一 Owner） | WARN |
 | **数据 SoR 冲突** | 多个 Feature 是否对同一数据声明了不同权威来源或生命周期 | WARN |
@@ -141,7 +139,7 @@ plan.md 填写规则：
 输出快速检查结果（不超过 20 条）：
 
 ```markdown
-### 批量生成后能力边界与 NFR 检查
+### 批量生成后能力边界检查
 
 | ID | 级别 | 涉及 Feature | 问题 | 建议 |
 |----|------|-------------|------|------|
@@ -166,17 +164,12 @@ plan.md 填写规则：
 | FEAT-001 | Capability | ✅ | [路径] | v0.1.0 | 2 |
 | FEAT-002 | Product | ✅ | [路径] | v0.1.0 | — |
 
-### 能力边界与 NFR 检查摘要
+### 能力边界检查摘要
 
 - BLOCK: X 条（须修复后进入下一阶段）
 - WARN: X 条（建议评估）
 
-### NFR 预算概览
-
-| NFR 维度 | EPIC 上限 | 各 Feature 分配总和 | 状态 |
-|---------|---------|-----------------|------|
-| 性能（启动时间/响应延迟）| ... | ... | ✅/⚠️/❌ |
-| 内存 | ... | ... | ✅/⚠️/❌ |
+> NFR 量化评估在 `/aisdd.epicdesign nfr` 产出 `nfr.md` 后，由 `/aisdd.epicanalyze` 对照各 Feature `spec.md` 的 NFR 指标做跨 Feature 一致性检查。
 
 ### 下一步建议
 
@@ -191,7 +184,7 @@ plan.md 填写规则：
 
 目标：生成 `plan.md`（Feature 轻量技术规约）。
 
-**plan.md 的定位**：Feature 轻量技术规约（增量约束/能力边界/数据与 NFR 硬约束/待确认项）。系统设计（架构图、类图、时序图、Story 拆解、L2 详细设计、接口字段、表结构、埋点字段）由后续 `/aisdd.epicdesign` 阶段在 EPIC 级统一产出。
+**plan.md 的定位**：Feature 轻量技术规约（增量约束/能力边界/数据与 NFR 硬约束）。系统设计（架构图、类图、时序图、Story 拆解、L2 详细设计、接口字段、表结构、埋点字段）由后续 `/aisdd.epicdesign` 阶段在 EPIC 级统一产出。
 
 **方案设计的输入（必须考虑）**：**spec 需求**（spec.md）与 **EPIC 级设计稿解析结果**（`specs/epics/<EPIC>/ux-design.md`，由 `/aisdd.epicuidesign` 从交互稿/视觉稿中提取的结构化交互逻辑与视觉规范）。若 epicuidesign 未执行则仅以 spec 为输入。
 
@@ -213,7 +206,7 @@ plan.md 填写规则：
 - 若 `EPIC_DIR/research/` 存在且非空：扫描与本 Feature 相关的调研报告（`/aisdd.research --save` 产出）作为**参考性补充信息**——了解 API 限制、库评估、风险等技术背景；调研报告**不是约束源或结论**，plan 仍须独立完整分析并做出自己的技术决策。
 - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 约束检查）
 - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
-- 注意：plan.md 不产出图表；若发现需要类图、时序图、流程图或表结构，记录到“Design 输入清单”，交由 `/aisdd.epicdesign` 展开。
+- 注意：plan.md 不产出图表；若发现需要类图、时序图、流程图或表结构，交由 `/aisdd.epicdesign` 展开，不在 plan 中单列清单。
 
 ### 3. 填充 plan.md 内容
 
@@ -225,8 +218,6 @@ plan.md 填写规则：
   - 二、Feature 增量约束
   - 三、能力边界与外部依赖
   - 四、数据、NFR 与安全硬约束
-  - 五、Design 输入清单
-  - 六、待确认问题
 
 ### 4. 写入 `IMPL_PLAN`
 
@@ -249,8 +240,9 @@ plan.md 填写规则：
 
 ## 核心规则
 
-- **Plan 禁止详细设计**：不得在 plan.md 中输出架构图、类图、时序图、流程图、Story 拆解、L2 设计、接口方法签名、数据库表字段、埋点字段；发现需要设计的内容写入“Design 输入清单”
+- **Plan 禁止详细设计**：不得在 plan.md 中输出架构图、类图、时序图、流程图、Story 拆解、L2 设计、接口方法签名、数据库表字段、埋点字段；详细设计一律在 `/aisdd.epicdesign` 阶段产出
 - **EPIC 规约遵从**：plan.md 的技术规约不得违反 epic-plan.md 的约束
 - **差距分析优先**（constitution 要求）：设计前须将每条 FR/NFR 映射到现有模块，明确可复用、需扩展、需新增的边界
+- **spec 单向消费（禁写红线）**：本命令对 `spec.md` 仅**只读**消费——读取 FR/NFR/AC/边界/场景作为方案输入；**禁止**反向修改 `spec.md` 的任何章节（含「变更记录」）。若发现 spec 缺失/歧义/与现实冲突：**停止 plan 编写**，通过 `/aisdd.cr` 或 `/aisdd.clarify` 走变更/澄清流程；不得在 plan 中"顺便"回写 spec
 - 执行主体：**SE/TL（或架构师）**。开发者应将 `plan.md` 视为只读输入；如需变更必须提交变更提案。
 - Plan 的技术规约是后续 EPIC 设计说明书与 Implement 阶段的约束输入之一。

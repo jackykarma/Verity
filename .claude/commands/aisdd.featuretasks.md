@@ -33,19 +33,19 @@ $ARGUMENTS
 2. **加载设计文档**：从 FEATURE_DIR 及 EPIC 目录中读取以下文档：
     - **必需文档**：
         - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三，若有）、**关键类图与关键时序**（§七 KD，若有）、**架构章节**（§一～§六）
-        - plan.md（**轻量技术规约**：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单）
+        - plan.md（**轻量技术规约**：增量约束、能力边界、数据/NFR/安全硬约束）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
     - **可选文档**：epic-plan.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
     - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。
 
 3. **追溯矩阵生成与一致性核对（只写入 tasks.md）**：
     - 从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射，并在 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵。
-    - 核对 `plan.md` 轻量规约是否已被 `epic-design.md` 承接：对照 §一～§六架构、§七 KD（若有）、接口/数据库/埋点子文件（若有）与 L2（若有），逐项检查 plan.md §二（增量约束）、§三（能力边界与外部依赖）、§四（数据/NFR/安全硬约束）、§五（Design 输入清单）。
+    - 核对 `plan.md` 轻量规约是否已被 `epic-design.md` 承接：对照 epic-design §一～§六架构、§七 KD（若有）、接口/数据库/埋点子文件（若有）与 L2（若有），逐项检查 plan.md §二（增量约束）、§三（能力边界与外部依赖）、§四（数据/NFR/安全硬约束）。
     - 若发现 spec/plan 与 design 矛盾或缺失，**停止生成 tasks.md**，输出差异并建议走 `/aisdd.cr` 或更新指定设计章节；不得在本命令中反向修改已冻结的 `spec.md` 或 `plan.md`。
     - **只写执行事实源**：本步骤只创建/更新 `tasks.md`，不回填 `spec.md` 追溯表，不追加 `plan.md` 变更记录。
 
 4. **执行任务生成流程**：
-    - 加载 plan.md 并提取轻量技术规约、能力边界、数据/NFR/安全硬约束与 Design 输入清单
+    - 加载 plan.md 并提取轻量技术规约、能力边界、数据/NFR/安全硬约束
     - 从 **EPIC 软件设计说明书**的 **§十二 Story 拆解** 提取 Story 列表（ST-xxx），包括：目标、改动范围、依赖、覆盖 FR/NFR、验证条件
     - 从 spec.md 提取 FR/NFR 与 AC（验收标准）
     - 从 `database-design.md` 或各 L2 提取实体/表结构并映射至对应 Story

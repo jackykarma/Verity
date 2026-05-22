@@ -63,7 +63,6 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 `features/*/l2_design/ST-xxx_*.md` | 分阶段（范围递减、精度递增）：**`key`**（§七）论证方案可行性，KD 内类图须含全量公共方法签名、时序须穷举全异常分支 → **`nfr`**（§八~§十一）量化验证 → **`story`**（§十二）拆解 → **`l2`**（§十三）Story 级落码设计（§八~§十一 正文在三份独立 md 中，`epic-design.md` 仅引用） |
 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 内置 FR/NFR → Story → Task 追溯矩阵，不反向改写冻结 spec/plan |
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
-| `/aisdd.verify` | 验证报告 | 实现↔设计一致性验证 |
 | `/aisdd.cr` | CR 文件 + 下游产物更新 | 变更请求 |
 | `/aisdd.challenge` | 挑战报告（不写入文件） | 阶段转换前可选：spec / plan / design |
 | `/aisdd.analyze` | 分析报告（不写入文件） | featuretasks 后、implement 前 |
@@ -136,11 +135,10 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 |------|-----------|
 | `spec.md` | 需求：FR / NFR / AC / 范围边界 / 完整场景矩阵（设计走查与验证追溯基线） |
 | `ux-design.md` | 体验呈现：交互规则、视觉规范、设计稿索引 |
-| `epic-plan.md`（或合并后的 `plan.md`） | EPIC 级公共约束：跨 Feature 边界、共享能力 Owner、NFR 总预算 |
-| `plan.md` | Feature 级轻量技术规约：增量约束、能力边界、数据/NFR/安全硬约束、Design 输入清单 |
+| `epic-plan.md`（或合并后的 `plan.md`） | EPIC 级公共约束：跨 Feature 边界、共享能力 Owner、统一运行时原则 |
+| `plan.md` | Feature 级轻量技术规约：增量约束、能力边界、数据/NFR/安全硬约束 |
 | `epic-design.md` | 架构与设计总览：0/1 层；§7.1 KD 清单与依赖、§7.2 引用；§8/§14 索引；§9 摘要并链至 `nfr.md`；§10～§12 摘要并链至 `interface-design.md` / `database-design.md` / `analytics-tracking.md` |
 | `key-func-design/KD_*_*.md` | §七各 KD 详细设计（核心方案、流程图、核心时序） |
 | `nfr.md` | §九技术评估（设计产出验证，9.1～9.7 量化全文） |
 | `features/*/l2_design/ST-xxx_*.md` | L2 落码级详细设计（复杂/高风险 Story 按需一文件） |
 | `tasks.md` | 执行：可操作 Task，含 spec/设计追溯 |
-| verify 报告（`--save`） | 实现↔设计一致性（EPIC 交付收口） |

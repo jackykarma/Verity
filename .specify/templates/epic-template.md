@@ -4,6 +4,29 @@
 
 # EPIC 规格说明：[EPIC 名称]
 
+> **epic.md 纯净度约束（红线，写入前必读）**
+>
+> 本文件是 **EPIC 级产品规格**（含 Feature 拆分列表），与下游各 `spec.md` 同属**需求事实源**，事实源范围仅限：EPIC 背景/目标/范围、Feature 拆分（业务语言）、跨 Feature 关注点、验收意图、业务/合规约束。
+>
+> **绝对禁止**出现以下任何技术实现细节（违者必须从本文件移除，归入 `epic-plan.md` / 各 Feature `plan.md` / `epic-design.md` 及其子文件）：
+>
+> | 禁触类别 | 识别特征 | 应归属 |
+> |---|---|---|
+> | 类名 / 接口名 | `*ViewModel` / `*Repository` / `*UseCase` / `*Manager` / `*Service` 等 PascalCase 技术后缀 | `plan.md` / `epic-design.md` |
+> | 框架 / 库名 | Hilt / Room / Compose / Coroutines / Retrofit / WorkManager 等 | `epic-plan.md` §技术栈 / `plan.md` |
+> | 数据存储 | DAO / Entity / 表名 / 字段名 / SQL / 索引 | `database-design.md` |
+> | API / 接口 | URL 路径、HTTP 方法、状态码、DTO 字段 | `interface-design.md` |
+> | 代码结构 | 包路径、文件路径、Gradle 模块名、代码片段 | `epic-design.md` §一～§六 |
+> | 线程 / 并发原语 | `Dispatchers.*` / `viewModelScope` / 锁、信号量 | `plan.md` / `epic-design.md` |
+> | 设计模式实现 | "用单例 / 观察者 / 工厂模式实现……"涉及代码语义 | `epic-design.md` |
+> | 埋点字段 | 事件名、参数 key、SDK 名 | `analytics-tracking.md` |
+>
+> **判断分界点**：删掉这条后，EPIC 的业务范围与 Feature 拆分逻辑是否仍完整？仍完整 → 是技术细节，删掉；不完整 → 改写为业务语言后保留。
+>
+> **Feature 拆分条目合法字段**：名称（业务语言）、类型（Product/Capability）、目标、In/Out、依赖、验收意图、拆分动机。**禁止**写「该 Feature 将使用 xxx 框架/库/类实现」。
+>
+> 详见 `docs/aisdd/spec-vs-plan-design-boundary.md`；与 `docs/aisdd/spec-vs-ux-design-boundary.md`（体验呈现边界）互补。
+
 **EPIC ID**：EPIC-[编号]
 **EPIC Version**：v0.1.0
 **创建时间**：[YYYY-MM-DD]
@@ -186,7 +209,7 @@
 - **线程与并发模型**：统一线程切换、协程/异步约束
 - **错误处理与能力边界**：统一错误原则、返回语义、能力责任边界
 - **数据与存储策略**：SoR、缓存、迁移、数据一致性
-- **NFR 预算与可观测性**：性能/功耗/内存/安全/日志/埋点口径
+- **可观测性与 NFR 验证**：日志/埋点口径；NFR 量化评估见 `/aisdd.epicdesign` 产出的 `nfr.md`；跨 Feature 接口契约见 `interface-design.md`
 
 ## EPIC 完成条件 *（必填）*
 
