@@ -194,6 +194,6 @@ flowchart TB
 1. **每个图表必须包含 `%%{init}%%` 配置** - 确保样式一致
 2. **流程图必须覆盖所有分支和异常** - 不要遗漏错误路径
 3. **时序图使用 alt/else/opt/loop** - 完整展示交互分支
-4. **每张时序图下方须有详细文字说明** - 解释协作过程、工作过程及分支含义（与 `.claude/rules/specify-diagram-requirements.mdc` §四一致）；AISDD 设计文档不得省略
+4. **每张时序图下方须有详细文字说明** - 解释协作过程、工作过程及分支含义（与 `.cursor/rules/specify-diagram-requirements.mdc` §四一致）；本项目**所有文档**中的时序图均不得省略，无例外
 5. **subgraph 使用中文标签** - 便于理解
 6. **节点 ID 使用英文，显示文字用中文** - 如 `API["后端服务"]`

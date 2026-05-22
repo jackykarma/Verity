@@ -60,12 +60,12 @@ description: "Change Request（CR）变更请求模板：用于需求/交互/视
 
 > 规则：**只更新受影响范围**；每次更新必须记录 Version 与变更记录。
 >
-> **spec.md 禁触红线（不可豁免）**：`spec.md` 是**纯粹的产品规格**，下表中所有勾选项写入 spec.md 时，**绝对禁止**附带类名、接口、框架名、库名、表/字段、SQL、API 路径、代码片段、包路径、文件路径、线程原语、埋点字段等技术实现细节；技术决策属于 `plan.md` / `epic-design.md` / 其子文件。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
+> **spec.md 禁触红线（不可豁免）**：`spec.md` 是**纯粹的产品规格**，下表中所有勾选项写入 spec.md 时，**绝对禁止**附带类名、接口、框架名、库名、表/字段、SQL、API 路径、代码片段、包路径、文件路径、线程原语、埋点字段等技术实现细节；技术决策属于 `tech-spec.md` / `epic-design.md` / 其子文件。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
 
 - [ ] 更新 EPIC `ux-design.md`（如涉及交互/视觉/动效）
 - [ ] 更新 Feature `spec.md` — **FR / AC / 范围（In/Out） / 用户旅程 / 边界与异常场景**（需求文字层面）
 - [ ] 更新 Feature `spec.md` — **仅 NFR 量化指标**（如 `p95 ≤ Xms`、`内存 ≤ XMB`，**不写实现方案**；技术方案类 CR 涉及此项时必须显式勾选）
-- [ ] 更新 Feature `plan.md`（如涉及方案决策/契约/预算/风险/Story；类名、接口、框架、库、模块、表/字段、API 路径等技术决策**全部**归此或更下游）
+- [ ] 更新 Feature `tech-spec.md`（如涉及方案决策/契约/预算/风险/Story；类名、接口、框架、库、模块、表/字段、API 路径等技术决策**全部**归此或更下游）
 - [ ] 更新 `epic-design.md` 与 KD / 接口 / 数据库 / 埋点 / l2 等子文件（如涉及架构、详细设计、接口契约、表结构、埋点字段）
 - [ ] 重新生成/更新 Feature `tasks.md`（确保验证步骤与追溯一致）
 

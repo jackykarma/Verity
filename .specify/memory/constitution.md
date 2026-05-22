@@ -104,7 +104,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
   - 其他图表格式（如 Graphviz、Draw.io XML 等）
 
 - **适用范围**：
-  - `plan.md`（Feature 轻量技术规约）
+  - `tech-spec.md`（EPIC 技术规格书）
   - EPIC 软件设计说明书
   - `spec.md`（如包含技术图表）
   - 其他技术设计文档
@@ -120,11 +120,10 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 
 - `spec.md` 是 **需求事实源**：范围（In/Out）、FR/NFR、验收标准、边界与异常场景
 - `ux-design.md`（EPIC 级）是 **体验呈现事实源**：信息架构、交互规则与状态、视觉规范、动效清单与说明、设计稿索引
-- `epic-plan.md`（EPIC 级，按需）是 **EPIC 公共约束事实源**：仅在多 Feature 且存在跨 Feature 约束时记录全局技术栈锁定、共享能力 Owner、统一运行时原则、Feature plan 裁剪策略；不得写详细设计；**NFR 量化评估**由 `nfr.md`（`/aisdd.epicdesign nfr`）承接
-- `plan.md`（Feature 级）是 **Feature 轻量技术规约事实源**：记录本 Feature 的增量约束、能力边界、数据/NFR/安全硬约束；不得写架构图、类图、时序图、Story、接口字段、表结构等详细设计
+- `tech-spec.md`（EPIC 根，**唯一**技术规约事实源）合并原 `epic-plan.md` 与各 Feature `plan.md`：**第一部分**为 EPIC 公共约束（技术栈、跨 Feature 边界、共享能力 Owner、运行时与数据总约束）；**第二部分**按 Feature 分节记录增量约束、能力边界、数据/NFR/安全硬约束；不得写详细设计；**NFR 量化评估**由 `nfr.md`（`/aisdd.epicdesign nfr`）承接
 - **EPIC 软件设计说明书**（EPIC 级）是 **架构与详细设计事实源**：0 层/1 层架构图、全景类图与关键时序、关键功能与疑难设计、接口字段、数据库表结构、Story 拆解与 L2 索引（§十三）；L2 详细设计按 Story 分文件写在各 Feature 的 **`l2_design/ST-xxx_<slug>.md`** 中；供人类评审与 Task/Implement 阶段引用
 - `tasks.md` 是 **执行事实源**：将设计说明书中的 Story 拆解为可执行 Task，并引用 plan 约束与对应 `l2_design/ST-xxx_*.md` 中的设计片段
-- **实现交付**：代码实现须对照 `spec.md`、`plan.md`、`epic-design.md` 与 L2 设计完成自检；发现偏离时走 CR 流程更新设计或修复实现，不在 implement 阶段擅自改写冻结文档
+- **实现交付**：代码实现须对照 `spec.md`、`tech-spec.md`、`epic-design.md` 与 L2 设计完成自检；发现偏离时走 CR 流程更新设计或修复实现，不在 implement 阶段擅自改写冻结文档
 - **`/aisdd.analyze`（可选，非阻塞）**：`feature` / `epic` 范围的一致性分析报告**不是** `featuretasks` 或 `implement` 的前置门禁；团队可按风险选择运行，未运行不得作为拒绝实现的理由
 
 ### 七.1 分支策略（Branch Strategy）
@@ -139,7 +138,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 
 追溯与变更规则：
 
-- 任何“可测试/可验收”的变化，必须最终落到 `spec.md`（FR/NFR/AC/边界）、`plan.md`（约束/能力边界/预算红线/降级与回滚要求）或 EPIC 软件设计说明书中；不得只停留在口头或实现代码里
+- 任何“可测试/可验收”的变化，必须最终落到 `spec.md`（FR/NFR/AC/边界）、`tech-spec.md`（约束/能力边界/预算红线/降级与回滚要求）或 EPIC 软件设计说明书中；不得只停留在口头或实现代码里
 - 任意变更必须有“影响分析 → 增量更新”的闭环：先明确影响哪些 Feature/Story/Task 与模块，再增量更新下游产物
 - 文档变更必须更新：
   - 对应文档头部 Version（必要时）
@@ -159,21 +158,16 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 落地准则：
 
 - 能用最小改动满足需求的，不得引入“理想化的大方案”
-- 若必须提高复杂度，须在 plan.md 的“复杂度跟踪”章节说明必要性与取舍
+- 若必须提高复杂度，须在 `tech-spec.md` 对应 Feature 章节临时追加「复杂度跟踪」小节说明必要性与取舍
 
 快速通道（Fast Track）：
 
-- **单 Feature EPIC**（EPIC 仅含一个 Feature）：
-  - `epic-plan.md` 可省略，其内容合并到 `plan.md`（在 plan 中增加"EPIC 级约束"章节）
-  - `epic-design.md` 仅需 Lite 级
-  - `l2_design/ST-xxx_*.md` 视复杂度，简单 Story 可仅写概要
+- **单 Feature EPIC**：仍产出一份 `tech-spec.md`（第一部分 + 唯一 Feature 第二节）；`epic-design.md` 仅需 Lite 级
 - **纯修复/小改动**（预估 ≤ 3 人天）：
-  - 可跳过 `epic-plan.md` 和 `ux-design.md`
+  - `tech-spec.md` 可精简（第一部分简写 + 涉及 Feature 第二节）
+  - 可跳过 `ux-design.md`
   - `epic-design.md` 可精简为仅含 Story 拆解 + 关键类图
   - `l2_design/` 下 L2 文件可跳过
-- **多 Feature 但无跨 Feature 约束**：
-  - `epic-plan.md` 可按需省略；各 Feature `plan.md` 只写自身增量约束
-  - 若后续发现共享能力或跨 Feature 技术约束冲突，再补建 `epic-plan.md` 并通过 CR 同步下游
 - 详细裁剪规则与判断流程见 `workflow-overview.md` §四
 
 ## AI 在 Plan 阶段的职责边界
@@ -305,7 +299,7 @@ Plan 阶段的规约输出 MUST 满足以下标准：
 
 - 章程修订需形成文档、获得批准并制定迁移计划
 - 所有 PR/评审 MUST 验证设计方案是否符合本章程
-- 复杂度增加 MUST 有合理依据（在 plan.md 的"复杂度跟踪"章节说明）
+- 复杂度增加 MUST 有合理依据（在 `tech-spec.md` 对应 Feature 章节的「复杂度跟踪」说明）
 
 ### 合规性检查
 

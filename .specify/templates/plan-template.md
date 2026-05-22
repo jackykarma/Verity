@@ -1,3 +1,9 @@
+# 【已废弃】请使用 tech-spec-template.md 第二部分
+
+> Feature 级规约已合并至 EPIC 根 **`tech-spec.md`**（按 Feature 分节）。请运行 `/aisdd.techspec`，勿再创建 Feature 级 `plan.md`。
+
+---
+
 # Plan（Feature 轻量技术规约）：[Feature 名称]
 
 > **定位**：本文档只记录本 Feature 的**轻量技术规约**（增量约束 / 能力边界 / 数据·NFR·安全硬约束）；**不是**设计说明书。

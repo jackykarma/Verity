@@ -45,7 +45,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -S
 # 在当前分支上创建（不新建 git 分支）
 pwsh -NoProfile -File .\.specify\scripts\powershell\create-new-epic.ps1 -Json -UseCurrentBranch -ShortName "<short-name>" "<EPIC 描述>"
 
-# 解析 EPIC 路径（epicuidesign、epicplan、epicdesign 阶段使用）
+# 解析 EPIC 路径（epicuidesign、techspec、epicdesign 阶段使用）
 pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId EPIC-001 -Json
 ```
 
@@ -58,25 +58,22 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.research` | `research/codebase-*-<date>.md`（可选） | **前置代码考古**：只记录存量代码事实快照；不做方案决策；plan/design/CR **不回写** |
 | `/aisdd.epicspec` | `epic.md` | EPIC 入口，运行 `create-new-epic.ps1` |
 | `/aisdd.featurespec` | 各 Feature `spec.md` | FR / NFR / AC |
-| `/aisdd.epicplan` | `epic-plan.md` | 多 Feature 且存在跨 Feature 约束时使用 |
-| `/aisdd.epicuidesign` | `ux-design.md` | 可选，与 epicplan 并行 |
-| `/aisdd.featureplan` | 各 Feature `plan.md` | 产出轻量技术规约；需在 epic-plan（若存在）或单 Feature 合并 plan 约束下执行 |
+| `/aisdd.techspec` | `tech-spec.md` | **EPIC 唯一技术规格书**（合并原 epic-plan + 各 Feature plan） |
+| `/aisdd.epicuidesign` | `ux-design.md` | 可选，与 techspec 并行 |
 | `/aisdd.epicdesign` | `epic-design.md`、`key-func-design/KD_*_*.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 `features/*/l2_design/ST-xxx_*.md` | 分阶段（范围递减、精度递增）：**`key`**（§七）论证方案可行性，KD 内类图须含全量公共方法签名、时序须穷举全异常分支 → **`nfr`**（§八~§十一）量化验证 → **`story`**（§十二）拆解 → **`l2`**（§十三）Story 级落码设计（§八~§十一 正文在三份独立 md 中，`epic-design.md` 仅引用） |
-| `/aisdd.featuretasks` | 各 Feature `tasks.md` | 内置 FR/NFR → Story → Task 追溯矩阵，不反向改写冻结 spec/plan |
+| `/aisdd.featuretasks` | 各 Feature `tasks.md` | 内置 FR/NFR → Story → Task 追溯矩阵，不反向改写冻结 spec/tech-spec |
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.cr` | CR 文件 + 下游产物更新 | 变更请求 |
 | `/aisdd.challenge` | 挑战报告（不写入文件） | 阶段转换前可选：spec / plan / design |
 | `/aisdd.analyze` | 分析报告（不写入文件，**可选、非阻塞**） | **feature** / **epic** / **epic pre-tasks**；不 gate `implement` |
 
-**单 Feature EPIC 快速通道**：跳过 `epic-plan.md`，将必要 EPIC 级约束合并写入唯一的 `plan.md`。
-
-**小改动快速通道**（预估 ≤3 人天）：跳过 `epic-plan.md`、`ux-design.md`、各 Feature `l2_design/` 下 L2 正文；`epic-design.md` 仅写 Story 拆解 + 关键类图。
+**小改动快速通道**（预估 ≤3 人天）：精简 `tech-spec.md`、可跳过 `ux-design.md` 与各 Feature `l2_design/` 下 L2 正文；`epic-design.md` 仅写 Story 拆解 + 关键类图。
 
 ## 分支策略
 
 - 每个 EPIC 一个分支：`epic/EPIC-xxx-short-name`（由 `create-new-epic.ps1` 创建）
 - **不为 Feature 单独创建分支**——Feature 是文档组织单位
-- 所有 spec/plan/tasks/代码均在 EPIC 分支上进行；完成后合并回 `main`
+- 所有 spec/tech-spec/tasks/代码均在 EPIC 分支上进行；完成后合并回 `main`
 
 ## 提交信息格式
 
@@ -135,8 +132,7 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 |------|-----------|
 | `spec.md` | 需求：FR / NFR / AC / 范围边界 / 完整场景矩阵（设计走查与验证追溯基线） |
 | `ux-design.md` | 体验呈现：交互规则、视觉规范、设计稿索引 |
-| `epic-plan.md`（或合并后的 `plan.md`） | EPIC 级公共约束：跨 Feature 边界、共享能力 Owner、统一运行时原则 |
-| `plan.md` | Feature 级轻量技术规约：增量约束、能力边界、数据/NFR/安全硬约束 |
+| `tech-spec.md` | EPIC 唯一技术规约：第一部分 EPIC 公共约束 + 第二部分各 Feature 增量规约 |
 | `epic-design.md` | 架构与设计总览：0/1 层；§7.1 KD 清单与依赖、§7.2 引用；§8/§14 索引；§9 摘要并链至 `nfr.md`；§10～§12 摘要并链至 `interface-design.md` / `database-design.md` / `analytics-tracking.md` |
 | `key-func-design/KD_*_*.md` | §七各 KD 详细设计（核心方案、流程图、核心时序） |
 | `nfr.md` | §九技术评估（设计产出验证，9.1～9.7 量化全文） |

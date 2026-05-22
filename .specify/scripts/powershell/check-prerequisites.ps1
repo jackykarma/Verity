@@ -96,9 +96,17 @@ if (-not (Test-Path $paths.FEATURE_DIR -PathType Container)) {
     exit 1
 }
 
-if (-not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
+# EPIC 工作流：技术规约为 EPIC 根目录 tech-spec.md；旧版 Feature plan.md 不再作为前置
+if ($paths.EPIC_DIR) {
+    $techSpec = Join-Path $paths.EPIC_DIR 'tech-spec.md'
+    if (-not (Test-Path $techSpec -PathType Leaf)) {
+        Write-Output "ERROR: tech-spec.md not found in $($paths.EPIC_DIR)"
+        Write-Output "Run /aisdd.techspec first to create the EPIC technical specification."
+        exit 1
+    }
+} elseif (-not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
     Write-Output "ERROR: plan.md not found in $($paths.FEATURE_DIR)"
-    Write-Output "Run /aisdd.featureplan first to create the implementation plan."
+    Write-Output "Run /aisdd.techspec (EPIC workflow) or legacy plan workflow first."
     exit 1
 }
 

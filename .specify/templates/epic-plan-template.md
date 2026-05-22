@@ -1,3 +1,9 @@
+# 【已废弃】请使用 tech-spec-template.md
+
+> 本模板已由 **`.specify/templates/tech-spec-template.md`** 取代。新 EPIC 请运行 `/aisdd.techspec`，产出 `tech-spec.md`，勿再创建 `epic-plan.md`。
+
+---
+
 # EPIC 技术规约（Epic Plan）：EPIC-[编号] - [EPIC 名称]
 
 > **定位**：本文档只在**多 Feature 且存在跨 Feature 技术约束**时产出，用于冻结 EPIC 级公共规约。它不替代 Feature `plan.md`，也不承载详细设计。

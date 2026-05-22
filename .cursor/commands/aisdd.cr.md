@@ -63,15 +63,15 @@ $ARGUMENTS
 
 3. **加载当前 EPIC 产物**：
    - 读取 `EPIC_DIR/epic.md`
-   - 读取各 `EPIC_DIR/features/*/spec.md`、`plan.md`、`tasks.md`（若有）
-   - 读取 `EPIC_DIR/epic-plan.md`（若有）
+   - 读取各 `EPIC_DIR/features/*/spec.md`、`tech-spec.md`、`tasks.md`（若有）
+   - 读取 `EPIC_DIR/tech-spec.md`（若有）
    - 读取 `EPIC_DIR/epic-design.md`（若有）
    - 读取 `EPIC_DIR/ux-design.md`（若有）
    - 读取 `.specify/templates/change-request-template.md`
 
 4. **影响分析**：
    - **判断变更类型**：需求类（Scope/FR/NFR/AC）/ 交互类 / 技术方案类 / 混合
-   - **定位受影响的产物**：逐个检查 spec/ux-design/plan/epic-plan/epic-design/l2_design（各 ST 文件）/tasks，列出需要更新的文件与章节
+   - **定位受影响的产物**：逐个检查 spec/ux-design/tech-spec/epic-design/l2_design（各 ST 文件）/tasks，列出需要更新的文件与章节
    - **`research/` 永久排除**：`EPIC_DIR/research/` 下代码调研快照**不得**列入下游更新清单；方案或需求变更时**不**修订、不覆盖已有调研报告（需新调研则新建带日期的文件，走 `/aisdd.research`）
    - **参考 workflow-overview.md §7.3 变更影响速查表**确定更新链路
    - **风险评估**：识别变更带来的风险（性能/兼容/工期等）
@@ -90,8 +90,8 @@ $ARGUMENTS
    - 提示用户确认下游更新清单
    - 按变更类型走对应流程（参考 workflow-overview.md §7.1 / §7.2）：
      - **需求类**：更新 spec → 检查 ux-design → 检查 plan → 检查 epic-design → 检查 l2_design（各 ST 文件）→ 更新 tasks
-       - **更新 spec 的硬约束**：**只允许**修改 FR / NFR（量化指标） / AC / 范围（In/Out，含背景与价值表中的 In/Out） / 完整场景矩阵；**绝对禁止**写入类名、接口、框架、库、表名、字段、SQL、API 路径、代码片段、包路径、文件路径、线程原语、埋点字段等技术实现细节（业务假设、平台/合规约束、领域实体语义改 `plan.md` §二～§四 或 `epic-design.md` §三；详见 `.cursor/rules/aisdd-document-boundaries.mdc`）
-     - **技术方案类**：检查 NFR 是否需调整 → 更新 plan/epic-plan → 更新 epic-design → 更新 l2_design（各 ST 文件）→ 检查 Story 拆解 → 更新 tasks
+       - **更新 spec 的硬约束**：**只允许**修改 FR / NFR（量化指标） / AC / 范围（In/Out，含背景与价值表中的 In/Out） / 完整场景矩阵；**绝对禁止**写入类名、接口、框架、库、表名、字段、SQL、API 路径、代码片段、包路径、文件路径、线程原语、埋点字段等技术实现细节（业务假设、平台/合规约束、领域实体语义改 `tech-spec.md` §二～§四 或 `epic-design.md` §三；详见 `.cursor/rules/aisdd-document-boundaries.mdc`）
+     - **技术方案类**：检查 NFR 是否需调整 → 更新 tech-spec.md → 更新 epic-design → 更新 l2_design（各 ST 文件）→ 检查 Story 拆解 → 更新 tasks
        - **spec 禁触红线**：技术方案类 CR **默认不修改 spec.md**；**唯一例外**是「NFR 指标本身需要调整」（如从 `p95 ≤ 200ms` 放宽到 `p95 ≤ 500ms`）——此时只能修改 NFR 行的数值/口径，不得在 spec.md 中粘贴实现方案、库选型、类名等技术决策
      - **混合类**：在 CR 文件 §3.1 影响范围中**预先标注** spec.md 的修改范围（仅 NFR 指标 / 仅 FR/AC 文字 / FR/AC+NFR / 无），按对应路径执行；未在 CR 中标注的字段**不得**在执行阶段顺手改动
    - **写 spec 前的纯净度自检**（每次写入 spec.md 前必须执行）：逐条扫描即将写入的内容是否含技术污染特征（参见 `aisdd.featurespec.md` §「spec / 技术细节边界守护」8 类识别表）；命中即按 block_ask 流程拦截，让用户三选一后再决定是否写入

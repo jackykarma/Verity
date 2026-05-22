@@ -41,7 +41,7 @@ $ARGUMENTS
 
 ## 目标
 
-在 `epicspec` / `featurespec` / `featureplan` / `epicdesign` **之前**，通过阅读**真实工程代码**，建立对相关模块的**事实性认知**，降低写需求/规格时的「想当然」。
+在 `epicspec` / `featurespec` / `techspec` / `epicdesign` **之前**，通过阅读**真实工程代码**，建立对相关模块的**事实性认知**，降低写需求/规格时的「想当然」。
 
 **本命令产出什么**：
 - 模块在哪、做什么、公开 API 与数据模型长什么样
@@ -50,7 +50,7 @@ $ARGUMENTS
 
 **本命令不产出什么**：
 - 技术选型、架构调整、复用/新建/扩展**决策**
-- 对 `spec.md` / `plan.md` / `epic-design.md` 的修改建议清单
+- 对 `spec.md` / `tech-spec.md` / `epic-design.md` 的修改建议清单
 - 风险消解方案、可行性 ✅/❌ 评级、否决/推荐方案
 
 ---
@@ -72,7 +72,7 @@ $ARGUMENTS
 - **严格只读**：不修改任何代码或既有文档（含已有调研报告）
 - **事实优先**：每条结论须可追溯到**文件路径**（可选行号）或测试/注释证据
 - **禁止方案化表述**：不出现「建议采用」「应重构为」「推荐在 plan 中写入」等措辞
-- **禁止替代设计**：调研 ≠ `plan.md` ≠ `epic-design.md`；所有技术决策在后续阶段**独立**做出
+- **禁止替代设计**：调研 ≠ `tech-spec.md` ≠ `epic-design.md`；所有技术决策在后续阶段**独立**做出
 - **基于真实代码**：participant、类名、包路径须来自工程，禁止编造示例类
 
 ---
@@ -179,7 +179,7 @@ $ARGUMENTS
 |------|-------------------|
 | `/aisdd.epicspec` | 可选前置：熟悉代码后再写 EPIC 边界 |
 | `/aisdd.featurespec` | 可选前置：写 FR/AC 时知道现有能力边界（事实），不抄调研做方案 |
-| `/aisdd.epicplan` / `/aisdd.featureplan` | 可读 `research/` 了解**调研时**的代码现状；**独立**做技术决策；**不更新**调研报告 |
+| `/aisdd.techspec` / `/aisdd.techspec` | 可读 `research/` 了解**调研时**的代码现状；**独立**做技术决策；**不更新**调研报告 |
 | `/aisdd.epicdesign` | 同上 |
 | `/aisdd.cr` | **不得**将 `research/` 列入下游更新清单 |
 | `/aisdd.clarify` | 澄清**需求**歧义；代码事实以 research 或现场读码为准 |

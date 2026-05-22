@@ -6,7 +6,7 @@
 
 > **epic.md 纯净度约束（红线）**：本文件与下游各 `spec.md` 同为**需求事实源**（背景/目标/范围、Feature 拆分、跨 Feature 关注点、验收意图）；**禁止**技术实现细节。
 >
-> **写入前自检**：是否含类名/框架/表字段/API/代码路径/线程原语/埋点字段？→ 移入 `epic-plan.md` / `plan.md` / `epic-design.md` 子文件。删掉该条后 EPIC 业务范围是否仍完整？完整则必删。
+> **写入前自检**：是否含类名/框架/表字段/API/代码路径/线程原语/埋点字段？→ 移入 `tech-spec.md` / `tech-spec.md` / `epic-design.md` 子文件。删掉该条后 EPIC 业务范围是否仍完整？完整则必删。
 >
 > **Feature 拆分条目**仅允许：名称、类型、目标、In/Out、依赖、验收意图、拆分动机（均业务语言）。
 >
@@ -127,7 +127,7 @@
 
 > 说明：这里用于识别**跨 Feature 的共享关注点**，并决定它是否需要升级为独立的 Capability Feature。
 >
-> - 本节只做**识别与决策**，不展开接口、SDK、线程模型、预算分配等详细技术设计；这些内容在 `epic-plan.md` 或对应 Feature 文档中完成。
+> - 本节只做**识别与决策**，不展开接口、SDK、线程模型、预算分配等详细技术设计；这些内容在 `tech-spec.md` 或对应 Feature 文档中完成。
 > - 若某关注点被升级为 Capability Feature，应同时出现在上方 Feature 列表中。
 >
 > 建议升级为 Capability Feature 的条件（满足其一即可）：
@@ -140,33 +140,33 @@
 ### 关注点清单
 
 
-| 关注点名称  | 类别（Observability/UX/Algorithm/Infra/Compliance） | 涉及 Feature | 是否升级为 Capability Feature | 建议 Feature / ID | 升级理由（复用/一致性/验收/风险） | 详细去向（epic-plan/ux-design/feature spec） | 状态          |
+| 关注点名称  | 类别（Observability/UX/Algorithm/Infra/Compliance） | 涉及 Feature | 是否升级为 Capability Feature | 建议 Feature / ID | 升级理由（复用/一致性/验收/风险） | 详细去向（tech-spec/ux-design/feature spec） | 状态          |
 | ------ | ----------------------------------------------- | ---------- | ------------------------ | --------------- | ------------------ | -------------------------------------- | ----------- |
 | [关注点1] |                                                 |            | 是/否                      | FEAT-??? / 无    |                    |                                        | 规划中/进行中/已完成 |
 
 
-## 跨 Feature 技术策略（轻量登记，详细约束下沉至 epic-plan）*（建议填写）*
+## 跨 Feature 技术策略（轻量登记，详细约束下沉至 tech-spec）*（建议填写）*
 
-> **目的**：在 EPIC 层做最小必要的协同登记，帮助后续 `epic-plan.md` 与各 Feature `plan.md` 明确复用关系和计划顺序。
+> **目的**：在 EPIC 层做最小必要的协同登记，帮助后续 `tech-spec.md` 与tech-spec.md（第二部分各 Feature 节） 明确复用关系和计划顺序。
 >
-> **时机**：建议在所有 Feature `spec.md` 完成后、运行 `/aisdd.epicplan` 前补齐；若前期已识别出明显共享项，也可先填写占位，后续与 `epic-plan.md` 对齐。
+> **时机**：建议在所有 Feature `spec.md` 完成后、运行 `/aisdd.techspec` 前补齐；若前期已识别出明显共享项，也可先填写占位，后续与 `tech-spec.md` 对齐。
 >
 > **强制规则**：
 >
-> - 本节只登记**影响复用、Owner 和执行顺序**的信息；技术栈锁定、统一运行时原则、能力边界、预算分配等公共约束按需写入 `epic-plan.md`
-> - 后续每个 Feature 在开始 plan 之前，**必须先阅读本章节**；若 EPIC 根下存在 `**epic-plan.md`**，**必须优先以 `epic-plan.md` 为准**
+> - 本节只登记**影响复用、Owner 和执行顺序**的信息；技术栈锁定、统一运行时原则、能力边界、预算分配等公共约束按需写入 `tech-spec.md`
+> - 后续每个 Feature 在开始 plan 之前，**必须先阅读本章节**；若 EPIC 根下存在 `**tech-spec.md`**，**必须优先以 `tech-spec.md` 为准**
 > - 若 Feature plan 中需要设计的共享组件已在此登记为“由其他 Feature 提供”，则应复用，不得重复设计
-> - 若发现新的共享需求，必须先更新本章节，并在 `epic-plan.md` 中补齐对应详细约束
+> - 若发现新的共享需求，必须先更新本章节，并在 `tech-spec.md` 中补齐对应详细约束
 
 ### 共享能力轻量登记
 
-> 识别多个 Feature 都可能用到的共享能力，先做 Owner 与消费者登记，详细设计在 `epic-plan.md` 展开。
+> 识别多个 Feature 都可能用到的共享能力，先做 Owner 与消费者登记，详细设计在 `tech-spec.md` 展开。
 
 
 | 共享项名称        | 类型             | 涉及 Feature | 建议 Owner Feature | 消费方 Feature        | 当前决策/备注             |
 | ------------ | -------------- | ---------- | ---------------- | ------------------ | ------------------- |
 | [例如：UI 基础框架] | Infrastructure | A, B, C    | FEAT-001         | FEAT-002, FEAT-003 | 主题、布局、导航由 Owner 统一  |
-| [例如：数据持久层]   | Infrastructure | A, B       | FEAT-001         | FEAT-002           | 详细存储策略下沉至 epic-plan |
+| [例如：数据持久层]   | Infrastructure | A, B       | FEAT-001         | FEAT-002           | 详细存储策略下沉至 tech-spec |
 | [例如：网络层封装]   | Infrastructure | B, C       | FEAT-002         | FEAT-003           | 统一接口风格与错误语义         |
 | [例如：通用错误处理]  | Infrastructure | All        | FEAT-001         | All                | 统一错误码与用户提示口径        |
 
@@ -178,7 +178,7 @@
 
 ### Feature Plan 建议顺序（基于依赖关系）
 
-> 根据共享能力的依赖关系，给出建议顺序；详细技术约束与最终顺序以 `epic-plan.md` 为准。
+> 根据共享能力的依赖关系，给出建议顺序；详细技术约束与最终顺序以 `tech-spec.md` 为准。
 
 
 | 顺序  | Feature  | 原因                  | 依赖（需要先完成 spec/plan 的 Feature） | 预期产出               |
@@ -188,7 +188,7 @@
 | 3   | FEAT-003 | 纯业务能力，依赖前置共享约束稳定    | FEAT-001, FEAT-002            | 业务侧 plan           |
 
 
-### 待在 `epic-plan.md` 细化的主题
+### 待在 `tech-spec.md` 细化的主题
 
 - **技术栈与工程约束**：统一技术边界、模块分层、依赖方向
 - **线程与并发模型**：统一线程切换、协程/异步约束
@@ -202,14 +202,14 @@
 >
 > - EPIC 是 **Feature 的容器与编排单元**，不是额外的独立验收对象。
 > - 每个 Feature 必须可独立验收、独立交付；EPIC 完成意味着其下必需 Feature 已完成并达到各自验收标准。
-> - 若存在跨 Feature 的统一技术约束（如性能预算、隐私合规、可观测性口径），应登记在 `epic-plan.md` 或相应 Feature 文档中，而不是在此重复定义一套 EPIC 级 FR/NFR。
+> - 若存在跨 Feature 的统一技术约束（如性能预算、隐私合规、可观测性口径），应登记在 `tech-spec.md` 或相应 Feature 文档中，而不是在此重复定义一套 EPIC 级 FR/NFR。
 
 ### 完成判定
 
 - 所有 **必需** Feature 已完成并通过各自验收
 - 依赖的 Capability Feature 已就绪并可被复用
 - 各 Feature 间依赖关系已闭合，无阻塞交付的前置缺口
-- 若存在跨 Feature 统一约束，已在 `epic-plan.md` 或相应 Feature 文档中落地并验证
+- 若存在跨 Feature 统一约束，已在 `tech-spec.md` 或相应 Feature 文档中落地并验证
 - 上项范围内无阻塞发布的 P0/P1 级问题
 
 ### 完成记录（执行时填写）

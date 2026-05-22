@@ -2,7 +2,7 @@
 description: "**EPIC 级**设计稿解析：从交互稿/视觉稿中提取并结构化交互逻辑与视觉规范。支持图片、Pencil(.pen)、Figma 链接三种输入源。须在所有 Feature 的 spec 均已输出之后运行；与 spec.md 交叉比对标出遗漏，产出可验证的 ux-design.md。无设计稿时进入兜底模式（AI 建议草案）。插入在 specify→plan 之间。"
 handoffs:
   - label: 制定技术方案
-    agent: aisdd.featureplan
+    agent: aisdd.techspec
     prompt: 完成 epic uidesign 后，基于 spec 与 EPIC 级 ux-design 制定技术方案
     send: true
   - label: 澄清交互/视觉约束
@@ -24,7 +24,7 @@ $ARGUMENTS
 
 ## 前置条件
 
-各 Feature 的 `spec.md` 应已完成。可与 `/aisdd.epicplan` 并行或在其前运行（须在所有 spec 输出之后）。
+各 Feature 的 `spec.md` 应已完成。可与 `/aisdd.techspec` 并行或在其前运行（须在所有 spec 输出之后）。
 
 ## 大纲
 
@@ -41,11 +41,11 @@ $ARGUMENTS
 
 **兜底模式**：当 `design/` 为空且无 Figma 链接时，AI 基于 spec.md 提出 UX 建议草案，所有内容标记为 `[AI 建议 - 待设计师确认]`。
 
-**本命令是可选步骤**：并非所有 EPIC 在技术方案阶段都具备完整 UX/视觉稿。若设计稿尚未就绪，可跳过本命令直接进入 `/aisdd.epicplan`；后续设计稿就绪后再运行本命令，或直接说明更新范围由 AI 做增量更新。
+**本命令是可选步骤**：并非所有 EPIC 在技术方案阶段都具备完整 UX/视觉稿。若设计稿尚未就绪，可跳过本命令直接进入 `/aisdd.techspec`；后续设计稿就绪后再运行本命令，或直接说明更新范围由 AI 做增量更新。
 
 **前置条件**：须在**所有 Feature 的 spec 均已输出**之后执行。
 
-**推荐顺序**：epicuidesign（若有） → epicplan → 各 Feature plan。若先做 epicuidesign 再做 epicplan，epicplan 可参考 UX 结论校准技术约束。
+**推荐顺序**：epicuidesign（若有） → techspec。若先做 epicuidesign 再做 techspec，techspec 可参考 UX 结论校准技术约束。
 
 ---
 
@@ -187,8 +187,7 @@ $ARGUMENTS
    - 请 review ux-design.md 中的「遗漏与待确认」章节
    - **重点关注 `❓ 低` 置信度条目**，确认或纠正
    - 若有遗漏，补充设计稿后可重新运行或说明更新范围做增量更新
-   - 若尚未做 EPIC 技术规约可运行 `/aisdd.epicplan "EPIC-xxx"`
-   - 对各 Feature 设置 `SPECIFY_FEATURE` 后运行 `/aisdd.featureplan`
+   - 若尚未做 EPIC 技术规约可运行 `/aisdd.techspec "EPIC-xxx"`
 
 **若输入质量为 C/D 级**，在完成报告中额外醒目提示：
 
@@ -208,4 +207,4 @@ $ARGUMENTS
 - **解析而非创作**：从设计素材**提取**交互与视觉规范，不凭空发明 UX（兜底模式除外，且须标记 `[AI 建议 - 待设计师确认]`）
 - **spec 单向消费（禁写红线）**：对 `epic.md`、各 Feature `spec.md` 仅**只读**消费——用于交叉比对与「遗漏与待确认」登记。**禁止**反向修改 spec/epic 的任何章节（含 FR/NFR/AC/范围/场景）。设计稿覆盖但 spec 未写的场景：写入 `ux-design.md`「遗漏与待确认」章节，并建议用户走 `/aisdd.cr`（需求类）或 `/aisdd.clarify` 补全 spec；**不得**在 ux-design 流程中直接改 spec
 - **ux-design 事实源边界**：交互形态、视觉细节、布局结构、状态视觉表现归本文件；「系统必须做什么 + 可验收结果」归 spec（详见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part B**）
-- **技术决策不归 ux-design**：线程模型、存储选型、API 契约、类结构等写入 `plan.md` / `epic-design.md`，不在 ux-design 中展开（见 **Part A**）
+- **技术决策不归 ux-design**：线程模型、存储选型、API 契约、类结构等写入 `tech-spec.md` / `epic-design.md`，不在 ux-design 中展开（见 **Part A**）

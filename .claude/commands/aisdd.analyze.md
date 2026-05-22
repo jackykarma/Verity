@@ -26,8 +26,8 @@ $ARGUMENTS
 
 | scope | 用法示例 | 分析对象 | 典型时机 |
 |-------|----------|----------|----------|
-| **feature**（默认） | `/aisdd.analyze`、`/aisdd.analyze FEAT-001` | 当前 Feature 的 `spec.md`、`plan.md`、`tasks.md` | **可选**；若运行，宜在 `tasks.md` 就绪后、`implement` 前 |
-| **epic** | `/aisdd.analyze epic`、`/aisdd.analyze EPIC-002` | `epic.md`、`epic-plan.md`、`epic-design.md`、子设计文件、各 Feature 的 spec/plan/tasks/l2 | **可选**；多 Feature 时可在全部 `tasks.md` 完成后做全量复核 |
+| **feature**（默认） | `/aisdd.analyze`、`/aisdd.analyze FEAT-001` | 当前 Feature 的 `spec.md`、`tech-spec.md`、`tasks.md` | **可选**；若运行，宜在 `tasks.md` 就绪后、`implement` 前 |
+| **epic** | `/aisdd.analyze epic`、`/aisdd.analyze EPIC-002` | `epic.md`、`tech-spec.md`、`epic-design.md`、子设计文件、各 Feature 的 spec/plan/tasks/l2 | **可选**；多 Feature 时可在全部 `tasks.md` 完成后做全量复核 |
 | **epic pre-tasks** | `/aisdd.analyze epic pre-tasks` | 同上，但**不要求**各 Feature 已有 `tasks.md` | **可选**；`epicdesign` 后、`featuretasks` 前 |
 
 **判定规则**（按优先级）：
@@ -65,7 +65,7 @@ $ARGUMENTS
 ### 2. 加载工件（渐进式披露）
 
 - **spec.md**：概述、FR/NFR、AC、完整场景矩阵（若有）
-- **plan.md**：增量约束、能力边界、数据/NFR/安全硬约束
+- **tech-spec.md**：EPIC 与各 Feature 技术规约
 - **tasks.md**：Task ID、描述、阶段、[P]、设计引用、[ST-xxx]
 - **constitution.md**
 
@@ -115,7 +115,7 @@ CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖�
 
 - `epic-design.md` 应已产出（至少 **story** 阶段）
 - **默认**：各 Feature 已有 `tasks.md` 时做含 Task 的全量检测
-- **`pre-tasks`**：仅要求各 Feature 有 `spec.md`、`plan.md`（及已产出的设计子文件）
+- **`pre-tasks`**：仅要求各 Feature 有 `spec.md`、`tech-spec.md`（及已产出的设计子文件）
 
 ### 1. 定位 EPIC
 
@@ -127,20 +127,20 @@ CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖�
 
 ### 2. 加载 EPIC 级产物
 
-`epic.md`、`epic-plan.md`（或单 Feature 时合并 plan）、`epic-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`ux-design.md`（按存在性）、`constitution.md`。
+`epic.md`、`tech-spec.md`（或单 Feature 时合并 plan）、`epic-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`ux-design.md`（按存在性）、`constitution.md`。
 
 ### 3. 加载各 Feature 产物
 
-对每个 Feature：`spec.md`、`plan.md`、`tasks.md`（非 pre-tasks 且存在时）、`l2_design/ST-xxx_*.md`（若有）。
+对每个 Feature：`spec.md`、`tech-spec.md`、`tasks.md`（非 pre-tasks 且存在时）、`l2_design/ST-xxx_*.md`（若有）。
 
 ### 4. 检测（最多 60 条发现）
 
 | 类别 | 内容 |
 |------|------|
-| A 术语一致性 | 跨 Feature / 与 epic-plan 术语统一 |
+| A 术语一致性 | 跨 Feature / 与 tech-spec 术语统一 |
 | B 接口契约 | Owner plan §三 与消费方引用、错误码体系 |
 | C NFR 量化 | spec NFR ↔ `nfr.md` 评估结论 |
-| D 共享能力 | epic.md 技术策略 ↔ epic-plan ↔ Owner/Consumer plan |
+| D 共享能力 | epic.md 技术策略 ↔ tech-spec 第一部分 ↔ Owner/Consumer Feature 节 |
 | E Story 与覆盖 | FR/NFR 覆盖矩阵、Story 依赖无环、ST 与 tasks/l2 一致 |
 | F 架构一致性 | 分层约束、模块归属、类图与 L2 一致 |
 | G 版本与变更 | Version 对齐、变更记录是否级联 |
@@ -155,7 +155,7 @@ CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖�
 
 **EPIC**：EPIC-xxx - [名称]
 **模式**：全量 / pre-tasks
-**产物覆盖**：epic.md ✅ | epic-plan.md ✅/❌ | …
+**产物覆盖**：epic.md ✅ | tech-spec.md ✅/❌ | …
 
 | ID | 类别 | 严重程度 | 涉及 Feature | 位置 | 摘要 | 建议 |
 

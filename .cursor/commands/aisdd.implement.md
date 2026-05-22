@@ -20,20 +20,20 @@ $ARGUMENTS
 
 2. 加载并分析实施上下文：
     - **必填**：读取 tasks.md 获取完整任务列表和执行计划
-    - **必填**：读取 plan.md 获取**技术规格**（约束/契约/边界）
+    - **必填**：读取 tech-spec.md 获取**技术规格**（约束/契约/边界）
     - **必填**：读取 **EPIC 软件设计说明书**（`epic-design.md`）获取**架构设计、全景类图、关键时序、Story 拆解**——这是代码实现的**架构事实源**
     - **必填**：读取各 Feature **`l2_design/ST-xxx_*.md`** 获取 **Story L2 详细设计（类图、时序图、触发条件）**——这是代码实现的**详细设计事实源**
     - **必填**：读取 spec.md 获取 FR/NFR 与验收边界
-    - **若存在**：读取 epic-plan.md 获取 EPIC 级技术约束
+    - **若存在**：读取 tech-spec.md 获取 EPIC 级技术约束
     - **若存在**：读取 data-model.md 获取实体及关系
     - **若存在**：读取 contracts/ 目录获取 API 规范
     - **若存在**：读取 research.md 获取技术决策
     - **若存在**：读取 quickstart.md 获取集成场景
 
    **强制约束（不可越权）**：
-    - Implement 阶段 **不得**擅自改写 `plan.md` 的技术规约、`epic-design.md` 的架构与 Story 设计，也不得改写 `spec.md` 的 FR/NFR/AC。
+    - Implement 阶段 **不得**擅自改写 `tech-spec.md` 的技术规约、`epic-design.md` 的架构与 Story 设计，也不得改写 `spec.md` 的 FR/NFR/AC。
     - 若发现设计缺口或必须变更：停止 Implement，提交变更提案（PR/Issue/评论；建议使用 `.specify/templates/change-request-template.md` 作为 CR 模板），由 SE/TL 在 EPIC 分支先更新设计文档，再继续。
-    - 代码实现应遵循 **epic-design.md 中的架构图、类图、时序图**，与 **plan.md 的技术规约** 共同指导实现，允许在细节上做必要调整但不得偏离整体设计方向。
+    - 代码实现应遵循 **epic-design.md 中的架构图、类图、时序图**，与 **`tech-spec.md` 的技术规约** 共同指导实现，允许在细节上做必要调整但不得偏离整体设计方向。
 
 3. 解析 tasks.md 结构并提取以下信息：
     - **任务阶段**：搭建（Setup）、测试（Tests）、核心开发（Core）、集成（Integration）、优化（Polish）
@@ -64,11 +64,11 @@ $ARGUMENTS
 7. 完成验证：
     - 验证所有必填任务均已完成
     - 检查已实现功能是否匹配 `spec.md` 的 FR/NFR/AC
-    - 确认实施过程符合 `plan.md` 的技术规约与 `epic-design.md` 的设计方案
+    - 确认实施过程符合 `tech-spec.md` 的技术规约与 `epic-design.md` 的设计方案
     - 输出最终状态，汇总已完成的工作
 
 8. **完成提示**：
-    - 完成后对照 `spec.md` FR/NFR/AC、`plan.md` 约束与 `epic-design.md` / L2 设计完成实现自检；通过即可合并/发布
+    - 完成后对照 `spec.md` FR/NFR/AC、`tech-spec.md` 约束与 `epic-design.md` / L2 设计完成实现自检；通过即可合并/发布
     - 若发现实现与设计偏离：走 `/aisdd.cr` 更新设计或修复代码，勿在 implement 阶段擅自改写冻结的 spec/plan/design
 
 注：本命令假定 tasks.md 中存在完整的任务拆分。若任务不完整或缺失，建议先运行 `/aisdd.featuretasks` 重新生成任务列表。

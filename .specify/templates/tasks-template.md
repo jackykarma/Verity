@@ -7,12 +7,12 @@ description: "Story → Task 落地任务清单模板"
 **Epic**：EPIC-[编号] - [名称]
 **Feature ID**：FEAT-[编号，例如 001]
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.0（来自 `plan.md`）
+**Plan Version**：v0.1.0（来自 `tech-spec.md`）
 **Tasks Version**：v0.1.0
-**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`plan.md` 以及可选工件）
+**输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`tech-spec.md` 以及可选工件）
 
 > 规则：
-> - Task 只能拆解与执行 **EPIC 软件设计说明书** 与 **plan.md** 中既定的 Story；**禁止**在 tasks.md 里改写技术决策或新增未决策的方案。
+> - Task 只能拆解与执行 **EPIC 软件设计说明书** 与 **`tech-spec.md`** 中既定的 Story；**禁止**在 tasks.md 里改写技术决策或新增未决策的方案。
 > - 每个 Task 必须包含：执行步骤、依赖关系（顺序/并行）、验证方式（可执行/可量化）。
 > - 每个 Task 必须提供**设计引用**：指向 EPIC 软件设计说明书（或各 Feature 的 `l2_design/ST-xxx_<slug>.md`）中对应 ST-xxx 的小节/类图/时序图。
 
@@ -44,7 +44,7 @@ description: "Story → Task 落地任务清单模板"
   - [ ] 指标（如 p95、mAh、内存 MB）与阈值（如适用）
 - **产物**：涉及的文件/文档/脚本
 
-## 路径约定（按 plan.md 的结构决策为准）
+## 路径约定（按 tech-spec.md 的结构决策为准）
 
 - **Android 移动端**（默认）：
   - 源码：`app/src/main/java/[包路径]/`（按分层组织：`ui/`、`domain/`、`data/`）
@@ -76,14 +76,14 @@ description: "Story → Task 落地任务清单模板"
 
 **目标**：对齐版本、冻结设计输入，避免 Implement 期返工
 
-- [ ] T001 在 `specs/[###-feature-short-name]/` 中核对 `spec.md`、`plan.md`、EPIC 软件设计说明书（若存在）的 Version 字段一致性，并在本 `tasks.md` 中记录输入基线
+- [ ] T001 在 `specs/[###-feature-short-name]/` 中核对 `spec.md`、`tech-spec.md`、EPIC 软件设计说明书（若存在）的 Version 字段一致性，并在本 `tasks.md` 中记录输入基线
   - **依赖**：无
   - **步骤**：
     - 1) 确认 `Feature Version`、`Plan Version` 已填写
     - 2) 确认 EPIC 软件设计说明书中的 Story 拆解已完成（ST-xxx）
   - **验证**：
-    - [ ] tasks.md 中 `Plan Version` 与 plan.md 一致
-  - **产物**：`spec.md`、`plan.md`、`tasks.md`
+    - [ ] tasks.md 中 `Plan Version` 与 tech-spec.md 一致
+  - **产物**：`spec.md`、`tech-spec.md`、`tasks.md`
 
 ---
 
@@ -91,13 +91,13 @@ description: "Story → Task 落地任务清单模板"
 
 **目标**：项目初始化与基础结构搭建
 
-- [ ] T010 按照 plan.md 的“结构决策”创建项目目录结构（路径：`[真实目录]`）
+- [ ] T010 按照 tech-spec.md 的“结构决策”创建项目目录结构（路径：`[真实目录]`）
   - **依赖**：T001
   - **步骤**：
     - 1) 创建/调整目录
     - 2) 确保与现有模块边界一致
   - **验证**：
-    - [ ] 目录结构与 plan.md 一致
+    - [ ] 目录结构与 tech-spec.md 一致
   - **产物**：相关目录
 
 - [ ] T011 初始化构建与依赖（路径：`[真实文件，如 build.gradle.kts / package.json]`）
@@ -126,12 +126,12 @@ description: "Story → Task 落地任务清单模板"
 
 核心基础任务示例（可根据项目调整）：
 
-- [ ] T020 搭建/校准公共基础设施（按 epic-plan 与 plan.md 的架构约束）
+- [ ] T020 搭建/校准公共基础设施（按 tech-spec.md 的架构约束）
   - **依赖**：T012
   - **步骤**：
     - 1) …
   - **验证**：
-    - [ ] 与 epic-plan 及 plan.md 约束一致（分层/错误处理/日志规范）
+    - [ ] 与 tech-spec.md 约束一致（分层/错误处理/日志规范）
   - **产物**：基础设施代码
 
 **检查点**：基础层就绪——Story 实现可并行启动
@@ -140,9 +140,9 @@ description: "Story → Task 落地任务清单模板"
 
 ## 阶段 3：Story ST-001 - [标题]（类型：Functional/…）
 
-**目标**：[来自 plan.md 的 ST-001 目标]
+**目标**：[来自 tech-spec.md 的 ST-001 目标]
 
-**验证方式（高层）**：[来自 plan.md；此处细化为可执行验证]
+**验证方式（高层）**：[来自 tech-spec.md；此处细化为可执行验证]
 
 ### ST-001 任务
 

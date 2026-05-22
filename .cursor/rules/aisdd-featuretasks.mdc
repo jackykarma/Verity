@@ -11,21 +11,21 @@ alwaysApply: false
 
 ## 目的
 
-基于 EPIC 软件设计说明书的 Story 拆解（§十二）、plan.md 的技术规约与 spec.md 的 FR/NFR，将 Story 拆解为可执行的 Task 清单，产出当前 Feature 目录下的 `tasks.md`，并在 `tasks.md` 内维护 FR/NFR → Story → Task 追溯矩阵。
+基于 EPIC 软件设计说明书的 Story 拆解（§十二）、`tech-spec.md`（本 Feature 章节）的技术规约与 spec.md 的 FR/NFR，将 Story 拆解为可执行的 Task 清单，产出当前 Feature 目录下的 `tasks.md`，并在 `tasks.md` 内维护 FR/NFR → Story → Task 追溯矩阵。
 
 ## 前置条件
 
-1. 本 Feature 的 `spec.md` 和 `plan.md` 已完成
+1. 本 Feature 的 `spec.md` 和 `tech-spec.md` 已完成
 2. `epic-design.md` 及按需 L2 设计已完成
 3. 本 Feature 的 `l2_design/` 下复杂/高风险 Story 对应 `ST-xxx_*.md` 已完成；简单 Story 可由 `epic-design.md` §十三索引标注由 `tasks.md` 设计引用与 DoD 承接
 
 ## 输入（必须阅读）
 
 1. **`epic-design.md`**：Story 拆解（§十二 Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、关键设计（§七 KD，若有）、架构与边界章节（§一～§六）、L2 索引（§十三）
-2. **本 Feature 的 `plan.md`**：轻量技术规约、能力边界、数据/NFR/安全硬约束
+2. **本 Feature 的 `tech-spec.md`**：轻量技术规约、能力边界、数据/NFR/安全硬约束
 3. **本 Feature 的 `l2_design/ST-xxx_*.md`**：复杂/高风险 Story 的 L2 详细设计（Task 的设计引用来源，若有）
 4. **本 Feature 的 `spec.md`**：FR/NFR/AC（Task 验证须追溯）
-5. **`epic-plan.md`**（若存在）：EPIC 级技术约束
+5. **`tech-spec.md`**（若存在）：EPIC 级技术约束
 6. **`.specify/templates/tasks-template.md`**：模板结构
 
 ## 前置步骤：追溯矩阵与一致性核对
@@ -33,8 +33,8 @@ alwaysApply: false
 在产出 `tasks.md` **之前**，只做只读核对与 tasks 内追溯建模：
 
 1. 从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射，并准备写入 `tasks.md` 的 FR/NFR → Story → Task 追溯矩阵。
-2. 核对 `plan.md` §二～§四是否已被设计说明书承接；若发现 spec/plan 与 design 矛盾或缺失，停止生成并建议走 `/aisdd.cr` 或更新指定设计章节。
-3. **不得反向修改**已冻结的 `spec.md` 或 `plan.md`；不得回填 spec 追溯表，不得追加 plan 变更记录。
+2. 核对 `tech-spec.md` §二～§四是否已被设计说明书承接；若发现 spec/plan 与 design 矛盾或缺失，停止生成并建议走 `/aisdd.cr` 或更新指定设计章节。
+3. **不得反向修改**已冻结的 `spec.md` 或 `tech-spec.md`；不得回填 spec 追溯表，不得追加 plan 变更记录。
 
 ## 输出
 

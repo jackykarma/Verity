@@ -1,4 +1,5 @@
 #!/usr/bin/env pwsh
+# 【已废弃】请使用 setup-techspec.ps1。本脚本仅为遗留 Feature 分支保留。
 # Setup implementation plan for a feature
 
 [CmdletBinding()]

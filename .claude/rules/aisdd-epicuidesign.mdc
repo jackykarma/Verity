@@ -17,7 +17,7 @@ alwaysApply: false
 
 1. `epic.md` 已存在
 2. **所有 Feature 的 `spec.md` 已完成**（Spec Ready）
-3. 可与 `/aisdd.epicplan` 并行执行
+3. 可与 `/aisdd.techspec` 并行执行
 4. 非技术 Feature（纯后台/数据/SDK）可跳过
 
 ## 输入
@@ -97,7 +97,7 @@ EPIC 根目录下的 `ux-design.md`，覆盖模板全部章节：
 - **兜底标记**：无设计稿时的 AI 建议内容须明确标记 `[AI 建议 - 待设计师确认]`，区别于从设计稿解析出的确定性内容
 - **低置信提示**：当输入质量为 C 级（仅有图片）时，须在完成报告中醒目提示用户补充 `design-notes.md` 或 `design-tokens.json` 以提升准确度
 - **模板结构保护**：不得增删章节
-- 作为各 Feature `plan.md` 和 `epic-design.md` 的**可选输入**（UI/交互约束）
+- 作为tech-spec.md（第二部分各 Feature 节） 和 `epic-design.md` 的**可选输入**（UI/交互约束）
 
 ### spec / ux-design 边界守护（必须）
 
@@ -166,7 +166,7 @@ EPIC 根目录下的 `ux-design.md`，覆盖模板全部章节：
 3. **review 置信度标记**：重点关注 `❓ 低` 和 `⚠️ 中` 的条目，确认或纠正
 4. 若 AI 理解有误，指出具体偏差后可增量更新
 5. 若有设计稿未覆盖的场景，补充设计稿后可说明更新范围做增量更新
-6. 后续 `/aisdd.featureplan` 和 `/aisdd.epicdesign` 可引用此文件作为 UI 约束输入
+6. 后续 `/aisdd.techspec` 和 `/aisdd.epicdesign` 可引用此文件作为 UI 约束输入
 
 **若输入质量为 C/D 级**，额外提示：
 - 建议补充 `design/design-notes.md`（参考模板 `.specify/templates/design-notes-template.md`）提供图片间关系、交互细节、动效参数等 AI 无法从截图推断的信息

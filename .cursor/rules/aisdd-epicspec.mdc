@@ -91,4 +91,4 @@ alwaysApply: false
 提示用户：
 1. 评审 epic.md 内容（尤其 Feature 拆分与跨 Feature 技术策略）
 2. 逐个 Feature 运行 `/aisdd.featurespec <Feature 描述>` 创建 Feature 目录与 spec.md
-3. 所有 Feature 的 spec.md 完成后 → 可进入 `/aisdd.epicplan` 或 `/aisdd.epicuidesign`
+3. 所有 Feature 的 spec.md 完成后 → 可进入 `/aisdd.techspec` 或 `/aisdd.epicuidesign`

@@ -1,5 +1,5 @@
 ---
-description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /aisdd.featureplan → /aisdd.featuretasks → /aisdd.implement 使用。支持 --batch 模式从 epic.md 批量并行生成所有 Feature 的 spec.md。
+description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /aisdd.techspec → /aisdd.featuretasks → /aisdd.implement 使用。支持 --batch 模式从 epic.md 批量并行生成所有 Feature 的 spec.md。
 handoffs:
   - label: 澄清规格说明要求
     agent: aisdd.clarify
@@ -13,13 +13,9 @@ handoffs:
     agent: aisdd.epicuidesign
     prompt: 若 UX/视觉稿已就绪且尚未运行，可运行 /aisdd.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；本步骤可选——若 UX 尚未就绪可跳过
     send: false
-  - label: EPIC 技术规约（EPIC 级）
-    agent: aisdd.epicplan
-    prompt: 运行 /aisdd.epicplan "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有）→ epicplan → 各 Feature plan
-    send: false
-  - label: 制定技术方案
-    agent: aisdd.featureplan
-    prompt: 为该规格说明制定方案（由 SE/TL 在 EPIC 分支产出与维护）。我正在基于……进行开发
+  - label: EPIC 技术规格书
+    agent: aisdd.techspec
+    prompt: 运行 /aisdd.techspec "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有）→ techspec
     send: false
 ---
 
@@ -134,7 +130,7 @@ EPIC 上下文：
 - AC 必须引用 FR/NFR ID
 - 完整场景矩阵须覆盖 7 类场景，不适用的标注 N/A；每条场景关联 FR/NFR ID + 优先级（P0/P1/P2）
 - 遵循 .specify/memory/constitution.md 的 MUST 条款
-- **写入前纯净度自检（强制）**：写入 SPEC_FILE 前，按本命令 §「spec / 技术细节边界守护」8 类清单扫描每条 FR/NFR/AC/场景；命中污染时**不得直接写入**，须在返回中设置 status: "blocked"，并在 purity_issues 列出原文、命中类别与建议归属（plan.md / epic-design.md / database-design.md 等）；改写为业务语言且无技术词汇后方可写入
+- **写入前纯净度自检（强制）**：写入 SPEC_FILE 前，按本命令 §「spec / 技术细节边界守护」8 类清单扫描每条 FR/NFR/AC/场景；命中污染时**不得直接写入**，须在返回中设置 status: "blocked"，并在 purity_issues 列出原文、命中类别与建议归属（tech-spec.md / epic-design.md / database-design.md 等）；改写为业务语言且无技术词汇后方可写入
 - **epic.md 技术词汇剥离**：若 epic.md「验收意图/拆分动机」含技术词汇，写入 spec 前须改写为业务语言，不得原样搬运
 ```
 
@@ -196,7 +192,7 @@ EPIC 上下文：
 1. **（推荐）** `/aisdd.challenge spec` — 三视角对抗性质量挑战，多 Feature EPIC 强烈推荐
 2. 需澄清具体 Feature 细节：`/aisdd.clarify`（逐个运行）
 3. 若 UX/视觉稿已就绪：`/aisdd.epicuidesign "EPIC-xxx"`
-4. 所有 spec 确认无误后：`/aisdd.epicplan` 或 `/aisdd.epicuidesign`（可选）
+4. 所有 spec 确认无误后：`/aisdd.techspec` 或 `/aisdd.epicuidesign`（可选）
 ```
 
 ---
@@ -245,9 +241,9 @@ EPIC 上下文：
 
 - `/aisdd.clarify`（建议先做）
 - 若 UX/视觉稿已就绪且尚未运行：**`/aisdd.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
-- 若尚未做 EPIC 技术规约：**`/aisdd.epicplan "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → epicplan → 各 Feature plan
-- 或直接 `/aisdd.featureplan`（plan 会引用 EPIC 级 ux-design、epic-plan，若存在）
-- 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`**，再进入 `/aisdd.epicplan` 或 `/aisdd.epicuidesign`
+- 若尚未做 EPIC 技术规约：**`/aisdd.techspec "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → techspec
+- 或直接 `/aisdd.techspec`（会引用 EPIC 级 ux-design，若存在）
+- 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`**，再进入 `/aisdd.techspec` 或 `/aisdd.epicuidesign`
 
 ---
 
@@ -305,12 +301,12 @@ EPIC 上下文：
 
 | 污染类别 | 识别特征（关键词 / 模式） | 正确归属 |
 |----------|---------------------------|----------|
-| 类名 / 接口名 | PascalCase 带技术后缀：`*ViewModel` / `*Repository` / `*UseCase` / `*Manager` / `*Service` / `*DataSource` / `*Mapper` / `*Provider` / `*Helper` / `*Controller` / `*Presenter` | `plan.md §三 能力边界` / `epic-design.md` 类图 |
-| 框架 / 库名 | Hilt / Dagger / Room / Compose / Coroutines / Flow / LiveData / Retrofit / OkHttp / WorkManager / Glide / Coil / RxJava / Moshi / Gson / Kotlinx.serialization 等命名 | `plan.md §二 增量约束 / 技术栈` |
+| 类名 / 接口名 | PascalCase 带技术后缀：`*ViewModel` / `*Repository` / `*UseCase` / `*Manager` / `*Service` / `*DataSource` / `*Mapper` / `*Provider` / `*Helper` / `*Controller` / `*Presenter` | `tech-spec.md` 对应 Feature §三 / `epic-design.md` 类图 |
+| 框架 / 库名 | Hilt / Dagger / Room / Compose / Coroutines / Flow / LiveData / Retrofit / OkHttp / WorkManager / Glide / Coil / RxJava / Moshi / Gson / Kotlinx.serialization 等命名 | `tech-spec.md` 第一部分或 Feature §二 |
 | 数据存储细节 | Room / DAO / Entity / 表名 / 字段名 / 字段类型 / SQL 语句 / 索引 / 主键 / 外键 / 触发器 | `database-design.md` |
 | API / 接口细节 | URL 路径（`/v1/...`、`/api/...`） / HTTP 方法（GET/POST 等） / 状态码 / Header / DTO 字段 / 请求体 schema | `interface-design.md` |
 | 代码结构 | 包路径（`com.xxx.yyy`） / 文件路径（`*.kt`/`*.java`） / Gradle 模块名 / 代码片段 / 函数签名 | `epic-design.md §一～§六` 架构 |
-| 线程 / 并发原语 | `Dispatchers.IO/Main/Default` / `viewModelScope` / `launch` / `withContext` / `Mutex` / `Semaphore` / `synchronized` | `plan.md §二` / `epic-design.md` |
+| 线程 / 并发原语 | `Dispatchers.IO/Main/Default` / `viewModelScope` / `launch` / `withContext` / `Mutex` / `Semaphore` / `synchronized` | `tech-spec.md` / `epic-design.md` |
 | 设计模式实现 | "用单例 / 观察者 / 策略 / 工厂模式实现……"且涉及代码语义而非业务语义 | `epic-design.md` |
 | 埋点字段 | 事件名（如 `click_gallery_btn`） / 参数 key / SDK 名（Firebase / 友盟 / 神策 / Mixpanel 等） | `analytics-tracking.md` |
 
@@ -318,14 +314,14 @@ EPIC 上下文：
 - **仍完整** → 这是技术细节，应删除或改写
 - **不完整** → 这是需求，**改写为业务语言**后保留
 
-**NFR 例外**：量化指标本身（如 `p95 ≤ 300ms`、`内存峰值 ≤ 200MB`、`日均功耗增量 ≤ 5mAh`）属于 NFR 合法内容，不算污染；但**「用 xxx 库实现 xxx 优化」属于污染**，应归 `plan.md`。
+**NFR 例外**：量化指标本身（如 `p95 ≤ 300ms`、`内存峰值 ≤ 200MB`、`日均功耗增量 ≤ 5mAh`）属于 NFR 合法内容，不算污染；但**「用 xxx 库实现 xxx 优化」属于污染**，应归 `tech-spec.md`。
 
 **拦截后的提示格式**：
 
 ```
-⚠️ 边界检查：以下内容疑似属于 plan.md / epic-design.md 而非 spec.md：
+⚠️ 边界检查：以下内容疑似属于 tech-spec.md / epic-design.md 而非 spec.md：
 
-1. [具体条目，原文引用] → 命中类别：[类名/框架/数据存储/...] → 建议归入 [plan.md §x / epic-design.md §y / database-design.md / interface-design.md / analytics-tracking.md]
+1. [具体条目，原文引用] → 命中类别：[类名/框架/数据存储/...] → 建议归入 [tech-spec.md §x / epic-design.md §y / database-design.md / interface-design.md / analytics-tracking.md]
 2. [具体条目，原文引用] → 命中类别：... → 建议归入 ...
 
 请确认：
