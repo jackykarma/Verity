@@ -268,7 +268,7 @@ EPIC 上下文：
 
 ### spec / ux-design 边界守护（必须）
 
-> 参见 `docs/aisdd/spec-vs-ux-design-boundary.md` 了解完整边界定义。
+> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part B** 了解 spec↔ux 边界。
 
 写入 `spec.md` 时，**必须检查**每条内容是否属于 spec 的事实源范围。若检测到以下**越界内容**，**禁止直接写入**，必须先向用户列出疑似越界条目并获得明确确认后再写入：
 
@@ -299,7 +299,7 @@ EPIC 上下文：
 
 ### spec / 技术细节边界守护（必须）
 
-> 参见 `docs/aisdd/spec-vs-plan-design-boundary.md` 了解 spec 与 plan / epic-design 的三方边界。
+> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part A** 了解 spec 纯净度与 plan/design 边界。
 
 `spec.md` 是**纯粹的产品规格**，只写「系统必须做什么」与可测试的需求；**禁止**任何技术实现细节。写入 `spec.md` 时，**必须逐条扫描**是否含以下「技术污染」特征，命中即按 block_ask 流程拦截：
 

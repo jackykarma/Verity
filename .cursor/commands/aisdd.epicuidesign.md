@@ -207,5 +207,5 @@ $ARGUMENTS
 
 - **解析而非创作**：从设计素材**提取**交互与视觉规范，不凭空发明 UX（兜底模式除外，且须标记 `[AI 建议 - 待设计师确认]`）
 - **spec 单向消费（禁写红线）**：对 `epic.md`、各 Feature `spec.md` 仅**只读**消费——用于交叉比对与「遗漏与待确认」登记。**禁止**反向修改 spec/epic 的任何章节（含 FR/NFR/AC/范围/场景）。设计稿覆盖但 spec 未写的场景：写入 `ux-design.md`「遗漏与待确认」章节，并建议用户走 `/aisdd.cr`（需求类）或 `/aisdd.clarify` 补全 spec；**不得**在 ux-design 流程中直接改 spec
-- **ux-design 事实源边界**：交互形态、视觉细节、布局结构、状态视觉表现归本文件；「系统必须做什么 + 可验收结果」归 spec（详见 `docs/aisdd/spec-vs-ux-design-boundary.md`）
-- **技术决策不归 ux-design**：线程模型、存储选型、API 契约、类结构等写入 `plan.md` / `epic-design.md`，不在 ux-design 中展开（见 `docs/aisdd/spec-vs-plan-design-boundary.md`）
+- **ux-design 事实源边界**：交互形态、视觉细节、布局结构、状态视觉表现归本文件；「系统必须做什么 + 可验收结果」归 spec（详见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part B**）
+- **技术决策不归 ux-design**：线程模型、存储选型、API 契约、类结构等写入 `plan.md` / `epic-design.md`，不在 ux-design 中展开（见 **Part A**）

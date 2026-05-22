@@ -10,7 +10,7 @@
 >
 > **Feature 拆分条目**仅允许：名称、类型、目标、In/Out、依赖、验收意图、拆分动机（均业务语言）。
 >
-> 规则全文：`docs/aisdd/spec-vs-plan-design-boundary.md`；体验边界：`docs/aisdd/spec-vs-ux-design-boundary.md`。
+> 规则全文：`.cursor/rules/aisdd-document-boundaries.mdc`（Part A：spec↔plan/design；Part B：spec↔ux-design）。
 
 **EPIC ID**：EPIC-[编号]
 **EPIC Version**：v0.1.0

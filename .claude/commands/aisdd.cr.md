@@ -90,7 +90,7 @@ $ARGUMENTS
    - 提示用户确认下游更新清单
    - 按变更类型走对应流程（参考 workflow-overview.md §7.1 / §7.2）：
      - **需求类**：更新 spec → 检查 ux-design → 检查 plan → 检查 epic-design → 检查 l2_design（各 ST 文件）→ 更新 tasks
-       - **更新 spec 的硬约束**：**只允许**修改 FR / NFR（量化指标） / AC / 范围（In/Out，含背景与价值表中的 In/Out） / 完整场景矩阵；**绝对禁止**写入类名、接口、框架、库、表名、字段、SQL、API 路径、代码片段、包路径、文件路径、线程原语、埋点字段等技术实现细节（业务假设、平台/合规约束、领域实体语义改 `plan.md` §二～§四 或 `epic-design.md` §三；详见 `docs/aisdd/spec-vs-plan-design-boundary.md`）
+       - **更新 spec 的硬约束**：**只允许**修改 FR / NFR（量化指标） / AC / 范围（In/Out，含背景与价值表中的 In/Out） / 完整场景矩阵；**绝对禁止**写入类名、接口、框架、库、表名、字段、SQL、API 路径、代码片段、包路径、文件路径、线程原语、埋点字段等技术实现细节（业务假设、平台/合规约束、领域实体语义改 `plan.md` §二～§四 或 `epic-design.md` §三；详见 `.cursor/rules/aisdd-document-boundaries.mdc`）
      - **技术方案类**：检查 NFR 是否需调整 → 更新 plan/epic-plan → 更新 epic-design → 更新 l2_design（各 ST 文件）→ 检查 Story 拆解 → 更新 tasks
        - **spec 禁触红线**：技术方案类 CR **默认不修改 spec.md**；**唯一例外**是「NFR 指标本身需要调整」（如从 `p95 ≤ 200ms` 放宽到 `p95 ≤ 500ms`）——此时只能修改 NFR 行的数值/口径，不得在 spec.md 中粘贴实现方案、库选型、类名等技术决策
      - **混合类**：在 CR 文件 §3.1 影响范围中**预先标注** spec.md 的修改范围（仅 NFR 指标 / 仅 FR/AC 文字 / FR/AC+NFR / 无），按对应路径执行；未在 CR 中标注的字段**不得**在执行阶段顺手改动
@@ -123,4 +123,4 @@ $ARGUMENTS
   - `spec.md` 是**纯粹的产品规格**事实源，本命令在任何变更类型下都**不得**向 `spec.md` 写入技术实现细节（类名、接口、框架、库、表名、字段、SQL、API 路径、代码、包路径、线程原语、埋点字段等）
   - 技术方案类 CR **默认不动 spec.md**，例外仅限 NFR 指标本身的数值调整
   - 写入 spec.md 前必须执行「纯净度自检」（见步骤 7），命中污染特征即按 block_ask 流程拦截
-  - 详见 `docs/aisdd/spec-vs-plan-design-boundary.md` 与 `.specify/templates/spec-template.md` 顶部「纯净度约束」
+  - 详见 `.cursor/rules/aisdd-document-boundaries.mdc` 与 `.specify/templates/spec-template.md` 顶部「纯净度约束」

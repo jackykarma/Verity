@@ -139,13 +139,13 @@ $ARGUMENTS
 
 4. **根据参数产出**：
 
-   > **各阶段通用禁令（arch / key / nfr / story / l2 / all 均适用）**：本阶段仅产出设计事实源（`epic-design.md` 及子文件）；对 `spec.md`、各 Feature `plan.md`、`epic-plan.md` **仅只读消费**。**禁止**反向修改上述规格/规约文件的任何章节。发现 spec/plan 缺口须**停止本阶段**，引导 `/aisdd.cr` 或 `/aisdd.clarify`；不得在 design 产物中「顺便」回写 spec/plan。详见 `docs/aisdd/spec-vs-plan-design-boundary.md`。
+   > **各阶段通用禁令（arch / key / nfr / story / l2 / all 均适用）**：本阶段仅产出设计事实源（`epic-design.md` 及子文件）；对 `spec.md`、各 Feature `plan.md`、`epic-plan.md` **仅只读消费**。**禁止**反向修改上述规格/规约文件的任何章节。发现 spec/plan 缺口须**停止本阶段**，引导 `/aisdd.cr` 或 `/aisdd.clarify`；不得在 design 产物中「顺便」回写 spec/plan。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
 
    - **无参数**：生成/更新 `epic-design.md`，含完整 §1~§13 骨架；§1~§6 填充内容，§7~§13 占位（提示运行对应参数产出）。
    - **arch**：重写 `epic-design.md` 的 §1~§6。
    - **key**：先判断是否存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计；若不存在，在 `epic-design.md` §7 标注 N/A 与原因，不创建 KD 文件。若适用，确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。**禁止**创建 EPIC 根目录 `key-func-design.md`，**不再**单独产出流程图集。KD 须含**核心方案**+**关键类图**（全量公共方法签名）+**核心调用链时序图**（穷举关键异常分支），按需可加方案架构图；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
    - **nfr**：先判断 §8～§11 各子文件是否适用；不适用时只在 `epic-design.md` 对应章节标注 N/A 与原因，不创建空子文件。适用时，按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §8.1～§8.7 全文）；按需分别按 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md` 产出/更新 **`EPIC_DIR/interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**（各子节如不适用须标注 N/A 并简述原因）；最后更新 `epic-design.md` **§8～§11** 为摘要 + 链接或 N/A 说明（**禁止**在 `epic-design.md` 内重复粘贴上述子文件正文）。
-   - **story**：按模板「§12.1 摘要（约束见 `docs/aisdd/story-splitting-guide.md`）→ §12.2 本 EPIC 拆解说明（1～3 句）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §12（Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵、工作量汇总）。Lite/Fast Track 不复制指南全文。
+   - **story**：按模板「§12.1 摘要（约束见 `.cursor/rules/aisdd-story-splitting.mdc`）→ §12.2 本 EPIC 拆解说明（1～3 句）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §12（Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵、工作量汇总）。Lite/Fast Track 不复制指南全文。
    - **l2**：
      - **前置：KD 关联与继承检查**（每个 Story 生成 L2 前必须执行）：
        1. 读取 `epic-design.md` §7.1/§7.2 与所有相关 `key-func-design/KD_*_*.md`
@@ -178,4 +178,4 @@ $ARGUMENTS
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
 - **L2 按需分文件并继承 KD**：`epic-design.md` §13 为索引、关联 KD、L2 状态与依赖总览；复杂/高风险 Story 的正文在各 Feature 的 `l2_design/ST-xxx_<slug>.md` 中，简单 Story 可由 `tasks.md` 的设计引用与 DoD 承接。凡涉及 KD 的 L2 必须继承 KD 关键方案，只能细化 Story 局部落码细节，不得与 KD 冲突或另起方案
 - **章节骨架先行**：首次（无参数）调用必须输出完整 §1~§13 骨架，未填充章节保留占位提示；后续调用仅更新指定章节
-- **spec / plan 单向消费（禁写红线）**：本命令对 `spec.md`、各 Feature `plan.md`、`epic-plan.md`（若存在）仅**只读**消费——读取 FR/NFR/AC/边界/场景矩阵与轻量技术规约作为设计输入；**禁止**反向修改上述文件的任何章节（含 spec「变更记录」、plan §一～§四）。设计过程中发现的 spec/plan 缺口（如缺失场景、NFR 缺失指标、FR 歧义、能力边界未声明等）必须**停止本命令**，引导用户走 `/aisdd.cr` 或 `/aisdd.clarify`；不得在设计说明书或子文件中"顺便"回写 spec/plan。§12 Story 拆解**不得**将 Story 定义反写入 spec。详见 `docs/aisdd/spec-vs-plan-design-boundary.md`
+- **spec / plan 单向消费（禁写红线）**：本命令对 `spec.md`、各 Feature `plan.md`、`epic-plan.md`（若存在）仅**只读**消费——读取 FR/NFR/AC/边界/场景矩阵与轻量技术规约作为设计输入；**禁止**反向修改上述文件的任何章节（含 spec「变更记录」、plan §一～§四）。设计过程中发现的 spec/plan 缺口（如缺失场景、NFR 缺失指标、FR 歧义、能力边界未声明等）必须**停止本命令**，引导用户走 `/aisdd.cr` 或 `/aisdd.clarify`；不得在设计说明书或子文件中"顺便"回写 spec/plan。§12 Story 拆解**不得**将 Story 定义反写入 spec。详见 `.cursor/rules/aisdd-document-boundaries.mdc`

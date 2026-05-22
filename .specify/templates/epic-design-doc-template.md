@@ -6,7 +6,7 @@
 >
 > **图表规范**：样式遵循 `.cursor/rules/mermaid-style-guide.mdc`；**内容与结构**须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 >
-> **Lite / Fast Track**（单 Feature EPIC、预估 ≤3 人天）：§一～§二 仅用**索引表 + 链接**指向 `epic.md` / 各 `spec.md`，不复制需求正文；§6.2 边界场景优先引用各 `spec.md` 的 `SC-xxx`，仅补充技术层对策；§十二 拆解方法论见 `docs/aisdd/story-splitting-guide.md`。
+> **Lite / Fast Track**（单 Feature EPIC、预估 ≤3 人天）：§一～§二 仅用**索引表 + 链接**指向 `epic.md` / 各 `spec.md`，不复制需求正文；§6.2 边界场景优先引用各 `spec.md` 的 `SC-xxx`，仅补充技术层对策；§十二 拆解方法论见 `.cursor/rules/aisdd-story-splitting.mdc`。
 
 **Epic**：EPIC-[编号] - [名称]
 **Epic Version**：v0.1.0（来自 `epic.md`）
@@ -543,7 +543,7 @@ flowchart LR
 
 ### 12.1 拆解策略与约束（摘要）
 
-> 完整方法论（拆解维度、反模式、粒度信号表）见 **[`docs/aisdd/story-splitting-guide.md`](../../../docs/aisdd/story-splitting-guide.md)**。
+> 完整方法论（拆解维度、反模式、粒度信号表）见 **[`.cursor/rules/aisdd-story-splitting.mdc`](../../../.cursor/rules/aisdd-story-splitting.mdc)**。
 
 - **目标**：可并行开发 + 可分笔提交；Feature 仍是最小交付单位
 - **工作量（参考）**：典型 **2～5 人天**；>7 人天评估是否可拆，<1 人天评估是否合并

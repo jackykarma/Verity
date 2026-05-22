@@ -101,7 +101,7 @@ EPIC 根目录下的 `ux-design.md`，覆盖模板全部章节：
 
 ### spec / ux-design 边界守护（必须）
 
-> 参见 `docs/aisdd/spec-vs-ux-design-boundary.md` 了解完整边界定义。
+> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part B**（spec↔ux）；技术细节见 **Part A**。
 
 写入 `ux-design.md` 时，**必须检查**每条内容是否属于 ux-design 的事实源范围。若检测到以下**越界内容**，**禁止直接写入**，必须先向用户列出疑似越界条目并获得明确确认后再写入：
 

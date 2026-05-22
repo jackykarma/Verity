@@ -13,7 +13,7 @@ alwaysApply: false
 
 在 EPIC 根目录产出 EPIC 软件设计说明书及配套子文件，作为面向人类评审与后续 Task 拆解、Implement 阶段 AI 编码引用的设计方案文档。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
 
-**Lite / Fast Track**：§一～§二 用索引表链到 `epic.md` / 各 `spec.md`；§十二 方法论见 `docs/aisdd/story-splitting-guide.md`（模板仅摘要）；P0 场景快照表可省略。
+**Lite / Fast Track**：§一～§二 用索引表链到 `epic.md` / 各 `spec.md`；§十二 方法论见 `.cursor/rules/aisdd-story-splitting.mdc`（模板仅摘要）；P0 场景快照表可省略。
 
 ## 产出文件组（与 `epic-design-doc-template.md` 一致）
 

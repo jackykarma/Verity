@@ -298,12 +298,12 @@ flowchart TD
 **关键原则**：
 - 方案变更从受影响的事实源出发：公共约束/能力边界先更新 `plan.md` / `epic-plan.md`，详细设计变更先更新 EPIC 软件设计说明书；再向上检查是否需要调整 NFR 目标（`spec.md`），向下更新 Task
 - 若变更导致 NFR 超标，必须先与产品协商 NFR 目标调整（走 CR），再继续方案变更
-- **spec.md 回写红线（强制）**：技术方案类变更**默认不修改 `spec.md`**；**唯一例外**是 NFR 量化指标本身的数值/口径调整（如 `p95 ≤ 200ms` → `p95 ≤ 500ms`），此时**只能改 NFR 行的指标值**，**绝对禁止**在 `spec.md` 中粘贴实现方案、库选型、类名、接口签名、SQL、API 路径等技术决策。技术决策一律归 `plan.md` / `epic-plan.md` / `epic-design.md` 及其子文件。详见 `docs/aisdd/spec-vs-plan-design-boundary.md`
+- **spec.md 回写红线（强制）**：技术方案类变更**默认不修改 `spec.md`**；**唯一例外**是 NFR 量化指标本身的数值/口径调整（如 `p95 ≤ 200ms` → `p95 ≤ 500ms`），此时**只能改 NFR 行的指标值**，**绝对禁止**在 `spec.md` 中粘贴实现方案、库选型、类名、接口签名、SQL、API 路径等技术决策。技术决策一律归 `plan.md` / `epic-plan.md` / `epic-design.md` 及其子文件。详见 `.cursor/rules/aisdd-document-boundaries.mdc`
 - EPIC 级公共约束变更（共享能力 Owner、统一运行时原则）须先更新 `epic-plan.md`（多 Feature），或单 Feature EPIC 时在**唯一** `plan.md` 中更新合并的 EPIC 级约束；NFR 量化变更更新 `nfr.md`；EPIC 级架构细节变更应更新设计说明书，再视需要级联更新 tasks
 
 ### 7.3 变更影响速查表
 
-> **spec.md 禁触红线**：下表中所有「可能影响的下游产物」涉及 `spec.md` 时，**仅允许**修改 FR / NFR（量化指标） / AC / 范围（In/Out） / 完整场景矩阵 / 依赖关系；**严禁**写入类名、接口、框架、库、模块、表/字段、SQL、API 路径、代码、包路径、线程原语、埋点字段等技术实现细节。详见 `docs/aisdd/spec-vs-plan-design-boundary.md`。
+> **spec.md 禁触红线**：下表中所有「可能影响的下游产物」涉及 `spec.md` 时，**仅允许**修改 FR / NFR（量化指标） / AC / 范围（In/Out） / 完整场景矩阵 / 依赖关系；**严禁**写入类名、接口、框架、库、模块、表/字段、SQL、API 路径、代码、包路径、线程原语、埋点字段等技术实现细节。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
 
 | 变更类型 | 起点（事实源） | 可能影响的下游产物 | spec.md 可改字段（红线内） |
 |----------|---------------|-------------------|-----------------------------|
@@ -490,11 +490,12 @@ DEV-B:                                                          [====== FEAT-2 �
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
+| v1.6.4 | 2026-05-22 | 文档边界与 Story 拆解迁至 Cursor Rule：合并 `aisdd-document-boundaries.mdc`、新增 `aisdd-story-splitting.mdc`；删除 `docs/aisdd/spec-vs-*-boundary.md` 与 `story-splitting-guide.md` |
 | v1.6.3 | 2026-05-22 | 明确 `/aisdd.analyze` 全流程可选、非阻塞，不 gate `implement`；`featuretasks` 默认 handoff 仅指向 implement |
 | v1.6.2 | 2026-05-22 | 合并 `/aisdd.epicanalyze` → `/aisdd.analyze epic`（保留 epicanalyze 为重定向说明）；删除 checklist 命令 |
 | v1.6.1 | 2026-05-22 | §一 流程图移除已废弃的 Verify 节点；与 implement 自检交付一致 |
 | v1.6.0 | 2026-05-22 | 移除 `/aisdd.verify` 命令、`verify-report-template.md` 与 `aisdd-verify.mdc`；实现阶段改为对照 spec/plan/design 自检后交付；同步更新 workflow、constitution、implement/cr/challenge |
-| v1.5.0 | 2026-05-22 | 新增 spec.md 纯净度治理：§7.2 增加「spec.md 回写红线」强制约束；§7.3 速查表新增「spec.md 可改字段（红线内）」列；新增 `docs/aisdd/spec-vs-plan-design-boundary.md` 三方边界文档；spec-template / featurespec / epicspec / cr / change-request-template / featureplan / epicdesign 全线增强守护规则 |
+| v1.5.0 | 2026-05-22 | 新增 spec.md 纯净度治理：§7.2 增加「spec.md 回写红线」强制约束；§7.3 速查表新增「spec.md 可改字段（红线内）」列；新增 `.cursor/rules/aisdd-document-boundaries.mdc` 三方边界文档；spec-template / featurespec / epicspec / cr / change-request-template / featureplan / epicdesign 全线增强守护规则 |
 | v1.4.0 | 2026-04-04 | 新增 §八「SE 与多开发并行协作策略」：角色定义、流水线并行模型、多 Feature/Story/Task 分工策略、交接点与协作节奏、并行风险应对、SE 自身 AI 辅助并行加速；版本记录调整为 §九 |
 | v1.3.1 | 2026-05-22 | `/aisdd.research` 收窄为**仅 codebase 代码考古**：只记录事实快照，禁止方案/评级/下游修改建议；`research/` 写完冻结，plan/design/CR 不得回写；新增 `research-template.md` |
 | v1.3.0 | 2026-03-22 | 新增 `/aisdd.research` 前置调研命令（platform / library / pattern / feasibility / codebase 五类型，支持 `--parallel` 并行子 Agent、`--save` 写文件）；升级 `/aisdd.verify` 为三级验证模式（L1 Story / L2 Feature / L3 EPIC，L3 并行子 Agent，新增 `--quick` / `--save` 标志）；`/aisdd.epicdesign` 完成报告补充 `/aisdd.challenge design` 推荐节点；同步更新 §一 流程图、§一新需求走流程、§二产出物表、§六命令执行顺序 |
