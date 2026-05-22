@@ -36,7 +36,7 @@ $ARGUMENTS
 输出结构化挑战报告（不写入文件），供人类评审后决定是否触发 `/aisdd.cr`。
 
 **与 `/aisdd.analyze` 的区别**：
-- `/aisdd.analyze`：一致性检查（spec↔plan↔tasks 映射完整性）
+- `/aisdd.analyze`：一致性检查（feature：spec↔plan↔tasks；epic：跨 Feature + EPIC 产物）
 - `/aisdd.challenge`：对抗性挑战（从不同角色视角主动找漏洞、风险、可行性问题）
 
 **可选性说明**：
@@ -235,16 +235,16 @@ $ARGUMENTS
 | `/aisdd.challenge spec` | 对抗性挑战 spec 漏洞、NFR 可行性、范围边界 | `featurespec` 完成后，进入 `epicplan` 前 | **可选（多 Feature 推荐）** |
 | `/aisdd.challenge plan` | 对抗性挑战架构风险、技术债务、可测试性 | `featureplan/epicplan` 完成后，进入 `epicdesign` 前 | **可选（多 Feature 推荐）** |
 | `/aisdd.challenge design` | 对抗性挑战安全、性能可达性、生态兼容性 | `epicdesign` 完成后，进入 `featuretasks` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.analyze` | 一致性检查（spec↔plan↔tasks 映射） | `featuretasks` 后，进入 `implement` 前 | 已有 |
-| `/aisdd.epicanalyze` | EPIC 跨 Feature 一致性分析 | `epicdesign` 后，进入 `featuretasks` 前 | 已有 |
+| `/aisdd.analyze feature` | 单 Feature 一致性（spec↔plan↔tasks） | **可选**；`tasks` 就绪后、`implement` 前 | 默认 scope |
+| `/aisdd.analyze epic` | EPIC 跨 Feature 一致性 | **可选**；原 epicanalyze | 不 gate implement |
 | `/aisdd.cr` | 变更请求（修复 challenge 发现的 BLOCK/WARN） | challenge 后发现问题时 | 已有 |
 
 **建议执行顺序**（多 Feature EPIC）：
 
 ```
 /aisdd.featurespec × N  →  /aisdd.challenge spec  →  /aisdd.epicplan / epicuidesign
-/aisdd.featureplan × N  →  /aisdd.challenge plan  →  /aisdd.epicanalyze  →  /aisdd.epicdesign
-/aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.epicanalyze  →  /aisdd.featuretasks
-/aisdd.featuretasks × N →  /aisdd.analyze × N     →  /aisdd.implement
+/aisdd.featureplan × N  →  /aisdd.challenge plan  →  /aisdd.epicdesign
+/aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.analyze epic pre-tasks（可选）  →  /aisdd.featuretasks
+/aisdd.featuretasks × N →  /aisdd.implement（analyze 全程可选，可插入 epic / feature 分析）
 /aisdd.implement        →  实现自检 / 合并发布
 ```

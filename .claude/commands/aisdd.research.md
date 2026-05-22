@@ -1,17 +1,13 @@
 ---
-description: "前置技术调研：在 EPIC 规格或 Feature 方案制定前，对技术可行性、Android 平台 API、第三方库、存量代码结构进行结构化调研，输出调研报告与下游文档的输入建议。减少 spec/plan 阶段的技术假设与不确定性。"
+description: "前置代码调研：在 EPIC/Feature 规格或方案制定前，考古存量代码、熟悉相关模块与现状事实。只记录「代码里有什么」，不做技术方案决策；报告为一次性快照，方案变更时不回写。"
 handoffs:
   - label: 进入 EPIC 规格说明
     agent: aisdd.epicspec
-    prompt: 调研完成，基于调研结论填写 EPIC 规格说明（调研报告中的「输入建议」可直接参考）
+    prompt: 代码调研完成，已熟悉相关模块现状，开始填写 EPIC 规格说明（规格与方案决策不依赖调研报告中的任何「建议」）
     send: false
-  - label: 进入 Feature 轻量技术规约
-    agent: aisdd.featureplan
-    prompt: 调研完成，基于调研结论制定 Feature 轻量技术规约（调研报告中的「推荐约束/风险」可直接参考，详细设计留给 epicdesign）
-    send: false
-  - label: 澄清剩余不确定项
-    agent: aisdd.clarify
-    prompt: 调研中发现需澄清的需求边界或技术假设，运行 /aisdd.clarify 进一步确认
+  - label: 进入 Feature 规格说明
+    agent: aisdd.featurespec
+    prompt: 代码调研完成，开始编写 spec.md（需求事实源；技术方案在后续 plan/design 阶段独立决策）
     send: false
 ---
 
@@ -25,390 +21,166 @@ $ARGUMENTS
 
 **参数解析（最先执行）**：
 
-| 参数格式 | 研究类型 | 说明 |
-|---------|----------|------|
-| `platform <topic>` | **Android 平台 API** | 调研系统 API、权限、兼容性限制（如 `platform MediaStore`、`platform BLE`） |
-| `library <name>` | **第三方库评估** | 功能覆盖、引入成本、版本兼容性（如 `library CameraX`、`library ExoPlayer`） |
-| `pattern <topic>` | **架构/设计模式** | 在本工程 Kotlin/Compose/Hilt/Room 约束下的适用性（如 `pattern offline-first`） |
-| `feasibility <requirement>` | **可行性分析** | 判断某需求在约束下是否可实现（如 `feasibility 后台实时录音`） |
-| `codebase <topic>` | **存量代码考古** | 理解已有实现、识别复用点与技术债（如 `codebase 媒体播放模块`） |
-| 自由文本 / 无参数 | **综合调研** | 自动判断研究维度，组合多个研究类型 |
+| 参数格式 | 说明 |
+|---------|------|
+| `codebase <topic>` | **显式**指定调研主题（模块/能力/业务域，如 `codebase 媒体播放模块`） |
+| 自由文本 / 无参数 | 将全文视为调研主题，按 **codebase** 执行 |
+| `--save` | 写入 `EPIC_DIR/research/codebase-<slug>-<YYYYMMDD>.md`（须能解析 EPIC 目录；否则仅对话输出） |
+| `--parallel` | 多个**互不相关**的代码主题时，并行子 Agent 各写一份快照 |
 
-**附加标志**：
-- `--save`：将报告写入文件（`EPIC_DIR/research/<topic>-<YYYYMMDD>.md`，若 EPIC 上下文存在）
-- `--parallel`：多个独立研究维度时，启动并行子 Agent（适合同时调研 2 个以上不相关主题）
+**不支持**（本命令职责外，请用其他方式处理）：
+- `platform` / `library` / `pattern` / `feasibility` — 不做平台选型、库评估、架构模式决策、可行性裁决
+- 任何「推荐方案」「下游文档输入建议」「综合评级可否开工」类输出
 
 示例：
-- `/aisdd.research platform MediaStore API`
-- `/aisdd.research feasibility 后台实时录音 --save`
-- `/aisdd.research library CameraX library ExoPlayer --parallel`
-- `/aisdd.research codebase 视频播放模块`
+- `/aisdd.research 视频播放与缓存相关代码`
+- `/aisdd.research codebase 登录与会话 --save`
+- `/aisdd.research codebase 相册导入 codebase 后台同步 --parallel --save`
 
 ---
 
 ## 目标
 
-在进入 `epicspec` / `featureplan` 前，通过结构化调研**消除技术不确定性**，为后续文档提供可靠的技术输入。
+在 `epicspec` / `featurespec` / `featureplan` / `epicdesign` **之前**，通过阅读**真实工程代码**，建立对相关模块的**事实性认知**，降低写需求/规格时的「想当然」。
 
-**调研的核心价值**：
-- **减少 spec/plan 中的技术假设**：将「我们以为可以」变为「已验证可以」
-- **提前识别可行性障碍**：在投入文档编写前发现 API 限制、权限壁垒、兼容性问题
-- **发现存量代码复用机会**：遵循 constitution 演进式设计原则，先问「现有代码能否支撑」
-- **规避架构风险**：在早期识别可能导致方案推翻的技术约束
+**本命令产出什么**：
+- 模块在哪、做什么、公开 API 与数据模型长什么样
+- 典型调用链与依赖关系（现状）
+- 可核对的限制/技术债**观察**（不带修复方案）
 
-**适用时机**：
+**本命令不产出什么**：
+- 技术选型、架构调整、复用/新建/扩展**决策**
+- 对 `spec.md` / `plan.md` / `epic-design.md` 的修改建议清单
+- 风险消解方案、可行性 ✅/❌ 评级、否决/推荐方案
 
-| 场景 | 推荐运行时机 |
-|------|------------|
-| 涉及不熟悉的平台 API / 权限 | `epicspec` 之前 |
-| 评估引入新第三方库 | `featureplan` 之前 |
-| 需求技术可行性存疑 | `featurespec` 之前 |
-| 改造已有模块 | `featureplan` 之前（codebase 类型） |
-| 多个技术方案需对比 | `epicplan` 之前 |
+---
+
+## 文档生命周期（强制）
+
+| 规则 | 说明 |
+|------|------|
+| **一次性快照** | 报告反映**调研当日**代码事实；写完即视为冻结 |
+| **方案变更不回写** | `plan` / `epic-design` / `tasks` / CR **不得**要求更新 `research/` 下已有文件 |
+| **需要新认知时** | **新建** `codebase-<topic>-<新日期>.md`，不修订旧报告 |
+| **非事实源** | 下游命令可读 `research/` 辅助**理解存量代码**，但**不得**把调研报告当作约束或决策依据 |
+| **CR 排除** | `/aisdd.cr` 影响分析与下游更新清单**不得**包含 `research/` 目录 |
 
 ---
 
 ## 操作约束
 
-- **严格只读**：不修改任何代码或文档
-- **事实优先**：每条发现须说明信息来源（Android 官方文档 / 代码文件路径 / 第三方文档）
-- **与 constitution 对齐**：调研结论须在「演进式设计」原则下给出，不得以「调研发现」为由建议推翻现有架构
-- **不替代 spec/plan**：调研报告是上游输入，不是 spec 或 plan 的替代品
+- **严格只读**：不修改任何代码或既有文档（含已有调研报告）
+- **事实优先**：每条结论须可追溯到**文件路径**（可选行号）或测试/注释证据
+- **禁止方案化表述**：不出现「建议采用」「应重构为」「推荐在 plan 中写入」等措辞
+- **禁止替代设计**：调研 ≠ `plan.md` ≠ `epic-design.md`；所有技术决策在后续阶段**独立**做出
+- **基于真实代码**：participant、类名、包路径须来自工程，禁止编造示例类
 
 ---
 
 ## 执行步骤
 
-### 1. 解析研究类型与范围
+### 1. 解析调研主题
 
 从 `$ARGUMENTS` 提取：
-- 研究类型（platform / library / pattern / feasibility / codebase / 综合）
-- 研究主题（关键词或描述）
-- 附加标志（`--save`、`--parallel`）
+- 调研主题（模块名、能力域、FR 草稿中的关键词均可）
+- `--save`、`--parallel`
 
-若同时包含多个研究主题（如 `library CameraX library ExoPlayer`），拆分为独立研究任务列表。若含 `--parallel` 且任务数 ≥ 2，进入**并行研究模式**（见步骤 3P）。
+若包含多个独立主题且带 `--parallel`，进入**并行模式**（步骤 3P）；否则单主题执行步骤 2～4。
 
 ### 2. 加载上下文
 
-根据研究类型，加载相关上下文：
+**必载**：
+- `.specify/memory/constitution.md`（仅用于识别工程分层惯例，**不**用于推导方案）
+- `.specify/templates/research-template.md`（输出结构）
 
-**通用加载（所有类型）**：
-- `.specify/memory/constitution.md`（技术栈约束：Kotlin / Compose / Hilt / Room / API 24~35）
-- 若 EPIC 上下文存在（`SPECIFY_EPIC` 环境变量或 `$ARGUMENTS` 含 EPIC 标识）：读取 `epic.md`（需求范围与 Feature 边界）
+**按需**：
+- 若可解析 `EPIC_DIR`：读 `epic.md`（仅用于对齐调研范围，**不**写入方案性结论）
+- 用户给出的 Android 工程根路径 / 模块名（须在对话或参数中明确；否则在工作区内搜索相关包名）
 
-**按类型加载**：
+### 3. 代码考古（单主题）
 
-| 研究类型 | 额外加载 |
-|---------|---------|
-| `platform` | — （主要依赖 WebSearch 与 AI 知识） |
-| `library` | — （主要依赖 WebSearch 与 AI 知识） |
-| `pattern` | 读取工程代码中相关模块目录（架构分层参考） |
-| `feasibility` | 读取相关 `spec.md`（若存在）、权限清单 |
-| `codebase` | **重点**：遍历相关模块代码文件，理解现有实现 |
-| 综合 | 按涉及类型组合加载 |
-
-### 3. 单研究主题执行
-
-针对单个研究主题，按研究类型执行对应分析：
-
----
-
-#### 3A. platform — Android 平台 API 调研
-
-**调研维度**：
-
-1. **API 可用性与版本范围**
-   - 目标 API 在 Android 8.0（API 24）\~ Android 15（API 35）的可用性
-   - 是否存在 `@RequiresApi` 限制；低 API 版本的兼容方案（如 `Build.VERSION.SDK_INT` 判断）
-   - 是否在目标 SDK 35 存在行为变更（Android 15 breaking changes）
-
-2. **权限模型**
-   - 所需权限（`INTERNET`、`READ_MEDIA_IMAGES` 等）
-   - 是否为危险权限（需运行时申请）；Android 10+/11+/13+ 权限变更影响
-   - 是否涉及特殊权限（`MANAGE_EXTERNAL_STORAGE`、`SYSTEM_ALERT_WINDOW` 等）
-
-3. **使用限制与后台行为**
-   - 后台执行限制（Doze / App Standby / Background Execution Limits）
-   - 是否需要前台 Service；通知要求
-   - Battery optimization 影响
-
-4. **替代 API 与 Jetpack 封装**
-   - 是否有 Jetpack 库封装（如 CameraX vs Camera2、WorkManager vs JobScheduler）
-   - 官方推荐方案是否与本工程技术栈兼容
-
-5. **Android 15 / targetSdk 35 专项**
-   - 是否受 Photo Picker 强制要求影响
-   - 是否受 Edge-to-edge 强制影响
-   - 其他目标 SDK 35 新行为
-
----
-
-#### 3B. library — 第三方库评估
-
-**调研维度**：
-
-1. **功能覆盖**
-   - 核心功能是否满足需求；边界能力（哪些不支持）
-   - Kotlin / Compose 兼容性（是否有官方 Kotlin API；是否支持 Compose 集成）
-
-2. **引入成本**
-   - APK 体积增量（大致估算）
-   - 传递依赖（是否引入不必要的大型依赖）
-   - 与现有 Hilt / Room / Coroutines 的兼容性
-
-3. **维护状态**
-   - GitHub Stars / 最近 commit 活跃度（近 6 个月）
-   - 是否由 Google / JetBrains 官方维护
-   - 是否有已知严重 bug / 安全漏洞
-
-4. **版本兼容性**
-   - 最低 Android API 要求
-   - 与工程当前 Gradle / AGP 版本兼容性
-
-5. **替代方案对比**
-   - 如有 2 个以上候选库，输出对比矩阵
-
----
-
-#### 3C. pattern — 架构/设计模式调研
-
-**调研维度**：
-
-1. **模式适配性**
-   - 该模式在 Kotlin / Jetpack Compose / MVVM / Hilt / Room 技术栈下的成熟实践
-   - 与工程现有架构分层（UI / Domain / Data）的契合度
-
-2. **存量代码适配**
-   - 读取相关模块，判断当前代码与该模式的差距
-   - 「演进路径」：以最小改动从现状迁移到该模式需要哪些步骤
-
-3. **已知陷阱**
-   - 该模式在 Android 生态中的常见反模式
-   - 与 Compose 重组、配置变更（Configuration Change）的兼容注意点
-
----
-
-#### 3D. feasibility — 可行性分析
-
-**调研维度**：
-
-1. **需求分解**
-   - 将待验证需求拆分为独立的技术假设（每条假设可单独验证）
-
-2. **逐假设验证**
-   - 对每个技术假设，结合 platform / library / codebase 研究，给出：
-     - ✅ 可行（有成熟 API / 实现方案）
-     - ⚠️ 有条件可行（需特定权限 / 版本限制 / 额外工作量）
-     - ❌ 不可行（API 限制 / 系统策略 / 无可用方案）
-
-3. **整体可行性结论**
-   - 综合评估：可直接实现 / 需调整需求边界 / 需放弃
-
-4. **替代方案（若主方案不可行）**
-   - 说明降级方案或需求裁剪建议
-
----
-
-#### 3E. codebase — 存量代码考古
-
-**调研维度**：
+按下列维度**只记录现状**：
 
 1. **模块定位**
-   - 相关代码所在包/模块路径
-   - 模块归属层（UI / Domain / Data）与职责
+   - 包/目录/Gradle module 路径
+   - 在 UI / Domain / Data（或工程实际分层）中的位置
 
-2. **现有能力评估**
-   - 可**直接复用**：无需修改即可满足新需求
-   - 需**扩展**：核心逻辑可用，但需增加参数/方法/配置
-   - 需**适配**：现有实现可参考，但接口不兼容，需改造
-   - 需**新建**：无相关实现，需从头构建
+2. **关键类型与公开接口**
+   - 类/接口/object 名称
+   - **已有**方法签名、主要字段（据源码摘录）
+   - 对外暴露的 Repository / UseCase / ViewModel 等（以工程实际为准）
 
-3. **技术债识别**
-   - 相关模块是否存在已知技术债（硬编码 / 过时 API / 不规范实现）
-   - 技术债是否影响本次需求的实现难度
+3. **典型调用链**
+   - 从 UI 事件或入口到 Data 层的**现有**路径（文字说明；复杂时可附 Mermaid，类名须真实）
+   - 同步/协程/Flow 等并发方式（据代码事实描述）
 
-4. **接口与数据事实**
-   - 现有模块对外暴露的接口（方法签名 / 数据模型）
-   - 与新需求的接口兼容性
+4. **依赖与耦合**
+   - 本模块依赖哪些内部/外部模块
+   - 被谁依赖（反向引用，据 import/调用）
 
----
+5. **持久化与网络（若涉及）**
+   - Room 表/DAO、Retrofit 接口等**已存在**定义（摘录，不设计新表）
 
-### 3P. 并行研究模式（`--parallel` 或多主题）
+6. **测试与样例**
+   - 已有单测/仪器测试路径及覆盖点（事实）
 
-> **适用场景**：同时调研 2 个以上不相关主题（如同时评估两个候选库、同时调研平台 API + 存量代码）。
+7. **观察到的限制与技术债**
+   - 仅列可核对事实（废弃 API、TODO、明显硬编码），**不写**修复建议
 
-**优先使用 Agent 工具并行执行**：为每个研究主题启动独立子 Agent。
+8. **与需求描述的关联索引（可选）**
+   - 将用户/EPIC 中的关键词映射到代码落点
+   - 允许写「代码中未见相关实现」；**禁止**写「应复用/应新建」
 
-每个子 Agent 的任务描述模板：
+**搜索策略**：SemanticSearch + Grep + Read；优先读入口类、接口定义、Module/DI 绑定处。
 
-```
-你是专注于单一主题的技术调研 Agent，只做一件事：对指定主题进行深度调研并返回结构化发现。
+### 3P. 并行模式
 
-研究类型：[platform / library / pattern / feasibility / codebase]
-研究主题：[具体主题描述]
-技术栈约束（只读，来自 constitution.md）：
-  - 语言：Kotlin
-  - UI：Jetpack Compose
-  - 最低支持：Android 8.0（API 24）
-  - 目标版本：Android 15（API 35）
-  - 架构：UI/Domain/Data 分层；Hilt DI；Room
+每个子 Agent 只负责一个主题，返回符合 `research-template.md` 结构的 Markdown 片段（禁止含方案/建议/评级）。父 Agent 合并为一份总报告或按主题拆成多文件（`--save` 时每个主题一个文件）。
 
-执行：按对应研究类型（3A/3B/3C/3D/3E）的调研维度逐项分析。
+### 4. 生成报告
 
-返回：
-{
-  topic: "研究主题",
-  type: "platform|library|...",
-  findings: [{ dimension, fact, source, confidence: "high|medium|low" }],
-  risks: [{ description, severity: "high|medium|low", mitigation }],
-  recommendation: "推荐方案与理由",
-  downstream_inputs: { spec: [...], plan: [...] }
-}
-```
+按 `.specify/templates/research-template.md` 输出完整 Markdown。
 
-**降级方案**（若 Agent 工具不可用）：按主题顺序依次执行，每个主题完整执行 3A~3E 对应分析后继续下一个。
+**报告末尾不得包含**：
+- 「推荐方案」「替代方案」「否决方案」
+- 「下游文档输入建议」
+- 「综合评级」
+- 「风险登记表」中的 mitigation/消解方案（若记录风险，仅限**已存在于代码/注释中的事实**，且无对策列）
 
-收集所有子 Agent 结果后，合并输出统一报告。
+### 5. 持久化（`--save`）
 
----
+- 路径：`{EPIC_DIR}/research/codebase-{slug}-{YYYYMMDD}.md`
+- `slug`：主题英文或拼音短名，小写连字符
+- 文件头保留模板中的「文档性质」说明块
+- **禁止**覆盖同日同 slug 以外文件；若用户要求更新旧报告，应说明须**新建日期后缀文件**
 
-### 4. 生成调研报告
-
-输出 Markdown 格式报告（若含 `--save` 则同时写入文件）：
-
-```markdown
-## 技术调研报告
-
-**调研主题**：[主题名称]
-**研究类型**：platform / library / pattern / feasibility / codebase（可多选）
-**调研日期**：YYYY-MM-DD
-**技术栈约束**：Kotlin / Compose / API 24~35 / Hilt / Room
-
----
-
-### 调研摘要
-
-[2~4 句话总结：核心发现、主要结论、对后续工作的影响]
-
----
-
-### 详细发现
-
-#### [研究类型 A]：[主题]
-
-| 维度 | 发现 | 信息来源 | 置信度 |
-|------|------|---------|--------|
-| API 可用性 | MediaStore.Images.Media.getBitmap() 在 API 29 废弃，应使用 ImageDecoder | Android 官方文档 | 高 |
-| 权限 | READ_MEDIA_IMAGES（API 33+）/ READ_EXTERNAL_STORAGE（API 32-） | Android 官方文档 | 高 |
-| 后台限制 | 后台不可访问媒体文件，需前台 Service 或用户主动触发 | 实测 + 文档 | 中 |
-
-（每个研究主题输出一个独立小节）
-
----
-
-### 风险登记表
-
-| ID | 风险描述 | 严重程度 | 消解方案 |
-|----|---------|---------|---------|
-| R-001 | MediaStore 在 API 29 以下行为不一致 | 中 | 按版本分支处理，低版本使用旧 API |
-| R-002 | 后台录音被系统策略限制（Android 11+） | 高 | 改为前台 Service + 通知，或改变需求边界 |
-
----
-
-### 存量代码复用评估（codebase 类型专属）
-
-| 模块/文件 | 现有能力 | 复用评估 | 建议操作 |
-|---------|---------|---------|---------|
-| `media/MediaRepository.kt` | 读取本地图片列表 | 可扩展 | 增加视频文件类型过滤参数 |
-| `player/VideoPlayer.kt` | 视频播放基础能力 | 可直接复用 | 无需改动 |
-| `audio/AudioRecorder.kt` | 不存在 | 需新建 | 参考现有 Camera 模块的 Service 模式 |
-
----
-
-### 推荐方案
-
-**推荐**：[具体推荐，含理由]
-
-**替代方案**（若主方案不可行）：[说明]
-
-**否决方案**（若存在明显不可行项）：[说明否决理由]
-
----
-
-### 未解决的不确定项
-
-（需通过 `/aisdd.clarify` 或进一步调研解答）
-
-| 序号 | 不确定问题 | 影响 | 建议下一步 |
-|------|-----------|------|-----------|
-| 1 | 用户设备中是否有超大媒体文件（> 500MB）需要处理？ | 影响流式读取方案选型 | 通过 /aisdd.clarify 向 PM 确认 |
-
----
-
-### 下游文档输入建议
-
-**→ spec.md 建议补充**：
-- NFR-PERF-xxx：媒体文件读取响应时间需在 API 29+ / 28- 分别定义
-- FR-xxx：需明确「后台权限」的用户感知范围（前台 Service 通知文案）
-
-**→ plan.md 建议补充**：
-- §二 Feature 增量约束：MediaStore 访问不得由 UI 层直接触发
-- §三 能力边界与外部依赖：媒体查询能力需区分 API 版本并声明降级约束
-- 下游设计：`MediaRepository.queryMedia(...)` 接口与 `MediaFile` 数据结构需在 `interface-design.md` / `database-design.md` 或 L2 中详细设计（`/aisdd.epicdesign` 阶段）
-
-**→ epic-plan.md 建议补充**（若为 EPIC 级结论）：
-- 跨 Feature 共享能力：MediaRepository 作为 Capability Feature，避免多 Feature 各自实现
-```
-
----
-
-### 5. 综合评级
-
-```markdown
-### 综合评级
-
-| 评级 | 条件 |
-|------|------|
-| ✅ 可直接进入规格/方案阶段 | 无 ❌ 不可行项，H 级风险已有消解方案 |
-| ⚠️ 需调整需求或方案后进入 | 存在 ⚠️ 有条件可行项，需确认降级方案 |
-| ❌ 存在阻塞性技术障碍 | 存在 ❌ 不可行项且无替代方案 |
-
-**本次评级**：[✅ / ⚠️ / ❌] — [一句话说明]
-```
-
----
-
-### 6. 完成报告
+### 6. 完成提示
 
 输出：
-- 综合评级与关键发现摘要
-- 建议下一步：
-  - 若 ✅ → 直接进入 `/aisdd.epicspec` 或 `/aisdd.featureplan`（使用调研报告中的「下游文档输入建议」）
-  - 若 ⚠️ → 先运行 `/aisdd.clarify` 解决不确定项后再进入规格阶段
-  - 若 ❌ → 提示需调整需求边界（与 PM 对齐后再开始规格）
-  - 若 `--save` → 提示报告已写入 `research/<topic>-<date>.md`；后续 `/aisdd.epicplan`、`/aisdd.featureplan`、`/aisdd.epicdesign` 会扫描 `research/` 目录作为参考性补充信息
+- 3～5 条**事实摘要**（模块位置、核心入口、与主题相关的现状）
+- 明确声明：**本报告不承载技术决策；后续 plan/design/CR 变更时无需、也不应回写本报告**
+- 建议下一步：`/aisdd.epicspec` 或 `/aisdd.featurespec`（按是否已有 EPIC）
+- 若 `--save`：给出写入路径
 
 ---
 
 ## 调研原则
 
-- **事实优先**：每条发现须标注信息来源（官方文档 / 代码文件 / 实测结论）；无来源的推测标注置信度为「低」
-- **演进式视角**：codebase 类调研须先问「现有代码能否支撑」，再考虑新建
-- **不替代设计**：调研报告是输入，不是设计方案；具体架构决策在 `plan.md` 中做
-- **适度广度**：调研聚焦能影响 spec/plan 决策的关键问题，不追求穷举
-- **时效性**：使用 WebSearch 时注意 Android API / 库版本的时效性；标注调研日期
+- **先读代码，再写一句话**：避免未打开文件就概括模块职责
+- **演进式视角只用于找代码**：可以说「某能力在 `FooRepository`」；不能说「应在 plan 中扩展 Foo」
+- **适度广度**：覆盖与主题相关的直接依赖即可，不追求全仓库穷举
+- **时效标注**：写明调研日期与代码基线（分支/commit，能取则取）
 
 ---
 
 ## 与现有命令的关系
 
-| 命令 | 职责 | 与 research 的关系 |
-|------|------|------------------|
-| `/aisdd.epicspec` | 填写 EPIC 规格说明 | research 是其可选前置（高不确定性时） |
-| `/aisdd.featurespec` | 生成 Feature spec.md | research 为其提供 NFR / AC 的技术依据 |
-| `/aisdd.epicplan` | 生成 epic-plan.md | **扫描** `EPIC_DIR/research/` 作为**参考性补充信息**（非约束源），辅助了解技术背景 |
-| `/aisdd.featureplan` | 生成 Feature plan.md | **扫描** `EPIC_DIR/research/` 作为**参考性补充信息**（非约束源），辅助方案选型 |
-| `/aisdd.epicdesign` | 生成 EPIC 设计说明书 | **扫描** `EPIC_DIR/research/` 作为**参考性补充信息**（非约束源），辅助设计决策 |
-| `/aisdd.clarify` | 需求澄清 | research 发现的不确定项通过 clarify 解决 |
-| `/aisdd.challenge` | 对抗性挑战 | challenge 在 spec/plan 完成后运行；research 在更早期 |
-| `/aisdd.epicuidesign` | 设计稿解析 | 两者并行，不互相依赖 |
+| 命令 | 与 research 的关系 |
+|------|-------------------|
+| `/aisdd.epicspec` | 可选前置：熟悉代码后再写 EPIC 边界 |
+| `/aisdd.featurespec` | 可选前置：写 FR/AC 时知道现有能力边界（事实），不抄调研做方案 |
+| `/aisdd.epicplan` / `/aisdd.featureplan` | 可读 `research/` 了解**调研时**的代码现状；**独立**做技术决策；**不更新**调研报告 |
+| `/aisdd.epicdesign` | 同上 |
+| `/aisdd.cr` | **不得**将 `research/` 列入下游更新清单 |
+| `/aisdd.clarify` | 澄清**需求**歧义；代码事实以 research 或现场读码为准 |
+| `/aisdd.challenge` | 在 spec/plan/design **之后**；与 research 无依赖 |

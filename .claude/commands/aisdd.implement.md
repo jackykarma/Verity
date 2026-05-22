@@ -12,7 +12,7 @@ $ARGUMENTS
 
 ## 前置条件
 
-各 Feature 的 `tasks.md` 应已完成。建议先运行 `/aisdd.analyze` 做一致性检查（非阻塞，用户可跳过）。
+各 Feature 的 `tasks.md` 应已完成。**不要求**事先运行 `/aisdd.analyze`（可选、非阻塞；未运行不得作为拒绝实现的理由）。
 
 ## 大纲
 

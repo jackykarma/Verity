@@ -89,5 +89,5 @@ alwaysApply: false
 
 提示用户：
 1. 评审 tasks.md
-2. 建议运行 `/aisdd.analyze`（一致性分析）
-3. 运行 `/aisdd.implement` 分阶段实现代码（建议先完成 `/aisdd.analyze`）
+2. **可直接** `/aisdd.implement`（必经下一步）
+3. （可选）多 Feature 可 `/aisdd.analyze epic`；各 Feature 可 `/aisdd.analyze`——跳过不影响实现

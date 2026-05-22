@@ -32,7 +32,7 @@ alwaysApply: false
 1. **本 Feature 的 `spec.md`**：FR/NFR/依赖/约束/边界场景——技术规格的主要输入
 2. **`epic-plan.md`**（若存在）：EPIC 级技术约束（plan 不得违反）
 3. **`ux-design.md`**（若已产出）：从设计稿解析出的信息架构、交互规则（页面流转图、逐屏交互规则）、视觉规范（色板、布局标注、组件清单）、设计稿索引；关注「遗漏与待确认」章节
-4. **`research/` 目录下的调研报告**（若存在，**参考性补充信息**）：了解 API 限制、库评估、风险等技术背景——辅助决策但**不作为约束源或结论**，plan 仍须独立完整分析
+4. **`research/` 目录下的代码调研快照**（若存在）：了解调研时代码现状——**不作为约束或决策依据**；**禁止**因 plan/CR 回写 `research/`；plan 仍须独立完整分析
 5. **`.specify/templates/plan-template.md`**：模板结构
 6. **`.specify/memory/constitution.md`**：章程约束（MUST/SHOULD）
 7. **`.cursor/rules/specify-diagram-requirements.mdc`**：确保图表基于本工程实际架构

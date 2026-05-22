@@ -1,5 +1,10 @@
 ---
-description: 在任务生成完成后，对spec.md、plan.md和tasks.md这三类核心工件进行非破坏性的跨工件一致性与质量分析。
+description: "【可选】一致性与质量分析（只读，非阻塞）。scope=feature / epic / epic pre-tasks；不 gate featuretasks 或 implement。"
+handoffs:
+  - label: 修复 EPIC 级发现
+    agent: aisdd.cr
+    prompt: 根据 epic 分析报告中的 CRITICAL/HIGH 项发起变更请求并更新下游产物
+    send: false
 ---
 
 ## 用户输入
@@ -8,174 +13,184 @@ description: 在任务生成完成后，对spec.md、plan.md和tasks.md这三类
 $ARGUMENTS
 ```
 
-在继续执行前，你**必须**考量用户输入的内容（若不为空）。
+在继续操作前，你**必须**参考用户输入（若不为空）。
 
-## 前置条件
+## 可选性（强制）
 
-须在 `/aisdd.featuretasks` 成功生成完整的 `tasks.md` 之后运行。通过后建议进入 `/aisdd.implement`。
+- **全流程可选**：`feature` / `epic` / `epic pre-tasks` **均不是** `featuretasks`、`implement` 或 EPIC 交付的**必经步骤**。
+- **不阻塞实现**：用户**未运行**本命令也可直接 `/aisdd.implement`；不得以「未 analyze」为由拒绝进入实现。
+- **报告不自动拦截**：即使存在 CRITICAL，也仅**建议**修复；是否继续 implement 由用户决定（须在报告末尾确认）。
+- **裁剪**：单 Feature EPIC、Fast Track（≤3 人天）可**跳过全部** analyze；多 Feature 仅在团队需要加严质量时选用。
 
-## 目标
+## 分析范围（scope）
 
-在项目实施前，识别三类核心工件（`spec.md`、`plan.md`、`tasks.md`）中存在的不一致、重复、模糊不清以及描述不充分的问题。该命令**仅允许**在 `/aisdd.featuretasks` 成功生成完整的 `tasks.md` 文件后运行。
+| scope | 用法示例 | 分析对象 | 典型时机 |
+|-------|----------|----------|----------|
+| **feature**（默认） | `/aisdd.analyze`、`/aisdd.analyze FEAT-001` | 当前 Feature 的 `spec.md`、`plan.md`、`tasks.md` | **可选**；若运行，宜在 `tasks.md` 就绪后、`implement` 前 |
+| **epic** | `/aisdd.analyze epic`、`/aisdd.analyze EPIC-002` | `epic.md`、`epic-plan.md`、`epic-design.md`、子设计文件、各 Feature 的 spec/plan/tasks/l2 | **可选**；多 Feature 时可在全部 `tasks.md` 完成后做全量复核 |
+| **epic pre-tasks** | `/aisdd.analyze epic pre-tasks` | 同上，但**不要求**各 Feature 已有 `tasks.md` | **可选**；`epicdesign` 后、`featuretasks` 前 |
 
-## 操作约束
+**判定规则**（按优先级）：
 
-**严格只读**：请勿修改任何文件。输出结构化的分析报告。可提供可选的整改方案（需用户明确批准后，方可手动触发后续的编辑命令）。
+1. 含 `pre-tasks`（与 `epic` 联用）→ epic 模式且不校验 tasks
+2. 含 `epic` 或匹配 `EPIC-\d+` → epic 模式
+3. 否则 → **feature** 模式（沿用 `check-prerequisites.ps1` 解析的当前 Feature）
 
-**章程权威性**：项目章程（`.specify/memory/constitution.md`）在本次分析范围内**不可协商**。违反章程的问题自动判定为CRITICAL（严重）级别，需调整规格说明（spec）、计划（plan）或任务（tasks）——而非淡化、重新解读或默认忽略相关原则。若章程原则本身需要变更，必须在 `/aisdd.analyze` 之外通过单独、明确的章程更新流程完成。
+**与 `/aisdd.challenge` 的区别**：`challenge` 为对抗性挑漏洞；`analyze` 为工件间映射、术语、契约与章程的一致性检查。
 
-## 执行步骤
+## 操作约束（共用）
 
-### 1. 初始化分析上下文
+**严格只读**：不修改任何文件。输出结构化 Markdown 报告（不写入文件）。整改方案须用户明确批准后再由其他命令执行。
 
-从代码库根目录运行一次 `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` 脚本，并解析返回的JSON数据以获取 FEATURE_DIR（功能目录）和 AVAILABLE_DOCS（可用文档）。推导绝对路径：
+**章程权威性**：`.specify/memory/constitution.md` **不可协商**；违反 MUST 一律 **CRITICAL**。
 
-- 规格说明文件（SPEC）= FEATURE_DIR/spec.md
-- 计划文件（PLAN）= FEATURE_DIR/plan.md
-- 任务文件（TASKS）= FEATURE_DIR/tasks.md
+---
 
-若任一必要文件缺失，终止操作并输出错误信息（指导用户运行对应的前置命令以补全缺失文件）。
-对于参数中包含单引号的情况（如 "I'm Groot"），需使用转义语法：例如 'I'\''m Groot'（若可行，也可使用双引号："I'm Groot"）。
+## Feature 范围（scope = feature）
 
-### 2. 加载工件内容（渐进式披露）
+### 运行本命令时的输入要求（非流程门禁）
 
-仅从每个工件中加载完成分析所需的最少必要上下文：
+用户**选择运行** feature 分析时，须已有完整 `tasks.md`（通常由 `/aisdd.featuretasks` 产出）；缺失则终止并提示先补 tasks——**这不表示** workflow 必须先跑 analyze。
 
-**从spec.md中加载**：
-- 概述/背景
-- 功能需求
-- 非功能需求
-- 用户故事
-- 边缘场景（若存在）
+### 1. 初始化
 
-**从plan.md中加载**：
-- 架构/技术栈选择
-- 数据模型引用
-- 实施阶段
-- 技术约束
+从仓库根运行：
 
-**从tasks.md中加载**：
-- 任务ID
-- 任务描述
-- 阶段分组
-- 并行标记 [P]
-- 引用的文件路径
+```powershell
+.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+```
 
-**从章程文件中加载**：
-- 加载 `.specify/memory/constitution.md` 以验证相关原则的合规性
+解析 `FEATURE_DIR`、`FEATURE_SPEC`、`IMPL_PLAN`、`TASKS`。任一缺失则终止并提示补全前置命令。
 
-### 3. 构建语义模型
+### 2. 加载工件（渐进式披露）
 
-创建内部表征（请勿在输出中包含工件原始内容）：
+- **spec.md**：概述、FR/NFR、AC、完整场景矩阵（若有）
+- **plan.md**：增量约束、能力边界、数据/NFR/安全硬约束
+- **tasks.md**：Task ID、描述、阶段、[P]、设计引用、[ST-xxx]
+- **constitution.md**
 
-- **需求清单**：为每一项功能需求和非功能需求分配稳定的标识键（基于祈使句式生成短标识；例如，"用户可上传文件" → `user-can-upload-file`）
-- **用户故事/操作清单**：梳理独立的用户操作及对应的验收标准
-- **任务覆盖映射**：将每个任务映射到一个或多个需求/用户故事（通过关键词或显式引用模式如ID、关键短语进行推断）
-- **章程规则集**：提取原则名称及带有MUST/SHOULD（必须/应当）的规范性表述
+### 3. 语义模型（内部）
 
-### 4. 检测环节（高token效率分析）
+需求清单、任务覆盖映射、章程规则集（输出中不粘贴原文）。
 
-聚焦高价值发现。总计最多输出50条发现结果；其余结果汇总至溢出摘要中。
+### 4. 检测（最多 50 条发现）
 
-#### A. 重复项检测
-- 识别近乎重复的需求
-- 标记需整合的低质量表述
+| 类别 | 内容 |
+|------|------|
+| A 重复项 | 近似重复 FR/表述 |
+| B 模糊性 | 不可量化形容词、未解决占位符 |
+| C 描述不充分 | 无对象的需求、AC 不对齐、任务引用未定义组件 |
+| D 章程一致性 | 违反 MUST、缺失强制章节 |
+| E 覆盖缺口 | 无任务的需求、无需求映射的任务、NFR 无任务体现 |
+| F 不一致性 | 术语漂移、实体矛盾、任务顺序矛盾、技术栈冲突 |
 
-#### B. 模糊性检测
-- 标记缺乏可量化标准的模糊形容词（如快速、可扩展、安全、直观、健壮等）
-- 标记未解决的占位符（如TODO、TKTK、???、`<placeholder>` 等）
+### 5. 严重程度
 
-#### C. 描述不充分问题
-- 仅包含动词、但缺失对象或可量化结果的需求
-- 验收标准未对齐的用户故事
-- 引用了spec/plan中未定义的文件或组件的任务
+CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖需求 → CRITICAL）。
 
-#### D. 章程一致性检测
-- 任何违反章程中MUST（必须）类原则的需求或计划内容
-- 缺失章程中强制要求的章节或质量关卡
+### 6. 报告格式
 
-#### E. 覆盖缺口检测
-- 无关联任务的需求
-- 未映射到任何需求/用户故事的任务
-- 任务中未体现的非功能需求（如性能、安全）
+```markdown
+## Feature 规格分析报告
 
-#### F. 不一致性检测
-- 术语漂移（同一概念在不同文件中命名不同）
-- 计划中引用但规格说明中缺失的数据实体（或反之）
-- 任务排序矛盾（如集成任务排在基础搭建任务之前且无依赖说明）
-- 冲突的需求（如一项要求使用Next.js，另一项指定Vue）
-
-### 5. 严重程度赋值
-
-采用以下启发式规则对发现结果排序：
-
-- **CRITICAL（严重）**：违反章程MUST条款、核心规格工件缺失，或阻碍基线功能实现且无覆盖的需求
-- **HIGH（高）**：重复/冲突的需求、模糊的安全/性能属性、不可测试的验收标准
-- **MEDIUM（中）**：术语漂移、非功能任务覆盖缺失、描述不充分的边缘场景
-- **LOW（低）**：格式/措辞优化、不影响执行顺序的轻微冗余
-
-### 6. 生成精简分析报告
-
-输出Markdown格式的报告（不写入文件），结构如下：
-
-## 规格分析报告
+**Feature**：FEAT-xxx
+**EPIC**：（若可知）
 
 | ID | 类别 | 严重程度 | 位置 | 摘要 | 建议 |
-|----|----------|----------|-------------|---------|----------------|
-| A1 | 重复项 | 高 | spec.md:第120-134行 | 两处相似的需求... | 合并表述，保留更清晰的版本 |
+|----|------|----------|------|------|------|
 
-（每条发现结果对应一行；生成以类别首字母为前缀的稳定ID。）
+**覆盖情况汇总** | **章程问题** | **未映射任务** | **指标**（需求数、任务数、覆盖率等）
+```
 
-**覆盖情况汇总表：**
+### 7. 后续行动
 
-| 需求标识键 | 是否有对应任务 | 任务ID | 备注 |
-|-----------------|-----------|----------|-------|
+- CRITICAL → **建议**修复；用户明确接受风险时可继续 `/aisdd.implement`（报告须记录该决定）
+- 多 Feature EPIC → **可选**再运行 `/aisdd.analyze epic`；**不得**暗示为 implement 前置必做
 
-**章程一致性问题：**（如有）
+---
 
-**未映射任务：**（如有）
+## EPIC 范围（scope = epic）
 
-**指标：**
+### 前置条件
 
-- 总需求数
-- 总任务数
-- 覆盖率（有至少1个关联任务的需求占比）
-- 模糊性问题数量
-- 重复项数量
-- 严重问题数量
+- `epic-design.md` 应已产出（至少 **story** 阶段）
+- **默认**：各 Feature 已有 `tasks.md` 时做含 Task 的全量检测
+- **`pre-tasks`**：仅要求各 Feature 有 `spec.md`、`plan.md`（及已产出的设计子文件）
 
-### 7. 提供后续行动建议
+### 1. 定位 EPIC
 
-在报告末尾输出简洁的“后续行动”模块：
+```powershell
+.specify/scripts/powershell/get-epic-paths.ps1 -EpicId "EPIC-xxx" -Json
+```
 
-- 若存在CRITICAL级问题：建议在执行 `/aisdd.implement` 前解决
-- 若仅存在LOW/MEDIUM级问题：用户可继续推进，但需提供优化建议
-- 给出明确的命令建议：例如，“运行 /aisdd.featurespec 生成/细化 Feature spec.md”、“运行 /aisdd.featureplan 调整架构”、“手动编辑tasks.md，补充对'performance-metrics'（性能指标）的任务覆盖”
+解析 `EPIC_DIR`，遍历 `features/*/。
 
-- 若本 Feature 属于多 Feature EPIC：建议完成所有 Feature 的 analyze 后运行 /aisdd.epicanalyze 做跨 Feature 一致性分析
+### 2. 加载 EPIC 级产物
 
-### 8. 提供整改建议
+`epic.md`、`epic-plan.md`（或单 Feature 时合并 plan）、`epic-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`ux-design.md`（按存在性）、`constitution.md`。
 
-向用户询问：“是否需要我为排名前N的问题提供具体的整改编辑建议？”（**请勿自动执行**整改操作。）
+### 3. 加载各 Feature 产物
+
+对每个 Feature：`spec.md`、`plan.md`、`tasks.md`（非 pre-tasks 且存在时）、`l2_design/ST-xxx_*.md`（若有）。
+
+### 4. 检测（最多 60 条发现）
+
+| 类别 | 内容 |
+|------|------|
+| A 术语一致性 | 跨 Feature / 与 epic-plan 术语统一 |
+| B 接口契约 | Owner plan §三 与消费方引用、错误码体系 |
+| C NFR 量化 | spec NFR ↔ `nfr.md` 评估结论 |
+| D 共享能力 | epic.md 技术策略 ↔ epic-plan ↔ Owner/Consumer plan |
+| E Story 与覆盖 | FR/NFR 覆盖矩阵、Story 依赖无环、ST 与 tasks/l2 一致 |
+| F 架构一致性 | 分层约束、模块归属、类图与 L2 一致 |
+| G 版本与变更 | Version 对齐、变更记录是否级联 |
+| H 章程合规 | Plan 前置检查、MUST 违规 |
+
+**pre-tasks 模式**：跳过 E 中与 `tasks.md` 强相关的行（标注 N/A：tasks 未生成）。
+
+### 5. 报告格式
+
+```markdown
+## EPIC 跨 Feature 分析报告
+
+**EPIC**：EPIC-xxx - [名称]
+**模式**：全量 / pre-tasks
+**产物覆盖**：epic.md ✅ | epic-plan.md ✅/❌ | …
+
+| ID | 类别 | 严重程度 | 涉及 Feature | 位置 | 摘要 | 建议 |
+
+### NFR 验证汇总（spec ↔ nfr.md）
+### 共享能力覆盖
+### Story 覆盖矩阵（跨 Feature）
+### 指标 + EPIC 健康度（A～F）
+```
+
+### 6. 后续行动
+
+- CRITICAL → **建议**修复项及命令（`/aisdd.cr` 等）；**不阻塞** implement
+- 单 Feature EPIC → 注明可跳过 epic 分析
+
+---
+
+## 可选参考顺序（多 Feature EPIC，质量加码时用）
+
+```text
+/aisdd.epicdesign 完成
+  → /aisdd.featuretasks（各 Feature）     ← 必经
+  → /aisdd.implement                    ← 必经（analyze 可全程跳过）
+
+可选插入（任意一步均可省略）：
+  /aisdd.analyze epic pre-tasks
+  /aisdd.analyze epic
+  /aisdd.analyze（各 Feature）
+```
 
 ## 操作原则
 
-### 上下文效率
-
-- **高价值低token输出**：聚焦可落地的发现结果，而非详尽的文档罗列
-- **渐进式披露**：增量加载工件内容；避免将所有内容纳入分析
-- **token高效输出**：发现结果表格最多显示50行；其余内容汇总展示
-- **结果确定性**：无变更情况下重复运行，应生成一致的ID和统计数据
-
-### 分析准则
-
-- **禁止修改文件**（本次分析为只读操作）
-- **禁止虚构缺失章节**（若内容缺失，需准确报告）
-- **优先处理章程违规问题**（此类问题一律判定为CRITICAL级）
-- **以示例替代穷尽式规则**（引用具体案例，而非泛化的模式）
-- **无问题时友好反馈**（输出包含覆盖统计的成功报告）
+- 高价值、低 token；发现表行数上限见各 scope
+- 无问题时输出成功摘要与覆盖统计
+- 禁止虚构缺失章节
 
 ## 上下文
 
 $ARGUMENTS
-```

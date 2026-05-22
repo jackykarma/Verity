@@ -5,9 +5,10 @@ handoffs:
     agent: aisdd.challenge
     prompt: epicdesign 完成（至少 story 阶段）后，运行 /aisdd.challenge design 对设计进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
     send: false
-  - label: EPIC 级跨 Feature 分析（建议在 featuretasks 前）
-    agent: aisdd.epicanalyze
-    prompt: 运行跨 Feature 一致性与质量分析
+  - label: EPIC 级跨 Feature 分析（可选）
+    agent: aisdd.analyze
+    prompt: （可选）运行 /aisdd.analyze epic pre-tasks；跳过可直接 featuretasks
+    send: false
     send: false
   - label: 生成任务（Story → Task）
     agent: aisdd.featuretasks
@@ -130,7 +131,7 @@ $ARGUMENTS
    - 读取 EPIC 级技术约束：**若存在** `epic-plan.md` 则读取之；**若单 Feature 省略 epic-plan**（`SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK`）则**必须**读取 `SOLE_FEATURE_PLAN` 指向的 `plan.md`，将其中的 EPIC 级约束与 Feature 规约一并作为技术约束输入
    - 读取各 `EPIC_DIR/features/*/spec.md`（含「完整场景矩阵」，P0 场景须在设计中可追溯）、轻量 `plan.md`（只作为约束与设计输入清单，不将 plan 当作详细设计事实源）
    - 若存在：读取 `EPIC_DIR/ux-design.md`
-   - 若 `EPIC_DIR/research/` 存在且非空：扫描调研报告作为**参考性补充信息**——了解 API 限制、库评估、风险等技术背景；调研报告**不是约束源或结论**，设计仍须独立完整分析并做出自己的设计决策
+   - 若 `EPIC_DIR/research/` 存在且非空：可读**代码调研快照**辅助理解调研当时的存量模块；**不得**当作约束或设计决策依据；**不得**因 design/CR 变更而回写 `research/`；设计仍须独立完整分析并做出自己的设计决策
    - 读取 `.specify/memory/constitution.md`
    - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`
    - 读取 `.claude/rules/specify-diagram-requirements.mdc`、`.claude/rules/mermaid-style-guide.mdc`
@@ -144,7 +145,7 @@ $ARGUMENTS
    - **arch**：重写 `epic-design.md` 的 §1~§6。
    - **key**：先判断是否存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计；若不存在，在 `epic-design.md` §7 标注 N/A 与原因，不创建 KD 文件。若适用，确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。**禁止**创建 EPIC 根目录 `key-func-design.md`，**不再**单独产出流程图集。KD 须含**核心方案**+**关键类图**（全量公共方法签名）+**核心调用链时序图**（穷举关键异常分支），按需可加方案架构图；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
    - **nfr**：先判断 §8～§11 各子文件是否适用；不适用时只在 `epic-design.md` 对应章节标注 N/A 与原因，不创建空子文件。适用时，按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §8.1～§8.7 全文）；按需分别按 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md` 产出/更新 **`EPIC_DIR/interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**（各子节如不适用须标注 N/A 并简述原因）；最后更新 `epic-design.md` **§8～§11** 为摘要 + 链接或 N/A 说明（**禁止**在 `epic-design.md` 内重复粘贴上述子文件正文）。
-   - **story**：按模板「§12.1 拆解策略（拆解维度 → 反模式筛查）→ §12.2 拆分约束（拆分首看改动路径独立性与技术边界，工作量仅为参考信号：典型 2～5 人天，>7 人天检查是否可拆，<1 人天检查是否可合并）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §12（拆解策略说明、Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵、工作量汇总）。
+   - **story**：按模板「§12.1 摘要（约束见 `docs/aisdd/story-splitting-guide.md`）→ §12.2 本 EPIC 拆解说明（1～3 句）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §12（Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵、工作量汇总）。Lite/Fast Track 不复制指南全文。
    - **l2**：
      - **前置：KD 关联与继承检查**（每个 Story 生成 L2 前必须执行）：
        1. 读取 `epic-design.md` §7.1/§7.2 与所有相关 `key-func-design/KD_*_*.md`
@@ -168,7 +169,7 @@ $ARGUMENTS
    - key 完成 → 提示继续 `nfr`
    - nfr 完成 → 提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.epicanalyze` → `/aisdd.featuretasks`（在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
+   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.analyze epic pre-tasks`（多 Feature 可选）→ `/aisdd.featuretasks`（在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
 
 核心规则：
 - 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的图表（关键类图、核心调用链时序图，及按需方案架构图）**直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**必须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举关键异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，**把核心技术方案与实现思路讲明白**——覆盖关键技术点、关键链路与每个关键环节如何达成，并与类图/时序图（及若有的方案架构图）一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环

@@ -13,6 +13,8 @@ alwaysApply: false
 
 在 EPIC 根目录产出 EPIC 软件设计说明书及配套子文件，作为面向人类评审与后续 Task 拆解、Implement 阶段 AI 编码引用的设计方案文档。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
 
+**Lite / Fast Track**：§一～§二 用索引表链到 `epic.md` / 各 `spec.md`；§十二 方法论见 `docs/aisdd/story-splitting-guide.md`（模板仅摘要）；P0 场景快照表可省略。
+
 ## 产出文件组（与 `epic-design-doc-template.md` 一致）
 
 | 文件 / 目录 | 对应章节 | 内容 |
@@ -104,7 +106,7 @@ alwaysApply: false
 
 - `epic-design-doc-template.md`、`key-func-design-kd-template.md`、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`
 - `specify-diagram-requirements.mdc`、`mermaid-style-guide.mdc`、`constitution.md`
-- `research/` 目录下的调研报告（若存在，**参考性补充信息**）：辅助了解技术背景，**不作为约束源或结论**，设计仍须独立完整分析
+- `research/` 目录下的代码调研快照（若存在）：辅助理解调研时代码现状；**不作为约束或设计依据**；**禁止**因 design/CR 回写 `research/`；设计仍须独立完整分析
 
 ## 完成后
 

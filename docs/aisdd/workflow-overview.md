@@ -9,7 +9,7 @@
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Research["（可选）research 调研报告<br/>platform / library / feasibility / codebase"] -.-> Start
+    Research["（可选）codebase 代码调研快照<br/>只读事实，非方案"] -.-> Start
     Start([需求输入]) --> EpicMd["epic.md<br/>EPIC 规格说明"]
     EpicMd --> SpecMd["各 Feature spec.md<br/>Feature 规格说明"]
     SpecMd --> EpicPlan["epic-plan.md<br/>EPIC 公共约束<br/>（多 Feature 按需）"]
@@ -22,9 +22,8 @@ flowchart TD
     UxDesign -.-> EpicDesign
     EpicDesign --> StoryDesign["各 Feature l2_design/<br/>ST-xxx_*.md（复杂/高风险 Story 按需）"]
     StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（内置 FR/NFR → Story → Task 追溯矩阵）"]
-    TasksMd --> Implement["Implement<br/>代码实现"]
-    Implement --> Verify["Verify<br/>实现↔设计一致性验证"]
-    Verify --> Done([交付])
+    TasksMd --> Implement["Implement<br/>代码实现 + 对照 spec/plan/design 自检"]
+    Implement --> Done([交付])
 
     style Research fill:#F3E5F5,stroke:#7B1FA2
     style Start fill:#E8F5E9,stroke:#388E3C
@@ -46,7 +45,7 @@ flowchart TD
 
 新需求从进入到交付，按上图顺序走一遍即可：
 
-1. **（可选）前置调研** → 若技术方向不确定（涉及陌生平台 API / 需要评估引入新库 / 需求可行性存疑），先运行 `/aisdd.research`（支持 `platform` / `library` / `feasibility` / `codebase` 等研究类型，`--parallel` 多主题并行）；调研报告中的「下游文档输入建议」直接喂给后续步骤
+1. **（可选）前置代码调研** → 在做 EPIC/Feature 规格前，若需先熟悉相关存量模块，运行 `/aisdd.research`（**仅**考古代码，`--parallel` 可多主题）；产出为**一次性事实快照**，不做技术方案决策；后续 `plan` / `design` / CR **不回写** `research/` 下已有报告
 2. **需求输入** → 运行 `create-new-epic.ps1` 创建 EPIC 目录与空 `epic.md`；**默认**同时新建并切换 `epic/EPIC-xxx-*` 分支，**可选** `-UseCurrentBranch` 保留当前 Git 分支（见 `/aisdd.epicspec`）→ `/aisdd.epicspec` 填充 `epic.md`（EPIC 规格 + Feature 拆分）
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
 4. **技术规约与 UX** → 多 Feature 且存在跨 Feature 约束时产出 `epic-plan.md`；单 Feature 或小改动可省略 `epic-plan.md`，在唯一 `plan.md` 中写入必要 EPIC 级约束。可选 `ux-design.md`
@@ -63,7 +62,7 @@ flowchart TD
 
 | 阶段 | 产出物 | 事实源归属 | 输入 |
 |------|--------|-----------|------|
-| **（可选）前置调研** | `research-<topic>-<date>.md`（`--save` 时写入；否则仅输出报告） | 技术调研事实源（平台 API / 库评估 / 可行性 / 存量代码） | 需求描述、现有代码 |
+| **（可选）前置代码调研** | `research/codebase-<topic>-<date>.md`（`--save` 时写入；否则仅对话输出） | **只读代码事实快照**（非约束源、非方案）；写完冻结，方案变更时不修订 | 需求描述、Android 工程源码 |
 | **EPIC 规格** | `epic.md` | 需求边界与 Feature 拆分 | 需求描述、调研报告（可选） |
 | **Feature 规格** | 各 `spec.md` | 需求事实源（FR/NFR/AC/完整场景矩阵） | `epic.md` |
 | **EPIC 技术规约** | `epic-plan.md`（多 Feature 且存在跨 Feature 约束时使用；单 Feature 可省略） | EPIC 公共约束事实源 | `epic.md`、各 `spec.md` |
@@ -162,7 +161,7 @@ flowchart TD
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#212121', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
 flowchart TD
-    Step0["/aisdd.research（可选）<br/>前置技术调研<br/>platform / library / feasibility / codebase<br/>支持 --parallel 多主题并行"] -.-> Step1
+    Step0["/aisdd.research（可选）<br/>前置代码调研（codebase）<br/>只记录现状事实，不做方案决策<br/>支持 --parallel"] -.-> Step1
     Step1["create-new-epic.ps1<br/>EPIC 目录 + epic.md 模板<br/>默认：新建 epic/* 分支<br/>可选：-UseCurrentBranch"] --> Step2["/aisdd.epicspec<br/>产出 epic.md<br/>（EPIC 规格 + Feature 拆分）"]
     Step2 --> Step3["/aisdd.featurespec<br/>创建 Feature 目录 + 产出 spec.md<br/>默认：逐个 Feature 执行<br/>可选：--batch 批量并行生成"]
     Step3 --> Step4["/aisdd.epicplan<br/>产出 epic-plan.md<br/>（多 Feature 按需）"]
@@ -184,7 +183,7 @@ flowchart TD
 
 | 步骤 | 命令 | 产出物 | 执行次数 |
 |------|------|--------|----------|
-| 0 | `/aisdd.research` | **调研报告**（不写文件；`--save` 时写入 `research-<topic>-<date>.md`）；含：平台 API 可行性 / 库评估 / 存量代码复用分析 / 下游文档输入建议 | **可选**（高不确定性时强烈推荐）；`epicspec` 之前 / `featureplan` 之前均可运行；支持 `--parallel` 多主题并行 |
+| 0 | `/aisdd.research` | **代码调研快照**（`--save` → `research/codebase-<topic>-<date>.md`）；只含模块地图、接口事实、调用链、依赖与观察项；**不含**方案建议/评级/下游修改清单 | **可选**；`epicspec` / `featurespec` 之前；熟悉存量代码时用；`plan`/`design`/CR **不得**回写已有调研文件 |
 | 1 | `create-new-epic.ps1` | **默认**：新建 `epic/EPIC-xxx-*` 分支 + EPIC 目录 + `epic.md`（空模板）；**可选** `-UseCurrentBranch`：不切换分支，仅创建目录与模板 | 每个 EPIC 一次 |
 | 2 | `/aisdd.epicspec` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
 | 3 | `/aisdd.featurespec` | Feature 目录 + `spec.md`（填充内容） | **默认**：每个 Feature 单独触发一次；**`--batch` 模式**：一次触发，顺序创建所有 Feature 目录后并行生成各 `spec.md`（从 `epic.md` Feature 列表读取，适合多 Feature EPIC） |
@@ -195,7 +194,10 @@ flowchart TD
 | 6.5 | `/aisdd.challenge plan` | 挑战报告（不写入文件）：从三视角对抗性检测架构风险、技术债务、可测试性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。进入 `epicdesign` 前运行 |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `nfr` / `story` / `l2`） | 分阶段。前置：`get-epic-paths.ps1 -Json` 中 `HAS_EPIC_PLAN` 或 `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 为 true |
 | 7.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。进入 `featuretasks` 前运行 |
+| 7.6 | `/aisdd.analyze epic pre-tasks` | EPIC 跨 Feature 分析报告（不写入文件） | **可选**；多 Feature EPIC；`epicdesign` 后、`featuretasks` 前；不要求 tasks.md |
 | 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 每个 Feature 一次 |
+| 8.5 | `/aisdd.analyze epic` | EPIC 全量一致性分析报告（含各 Feature tasks） | **可选**；多 Feature 质量加码；**非** implement 前置必做 |
+| 8.6 | `/aisdd.analyze` | 单 Feature 分析报告（scope=feature，默认） | **可选**；每个 Feature 至多一次；**非阻塞** implement |
 | 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行；完成后对照 spec/plan/design 自检 |
 | — | `/aisdd.cr` | CR 文件 + 下游产物增量更新 | 变更时按需（自动影响分析 → 生成 CR → 分步更新） |
 
@@ -220,6 +222,7 @@ flowchart TD
 - 变更须有影响分析 → 增量更新的闭环
 - 只更新受影响的产物，不扩散修改（精准更新原则）
 - 文档变更须更新 Version 与变更记录表
+- **`research/` 排除**：代码调研快照不参与 CR 下游更新；方案变更时**不**修订已有调研报告（需新认知则新建带日期的调研文件）
 
 ### 7.1 需求变更流程
 
@@ -310,6 +313,7 @@ flowchart TD
 | EPIC 级技术约束 | `epic-plan.md`（多 Feature）；单 Feature 时为唯一 `plan.md` 中的 EPIC 级约束章节 | 各 `plan.md` → `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` | **不修改**（技术决策不回写 spec） |
 | Feature 级技术规约 | `plan.md` | `epic-design.md` → `l2_design/ST-xxx_*.md` → `tasks.md` | **不修改**（技术决策不回写 spec） |
 | Story 拆解调整 | `epic-design.md` §十二 | `l2_design/ST-xxx_*.md`（若有） → `tasks.md` 追溯矩阵 | **不修改**（Story 是设计层概念，不写入 spec） |
+| 任意 CR 类型 | — | **不包含** `research/` | **永不修改**调研快照；新调研另建文件 |
 
 ---
 
@@ -444,7 +448,7 @@ flowchart TD
 | **Feature tasks.md 完成** | 某 Feature 的 `tasks.md` | **正式交接点**——SE 将该 Feature 的 Task 列表交给 DEV | DEV 认领 Task，开始实现 |
 | **实现过程中** | SE 继续设计下一个 Feature | DEV 遇到设计疑问 → 同步 SE 确认 | DEV 按 Task 提交代码，对照设计文档自检 |
 | **Feature 实现完成** | — | DEV 提交代码并说明 FR/Story 覆盖情况 | SE Review 实现与 spec/design 一致性 |
-| **全部 Feature 完成** | SE 组织 EPIC 级走查（可选 `/aisdd.epicanalyze`） | SE 确认跨 Feature 一致性后合并 | DEV 按 CR 修复偏离项 |
+| **全部 Feature 完成** | SE 组织 EPIC 级走查（可选 `/aisdd.analyze epic`） | SE 确认跨 Feature 一致性后合并 | DEV 按 CR 修复偏离项 |
 
 #### 典型协作时间线（4 Feature / 1 SE + 2 DEV）
 
@@ -478,7 +482,7 @@ DEV-B:                                                          [====== FEAT-2 �
 | epic-plan 与 ux-design 并行 | `/aisdd.epicplan` + `/aisdd.epicuidesign` | 两者仅依赖 `spec.md`，互不依赖 |
 | 批量生成 plan | `/aisdd.featureplan --batch` | 依赖感知并行：Capability Owner 先，Consumer 后 |
 | 分阶段 epicdesign | `/aisdd.epicdesign diagram FEAT-xxx` | 按 Feature 逐个产出类图/时序图，完成一个即可交出 tasks |
-| 多主题调研 | `/aisdd.research --parallel` | 并行调研多个技术方向 |
+| 多模块代码调研 | `/aisdd.research --parallel` | 并行考古代码多个不相关主题 |
 
 ---
 
@@ -486,9 +490,13 @@ DEV-B:                                                          [====== FEAT-2 �
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
+| v1.6.3 | 2026-05-22 | 明确 `/aisdd.analyze` 全流程可选、非阻塞，不 gate `implement`；`featuretasks` 默认 handoff 仅指向 implement |
+| v1.6.2 | 2026-05-22 | 合并 `/aisdd.epicanalyze` → `/aisdd.analyze epic`（保留 epicanalyze 为重定向说明）；删除 checklist 命令 |
+| v1.6.1 | 2026-05-22 | §一 流程图移除已废弃的 Verify 节点；与 implement 自检交付一致 |
 | v1.6.0 | 2026-05-22 | 移除 `/aisdd.verify` 命令、`verify-report-template.md` 与 `aisdd-verify.mdc`；实现阶段改为对照 spec/plan/design 自检后交付；同步更新 workflow、constitution、implement/cr/challenge |
 | v1.5.0 | 2026-05-22 | 新增 spec.md 纯净度治理：§7.2 增加「spec.md 回写红线」强制约束；§7.3 速查表新增「spec.md 可改字段（红线内）」列；新增 `docs/aisdd/spec-vs-plan-design-boundary.md` 三方边界文档；spec-template / featurespec / epicspec / cr / change-request-template / featureplan / epicdesign 全线增强守护规则 |
 | v1.4.0 | 2026-04-04 | 新增 §八「SE 与多开发并行协作策略」：角色定义、流水线并行模型、多 Feature/Story/Task 分工策略、交接点与协作节奏、并行风险应对、SE 自身 AI 辅助并行加速；版本记录调整为 §九 |
+| v1.3.1 | 2026-05-22 | `/aisdd.research` 收窄为**仅 codebase 代码考古**：只记录事实快照，禁止方案/评级/下游修改建议；`research/` 写完冻结，plan/design/CR 不得回写；新增 `research-template.md` |
 | v1.3.0 | 2026-03-22 | 新增 `/aisdd.research` 前置调研命令（platform / library / pattern / feasibility / codebase 五类型，支持 `--parallel` 并行子 Agent、`--save` 写文件）；升级 `/aisdd.verify` 为三级验证模式（L1 Story / L2 Feature / L3 EPIC，L3 并行子 Agent，新增 `--quick` / `--save` 标志）；`/aisdd.epicdesign` 完成报告补充 `/aisdd.challenge design` 推荐节点；同步更新 §一 流程图、§一新需求走流程、§二产出物表、§六命令执行顺序 |
 | v1.2.0 | — | 新增 `/aisdd.challenge` 对抗性挑战（spec / plan / design 三阶段）；`/aisdd.featureplan` 支持 `--batch` 依赖感知并行生成；`/aisdd.featurespec` 支持 `--batch` 批量并行；`/aisdd.cr` 变更请求自动化流程；更新 §六 命令表含 3.5 / 6.5 / 7.5 challenge 步骤 |
 | v1.1.0 | — | 单 Feature EPIC 快速通道（省略 `epic-plan.md`，合并约束至 `plan.md`）；Fast Track 小改动档位（§四）；`get-epic-paths.ps1` `SINGLE_FEATURE_WITHOUT_EPIC_PLAN_OK` 判定逻辑 |

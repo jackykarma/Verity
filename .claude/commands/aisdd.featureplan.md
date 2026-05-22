@@ -169,12 +169,12 @@ plan.md 填写规则：
 - BLOCK: X 条（须修复后进入下一阶段）
 - WARN: X 条（建议评估）
 
-> NFR 量化评估在 `/aisdd.epicdesign nfr` 产出 `nfr.md` 后，由 `/aisdd.epicanalyze` 对照各 Feature `spec.md` 的 NFR 指标做跨 Feature 一致性检查。
+> NFR 量化评估在 `/aisdd.epicdesign nfr` 产出 `nfr.md` 后，**可选**用 `/aisdd.analyze epic` 对照各 Feature `spec.md` 的 NFR 指标做跨 Feature 一致性检查。
 
 ### 下一步建议
 
 1. **（推荐）** `/aisdd.challenge plan` — 三视角对抗性质量挑战，多 Feature EPIC 强烈推荐
-2. 需深度跨 Feature 分析：`/aisdd.epicanalyze`
+2. （可选）跨 Feature 一致性分析：`/aisdd.analyze epic` 或 `/aisdd.analyze epic pre-tasks`
 3. 所有 plan 确认无误后：`/aisdd.epicdesign`
 ```
 
@@ -203,7 +203,7 @@ plan.md 填写规则：
 - 读取 `FEATURE_SPEC`（提取：Epic/Feature 元信息、FR/NFR、验收与边界场景、依赖）——**spec 需求**为方案设计的主要输入。
 - 若 `EPIC_PLAN` 存在（**EPIC 级** epic-plan.md）：读取 epic-plan.md，提取 **EPIC 级技术约束与规约**；技术规约须在其约束下展开，不得违反 EPIC 规约。
 - 若 `UX_DESIGN` 存在：读取 ux-design.md（设计稿解析结果），提取信息架构、交互规则（含页面流转图、逐屏交互规则）、视觉规范（色板、布局标注、组件清单）、设计稿索引（按所属 Feature 过滤）；关注「遗漏与待确认」章节中与本 Feature 相关的未覆盖场景。
-- 若 `EPIC_DIR/research/` 存在且非空：扫描与本 Feature 相关的调研报告（`/aisdd.research --save` 产出）作为**参考性补充信息**——了解 API 限制、库评估、风险等技术背景；调研报告**不是约束源或结论**，plan 仍须独立完整分析并做出自己的技术决策。
+- 若 `EPIC_DIR/research/` 存在且非空：可读与本 Feature 相关的**代码调研快照**（`/aisdd.research --save`），辅助理解调研当时的存量实现；**不得**当作约束或决策依据；**不得**因 plan/design/CR 变更而回写 `research/`；plan 须独立完整分析并做出自己的技术决策。
 - 读取 `.specify/memory/constitution.md`（提取 MUST/SHOULD 约束，作为 Plan 约束检查）
 - 读取 `.specify/templates/plan-template.md`（作为结构与输出格式）
 - 注意：plan.md 不产出图表；若发现需要类图、时序图、流程图或表结构，交由 `/aisdd.epicdesign` 展开，不在 plan 中单列清单。

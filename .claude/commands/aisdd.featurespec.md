@@ -104,7 +104,7 @@ features[]:
 **优先使用 Agent 工具并行执行**：为每个 Feature 同时启动一个独立子 Agent，各子 Agent 的任务：
 
 ```
-你是专注于单一 Feature 规格生成的子 Agent，只做一件事：生成指定 Feature 的 spec.md 和 checklist。
+你是专注于单一 Feature 规格生成的子 Agent，只做一件事：生成指定 Feature 的 spec.md。
 
 EPIC 上下文：
   EPIC_DIR: [路径]
@@ -124,8 +124,7 @@ EPIC 上下文：
 执行步骤：
 1. 读取 .specify/templates/spec-template.md
 2. 按模板填充 SPEC_FILE（规则见下方）
-3. 在 FEATURE_DIR/checklists/requirements.md 生成需求质量清单
-4. 返回：{ feature_id, spec_file, status: "ok"|"error"|"blocked", summary: "一句话摘要", purity_issues: [{text, category, suggested_target}] }
+3. 返回：{ feature_id, spec_file, status: "ok"|"error"|"blocked", summary: "一句话摘要", purity_issues: [{text, category, suggested_target}] }
 
 规格填写规则：
 - Epic 字段：[EPIC_ID - EPIC 名称]
@@ -240,13 +239,9 @@ EPIC 上下文：
 - AC（验收标准）必须引用 FR/NFR ID
 - **完整场景矩阵**须覆盖 7 类场景（正常/替代/边界值/异常错误/并发竞态/生命周期/跨 Feature 集成），不适用的类别标注 `N/A` 及理由；每条场景须关联 FR/NFR ID 并标注优先级（P0/P1/P2）
 
-### 5. 质量检查清单
+### 5. 完成报告
 
-在 `FEATURE_DIR/checklists/requirements.md` 生成需求质量清单（与 Feature 模板结构一致）。
-
-### 6. 完成报告
-
-输出 Feature Key、spec.md 路径、检查清单路径，并提示下一步：
+输出 Feature Key、spec.md 路径，并提示下一步：
 
 - `/aisdd.clarify`（建议先做）
 - 若 UX/视觉稿已就绪且尚未运行：**`/aisdd.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
@@ -263,7 +258,7 @@ EPIC 上下文：
 - 聚焦用户**需要什么**以及**为什么需要**。
 - 避免描述**如何**实现（不提及技术栈、API、代码结构）。
 - 面向业务相关方编写，而非开发人员。
-- 请勿在规格说明中嵌入任何检查清单，检查清单需通过单独命令生成。
+- 请勿在规格说明中嵌入检查清单；需求质量评审使用 `/aisdd.challenge spec`（多 Feature 推荐）或 `/aisdd.clarify`。
 
 ### 章节要求
 

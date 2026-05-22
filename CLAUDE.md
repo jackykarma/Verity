@@ -55,6 +55,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 
 | 命令 | 产出物 | 说明 |
 |------|--------|------|
+| `/aisdd.research` | `research/codebase-*-<date>.md`（可选） | **前置代码考古**：只记录存量代码事实快照；不做方案决策；plan/design/CR **不回写** |
 | `/aisdd.epicspec` | `epic.md` | EPIC 入口，运行 `create-new-epic.ps1` |
 | `/aisdd.featurespec` | 各 Feature `spec.md` | FR / NFR / AC |
 | `/aisdd.epicplan` | `epic-plan.md` | 多 Feature 且存在跨 Feature 约束时使用 |
@@ -65,8 +66,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.cr` | CR 文件 + 下游产物更新 | 变更请求 |
 | `/aisdd.challenge` | 挑战报告（不写入文件） | 阶段转换前可选：spec / plan / design |
-| `/aisdd.analyze` | 分析报告（不写入文件） | featuretasks 后、implement 前 |
-| `/aisdd.epicanalyze` | EPIC 分析报告（不写入文件） | epicdesign 后、featuretasks 前（多 Feature 推荐） |
+| `/aisdd.analyze` | 分析报告（不写入文件，**可选、非阻塞**） | **feature** / **epic** / **epic pre-tasks**；不 gate `implement`；原 `epicanalyze` 已合并 |
 
 **单 Feature EPIC 快速通道**：跳过 `epic-plan.md`，将必要 EPIC 级约束合并写入唯一的 `plan.md`。
 

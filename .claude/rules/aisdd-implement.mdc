@@ -16,7 +16,7 @@ alwaysApply: false
 ## 前置条件
 
 1. 本 Feature 的 `tasks.md` 已完成
-2. 建议已运行 `/aisdd.analyze`（非阻塞）；`checklists/` 仅用于进入 plan 前的需求质量评审，不作为 implement 阶段阻塞条件
+2. **不要求**事先运行 `/aisdd.analyze`（可选、非阻塞）
 
 ## 输入（必须阅读）
 
