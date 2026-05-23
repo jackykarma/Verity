@@ -10,7 +10,7 @@
 >
 > **Feature 拆分条目**仅允许：名称、类型、目标、In/Out、依赖、验收意图、拆分动机（均业务语言）。
 >
-> 规则全文：`.cursor/rules/aisdd-document-boundaries.mdc`（Part A：spec↔plan/design；Part B：spec↔ux-design）。
+> 规则全文：`.cursor/rules/aisdd-document-boundaries.mdc`（Part A：spec↔techspec/design；Part B：spec↔ux-design）。
 
 **EPIC ID**：EPIC-[编号]
 **EPIC Version**：v0.1.0
@@ -147,15 +147,15 @@
 
 ## 跨 Feature 技术策略（轻量登记，详细约束下沉至 tech-spec）*（建议填写）*
 
-> **目的**：在 EPIC 层做最小必要的协同登记，帮助后续 `tech-spec.md` 与tech-spec.md（第二部分各 Feature 节） 明确复用关系和计划顺序。
+> **目的**：在 EPIC 层做最小必要的协同登记，帮助后续 `tech-spec.md`（第一部分公共约束 + 第二部分各 Feature 节）明确复用关系；**Feature 规约编写顺序**在 `/aisdd.techspec` 产出的 `tech-spec.md` §五 中定稿。
 >
 > **时机**：建议在所有 Feature `spec.md` 完成后、运行 `/aisdd.techspec` 前补齐；若前期已识别出明显共享项，也可先填写占位，后续与 `tech-spec.md` 对齐。
 >
 > **强制规则**：
 >
-> - 本节只登记**影响复用、Owner 和执行顺序**的信息；技术栈锁定、统一运行时原则、能力边界、预算分配等公共约束按需写入 `tech-spec.md`
-> - 后续每个 Feature 在开始 plan 之前，**必须先阅读本章节**；若 EPIC 根下存在 `**tech-spec.md`**，**必须优先以 `tech-spec.md` 为准**
-> - 若 Feature plan 中需要设计的共享组件已在此登记为“由其他 Feature 提供”，则应复用，不得重复设计
+> - 本节只登记**影响复用与 Owner** 的信息；技术栈锁定、统一运行时原则、能力边界、预算分配、规约编写顺序等按需写入 `tech-spec.md`
+> - 运行 `/aisdd.techspec` 或编写各 Feature tech-spec 节前，**必须先阅读本章节**；若 EPIC 根下已存在 `tech-spec.md`，**必须优先以 `tech-spec.md` 为准**
+> - 若某 Feature 的 tech-spec 节中需要设计的共享组件已在此登记为“由其他 Feature 提供”，则应复用，不得重复设计
 > - 若发现新的共享需求，必须先更新本章节，并在 `tech-spec.md` 中补齐对应详细约束
 
 ### 共享能力轻量登记
@@ -175,18 +175,6 @@
 >
 > - **Infrastructure**：基础设施与使能组件（UI 框架、数据层、网络层、错误处理、日志、配置等）
 > - **Capability**：可被多个 Feature 复用、需要独立验收或版本化的业务/平台能力（是否独立为 Feature 由上一节决策）
-
-### Feature Plan 建议顺序（基于依赖关系）
-
-> 根据共享能力的依赖关系，给出建议顺序；详细技术约束与最终顺序以 `tech-spec.md` 为准。
-
-
-| 顺序  | Feature  | 原因                  | 依赖（需要先完成 spec/plan 的 Feature） | 预期产出               |
-| --- | -------- | ------------------- | ----------------------------- | ------------------ |
-| 1   | FEAT-001 | 先确定共享基础能力           | 无                             | Owner 级 plan 或契约草案 |
-| 2   | FEAT-002 | 依赖 FEAT-001 输出的共享能力 | FEAT-001                      | 消费方 plan           |
-| 3   | FEAT-003 | 纯业务能力，依赖前置共享约束稳定    | FEAT-001, FEAT-002            | 业务侧 plan           |
-
 
 ### 待在 `tech-spec.md` 细化的主题
 

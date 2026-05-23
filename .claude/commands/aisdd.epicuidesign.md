@@ -1,5 +1,5 @@
 ---
-description: "**EPIC 级**设计稿解析：从交互稿/视觉稿中提取并结构化交互逻辑与视觉规范。支持图片、Pencil(.pen)、Figma 链接三种输入源。须在所有 Feature 的 spec 均已输出之后运行；与 spec.md 交叉比对标出遗漏，产出可验证的 ux-design.md。无设计稿时进入兜底模式（AI 建议草案）。插入在 specify→plan 之间。"
+description: "**EPIC 级**设计稿解析：从交互稿/视觉稿中提取并结构化交互逻辑与视觉规范。支持图片、Pencil(.pen)、Figma 链接三种输入源。须在所有 Feature 的 spec 均已输出之后运行；与 spec.md 交叉比对标出遗漏，产出可验证的 ux-design.md。无设计稿时进入兜底模式（AI 建议草案）。插入在 specify→techspec 之间。"
 handoffs:
   - label: 制定技术方案
     agent: aisdd.techspec

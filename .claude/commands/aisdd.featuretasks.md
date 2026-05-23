@@ -37,7 +37,7 @@ $ARGUMENTS
 3. **追溯矩阵生成与一致性核对（只写入 tasks.md）**：
     - 从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射，并在 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵。
     - 核对 `tech-spec.md` 轻量规约是否已被 `epic-design.md` 承接：对照 epic-design §一～§六架构、§七 KD（若有）、接口/数据库/埋点子文件（若有）与 L2（若有），逐项检查 tech-spec.md §二（增量约束）、§三（能力边界与外部依赖）、§四（数据/NFR/安全硬约束）。
-    - 若发现 spec/plan 与 design 矛盾或缺失，**停止生成 tasks.md**，输出差异并建议走 `/aisdd.cr` 或更新指定设计章节；不得在本命令中反向修改已冻结的 `spec.md` 或 `tech-spec.md`。
+    - 若发现 spec/tech-spec 与 design 矛盾或缺失，**停止生成 tasks.md**，输出差异并建议走 `/aisdd.cr` 或更新指定设计章节；不得在本命令中反向修改已冻结的 `spec.md` 或 `tech-spec.md`。
     - **只写执行事实源**：本步骤只创建/更新 `tasks.md`，不回填 `spec.md` 追溯表，不追加 `tech-spec.md` 变更记录。
 
 4. **执行任务生成流程**：

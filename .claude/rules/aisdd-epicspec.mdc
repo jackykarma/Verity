@@ -44,7 +44,7 @@ alwaysApply: false
 | 依赖关系 | 上游依赖、下游影响、外部依赖故障模式 |
 | Feature 拆分 | Feature 列表（含类型/价值/依赖/NFR 关注点/优先级）+ 每个 Feature 的边界说明 |
 | 通用能力 | 跨 Feature Capability 识别、能力清单、Capability Feature 映射 |
-| 跨 Feature 技术策略 | 共享能力识别（Owner/消费方）、Feature Plan 执行顺序、技术约束 |
+| 跨 Feature 技术策略 | 共享能力识别（Owner/消费方）、待在 tech-spec 细化的主题登记 |
 | 整体 FR/NFR（EPIC Level） | EPIC-FR（端到端功能目标）、EPIC-NFR（性能/功耗/内存/安全/可观测性） |
 | EPIC 验收 | 验收前置条件、端到端验收场景（E2E-xxx）、通过准则 |
 | 变更记录 | 初始版本 v0.1.0 |
@@ -72,8 +72,8 @@ alwaysApply: false
 ### 跨 Feature 技术策略规则
 
 - 必须识别共享技术能力，明确 Owner Feature 与消费方 Feature
-- 必须基于依赖关系确定 Feature Plan 执行顺序（Owner 先行）
-- 技术约束为后续所有 Feature 的 plan 提供强制输入
+- **不得**在 epic.md 中写 Feature 规约编写顺序表——执行顺序由 `/aisdd.techspec` 写入 `tech-spec.md` §五「Feature 规约编写顺序」
+- 轻量登记为后续 `tech-spec.md` 提供输入，不替代 tech-spec 中的顺序与详细约束
 
 ### 通用约束
 

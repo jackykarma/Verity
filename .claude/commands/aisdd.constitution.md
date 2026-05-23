@@ -41,7 +41,7 @@ $ARGUMENTS
     - 确保“治理”章节列出修订流程、版本控制策略，以及合规审查的预期要求。
 
 4. 一致性同步检查清单（将原有清单转化为主动验证项）：
-    - 读取 `.specify/templates/plan-template.md`，确保其中所有“章程检查项”或规则与更新后的原则保持一致。
+    - 读取 `.specify/templates/tech-spec-template.md`，确保其中所有“章程检查项”或规则与更新后的原则保持一致。
     - 读取 `.specify/templates/spec-template.md`，检查范围/要求的一致性——若章程新增/移除了强制性章节或约束条件，需同步更新该文件。
     - 读取 `.specify/templates/tasks-template.md`，确保任务分类能体现新增或移除的、由原则驱动的任务类型（例如可观测性、版本控制、测试规范）。
     - 读取 `.specify/templates/commands/*.md` 路径下的所有命令文件（包括本文件），验证当需要通用指引时，不存在过时的专属引用（仅保留 CLAUDE 等智能体专属名称）。

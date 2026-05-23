@@ -1,5 +1,5 @@
 ---
-description: "对抗性方案挑战：从多个独立视角对 spec / plan / design 进行非破坏性质量挑战，识别漏洞、风险与不可行点。在阶段转换前可选运行；多 Feature EPIC 或 CR 变更后强烈推荐。"
+description: "对抗性方案挑战：从多个独立视角对 spec / techspec / design 进行非破坏性质量挑战，识别漏洞、风险与不可行点。在阶段转换前可选运行；多 Feature EPIC 或 CR 变更后强烈推荐。"
 handoffs:
   - label: 修复 BLOCK/WARN 问题
     agent: aisdd.cr
@@ -15,17 +15,17 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。`$ARGUMENTS` 须包含：
 
-- **挑战目标**（必填）：`spec` / `plan` / `design`
+- **挑战目标**（必填）：`spec` / `techspec` / `design`
 - **可选范围限定**：Feature 标识（如 `FEAT-001`）或 EPIC 标识（如 `EPIC-002`）
 - **可选侧重**：如 `仅安全` / `仅 NFR` / `仅架构`
 
-示例：`/aisdd.challenge spec`、`/aisdd.challenge plan FEAT-001`、`/aisdd.challenge design 仅安全`
+示例：`/aisdd.challenge spec`、`/aisdd.challenge techspec FEAT-001`、`/aisdd.challenge design 仅安全`
 
 若 `$ARGUMENTS` 为空或未包含有效挑战目标，**立即终止**并提示：
 
 ```
 用法：/aisdd.challenge <目标>
-  目标：spec | plan | design
+  目标：spec | techspec | design
 示例：/aisdd.challenge spec
 ```
 
@@ -36,12 +36,12 @@ $ARGUMENTS
 输出结构化挑战报告（不写入文件），供人类评审后决定是否触发 `/aisdd.cr`。
 
 **与 `/aisdd.analyze` 的区别**：
-- `/aisdd.analyze`：一致性检查（feature：spec↔plan↔tasks；epic：跨 Feature + EPIC 产物）
+- `/aisdd.analyze`：一致性检查（feature：spec↔techspec↔tasks；epic：跨 Feature + EPIC 产物）
 - `/aisdd.challenge`：对抗性挑战（从不同角色视角主动找漏洞、风险、可行性问题）
 
 **可选性说明**：
 - 单 Feature EPIC（≤3 人天）：可跳过
-- 多 Feature EPIC：**强烈推荐**（尤其 spec 和 plan 阶段）
+- 多 Feature EPIC：**强烈推荐**（尤其 spec 和 techspec 阶段）
 - CR 变更后：**必须运行**（变更影响面不确定性高）
 
 ## 操作约束
@@ -62,7 +62,7 @@ $ARGUMENTS
 | **NFR 可行性质疑者** | "这些指标真的能做到吗？" | NFR 是否可量化测量、Android 8.0+ 上是否可达、NFR 之间是否冲突（如高性能 vs 省电）、缺失测量基准或测量方法 |
 | **范围与依赖哨兵** | "这里是否超出了 EPIC 目标？" | 范围蔓延（超出 epic.md 声明边界）、隐性外部依赖（系统权限/硬件/第三方服务）、未声明的技术假设、与其他 Feature 的隐性耦合 |
 
-### 挑战目标：`plan`
+### 挑战目标：`techspec`
 
 | 角色 | 挑战视角 | 重点检测项 |
 |------|----------|-----------|
@@ -82,7 +82,7 @@ $ARGUMENTS
 
 ### 1. 解析挑战目标与 EPIC 上下文
 
-从 `$ARGUMENTS` 解析：挑战目标（`spec`/`plan`/`design`）、可选 Feature/EPIC 标识、可选侧重。
+从 `$ARGUMENTS` 解析：挑战目标（`spec`/`techspec`/`design`）、可选 Feature/EPIC 标识、可选侧重。
 
 定位 EPIC 路径：
 
@@ -101,10 +101,9 @@ $ARGUMENTS
 - `epic.md`（EPIC 范围声明、Feature 拆分边界）
 - `.specify/memory/constitution.md`
 
-**`plan` 模式** — 加载：
-- `tech-spec.md`（若存在；EPIC 技术规约与共享能力约束）
-- tech-spec.md（第二部分各 Feature 节）（轻量技术规约、能力边界、数据/NFR/安全硬约束）
-- 各 Feature `spec.md`（作为 plan 的需求基线对照）
+**`techspec` 模式** — 加载：
+- `tech-spec.md`（第一部分 EPIC 公共约束 + 第二部分各 Feature 增量规约：能力边界、数据/NFR/安全硬约束）
+- 各 Feature `spec.md`（作为 techspec 的需求基线对照）
 - `.specify/memory/constitution.md`
 
 **`design` 模式** — 加载：
@@ -140,7 +139,7 @@ $ARGUMENTS
 
 1. **去重**：同一实质问题被多角色发现时，保留最高级别，合并为一条，标注"多角色共同发现"
 2. **排序**：BLOCK > WARN > NOTE，同级别按影响范围排序
-3. **ID 分配**：格式 `CH-[目标首字母][序号]`，如 `CH-S1`（spec）、`CH-P3`（plan）、`CH-D2`（design）
+3. **ID 分配**：格式 `CH-[目标首字母][序号]`，如 `CH-S1`（spec）、`CH-T3`（techspec）、`CH-D2`（design）
 
 **严重程度定义**：
 
@@ -158,9 +157,9 @@ $ARGUMENTS
 ## /aisdd.challenge [目标] 挑战报告
 
 **EPIC**：EPIC-xxx - [名称]
-**挑战目标**：spec / plan / design
+**挑战目标**：spec / techspec / design
 **挑战日期**：YYYY-MM-DD
-**文档版本**：[各目标文档版本号，如 spec v1.2 / plan v0.8]
+**文档版本**：[各目标文档版本号，如 spec v1.2 / tech-spec v0.8]
 **激活角色**：[角色A] | [角色B] | [角色C]（或「仅 [角色名]」）
 
 ---
@@ -212,7 +211,7 @@ $ARGUMENTS
 - **若存在 BLOCK**：运行 `/aisdd.cr` 发起变更请求修复后，可重新运行 `/aisdd.challenge [目标]` 验证
 - **若存在 WARN**：评估风险后选择修复（`/aisdd.cr`）或记录「已知风险，人工确认自担」后继续
 - **NOTE 问题**：可作为技术债务记录，纳入后续迭代
-- **进入下一阶段**：评级 ✅ 或 ⚠️（人工确认后）→ spec 后 `/aisdd.techspec` 或 `/aisdd.epicuidesign`；plan 后 `/aisdd.epicdesign`；design 后 `/aisdd.featuretasks`
+- **进入下一阶段**：评级 ✅ 或 ⚠️（人工确认后）→ spec 后 `/aisdd.techspec` 或 `/aisdd.epicuidesign`；techspec 后 `/aisdd.epicdesign`；design 后 `/aisdd.featuretasks`
 ```
 
 ### 6. 提供整改建议
@@ -233,9 +232,9 @@ $ARGUMENTS
 | 命令 | 职责 | 适用阶段 | 性质 |
 |------|------|----------|------|
 | `/aisdd.challenge spec` | 对抗性挑战 spec 漏洞、NFR 可行性、范围边界 | `featurespec` 完成后，进入 `techspec` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.challenge plan` | 对抗性挑战架构风险、技术债务、可测试性 | `/aisdd.techspec` 完成后，进入 `epicdesign` 前 | **可选（多 Feature 推荐）** |
+| `/aisdd.challenge techspec` | 对抗性挑战架构风险、技术债务、可测试性 | `/aisdd.techspec` 完成后，进入 `epicdesign` 前 | **可选（多 Feature 推荐）** |
 | `/aisdd.challenge design` | 对抗性挑战安全、性能可达性、生态兼容性 | `epicdesign` 完成后，进入 `featuretasks` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.analyze feature` | 单 Feature 一致性（spec↔plan↔tasks） | **可选**；`tasks` 就绪后、`implement` 前 | 默认 scope |
+| `/aisdd.analyze feature` | 单 Feature 一致性（spec↔techspec↔tasks） | **可选**；`tasks` 就绪后、`implement` 前 | 默认 scope |
 | `/aisdd.analyze epic` | EPIC 跨 Feature 一致性 | **可选**；`epicdesign` 后或全量 tasks 后 | 不 gate implement |
 | `/aisdd.cr` | 变更请求（修复 challenge 发现的 BLOCK/WARN） | challenge 后发现问题时 | 已有 |
 
@@ -243,7 +242,7 @@ $ARGUMENTS
 
 ```
 /aisdd.featurespec × N  →  /aisdd.challenge spec  →  /aisdd.techspec / epicuidesign
-/aisdd.techspec × N  →  /aisdd.challenge plan  →  /aisdd.epicdesign
+/aisdd.techspec × N  →  /aisdd.challenge techspec  →  /aisdd.epicdesign
 /aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.analyze epic pre-tasks（可选）  →  /aisdd.featuretasks
 /aisdd.featuretasks × N →  /aisdd.implement（analyze 全程可选，可插入 epic / feature 分析）
 /aisdd.implement        →  实现自检 / 合并发布

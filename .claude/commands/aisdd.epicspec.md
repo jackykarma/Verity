@@ -80,7 +80,7 @@ $ARGUMENTS
 
 ### epic.md 纯净度边界守护（必须）
 
-> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` 了解 spec 与 plan / epic-design 的三方边界。
+> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` 了解 spec 与 techspec / epic-design 的三方边界。
 
 `epic.md`（EPIC 规格 + Feature 拆分）与下游 `spec.md` 同属**产品规格事实源**，**禁止**含技术实现细节。写入 `epic.md` 与 Feature 拆分条目时，**必须逐条扫描**是否含以下「技术污染」特征，命中即按 block_ask 流程拦截：
 
@@ -108,7 +108,7 @@ $ARGUMENTS
 
 请确认：
 (a) 改写为业务语言后留在 epic.md（推荐）
-(b) 移出 epic.md，记入待写清单交由 epic-plan / epic-design 处理
+(b) 移出 epic.md，记入待写清单交由 tech-spec / epic-design 处理
 (c) 确认保留（需说明理由）
 ```
 

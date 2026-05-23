@@ -7,7 +7,7 @@ handoffs:
     send: false
   - label: 进入 Feature 规格说明
     agent: aisdd.featurespec
-    prompt: 代码调研完成，开始编写 spec.md（需求事实源；技术方案在后续 plan/design 阶段独立决策）
+    prompt: 代码调研完成，开始编写 spec.md（需求事实源；技术方案在后续 techspec/design 阶段独立决策）
     send: false
 ---
 
@@ -60,7 +60,7 @@ $ARGUMENTS
 | 规则 | 说明 |
 |------|------|
 | **一次性快照** | 报告反映**调研当日**代码事实；写完即视为冻结 |
-| **方案变更不回写** | `plan` / `epic-design` / `tasks` / CR **不得**要求更新 `research/` 下已有文件 |
+| **方案变更不回写** | `techspec` / `epic-design` / `tasks` / CR **不得**要求更新 `research/` 下已有文件 |
 | **需要新认知时** | **新建** `codebase-<topic>-<新日期>.md`，不修订旧报告 |
 | **非事实源** | 下游命令可读 `research/` 辅助**理解存量代码**，但**不得**把调研报告当作约束或决策依据 |
 | **CR 排除** | `/aisdd.cr` 影响分析与下游更新清单**不得**包含 `research/` 目录 |
@@ -71,7 +71,7 @@ $ARGUMENTS
 
 - **严格只读**：不修改任何代码或既有文档（含已有调研报告）
 - **事实优先**：每条结论须可追溯到**文件路径**（可选行号）或测试/注释证据
-- **禁止方案化表述**：不出现「建议采用」「应重构为」「推荐在 plan 中写入」等措辞
+- **禁止方案化表述**：不出现「建议采用」「应重构为」「推荐在 tech-spec 中写入」等措辞
 - **禁止替代设计**：调研 ≠ `tech-spec.md` ≠ `epic-design.md`；所有技术决策在后续阶段**独立**做出
 - **基于真实代码**：participant、类名、包路径须来自工程，禁止编造示例类
 
@@ -158,7 +158,7 @@ $ARGUMENTS
 
 输出：
 - 3～5 条**事实摘要**（模块位置、核心入口、与主题相关的现状）
-- 明确声明：**本报告不承载技术决策；后续 plan/design/CR 变更时无需、也不应回写本报告**
+- 明确声明：**本报告不承载技术决策；后续 techspec/design/CR 变更时无需、也不应回写本报告**
 - 建议下一步：`/aisdd.epicspec` 或 `/aisdd.featurespec`（按是否已有 EPIC）
 - 若 `--save`：给出写入路径
 
@@ -167,7 +167,7 @@ $ARGUMENTS
 ## 调研原则
 
 - **先读代码，再写一句话**：避免未打开文件就概括模块职责
-- **演进式视角只用于找代码**：可以说「某能力在 `FooRepository`」；不能说「应在 plan 中扩展 Foo」
+- **演进式视角只用于找代码**：可以说「某能力在 `FooRepository`」；不能说「应在 tech-spec 中扩展 Foo」
 - **适度广度**：覆盖与主题相关的直接依赖即可，不追求全仓库穷举
 - **时效标注**：写明调研日期与代码基线（分支/commit，能取则取）
 
@@ -183,4 +183,4 @@ $ARGUMENTS
 | `/aisdd.epicdesign` | 同上 |
 | `/aisdd.cr` | **不得**将 `research/` 列入下游更新清单 |
 | `/aisdd.clarify` | 澄清**需求**歧义；代码事实以 research 或现场读码为准 |
-| `/aisdd.challenge` | 在 spec/plan/design **之后**；与 research 无依赖 |
+| `/aisdd.challenge` | 在 spec/techspec/design **之后**；与 research 无依赖 |

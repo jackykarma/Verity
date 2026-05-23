@@ -132,7 +132,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 
 - 分支命名：`epic/EPIC-xxx-short-name`，由 `create-new-epic.ps1` 自动创建
 - **不为 Feature 单独创建分支**——Feature 是文档组织单位（目录），而非分支单位
-- 所有 Feature 的 spec/plan/tasks/代码实现均在 EPIC 分支上进行
+- 所有 Feature 的 spec/tech-spec/tasks/代码实现均在 EPIC 分支上进行
 - Story/Task 的增量提交均在 EPIC 分支上，按 Task 或逻辑分组粒度提交
 - EPIC 完成后合并回主分支（merge/rebase 由团队约定）
 
@@ -231,7 +231,7 @@ Plan 阶段的规约输出 MUST 满足以下标准：
 
 **模板是稳定的交付契约，禁止随意改动模板结构或增加章节。**
 
-- 所有模板（`plan-template.md`、`spec-template.md`、`tasks-template.md` 等）的章节结构视为固定契约
+- 所有模板（`tech-spec-template.md`、`spec-template.md`、`tasks-template.md` 等）的章节结构视为固定契约
 - MUST NOT 在输出文档中随意增加模板未定义的章节
 - MUST NOT 删除或合并模板已定义的章节
 - 若确需调整模板结构，MUST 先修改模板文件并说明理由，而非在输出文档中临时增改

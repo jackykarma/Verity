@@ -32,7 +32,7 @@ $ARGUMENTS
 
 ## 前置条件
 
-EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/aisdd.challenge plan`。
+EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/aisdd.challenge techspec`。
 
 ## 设计阶段分步逻辑（先想清楚 → 按 Story 切片）
 

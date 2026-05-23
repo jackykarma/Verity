@@ -33,7 +33,7 @@ alwaysApply: false
 在产出 `tasks.md` **之前**，只做只读核对与 tasks 内追溯建模：
 
 1. 从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射，并准备写入 `tasks.md` 的 FR/NFR → Story → Task 追溯矩阵。
-2. 核对 `tech-spec.md` §二～§四是否已被设计说明书承接；若发现 spec/plan 与 design 矛盾或缺失，停止生成并建议走 `/aisdd.cr` 或更新指定设计章节。
+2. 核对 `tech-spec.md` §二～§四是否已被设计说明书承接；若发现 spec/tech-spec 与 design 矛盾或缺失，停止生成并建议走 `/aisdd.cr` 或更新指定设计章节。
 3. **不得反向修改**已冻结的 `spec.md` 或 `tech-spec.md`；不得回填 spec 追溯表，不得追加 plan 变更记录。
 
 ## 输出

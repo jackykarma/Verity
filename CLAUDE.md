@@ -64,7 +64,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 | `/aisdd.featuretasks` | 各 Feature `tasks.md` | 内置 FR/NFR → Story → Task 追溯矩阵，不反向改写冻结 spec/tech-spec |
 | `/aisdd.implement` | 代码 | 按 Task 逐个执行 |
 | `/aisdd.cr` | CR 文件 + 下游产物更新 | 变更请求 |
-| `/aisdd.challenge` | 挑战报告（不写入文件） | 阶段转换前可选：spec / plan / design |
+| `/aisdd.challenge` | 挑战报告（不写入文件） | 阶段转换前可选：spec / techspec / design |
 | `/aisdd.analyze` | 分析报告（不写入文件，**可选、非阻塞**） | **feature** / **epic** / **epic pre-tasks**；不 gate `implement` |
 
 **小改动快速通道**（预估 ≤3 人天）：精简 `tech-spec.md`、可跳过 `ux-design.md` 与各 Feature `l2_design/` 下 L2 正文；`epic-design.md` 仅写 Story 拆解 + 关键类图。

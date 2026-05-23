@@ -85,7 +85,7 @@ alwaysApply: false
 
 1. **提示确认**：展示下游更新清单，等待用户确认
 2. **按变更类型走流程**（参考 `workflow-overview.md`）：
-   - **需求类** → 7.1 流程：spec → ux-design → plan → epic-design → l2_design（各 ST 文件）→ tasks
+   - **需求类** → 7.1 流程：spec → ux-design → tech-spec → epic-design → l2_design（各 ST 文件）→ tasks
    - **技术方案类** → 7.2 流程：检查 NFR → tech-spec → epic-design → l2_design（各 ST 文件）→ Story 拆解 → tasks
 3. **每步更新后**：
    - 更新文件的变更记录表（Version +0.0.1）
@@ -103,7 +103,7 @@ alwaysApply: false
 - specs/epics/EPIC-xxx/tech-spec.md（v0.1.3，FEAT-001 章节）
 - specs/epics/EPIC-xxx/features/FEAT-001/tasks.md（v0.1.2）
 
-**建议**：CR 更新下游产物后，由负责人对照 spec/plan/design 与代码做一致性自检
+**建议**：CR 更新下游产物后，由负责人对照 spec/techspec/design 与代码做一致性自检
 ```
 
 ## 核心规则

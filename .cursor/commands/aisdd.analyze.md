@@ -27,7 +27,7 @@ $ARGUMENTS
 | scope | 用法示例 | 分析对象 | 典型时机 |
 |-------|----------|----------|----------|
 | **feature**（默认） | `/aisdd.analyze`、`/aisdd.analyze FEAT-001` | 当前 Feature 的 `spec.md`、`tech-spec.md`、`tasks.md` | **可选**；若运行，宜在 `tasks.md` 就绪后、`implement` 前 |
-| **epic** | `/aisdd.analyze epic`、`/aisdd.analyze EPIC-002` | `epic.md`、`tech-spec.md`、`epic-design.md`、子设计文件、各 Feature 的 spec/plan/tasks/l2 | **可选**；多 Feature 时可在全部 `tasks.md` 完成后做全量复核 |
+| **epic** | `/aisdd.analyze epic`、`/aisdd.analyze EPIC-002` | `epic.md`、`tech-spec.md`、`epic-design.md`、子设计文件、各 Feature 的 spec/tech-spec/tasks/l2 | **可选**；多 Feature 时可在全部 `tasks.md` 完成后做全量复核 |
 | **epic pre-tasks** | `/aisdd.analyze epic pre-tasks` | 同上，但**不要求**各 Feature 已有 `tasks.md` | **可选**；`epicdesign` 后、`featuretasks` 前 |
 
 **判定规则**（按优先级）：
@@ -127,7 +127,7 @@ CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖�
 
 ### 2. 加载 EPIC 级产物
 
-`epic.md`、`tech-spec.md`（或单 Feature 时合并 plan）、`epic-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`ux-design.md`（按存在性）、`constitution.md`。
+`epic.md`、`tech-spec.md`、`epic-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`ux-design.md`（按存在性）、`constitution.md`。
 
 ### 3. 加载各 Feature 产物
 
@@ -138,13 +138,13 @@ CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖�
 | 类别 | 内容 |
 |------|------|
 | A 术语一致性 | 跨 Feature / 与 tech-spec 术语统一 |
-| B 接口契约 | Owner plan §三 与消费方引用、错误码体系 |
+| B 接口契约 | Owner tech-spec §三 与消费方引用、错误码体系 |
 | C NFR 量化 | spec NFR ↔ `nfr.md` 评估结论 |
 | D 共享能力 | epic.md 技术策略 ↔ tech-spec 第一部分 ↔ Owner/Consumer Feature 节 |
 | E Story 与覆盖 | FR/NFR 覆盖矩阵、Story 依赖无环、ST 与 tasks/l2 一致 |
 | F 架构一致性 | 分层约束、模块归属、类图与 L2 一致 |
 | G 版本与变更 | Version 对齐、变更记录是否级联 |
-| H 章程合规 | Plan 前置检查、MUST 违规 |
+| H 章程合规 | tech-spec 前置检查、MUST 违规 |
 
 **pre-tasks 模式**：跳过 E 中与 `tasks.md` 强相关的行（标注 N/A：tasks 未生成）。
 

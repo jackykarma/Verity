@@ -2,7 +2,7 @@
 
 > **定位**：EPIC 需求级别的技术设计方案，面向人类评审与后续 Task 拆解、Implement 阶段的 AI 编码参考。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
 >
-> **输入**：`epic.md`、`epic-plan.md`、各 `features/*/spec.md`、各 `features/*/plan.md`、`ux-design.md`（若已产出）、现有工程代码
+> **输入**：`epic.md`、`tech-spec.md`、各 `features/*/spec.md`、`ux-design.md`（若已产出）、现有工程代码
 >
 > **图表规范**：样式遵循 `.cursor/rules/mermaid-style-guide.mdc`；**内容与结构**须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 >
@@ -52,7 +52,7 @@
 ### 前置检查清单
 
 - 已阅读 `epic.md` 的「跨 Feature 技术策略」章节（若尚未定稿，本设计说明书产出后须与之同步）
-- 已阅读 `epic-plan.md`，确认本 EPIC 下各 Feature 的**执行顺序与依赖关系**
+- 已阅读 `tech-spec.md`，确认本 EPIC 下各 Feature 的**执行顺序与依赖关系**
 - 本 EPIC 涉及的**共享能力**已在 `epic.md` 中登记 Owner Feature（或将在本设计说明书中拟定并回流至 epic.md）
 - 若已有部分 Feature 的 **plan.md**，已阅读并识别可复用的组件/接口与约束，避免本设计说明书与既有 plan 冲突
 - 已通读所有 Feature 的 `spec.md`「完整场景矩阵」，确认每个 **P0 场景**在后续架构/时序设计中有对应覆盖策略；多 Feature EPIC 须特别关注「跨 Feature 集成」类场景
@@ -92,7 +92,7 @@
 
 - **检查日期**：[YYYY-MM-DD]
 - **检查人**：[姓名/角色]
-- **结论**：通过 / 需先更新 epic.md 或 epic-plan.md / 需等待 [外部依赖或评审]
+- **结论**：通过 / 需先更新 epic.md 或 tech-spec.md / 需等待 [外部依赖或评审]
 - **备注**：[如有阻塞或需协商事项]
 
 ---
@@ -113,7 +113,7 @@
 | 来源文档 | 相对路径 | 范围要点（可选一行） |
 |---|---|---|
 | EPIC 规格 | [`epic.md`](./epic.md) | [In/Out 摘要或「见原文」] |
-| EPIC 技术约束 | [`epic-plan.md`](./epic-plan.md) 或合并 [`features/.../plan.md`](./features/) | [有则填；单 Feature 无 epic-plan 时填唯一 plan] |
+| EPIC 技术约束 | [`tech-spec.md`](./tech-spec.md) | [有则填；见原文或摘要] |
 | UX（若有） | [`ux-design.md`](./ux-design.md) | [交互/视觉约束摘要或 N/A] |
 
 ## 二、需求概述

@@ -63,7 +63,7 @@ docs/
 **命名规则**：子目录名 = `Markdown文件名-images`
 
 例如：
-- `plan-template.md` → `plan-template-images/`
+- `tech-spec-template.md` → `tech-spec-template-images/`
 - `architecture.md` → `architecture-images/`
 - `README.md` → `README-images/`
 

@@ -50,5 +50,5 @@ alwaysApply: false
 ## 完成后
 
 1. 评审 tech-spec.md
-2. 推荐 `/aisdd.challenge plan`
+2. 推荐 `/aisdd.challenge techspec`
 3. `/aisdd.epicdesign`

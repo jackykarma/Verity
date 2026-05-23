@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Initialize EPIC-level files from templates (epic-plan.md, ux-design.md, epic-design.md, nfr.md) and directory key-func-design/.
+Initialize EPIC-level files from templates (tech-spec.md, ux-design.md, epic-design.md, nfr.md) and directory key-func-design/.
 
 .DESCRIPTION
 Creates EPIC-level design files in the EPIC directory from their respective templates.
@@ -16,7 +16,7 @@ Overwrite existing files.
 
 .PARAMETER FilesOnly
 Comma-separated list of files to create. Default: all.
-Valid values: epic-plan, ux-design, epic-design, key-func-design-dir, nfr, story-detail
+Valid values: tech-spec, ux-design, epic-design, key-func-design-dir, nfr, story-detail
   (story-detail: per-Feature l2_design/.gitkeep；L2 正文由 /aisdd.epicdesign l2 按复杂/高风险 Story 生成)
 
 .PARAMETER Json
@@ -34,12 +34,12 @@ param(
 $ErrorActionPreference = 'Stop'
 
 if ($Help) {
-    Write-Host 'Usage: ./init-epic-files.ps1 [-EpicId EPIC-001] [-Force] [-FilesOnly epic-plan,nfr] [-Json]'
+    Write-Host 'Usage: ./init-epic-files.ps1 [-EpicId EPIC-001] [-Force] [-FilesOnly tech-spec,nfr] [-Json]'
     Write-Host ''
     Write-Host 'Creates EPIC-level design files from templates. Safe to re-run (skips existing unless -Force).'
     Write-Host ''
     Write-Host 'Files created:'
-    Write-Host '  epic-plan.md              -> EPIC root'
+    Write-Host '  tech-spec.md              -> EPIC root'
     Write-Host '  ux-design.md              -> EPIC root'
     Write-Host '  epic-design.md            -> EPIC root'
     Write-Host '  key-func-design/          -> EPIC subdirectory (empty + .gitkeep)'
@@ -76,7 +76,7 @@ $repoRoot = Get-RepoRoot
 $templatesDir = Join-Path $repoRoot '.specify/templates'
 
 $fileMap = @{
-    'epic-plan'        = @{ template = 'epic-plan-template.md';        target = 'epic-plan.md' }
+    'tech-spec'        = @{ template = 'tech-spec-template.md';        target = 'tech-spec.md' }
     'ux-design'        = @{ template = 'ux-design-template.md';        target = 'ux-design.md' }
     'epic-design'      = @{ template = 'epic-design-doc-template.md'; target = 'epic-design.md' }
     'nfr'              = @{ template = 'nfr-template.md';             target = 'nfr.md' }
@@ -85,14 +85,16 @@ $fileMap = @{
 $filesToCreate = if ($FilesOnly) {
     $FilesOnly -split ',' | ForEach-Object { $_.Trim() }
 } else {
-    @('epic-plan', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'story-detail')
+    @('tech-spec', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'story-detail')
 }
 
 # Legacy key-diagram files are deprecated and no longer created.
 $results = @()
 $expanded = [System.Collections.ArrayList]::new()
 foreach ($k in $filesToCreate) {
-    if ($k -eq 'key-diagram' -or $k -eq 'key-diagram-epic' -or $k -eq 'key-diagram-feature') {
+    if ($k -eq 'epic-plan') {
+        $results += @{ file = $k; status = 'deprecated (use tech-spec; run /aisdd.techspec or -FilesOnly tech-spec)' }
+    } elseif ($k -eq 'key-diagram' -or $k -eq 'key-diagram-epic' -or $k -eq 'key-diagram-feature') {
         $results += @{ file = $k; status = 'deprecated (use key-func-design/KD_*_*.md)' }
     } else {
         [void]$expanded.Add($k)

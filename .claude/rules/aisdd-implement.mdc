@@ -61,4 +61,4 @@ alwaysApply: false
 提示用户：
 1. 输出最终状态，汇总已完成的工作
 2. 检查已实现功能是否匹配 `spec.md` 的 FR/NFR/AC
-3. 对照 spec/plan/epic-design 完成实现自检，通过后合并/发布；偏离走 `/aisdd.cr`
+3. 对照 spec/tech-spec/epic-design 完成实现自检，通过后合并/发布；偏离走 `/aisdd.cr`

@@ -19,7 +19,7 @@ flowchart TD
     UxDesign -.-> EpicDesign
     EpicDesign --> StoryDesign["各 Feature l2_design/<br/>ST-xxx_*.md（复杂/高风险 Story 按需）"]
     StoryDesign --> TasksMd["tasks.md<br/>Task 拆解<br/>（内置 FR/NFR → Story → Task 追溯矩阵）"]
-    TasksMd --> Implement["Implement<br/>代码实现 + 对照 spec/plan/design 自检"]
+    TasksMd --> Implement["Implement<br/>代码实现 + 对照 spec/techspec/design 自检"]
     Implement --> Done([交付])
 
     style Research fill:#F3E5F5,stroke:#7B1FA2
@@ -40,7 +40,7 @@ flowchart TD
 
 新需求从进入到交付，按上图顺序走一遍即可：
 
-1. **（可选）前置代码调研** → 在做 EPIC/Feature 规格前，若需先熟悉相关存量模块，运行 `/aisdd.research`（**仅**考古代码，`--parallel` 可多主题）；产出为**一次性事实快照**，不做技术方案决策；后续 `plan` / `design` / CR **不回写** `research/` 下已有报告
+1. **（可选）前置代码调研** → 在做 EPIC/Feature 规格前，若需先熟悉相关存量模块，运行 `/aisdd.research`（**仅**考古代码，`--parallel` 可多主题）；产出为**一次性事实快照**，不做技术方案决策；后续 `techspec` / `design` / CR **不回写** `research/` 下已有报告
 2. **需求输入** → 运行 `create-new-epic.ps1` 创建 EPIC 目录与空 `epic.md`；**默认**同时新建并切换 `epic/EPIC-xxx-*` 分支，**可选** `-UseCurrentBranch` 保留当前 Git 分支（见 `/aisdd.epicspec`）→ `/aisdd.epicspec` 填充 `epic.md`（EPIC 规格 + Feature 拆分）
 3. **Feature 规格** → 各 Feature 产出 `spec.md`（FR/NFR/AC）
 4. **技术规约与 UX** → 产出 EPIC 根 `tech-spec.md`（`/aisdd.techspec`）；可选 `ux-design.md`（可与 techspec 并行）
@@ -64,7 +64,7 @@ flowchart TD
 | **EPIC 设计说明书** | `epic-design.md` | 架构与设计事实源 | `epic.md`、`tech-spec.md`、各 `spec.md`（含完整场景矩阵）、`ux-design.md`（可选） |
 | **L2 详细设计** | 各 `features/*/l2_design/ST-xxx_*.md`（复杂/高风险 Story 按需） | 落码级设计事实源 | `epic-design.md` |
 | **Task 拆解** | 各 `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 执行事实源 | `tech-spec.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md`（若有） |
-| **实现** | 代码 | 交付物；实现须对照 spec/plan/design 自检 | `tasks.md` |
+| **实现** | 代码 | 交付物；实现须对照 spec/techspec/design 自检 | `tasks.md` |
 
 ---
 
@@ -73,7 +73,7 @@ flowchart TD
 - **默认**：每个 EPIC 由 `create-new-epic.ps1` **新建并切换**到 `epic/EPIC-xxx-short-name` 分支，同时创建 `specs/epics/...` 与空 `epic.md`
 - **可选**：脚本加 **`-UseCurrentBranch`** 时**不**创建/切换 `epic/*` 分支，仅在**当前 HEAD** 上创建 EPIC 目录与 `epic.md`（适用于热修复栈、共享分支等；见 `.cursor/commands/aisdd.epicspec.md`）
 - **不为 Feature 单独创建分支**——Feature 是文档组织单位（目录），而非分支单位
-- 所有 Feature 的 spec/plan/tasks/代码实现均在当前工作分支（默认即 EPIC 分支）上进行
+- 所有 Feature 的 spec/tech-spec/tasks/代码实现均在当前工作分支（默认即 EPIC 分支）上进行
 - Story/Task 的增量提交均在同一工作分支上，按 Task 或逻辑分组粒度提交
 - EPIC 完成后合并回主分支
 
@@ -172,21 +172,21 @@ flowchart TD
 
 | 步骤 | 命令 | 产出物 | 执行次数 |
 |------|------|--------|----------|
-| 0 | `/aisdd.research` | **代码调研快照**（`--save` → `research/codebase-<topic>-<date>.md`）；只含模块地图、接口事实、调用链、依赖与观察项；**不含**方案建议/评级/下游修改清单 | **可选**；`epicspec` / `featurespec` 之前；熟悉存量代码时用；`plan`/`design`/CR **不得**回写已有调研文件 |
+| 0 | `/aisdd.research` | **代码调研快照**（`--save` → `research/codebase-<topic>-<date>.md`）；只含模块地图、接口事实、调用链、依赖与观察项；**不含**方案建议/评级/下游修改清单 | **可选**；`epicspec` / `featurespec` 之前；熟悉存量代码时用；`techspec`/`design`/CR **不得**回写已有调研文件 |
 | 1 | `create-new-epic.ps1` | **默认**：新建 `epic/EPIC-xxx-*` 分支 + EPIC 目录 + `epic.md`（空模板）；**可选** `-UseCurrentBranch`：不切换分支，仅创建目录与模板 | 每个 EPIC 一次 |
 | 2 | `/aisdd.epicspec` | `epic.md`（填充内容：EPIC 规格 + Feature 拆分） | 每个 EPIC 一次 |
 | 3 | `/aisdd.featurespec` | Feature 目录 + `spec.md`（填充内容） | **默认**：每个 Feature 单独触发一次；**`--batch` 模式**：一次触发，顺序创建所有 Feature 目录后并行生成各 `spec.md`（从 `epic.md` Feature 列表读取，适合多 Feature EPIC） |
 | 3.5 | `/aisdd.challenge spec` | 挑战报告（不写入文件）：从三视角对抗性检测 spec 漏洞、NFR 可行性、范围边界 | **可选**；多 Feature EPIC 强烈推荐；单 Feature/≤3人天可跳过。进入 `techspec` 前运行 |
 | 4 | `/aisdd.techspec` | `tech-spec.md` | 每个 EPIC 一次（覆盖第一部分 + 全部 Feature 第二节） |
 | 5 | `/aisdd.epicuidesign` | `ux-design.md`（解析设计稿 → 结构化交互/视觉规范） | 每个 EPIC 一次（可选，与步骤 4 并行） |
-| 4.5 | `/aisdd.challenge plan` | 挑战报告（不写入文件）：对抗性检测 tech-spec 架构风险、技术债务、可测试性 | **可选**；多 Feature 强烈推荐；CR 变更后必须运行。进入 `epicdesign` 前运行 |
+| 4.5 | `/aisdd.challenge techspec` | 挑战报告（不写入文件）：对抗性检测 tech-spec 架构风险、技术债务、可测试性 | **可选**；多 Feature 强烈推荐；CR 变更后必须运行。进入 `epicdesign` 前运行 |
 | 7 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `nfr` / `story` / `l2`） | 分阶段。前置：`get-epic-paths.ps1 -Json` 中 `HAS_TECH_SPEC` 为 true |
 | 7.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。进入 `featuretasks` 前运行 |
 | 7.6 | `/aisdd.analyze epic pre-tasks` | EPIC 跨 Feature 分析报告（不写入文件） | **可选**；多 Feature EPIC；`epicdesign` 后、`featuretasks` 前；不要求 tasks.md |
 | 8 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 每个 Feature 一次 |
 | 8.5 | `/aisdd.analyze epic` | EPIC 全量一致性分析报告（含各 Feature tasks） | **可选**；多 Feature 质量加码；**非** implement 前置必做 |
 | 8.6 | `/aisdd.analyze` | 单 Feature 分析报告（scope=feature，默认） | **可选**；每个 Feature 至多一次；**非阻塞** implement |
-| 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行；完成后对照 spec/plan/design 自检 |
+| 9 | `/aisdd.implement` | 代码 | 按 Task 逐个执行；完成后对照 spec/techspec/design 自检 |
 | — | `/aisdd.cr` | CR 文件 + 下游产物增量更新 | 变更时按需（自动影响分析 → 生成 CR → 分步更新） |
 
 ---
@@ -202,7 +202,7 @@ flowchart TD
 1. **创建 CR**：运行 `/aisdd.cr`（或手动使用模板 [change-request-template.md](./templates/change-request-template.md)），填写「变更内容」「变更原因与证据」「影响分析」「下游更新清单」
 2. **CR 评审**：结论为通过 / 有条件通过 / 不通过
 3. **按类型走流程**：
-   - **需求类变更**（Scope/FR/NFR/AC/边界）→ 走 [7.1 需求变更流程](#71-需求变更流程)：从更新 `spec.md` 起，自顶向下检查并更新 ux-design → plan → epic-design → l2_design（各 ST 文件）→ tasks
+   - **需求类变更**（Scope/FR/NFR/AC/边界）→ 走 [7.1 需求变更流程](#71-需求变更流程)：从更新 `spec.md` 起，自顶向下检查并更新 ux-design → tech-spec → epic-design → l2_design（各 ST 文件）→ tasks
    - **技术方案类变更**（公共约束、能力边界、接口/实现决策）→ 走 [7.2 技术方案变更流程](#72-技术方案变更流程)：从更新 `tech-spec.md`/`tech-spec.md` 或设计说明书起，自中间向两端扩展，必要时先协商 NFR 再更新设计说明书与 tasks
 4. **执行下游更新清单**：只更新 CR 影响分析中列出的产物，每份文档更新后填写 Version 与变更记录表（`/aisdd.cr` 会分步执行并逐步确认）
 
@@ -311,7 +311,7 @@ flowchart TD
 | 角色 | 职责 | 在 AISDD 中的产出物 |
 |------|------|-------------------|
 | **SE（方案设计者）** | 驱动整个设计流程：需求分析、方案设计、Story 拆解、Task 拆分；设计评审与变更管理 | `epic.md`、`spec.md`、`tech-spec.md`、`tech-spec.md`、`ux-design.md`、`epic-design.md`、各 Feature `l2_design/ST-xxx_*.md`、`tasks.md` |
-| **DEV（开发者）** | 按 `tasks.md` 执行代码实现；编写单元测试；对照 spec/plan/design 自验证 | 代码、单测 |
+| **DEV（开发者）** | 按 `tasks.md` 执行代码实现；编写单元测试；对照 spec/techspec/design 自验证 | 代码、单测 |
 
 > **SE 同时可以是 DEV**——在小团队中 SE 既做设计也做实现，此时并行策略退化为串行流水线（自己设计完 Feature A → 开始实现 Feature A，同时设计 Feature B）。
 
@@ -331,7 +331,7 @@ gantt
     tech-spec + ux-design（并行）    :se2, after se1, 2d
     FEAT-001 design + tasks   :se3, after se2, 3d
     FEAT-002 design + tasks   :se4, after se3, 3d
-    FEAT-003 plan + design + tasks   :se5, after se4, 2d
+    FEAT-003 techspec + design + tasks   :se5, after se4, 2d
     EPIC 收尾 + 合并                  :se6, after dev3, 1d
 
     section DEV-A 实现
@@ -389,7 +389,7 @@ flowchart LR
 
 | 依赖类型 | SE 策略 | DEV 策略 |
 |----------|---------|---------|
-| **无依赖**（Feature 间独立） | 按复杂度排序逐个设计，或 `--batch` 并行生成 plan | 各 DEV 分别认领独立 Feature，完全并行实现 |
+| **无依赖**（Feature 间独立） | 按复杂度排序逐个设计，或 `--batch` 并行生成 tech-spec | 各 DEV 分别认领独立 Feature，完全并行实现 |
 | **接口依赖**（B 调用 A 的 API） | 先在 A 的 `tech-spec.md` 记录能力边界与调用约束，详细接口在 `interface-design.md` 或 L2 中设计；B 的 `tech-spec.md` 引用该能力边界 | DEV-1 先实现 A 的接口层（Stub/空实现）→ DEV-2 可基于接口开始 B 的实现 |
 | **数据依赖**（B 消费 A 产出的数据） | 先在 A 的 `tech-spec.md` 记录 SoR 与生命周期等数据约束，详细数据模型和存储方案在 `database-design.md` 或 L2 中设计，B 引用该方案 | A 的数据层实现完毕后 B 才能联调；B 可先用 Mock 数据并行开发 |
 | **紧耦合依赖**（A/B 共享状态/深度交互） | 考虑合并为同一 Feature，或在 `tech-spec.md` 中定义共享契约 | 同一 DEV 负责两者，或两 DEV 频繁同步 |

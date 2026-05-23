@@ -3,7 +3,7 @@ description: "产出 EPIC 根目录唯一技术规格书 tech-spec.md（合并�
 handoffs:
   - label: 对抗性挑战（多 Feature 推荐）
     agent: aisdd.challenge
-    prompt: tech-spec 完成后运行 /aisdd.challenge plan 对抗性检测技术规约
+    prompt: tech-spec 完成后运行 /aisdd.challenge techspec 对抗性检测技术规约
     send: false
   - label: 输出 EPIC 软件设计说明书
     agent: aisdd.epicdesign
@@ -91,7 +91,7 @@ $ARGUMENTS
 | 共享能力重复实现（未引用 Owner） | WARN |
 | 数据 SoR 冲突 | WARN |
 
-输出简要检查表（≤20 条）。完整对抗性挑战 → `/aisdd.challenge plan`。
+输出简要检查表（≤20 条）。完整对抗性挑战 → `/aisdd.challenge techspec`。
 
 ### 6. 完成报告
 
@@ -99,7 +99,7 @@ $ARGUMENTS
 - Tech Spec Version
 - 已覆盖 Feature 列表
 - 能力边界检查摘要
-- 下一步：`/aisdd.challenge plan`（推荐）→ `/aisdd.epicdesign`
+- 下一步：`/aisdd.challenge techspec`（推荐）→ `/aisdd.epicdesign`
 
 ## 核心规则
 

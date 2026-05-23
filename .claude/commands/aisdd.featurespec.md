@@ -295,7 +295,7 @@ EPIC 上下文：
 
 ### spec / 技术细节边界守护（必须）
 
-> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part A** 了解 spec 纯净度与 plan/design 边界。
+> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part A** 了解 spec 纯净度与 techspec/design 边界。
 
 `spec.md` 是**纯粹的产品规格**，只写「系统必须做什么」与可测试的需求；**禁止**任何技术实现细节。写入 `spec.md` 时，**必须逐条扫描**是否含以下「技术污染」特征，命中即按 block_ask 流程拦截：
 
@@ -326,7 +326,7 @@ EPIC 上下文：
 
 请确认：
 (a) 改写为业务语言后留在 spec.md（推荐——保留业务意图，剥离技术词汇）
-(b) 移出 spec.md，记入待写清单交由 plan / epic-design 处理（推荐，若该信息属于技术决策）
+(b) 移出 spec.md，记入待写清单交由 tech-spec / epic-design 处理（推荐，若该信息属于技术决策）
 (c) 确认保留原文（需说明理由——例如该术语已成为业务固定称呼）
 (d) 拆分：业务部分留 spec，技术部分移入下游
 ```
