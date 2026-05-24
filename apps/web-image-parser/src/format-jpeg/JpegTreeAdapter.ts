@@ -115,7 +115,7 @@ export async function toPresentRequest(
       fields: [{ key: '内容', value: comText(new Uint8Array(buffer), node.offset, node.length) }],
     }
   } else if (node.parCatalogId === 'PAR-JPEG-021') {
-    readablePayload = extractXmpFromApp1(slice)
+    readablePayload = extractXmpFromApp1(slice, buffer)
   } else if (node.parCatalogId === 'PAR-JPEG-028' || node.parCatalogId === 'PAR-JPEG-019') {
     const extras = mpfPresentExtras(node, buffer, sessionId, allNodes)
     readablePayload = extras.readablePayload ?? readablePayload

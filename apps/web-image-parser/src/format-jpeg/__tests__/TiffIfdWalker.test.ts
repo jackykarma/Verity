@@ -24,5 +24,11 @@ describe('TiffIfdWalker', () => {
     expect(exifStart).toBeGreaterThan(0)
     expect(isoIdx).toBeGreaterThan(exifStart)
     expect(focalPlaneIdx).toBeGreaterThan(isoIdx)
+
+    expect(names.some((n) => n.startsWith('IFD1 ·'))).toBe(true)
+    const ifd1Compression = names.indexOf('IFD1 · Compression')
+    const ifd1Offset = names.indexOf('IFD1 · ThumbnailOffset')
+    expect(ifd1Compression).toBeGreaterThan(0)
+    expect(ifd1Offset).toBeGreaterThan(ifd1Compression)
   })
 })

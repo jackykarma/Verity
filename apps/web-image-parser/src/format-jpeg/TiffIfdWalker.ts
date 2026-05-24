@@ -1,16 +1,20 @@
 import { tagKeys } from 'exifr'
+import { supplementTagName } from './exifTagSupplement.ts'
 
-export type IfdBlockKey = 'ifd0' | 'exif' | 'gps' | 'interop'
+export type IfdBlockKey = 'ifd0' | 'ifd1' | 'exif' | 'gps' | 'interop'
 
 export interface OrderedIfdTag {
   blockKey: IfdBlockKey
   groupLabel: string
   tagId: number
   tagName: string
+  /** TIFF 头内 IFD 起始偏移 */
+  ifdOffset: number
 }
 
 const GROUP_LABELS: Record<IfdBlockKey, string> = {
   ifd0: 'IFD0',
+  ifd1: 'IFD1',
   exif: 'ExifIFD',
   gps: 'GPS IFD',
   interop: 'InteropIFD',
@@ -35,18 +39,18 @@ export function findExifTiffStart(data: Uint8Array): number | null {
   return null
 }
 
-function isLittleEndian(data: Uint8Array, tiffStart: number): boolean {
+export function isTiffLittleEndian(data: Uint8Array, tiffStart: number): boolean {
   return data[tiffStart] === 0x49 && data[tiffStart + 1] === 0x49
 }
 
-function readU16(data: Uint8Array, offset: number, le: boolean): number {
+export function readU16(data: Uint8Array, offset: number, le: boolean): number {
   if (le) {
     return data[offset]! | (data[offset + 1]! << 8)
   }
   return (data[offset]! << 8) | data[offset + 1]!
 }
 
-function readU32(data: Uint8Array, offset: number, le: boolean): number {
+export function readU32(data: Uint8Array, offset: number, le: boolean): number {
   if (le) {
     return (data[offset]! | (data[offset + 1]! << 8) | (data[offset + 2]! << 16) | (data[offset + 3]! << 24)) >>> 0
   }
@@ -54,8 +58,8 @@ function readU32(data: Uint8Array, offset: number, le: boolean): number {
 }
 
 function tagNameFor(blockKey: IfdBlockKey, tagId: number): string {
-  const dict = tagKeys.get(blockKey)
-  return dict?.get(tagId) ?? `0x${tagId.toString(16)}`
+  const dict = tagKeys.get(blockKey === 'ifd1' ? 'ifd1' : blockKey)
+  return dict?.get(tagId) ?? supplementTagName(tagId) ?? `0x${tagId.toString(16)}`
 }
 
 interface WalkIfdResult {
@@ -63,6 +67,7 @@ interface WalkIfdResult {
   exifIfdOffset: number | null
   gpsIfdOffset: number | null
   interopIfdOffset: number | null
+  nextIfdOffset: number | null
 }
 
 function walkIfd(
@@ -127,20 +132,145 @@ function walkIfd(
       groupLabel: GROUP_LABELS[blockKey],
       tagId,
       tagName: tagNameFor(blockKey, tagId),
+      ifdOffset,
     })
   }
 
-  return { tags, exifIfdOffset, gpsIfdOffset, interopIfdOffset }
+  const nextIfdOffset =
+    ifdAbs + 2 + count * 12 + 4 <= data.length
+      ? readU32(data, ifdAbs + 2 + count * 12, le)
+      : null
+
+  return { tags, exifIfdOffset, gpsIfdOffset, interopIfdOffset, nextIfdOffset }
 }
 
-/** 按 TIFF IFD 目录条目顺序收集 Tag（IFD0 → ExifIFD → GPS → Interop） */
+/** 读取 IFD 目录项原始值（exifr 未收录 Tag 时使用） */
+export function readIfdTagRawValue(
+  data: Uint8Array,
+  tiffStart: number,
+  ifdOffset: number,
+  tagId: number,
+  le: boolean,
+): unknown | undefined {
+  const ifdAbs = tiffStart + ifdOffset
+  if (ifdAbs + 2 > data.length) {
+    return undefined
+  }
+
+  const count = readU16(data, ifdAbs, le)
+  for (let i = 0; i < count; i++) {
+    const entry = ifdAbs + 2 + i * 12
+    if (entry + 12 > data.length) {
+      break
+    }
+
+    if (readU16(data, entry, le) !== tagId) {
+      continue
+    }
+
+    const type = readU16(data, entry + 2, le)
+    const valueCount = readU32(data, entry + 4, le)
+    const valueOrOffset = readU32(data, entry + 8, le)
+    const totalBytes = valueCount * tiffTypeSize(type)
+
+    let valueStart = entry + 8
+    if (totalBytes > 4) {
+      valueStart = tiffStart + valueOrOffset
+      if (valueStart + totalBytes > data.length) {
+        return undefined
+      }
+    }
+
+    return decodeTiffValue(data, valueStart, type, valueCount, le, totalBytes <= 4 ? valueOrOffset : undefined)
+  }
+
+  return undefined
+}
+
+function tiffTypeSize(type: number): number {
+  switch (type) {
+    case 1:
+    case 2:
+    case 6:
+    case 7:
+      return 1
+    case 3:
+    case 8:
+      return 2
+    case 4:
+    case 9:
+    case 11:
+      return 4
+    case 5:
+    case 10:
+    case 12:
+      return 8
+    default:
+      return 1
+  }
+}
+
+function decodeTiffValue(
+  data: Uint8Array,
+  offset: number,
+  type: number,
+  count: number,
+  le: boolean,
+  inlineU32?: number,
+): unknown {
+  switch (type) {
+    case 1:
+    case 7: {
+      if (count === 1 && inlineU32 != null) {
+        return inlineU32 & 0xff
+      }
+      const bytes = data.slice(offset, offset + count)
+      return count === 1 ? bytes[0] : bytes
+    }
+    case 3: {
+      if (count === 1 && inlineU32 != null) {
+        return inlineU32 & 0xffff
+      }
+      const values: number[] = []
+      for (let i = 0; i < count; i++) {
+        values.push(readU16(data, offset + i * 2, le))
+      }
+      return count === 1 ? values[0] : values
+    }
+    case 4:
+    case 9: {
+      if (count === 1 && inlineU32 != null) {
+        return inlineU32
+      }
+      const values: number[] = []
+      for (let i = 0; i < count; i++) {
+        values.push(readU32(data, offset + i * 4, le))
+      }
+      return count === 1 ? values[0] : values
+    }
+    case 2: {
+      let end = offset
+      while (end < data.length && data[end] !== 0) {
+        end++
+      }
+      return new TextDecoder('latin1').decode(data.slice(offset, end))
+    }
+    default:
+      if (count === 1 && inlineU32 != null) {
+        return inlineU32
+      }
+      return inlineU32 ?? readU32(data, offset, le)
+  }
+}
+
+/** 按 TIFF IFD 目录条目顺序收集 Tag（IFD0 → ExifIFD → GPS → Interop → IFD1） */
 export function collectOrderedIfdTags(data: Uint8Array): OrderedIfdTag[] {
   const tiffStart = findExifTiffStart(data)
   if (tiffStart == null || tiffStart + 8 > data.length) {
     return []
   }
 
-  const le = isLittleEndian(data, tiffStart)
+  const le = isTiffLittleEndian(data, tiffStart)
   const ifd0Offset = readU32(data, tiffStart + 4, le)
   const ifd0 = walkIfd(data, tiffStart, ifd0Offset, 'ifd0', le)
   if (!ifd0) {
@@ -169,6 +299,13 @@ export function collectOrderedIfdTags(data: Uint8Array): OrderedIfdTag[] {
     interopOffset != null ? walkIfd(data, tiffStart, interopOffset, 'interop', le) : null
   if (interop) {
     ordered.push(...interop.tags)
+  }
+
+  if (ifd0.nextIfdOffset != null && ifd0.nextIfdOffset > 0) {
+    const ifd1 = walkIfd(data, tiffStart, ifd0.nextIfdOffset, 'ifd1', le)
+    if (ifd1) {
+      ordered.push(...ifd1.tags)
+    }
   }
 
   return ordered

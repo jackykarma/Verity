@@ -155,7 +155,7 @@ export function parseXmpFields(xml: string): ReadableField[] {
   return fields.length > 0 ? fields : parseXmpWithRegex(xml)
 }
 
-export function extractXmpFromApp1(app1Slice: ArrayBuffer): ReadablePayload {
+export function extractXmpFromApp1(app1Slice: ArrayBuffer, fullBuffer?: ArrayBuffer): ReadablePayload {
   const payload = new Uint8Array(app1Slice)
   const xml = locateXmpXml(payload)
 
@@ -172,9 +172,10 @@ export function extractXmpFromApp1(app1Slice: ArrayBuffer): ReadablePayload {
 
   const fields = parseXmpFields(xml)
   const containerItems = parseXmpContainerItems(xml)
+  const fileSize = fullBuffer?.byteLength ?? app1Slice.byteLength
   const containerFields =
     containerItems.length > 0
-      ? buildContainerReadable(resolveContainerItemOffsets(payload.byteLength, containerItems))
+      ? buildContainerReadable(resolveContainerItemOffsets(fileSize, containerItems))
       : []
   const preview =
     xml.length > 4000 ? `${xml.slice(0, 4000)}\n…（已截断，共 ${xml.length} 字符）` : xml

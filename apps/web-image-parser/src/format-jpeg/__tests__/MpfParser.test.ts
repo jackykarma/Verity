@@ -3,7 +3,10 @@ import {
   buildMpfGallery,
   buildMpfPreviewBytes,
   buildMpfReadable,
+  buildMpImageEntryFields,
+  enrichMpfEntriesWithContainer,
   extractEmbeddedJpegRange,
+  extractJpegFromMpfByteRange,
   normalizeMpfEntries,
   parseMpfSegment,
   type MpfImageEntry,
@@ -124,8 +127,24 @@ describe('MpfParser', () => {
     expect(parsed!.entries[1]?.flagsLabel).toContain('Dependent')
 
     const readable = buildMpfReadable(parsed!)
-    expect(readable.fields.some((f) => f.key === 'MPImage 1 · MPImageType')).toBe(true)
-    expect(readable.fields.some((f) => f.key === 'MPImage 2 · MPImageStart')).toBe(true)
+    const keys = readable.fields.map((f) => f.key)
+    expect(keys).toContain('MPImage 1 · MPImageFlags')
+    expect(keys).toContain('MPImage 1 · MPImageType')
+    expect(keys).toContain('MPImage 2 · MPImageStart')
+    expect(keys).toContain('MPImage 1 · DependentImage1EntryNumber')
+    expect(keys).not.toContain('MPImage 1 · 摘要')
+    expect(keys).not.toContain('MPImage 1 · rawAttr')
+
+    const mp1Fields = buildMpImageEntryFields(parsed!.entries[0]!)
+    expect(mp1Fields.map((f) => f.key.replace(/^MPImage \d+ · /, ''))).toEqual([
+      'MPImageFlags',
+      'MPImageFormat',
+      'MPImageType',
+      'MPImageLength',
+      'MPImageStart',
+      'DependentImage1EntryNumber',
+      'DependentImage2EntryNumber',
+    ])
 
     const gallery = buildMpfGallery(file.buffer, parsed!, 'session-test')
     expect(gallery).toHaveLength(2)
@@ -210,6 +229,49 @@ describe('MpfParser', () => {
     const parsed = parseMpfSegment(mpfSeg.buffer, 0, mpfSeg.byteLength)
     expect(parsed?.entries[0]?.imageType).toBe(0x50000)
     expect(parsed?.entries[0]?.imageTypeLabel).toBe('Gain Map Image')
-    expect(parsed?.entries[0]?.format).toBe('JPEG')
+    expect(parsed?.entries[0]?.formatCode).toBe(0)
+  })
+
+  it('extracts Gain Map preview strictly from MPImageStart and MPImageLength', () => {
+    const primaryJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0xff, 0xda, 0xff, 0xd9])
+    const gainMapJpeg = new Uint8Array([
+      0xff, 0xd8, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08, 0x07, 0x07,
+      0x07, 0x09, 0x09, 0x08, 0x0a, 0x0c, 0x14, 0x0d, 0x0c, 0x0b, 0x0b, 0x0c, 0x19, 0x12, 0x13, 0x0f,
+      0x14, 0x1d, 0x1a, 0x1f, 0x1e, 0x1d, 0x1a, 0x1c, 0x1c, 0x20, 0x24, 0x2e, 0x27, 0x20, 0x22, 0x2c,
+      0x23, 0x1c, 0x1c, 0x28, 0x37, 0x29, 0x2c, 0x30, 0x31, 0x34, 0x34, 0x34, 0x1f, 0x27, 0x39, 0x3d,
+      0x38, 0x32, 0x3c, 0x2e, 0x33, 0x34, 0x32, 0xff, 0xd9,
+    ])
+    const gap = 64
+    const gainOffset = primaryJpeg.length + gap
+    const file = new Uint8Array(gainOffset + gainMapJpeg.length)
+    file.set(primaryJpeg, 0)
+    file.set(gainMapJpeg, gainOffset)
+
+    const entries = normalizeMpfEntries(file.buffer, [
+      bareEntry({ index: 0, offset: 0, size: primaryJpeg.length, imageType: 0x30000, imageTypeLabel: 'Baseline MP Primary Image', role: 'Baseline MP Primary Image' }),
+      bareEntry({ index: 1, offset: gainOffset, size: gainMapJpeg.length, imageType: 0x50000, imageTypeLabel: 'Gain Map Image', role: 'Gain Map Image' }),
+    ])
+
+    expect(entries[1]?.offset).toBe(gainOffset)
+    expect(entries[1]?.size).toBe(gainMapJpeg.length)
+
+    const sliced = extractJpegFromMpfByteRange(file, gainOffset, gainMapJpeg.length)
+    expect(sliced?.byteLength).toBe(gainMapJpeg.byteLength)
+
+    const preview = buildMpfPreviewBytes(file.buffer, entries[1]!, entries)
+    expect(preview?.byteLength).toBe(gainMapJpeg.byteLength)
+    expect(Array.from(preview!)).toEqual(Array.from(gainMapJpeg))
+    expect(preview).not.toEqual(buildMpfPreviewBytes(file.buffer, entries[0]!, entries))
+  })
+
+  it('infers Gain Map Image from XMP Container when MP attr type is 0', () => {
+    const entry = bareEntry({ index: 0, offset: 100, size: 512, rawAttr: 0 })
+    const enriched = enrichMpfEntriesWithContainer([entry], [
+      { index: 0, semantic: 'GainMap', mime: 'image/jpeg', length: 512, padding: 0, offset: 200 },
+    ])
+    expect(enriched[0]?.imageType).toBe(0x50000)
+    expect(enriched[0]?.imageTypeLabel).toBe('Gain Map Image')
+    const typeField = buildMpImageEntryFields(enriched[0]!)[2]
+    expect(typeField?.value).toBe('Gain Map Image (0x50000)')
   })
 })

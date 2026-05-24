@@ -6,6 +6,7 @@ import {
   buildThumbnailReadableFields,
   extractThumbnailInfo,
   findExifTiffStart,
+  readJpegDimensions,
 } from '../ThumbnailExtractor.ts'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -45,10 +46,22 @@ describe('ThumbnailExtractor', () => {
     const fields = buildThumbnailReadableFields(info!)
     const map = Object.fromEntries(fields.map((f) => [f.key, f.value]))
 
-    expect(map.Compression).toBe('JPEG (old-style)')
-    expect(map['JPEGInterchangeFormat (ThumbnailOffset)']).toContain('1090')
-    expect(map['JPEGInterchangeFormat (ThumbnailOffset)']).toContain('0x460 (1120)')
-    expect(map['JPEGInterchangeFormatLength (ThumbnailLength)']).toBe('1378 字节')
-    expect(map.ThumbnailImage).toContain('1378')
+    expect(map['IFD1 · Compression']).toBe('JPEG (old-style)')
+    expect(map['IFD1 · ImageWidth']).toBeDefined()
+    expect(map['IFD1 · ImageHeight']).toBeDefined()
+    expect(map['IFD1 · JPEGInterchangeFormat (ThumbnailOffset)']).toContain('1090')
+    expect(map['IFD1 · JPEGInterchangeFormat (ThumbnailOffset)']).toContain('0x460 (1120)')
+    expect(map['IFD1 · JPEGInterchangeFormatLength (ThumbnailLength)']).toBe('1378 字节')
+    expect(map['IFD1 · ThumbnailImage']).toContain('1378')
+  })
+
+  it('reads JPEG dimensions from embedded thumbnail bytes', async () => {
+    const info = await extractThumbnailInfo(readFileSync(canonSample).buffer)
+    const dims = readJpegDimensions(new Uint8Array(info!.jpegBytes!))
+    expect(dims).not.toBeNull()
+    expect(dims!.width).toBeGreaterThan(0)
+    expect(dims!.height).toBeGreaterThan(0)
+    expect(info!.thumbnailWidth).toBe(dims!.width)
+    expect(info!.thumbnailHeight).toBe(dims!.height)
   })
 })

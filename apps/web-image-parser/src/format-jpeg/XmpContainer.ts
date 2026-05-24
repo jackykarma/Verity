@@ -113,7 +113,7 @@ export function resolveContainerItemOffsets(
     offset:
       item.length > 0
         ? Math.max(0, fileSize - tailSumAfter[i]! - item.length - item.padding)
-        : 0,
+        : undefined,
   }))
 }
 
@@ -138,8 +138,18 @@ export function jpegContainerItems(items: XmpContainerItem[]): XmpContainerItem[
 }
 
 export function buildContainerReadable(items: XmpContainerItem[]): { key: string; value: string }[] {
-  return items.map((item) => ({
-    key: `Container · ${semanticDisplayLabel(item.semantic)}`,
-    value: `${item.mime} · Length ${item.length}${item.offset != null ? ` · 偏移 ${formatByteOffset(item.offset)}` : ''}`,
-  }))
+  const fields: { key: string; value: string }[] = []
+
+  for (const item of items) {
+    const label = semanticDisplayLabel(item.semantic)
+    const prefix = `Container · ${label}`
+    fields.push({ key: `${prefix} · Item:Mime`, value: item.mime })
+    fields.push({ key: `${prefix} · Item:Length`, value: String(item.length) })
+    fields.push({ key: `${prefix} · Item:Padding`, value: String(item.padding) })
+    if (item.length > 0 && item.offset != null && item.offset > 0) {
+      fields.push({ key: `${prefix} · 推算偏移`, value: formatByteOffset(item.offset) })
+    }
+  }
+
+  return fields
 }

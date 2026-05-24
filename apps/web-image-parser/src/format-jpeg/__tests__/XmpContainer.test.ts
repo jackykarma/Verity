@@ -5,9 +5,9 @@ import {
   normalizeMpfEntries,
 } from '../MpfParser.ts'
 import {
+  buildContainerReadable,
   parseXmpContainerItems,
   resolveContainerItemOffsets,
-  semanticDisplayLabel,
 } from '../XmpContainer.ts'
 
 const SAMPLE_CONTAINER = `<rdf:Seq>
@@ -39,10 +39,22 @@ describe('XmpContainer', () => {
     const items = parseXmpContainerItems(SAMPLE_CONTAINER)
     const resolved = resolveContainerItemOffsets(100, items)
 
-    expect(resolved[0]?.offset).toBe(0)
+    expect(resolved[0]?.offset).toBeUndefined()
     expect(resolved[1]?.offset).toBe(48)
     expect(resolved[2]?.offset).toBe(70)
     expect(resolved[1]?.offset! + resolved[1]?.length! + resolved[2]?.length!).toBe(100)
+  })
+
+  it('buildContainerReadable shows Padding separately, not as offset', () => {
+    const items = resolveContainerItemOffsets(100, parseXmpContainerItems(SAMPLE_CONTAINER))
+    const fields = buildContainerReadable(items)
+    const map = Object.fromEntries(fields.map((f) => [f.key, f.value]))
+
+    expect(map['Container · 主图 (Primary) · Item:Padding']).toBe('0')
+    expect(map['Container · HDR 增益图 (GainMap) · Item:Padding']).toBe('0')
+    expect(map['Container · 主图 (Primary) · Item:Length']).toBe('0')
+    expect(Object.keys(map).some((k) => k.includes('偏移') && map[k] === '0x0 (0)')).toBe(false)
+    expect(Object.keys(map).some((k) => k.includes('Item:Padding'))).toBe(true)
   })
 
   it('labels MPF frame 2 as GainMap and previews via XMP length', () => {

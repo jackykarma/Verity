@@ -1,7 +1,8 @@
 import exifr from 'exifr'
 import { formatByteOffset } from '../shared/formatUtils.ts'
 import type { ReadableField, ReadablePayload } from '../shared/types/present.ts'
-import { bufferToUint8Array, collectOrderedIfdTags, type IfdBlockKey, type OrderedIfdTag } from './TiffIfdWalker.ts'
+import { bufferToUint8Array, collectOrderedIfdTags, readIfdTagRawValue, isTiffLittleEndian, findExifTiffStart, type IfdBlockKey, type OrderedIfdTag } from './TiffIfdWalker.ts'
+import { formatThumbnailFormat } from './exifTagSupplement.ts'
 
 const EXIF_SPEC = 'https://exiftool.org/TagNames/EXIF.html'
 
@@ -86,6 +87,10 @@ export function decodeUserComment(value: unknown): string {
 }
 
 function formatExifValue(key: string, value: unknown): string {
+  if (key === 'ThumbnailFormat') {
+    const n = typeof value === 'number' ? value : Number(value)
+    return Number.isFinite(n) ? formatThumbnailFormat(n) : String(value)
+  }
   if (key === 'UserComment' || key.endsWith('.UserComment')) {
     return decodeUserComment(value)
   }
@@ -152,6 +157,7 @@ const IFD_FALLBACK_GROUPS: { blockKey: IfdBlockKey; label: string }[] = [
   { blockKey: 'exif', label: 'ExifIFD' },
   { blockKey: 'gps', label: 'GPS IFD' },
   { blockKey: 'interop', label: 'InteropIFD' },
+  { blockKey: 'ifd1', label: 'IFD1' },
 ]
 
 function fallbackBlockFields(parsed: Record<string, unknown>): ReadableField[] {
@@ -196,6 +202,9 @@ function orderedFieldsFromParsed(
     return []
   }
 
+  const tiffStart = findExifTiffStart(data)
+  const le = tiffStart != null ? isTiffLittleEndian(data, tiffStart) : true
+
   const fields: ReadableField[] = []
   const seen = new Set<string>()
 
@@ -206,7 +215,10 @@ function orderedFieldsFromParsed(
     }
     seen.add(dedupeKey)
 
-    const raw = lookupTagValue(parsed, tag)
+    let raw = lookupTagValue(parsed, tag)
+    if ((raw === undefined || raw === null) && tiffStart != null) {
+      raw = readIfdTagRawValue(data, tiffStart, tag.ifdOffset, tag.tagId, le)
+    }
     if (raw === undefined || raw === null) {
       continue
     }
@@ -263,6 +275,7 @@ function flattenMergedExif(data: Record<string, unknown>): ReadableField[] {
 const EXIF_PARSE_OPTIONS = {
   tiff: true,
   ifd0: true,
+  ifd1: true,
   exif: true,
   gps: true,
   interop: true,

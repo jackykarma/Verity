@@ -130,6 +130,57 @@ function mpfImageTypeLabel(type: number): string {
   return MP_IMAGE_TYPES[type] ?? `0x${type.toString(16)}`
 }
 
+function inferImageTypeFromSemantic(
+  semantic: string,
+  currentType: number,
+): Pick<MpfImageEntry, 'imageType' | 'imageTypeLabel' | 'role'> | null {
+  if (currentType !== 0) {
+    return null
+  }
+  const semanticToType: Record<string, number> = {
+    Primary: 0x30000,
+    GainMap: 0x50000,
+  }
+  const inferred = semanticToType[semantic]
+  if (inferred == null) {
+    return null
+  }
+  const imageTypeLabel = mpfImageTypeLabel(inferred)
+  return { imageType: inferred, imageTypeLabel, role: imageTypeLabel }
+}
+
+function formatMpImageFlags(flags: number, flagsLabel: string): string {
+  if (flags === 0) {
+    return '0'
+  }
+  return `${flagsLabel} (0x${flags.toString(16)})`
+}
+
+function formatMpImageFormat(formatCode: number): string {
+  return formatCode === 0 ? 'JPEG' : String(formatCode)
+}
+
+function formatMpImageType(imageType: number, imageTypeLabel: string): string {
+  return `${imageTypeLabel} (0x${imageType.toString(16)})`
+}
+
+/** MP Entry 16 字节结构字段，顺序对齐 ExifTool MPImage Tags 表 */
+export function buildMpImageEntryFields(entry: MpfImageEntry): ReadableField[] {
+  const n = entry.index + 1
+  const prefix = `MPImage ${n} · `
+  const fields: ReadableField[] = [
+    { key: `${prefix}MPImageFlags`, value: formatMpImageFlags(entry.flags, entry.flagsLabel) },
+    { key: `${prefix}MPImageFormat`, value: formatMpImageFormat(entry.formatCode) },
+    { key: `${prefix}MPImageType`, value: formatMpImageType(entry.imageType, entry.imageTypeLabel) },
+    { key: `${prefix}MPImageLength`, value: String(entry.size) },
+    { key: `${prefix}MPImageStart`, value: formatByteOffset(entry.offset) },
+    { key: `${prefix}DependentImage1EntryNumber`, value: String(entry.dependent1) },
+    { key: `${prefix}DependentImage2EntryNumber`, value: String(entry.dependent2) },
+  ]
+
+  return fields
+}
+
 function buildEntryRole(flagsLabel: string, imageTypeLabel: string): string {
   if (imageTypeLabel !== 'Undefined') {
     return imageTypeLabel
@@ -344,14 +395,14 @@ export function enrichMpfEntriesWithContainer(
       return entry
     }
 
+    const inferred = inferImageTypeFromSemantic(container.semantic, entry.imageType)
     const semanticLabel = semanticDisplayLabel(container.semantic)
     return {
       ...entry,
       semantic: container.semantic,
-      role:
-        entry.imageTypeLabel !== 'Undefined'
-          ? entry.role
-          : semanticLabel,
+      imageType: inferred?.imageType ?? entry.imageType,
+      imageTypeLabel: inferred?.imageTypeLabel ?? entry.imageTypeLabel,
+      role: inferred?.role ?? (entry.imageTypeLabel !== 'Undefined' ? entry.role : semanticLabel),
       xmpOffset: container.offset,
       xmpLength: container.length,
     }
@@ -398,41 +449,7 @@ export function buildMpfReadable(result: MpfParseResult): ReadablePayload {
   }
 
   for (const entry of result.entries) {
-    const n = entry.index + 1
-    fields.push({ key: `MPImage ${n} · 摘要`, value: entry.role })
-    fields.push({ key: `MPImage ${n} · MPImageFlags`, value: `${entry.flagsLabel} (0x${entry.flags.toString(16)})` })
-    fields.push({
-      key: `MPImage ${n} · MPImageFormat`,
-      value: `${entry.format} (code ${entry.formatCode})`,
-    })
-    fields.push({
-      key: `MPImage ${n} · MPImageType`,
-      value: `${entry.imageTypeLabel} (0x${entry.imageType.toString(16)})`,
-    })
-    fields.push({
-      key: `MPImage ${n} · MPImageLength`,
-      value: `${entry.size} 字节`,
-    })
-    fields.push({
-      key: `MPImage ${n} · MPImageStart`,
-      value: formatByteOffset(entry.offset),
-    })
-    fields.push({
-      key: `MPImage ${n} · rawAttr`,
-      value: `0x${entry.rawAttr.toString(16).padStart(8, '0')}`,
-    })
-    if (entry.dependent1 > 0 || entry.dependent2 > 0) {
-      fields.push({
-        key: `MPImage ${n} · DependentImage`,
-        value: `#${entry.dependent1}${entry.dependent2 > 0 ? `, #${entry.dependent2}` : ''}`,
-      })
-    }
-    if (entry.xmpOffset != null && entry.xmpLength != null && entry.xmpLength > 0) {
-      fields.push({
-        key: `MPImage ${n} · XMP Container`,
-        value: `${entry.semantic ?? '—'} · Length ${entry.xmpLength} · 偏移 ${formatByteOffset(entry.xmpOffset)}`,
-      })
-    }
+    fields.push(...buildMpImageEntryFields(entry))
   }
 
   return { title: 'MPF 多图象素功能段', fields: [
@@ -443,8 +460,51 @@ export function buildMpfReadable(result: MpfParseResult): ReadablePayload {
   ] }
 }
 
-function isLikelyJpeg(data: Uint8Array, offset: number): boolean {
-  return data[offset] === 0xff && data[offset + 1] === 0xd8
+/** 在 MP Entry 声明的 [offset, offset+size) 内提取 JPEG，不扫描全文件 SOI */
+export function extractJpegFromMpfByteRange(
+  data: Uint8Array,
+  offset: number,
+  size: number,
+): Uint8Array | null {
+  if (size <= 0 || offset < 0 || offset >= data.length) {
+    return null
+  }
+
+  const rangeEnd = Math.min(data.length, offset + size)
+  if (rangeEnd - offset < 2) {
+    return null
+  }
+
+  let start = offset
+  if (!isLikelyJpeg(data, start)) {
+    const scanEnd = Math.min(rangeEnd, offset + 512)
+    let found = -1
+    for (let i = offset; i < scanEnd - 1; i++) {
+      if (isLikelyJpeg(data, i)) {
+        found = i
+        break
+      }
+    }
+    if (found < 0) {
+      return null
+    }
+    start = found
+  }
+
+  for (let i = start + 2; i < rangeEnd - 1; i++) {
+    if (data[i] !== 0xff) {
+      continue
+    }
+    if (data[i + 1] === 0xd9) {
+      return data.slice(start, i + 2)
+    }
+  }
+
+  return data.slice(start, rangeEnd)
+}
+
+function hasExplicitMpfRange(entry: MpfImageEntry, fileSize: number): boolean {
+  return entry.size > 0 && entry.offset >= 0 && entry.offset + entry.size <= fileSize
 }
 
 /** 从 hint 附近定位 SOI，并截断到 EOI 或下一张 SOI（适配 MPO 无中间 EOI 的拼接结构）。 */
@@ -633,26 +693,33 @@ function buildFromMpfEntry(
   return withEoi
 }
 
-/** 提取可解码 JPEG：优先 MP Entry offset/size，失败则按 SOI 序号回退。 */
+/** 提取可解码 JPEG：优先 MP Entry 的 MPImageStart + MPImageLength，再回退 SOI / XMP。 */
 export function buildMpfPreviewBytes(
   buffer: ArrayBuffer,
   entry: MpfImageEntry,
   allEntries: MpfImageEntry[],
 ): Uint8Array | null {
   const data = new Uint8Array(buffer)
+
+  if (entry.index === 0 && entry.offset === 0) {
+    return data
+  }
+
+  if (hasExplicitMpfRange(entry, data.length)) {
+    const fromMpfRange = extractJpegFromMpfByteRange(data, entry.offset, entry.size)
+    if (fromMpfRange && fromMpfRange.length >= 4 && isLikelyJpeg(fromMpfRange, 0)) {
+      return fromMpfRange
+    }
+  }
+
   const fromEntry = buildFromMpfEntry(buffer, entry, allEntries)
-  if (fromEntry && fromEntry.length >= 4) {
-    if (entry.index === 0 && entry.offset === 0) {
-      return fromEntry
-    }
-    if (isLikelyJpeg(fromEntry, 0) && (endsWithEoi(fromEntry, 0, fromEntry.length) || fromEntry.length > 100)) {
-      return fromEntry
-    }
+  if (fromEntry && fromEntry.length >= 4 && isLikelyJpeg(fromEntry, 0)) {
+    return fromEntry
   }
 
   const soiList = listCandidateSoiOffsets(data)
   const soiOffset = soiList[entry.index]
-  if (soiOffset !== undefined) {
+  if (soiOffset !== undefined && !hasExplicitMpfRange(entry, data.length)) {
     const nextSoi = soiList[entry.index + 1] ?? data.length
     const fromSoi = extractJpegFromSoi(data, soiOffset, nextSoi)
     if (fromSoi && fromSoi.length >= 4) {
@@ -665,11 +732,15 @@ export function buildMpfPreviewBytes(
     return fromXmp
   }
 
-  if (entry.index === 0) {
-    return data
+  if (hasExplicitMpfRange(entry, data.length)) {
+    return extractJpegFromMpfByteRange(data, entry.offset, entry.size)
   }
 
   return fromEntry
+}
+
+function isLikelyJpeg(data: Uint8Array, offset: number): boolean {
+  return data[offset] === 0xff && data[offset + 1] === 0xd8
 }
 
 function createBlobRefFromBytes(bytes: Uint8Array): { kind: 'blobUrl'; url: string; mimeType: string } {
@@ -685,6 +756,10 @@ export function normalizeMpfEntries(buffer: ArrayBuffer, entries: MpfImageEntry[
   const sorted = [...entries].sort((a, b) => a.offset - b.offset)
 
   return sorted.map((entry, i) => {
+    if (hasExplicitMpfRange(entry, data.length)) {
+      return entry
+    }
+
     const next = sorted[i + 1]
     let hintSize = entry.size
     if (hintSize <= 0 && next) {
@@ -736,25 +811,10 @@ export function buildMpfGallery(
 }
 
 export function buildMpfFrameReadable(entry: MpfImageEntry): ReadablePayload {
-  const fields: ReadableField[] = [
-    { key: 'MPImageFlags', value: `${entry.flagsLabel} (0x${entry.flags.toString(16)})` },
-    { key: 'MPImageFormat', value: `${entry.format} (code ${entry.formatCode})` },
-    { key: 'MPImageType', value: `${entry.imageTypeLabel} (0x${entry.imageType.toString(16)})` },
-    { key: 'MPImageLength', value: `${entry.size} 字节` },
-    { key: 'MPImageStart', value: formatByteOffset(entry.offset) },
-    { key: 'rawAttr', value: `0x${entry.rawAttr.toString(16).padStart(8, '0')}` },
-    { key: 'DependentImage1EntryNumber', value: String(entry.dependent1) },
-    { key: 'DependentImage2EntryNumber', value: String(entry.dependent2) },
-  ]
-  if (entry.semantic) {
-    fields.push({ key: 'XMP Item:Semantic', value: entry.semantic })
-  }
-  if (entry.xmpOffset != null && entry.xmpLength != null) {
-    fields.push(
-      { key: 'XMP Item:Length', value: `${entry.xmpLength} 字节` },
-      { key: 'XMP Container 偏移', value: formatByteOffset(entry.xmpOffset) },
-    )
-  }
+  const fields = buildMpImageEntryFields(entry).map(({ key, value }) => ({
+    key: key.replace(/^MPImage \d+ · /, ''),
+    value,
+  }))
 
   const title =
     entry.imageTypeLabel === 'Gain Map Image' || entry.semantic === 'GainMap'
