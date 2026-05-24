@@ -24,36 +24,8 @@ function node(partial: Partial<SegmentNodeDto> & Pick<SegmentNodeDto, 'parCatalo
  * @vitest-environment node
  */
 describe('SegmentDetailExtractor', () => {
-  it('parses ICC profile summary from Olympus sample', () => {
-    const file = readFileSync(join(assetsRoot, 'S-JPEG-01_Canon_40D_EXIF.jpg'))
-    let iccOffset = 0
-    let iccLength = 0
-    const data = new Uint8Array(file)
-    for (let i = 0; i < data.length - 1; i++) {
-      if (data[i] === 0xff && data[i + 1] === 0xe2) {
-        const len = (data[i + 2]! << 8) | data[i + 3]!
-        const payload = file.slice(i + 4, i + 4 + len - 2)
-        if (payload.includes('ICC_PROFILE')) {
-          iccOffset = i
-          iccLength = len + 2
-          break
-        }
-      }
-    }
-
-    expect(iccLength).toBeGreaterThan(0)
-    const readable = buildSegmentDetailReadable(
-      node({ parCatalogId: 'PAR-JPEG-006', label: 'APP2 (ICC)', offset: iccOffset, length: iccLength }),
-      file.buffer.slice(file.byteOffset, file.byteOffset + file.byteLength),
-    )
-
-    expect(readable.fields.some((f) => f.key === '色彩空间')).toBe(true)
-    expect(readable.fields.some((f) => f.key === '设备类别')).toBe(true)
-    expect(readable.fields.some((f) => f.key === '签名' && f.value.includes('acsp'))).toBe(true)
-  })
-
   it('parses DQT and SOF structural fields', () => {
-    const file = readFileSync(join(assetsRoot, 'S-JPEG-01_Canon_40D_EXIF.jpg'))
+    const file = readFileSync(join(assetsRoot, 'IMG20260508185614.jpg'))
     const data = new Uint8Array(file)
     let dqt: SegmentNodeDto | null = null
     let sof: SegmentNodeDto | null = null

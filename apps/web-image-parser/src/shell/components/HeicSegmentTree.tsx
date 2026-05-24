@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { SegmentNodeDto, SegmentTreeDto } from '../../shared/types/parseMessages.ts'
 
 interface HeicSegmentTreeProps {
@@ -31,47 +32,75 @@ function HeicTreeNode({
   childrenMap,
   selectedId,
   onSelect,
+  collapsedIds,
+  onToggleCollapse,
 }: {
   node: SegmentNodeDto
   depth: number
   childrenMap: Map<string | null, SegmentNodeDto[]>
   selectedId: string | null
   onSelect: (node: SegmentNodeDto) => void
+  collapsedIds: Set<string>
+  onToggleCollapse: (id: string) => void
 }) {
   const children = childrenMap.get(node.id) ?? []
   const badge = LOAD_BADGE[node.loadType] ?? '·'
+  const isGroup = node.id === 'grid-tiles-group' || (children.length >= 8 && node.parCatalogId === 'PAR-HEIC-C03')
+  const collapsed = isGroup && collapsedIds.has(node.id)
 
   return (
     <>
-      <button
-        type="button"
-        data-testid="tree-node"
-        className={`tree-node heic-tree-node${selectedId === node.id ? ' tree-node--selected' : ''}`}
-        style={{ paddingLeft: `${depth * 12 + 8}px` }}
-        onClick={() => onSelect(node)}
-        title={node.parCatalogId}
-      >
-        <span className="heic-tree-node__badge" data-load={node.loadType}>
-          {badge}
-        </span>
-        {node.warning ? '⚠ ' : ''}
-        {node.label}
-      </button>
-      {children.map((child) => (
-        <HeicTreeNode
-          key={child.id}
-          node={child}
-          depth={depth + 1}
-          childrenMap={childrenMap}
-          selectedId={selectedId}
-          onSelect={onSelect}
-        />
-      ))}
+      <div className="heic-tree-node__row" style={{ paddingLeft: `${depth * 12 + 8}px` }}>
+        {isGroup ? (
+          <button
+            type="button"
+            className="heic-tree-node__toggle"
+            aria-expanded={!collapsed}
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleCollapse(node.id)
+            }}
+          >
+            {collapsed ? '▸' : '▾'}
+          </button>
+        ) : (
+          <span className="heic-tree-node__toggle heic-tree-node__toggle--spacer" />
+        )}
+        <button
+          type="button"
+          data-testid="tree-node"
+          className={`tree-node heic-tree-node${selectedId === node.id ? ' tree-node--selected' : ''}`}
+          onClick={() => onSelect(node)}
+          title={node.parCatalogId}
+        >
+          <span className="heic-tree-node__badge" data-load={node.loadType}>
+            {badge}
+          </span>
+          {node.warning ? '⚠ ' : ''}
+          {node.label}
+        </button>
+      </div>
+      {!collapsed
+        ? children.map((child) => (
+            <HeicTreeNode
+              key={child.id}
+              node={child}
+              depth={depth + 1}
+              childrenMap={childrenMap}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              collapsedIds={collapsedIds}
+              onToggleCollapse={onToggleCollapse}
+            />
+          ))
+        : null}
     </>
   )
 }
 
 export function HeicSegmentTree({ tree, selectedId, onSelect }: HeicSegmentTreeProps) {
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => new Set(['grid-tiles-group']))
+
   if (!tree) {
     return (
       <div className="tree-panel tree-panel--empty heic-tree" data-testid="segment-tree">
@@ -82,6 +111,18 @@ export function HeicSegmentTree({ tree, selectedId, onSelect }: HeicSegmentTreeP
 
   const childrenMap = buildChildrenMap(tree.nodes)
   const roots = childrenMap.get(null) ?? []
+
+  const toggleCollapse = (id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
 
   return (
     <div className="tree-panel heic-tree" data-testid="segment-tree">
@@ -100,6 +141,8 @@ export function HeicSegmentTree({ tree, selectedId, onSelect }: HeicSegmentTreeP
           childrenMap={childrenMap}
           selectedId={selectedId}
           onSelect={onSelect}
+          collapsedIds={collapsedIds}
+          onToggleCollapse={toggleCollapse}
         />
       ))}
     </div>

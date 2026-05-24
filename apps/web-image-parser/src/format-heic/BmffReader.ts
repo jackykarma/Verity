@@ -26,7 +26,40 @@ export interface BmffBox {
 export interface BmffParseResult {
   boxes: BmffBox[]
   truncated: boolean
+  /** 文件末尾存在无 BMFF 头的厂商媒体数据（非截断） */
+  vendorTailBytes: number
   warnings: string[]
+}
+
+const OPAQUE_TAIL_MIN_BYTES = 1024
+
+function hasTopLevelHeicStructure(boxes: BmffBox[]): boolean {
+  const topTypes = new Set(boxes.filter((b) => b.parentOffset === null).map((b) => b.type))
+  return topTypes.has('ftyp') && topTypes.has('meta')
+}
+
+function canAbsorbVendorTail(
+  boxes: BmffBox[],
+  parentOffset: number | null,
+  remaining: number,
+): boolean {
+  if (parentOffset !== null || remaining < OPAQUE_TAIL_MIN_BYTES) {
+    return false
+  }
+  if (!hasTopLevelHeicStructure(boxes)) {
+    return false
+  }
+  const top = boxes.filter((b) => b.parentOffset === null)
+  return top.some((b) => b.type === 'mdat' || b.type === 'idat' || b.type === 'QTI ')
+}
+
+function readQtiLabel(data: Uint8Array, offset: number, size: number): string | null {
+  const payload = data.subarray(offset + 8, offset + size)
+  const text = new TextDecoder('ascii', { fatal: false }).decode(payload)
+  if (text.includes('QTI Debug')) {
+    return 'QTI Debug Metadata'
+  }
+  return null
 }
 
 function isPrintableType(type: string): boolean {
@@ -83,12 +116,32 @@ export function parseBmffBoxes(buffer: ArrayBuffer): BmffParseResult {
   const boxes: BmffBox[] = []
   const warnings: string[] = []
   let truncated = false
+  let vendorTailBytes = 0
 
   function walk(start: number, end: number, parentOffset: number | null): void {
     let offset = start
     while (offset + 8 <= end) {
       const header = readBoxHeader(data, offset, end)
       if (!header) {
+        const remaining = end - offset
+        if (canAbsorbVendorTail(boxes, parentOffset, remaining)) {
+          vendorTailBytes = remaining
+          boxes.push({
+            type: 'tail',
+            offset,
+            size: remaining,
+            headerSize: 0,
+            catalogId: 'PAR-HEIC-011',
+            label: `媒体数据续区 (${remaining.toLocaleString()} 字节，无 BMFF 头)`,
+            loadType: 'other',
+            warning: false,
+            parentOffset,
+          })
+          warnings.push(
+            `末尾 ${remaining.toLocaleString()} 字节为厂商未封装媒体数据（常见于 OPPO/高通），非文件截断`,
+          )
+          break
+        }
         truncated = true
         warnings.push(`偏移 0x${offset.toString(16)} 处 box 头无效`)
         break
@@ -140,6 +193,11 @@ export function parseBmffBoxes(buffer: ArrayBuffer): BmffParseResult {
         }
       } else if (type === 'mdat' || type === 'idat') {
         label = `${type} (${(boxEnd - offset - headerSize).toLocaleString()} 字节)`
+      } else if (type === 'QTI ') {
+        const qti = readQtiLabel(data, offset, boxEnd - offset)
+        if (qti) {
+          label = qti
+        }
       }
 
       boxes.push({
@@ -171,14 +229,14 @@ export function parseBmffBoxes(buffer: ArrayBuffer): BmffParseResult {
   }
 
   if (data.length < 12) {
-    return { boxes, truncated: true, warnings: ['文件过短'] }
+    return { boxes, truncated: true, vendorTailBytes: 0, warnings: ['文件过短'] }
   }
 
   const ftyp = String.fromCharCode(data[4]!, data[5]!, data[6]!, data[7]!)
   if (ftyp !== 'ftyp') {
-    return { boxes, truncated: true, warnings: ['缺少 ftyp box'] }
+    return { boxes, truncated: true, vendorTailBytes: 0, warnings: ['缺少 ftyp box'] }
   }
 
   walk(0, data.length, null)
-  return { boxes, truncated, warnings }
+  return { boxes, truncated, vendorTailBytes, warnings }
 }

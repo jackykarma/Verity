@@ -10,24 +10,7 @@ import {
 } from './jpegExifToolRef.ts'
 import { parseSofSummary } from './SegmentTreeBuilder.ts'
 import { extractJfifFromSegment } from './JfifParser.ts'
-
-const ICC_DEVICE_CLASS: Record<string, string> = {
-  scnr: '输入设备（扫描仪）',
-  mntr: '显示器',
-  prtr: '输出设备（打印机）',
-  link: '设备链接',
-  abstr: '抽象',
-  spac: '色彩空间',
-}
-
-const ICC_COLOR_SPACE: Record<string, string> = {
-  RGB: 'RGB',
-  GRAY: '灰度',
-  CMYK: 'CMYK',
-  Lab: 'Lab',
-  XYZ: 'XYZ',
-  YCbCr: 'YCbCr',
-}
+import { buildIccReadableFromSegment } from './IccProfileParser.ts'
 
 function baseFields(node: SegmentNodeDto): ReadableField[] {
   return [
@@ -71,59 +54,8 @@ function extractJfif(data: Uint8Array, segOffset: number, segLength: number): Re
   return extractJfifFromSegment(data, segOffset, segLength)
 }
 
-function extractIcc(data: Uint8Array, segOffset: number): ReadableField[] {
-  const payloadStart = appPayloadStart(segOffset)
-  const fields: ReadableField[] = []
-  let profileStart = payloadStart
-
-  const headerId = readAscii(data, payloadStart, 12)
-  if (headerId.startsWith('ICC_PROFILE')) {
-    fields.push({ key: 'APP2 类型', value: 'ICC 色彩配置文件（分块封装）' })
-    if (payloadStart + 14 <= data.length) {
-      fields.push({ key: '当前分块', value: String(data[payloadStart + 12] ?? 0) })
-      fields.push({ key: '总分块数', value: String(data[payloadStart + 13] ?? 0) })
-    }
-    profileStart = payloadStart + 14
-  } else {
-    fields.push({ key: 'APP2 类型', value: 'ICC 色彩配置文件' })
-  }
-
-  if (profileStart + 128 > data.length) {
-    fields.push({ key: '提示', value: 'ICC 配置文件头不完整' })
-    return fields
-  }
-
-  const profileSize = readBe32(data, profileStart)
-  const cmm = fourCc(data, profileStart + 4)
-  const versionMajor = data[profileStart + 8] ?? 0
-  const versionMinor = data[profileStart + 9] ?? 0
-  const deviceClass = fourCc(data, profileStart + 12)
-  const colorSpace = fourCc(data, profileStart + 16)
-  const pcs = fourCc(data, profileStart + 20)
-  const signature = fourCc(data, profileStart + 36)
-
-  fields.push({ key: '配置文件大小', value: `${profileSize} 字节` })
-  fields.push({ key: 'CMM 类型', value: cmm.trim() || '（未指定）' })
-  fields.push({ key: '版本', value: `${versionMajor}.${versionMinor >> 4}.${versionMinor & 0x0f}` })
-  fields.push({ key: '设备类别', value: ICC_DEVICE_CLASS[deviceClass] ?? deviceClass })
-  fields.push({ key: '色彩空间', value: ICC_COLOR_SPACE[colorSpace] ?? colorSpace })
-  fields.push({ key: '连接色彩空间 (PCS)', value: ICC_COLOR_SPACE[pcs] ?? pcs })
-  fields.push({ key: '签名', value: signature === 'acsp' ? 'acsp（有效 ICC）' : signature })
-
-  const descOffset = readBe32(data, profileStart + 84)
-  if (signature === 'acsp' && descOffset > 0 && profileStart + descOffset + 12 < data.length) {
-    const tagSig = fourCc(data, profileStart + descOffset + 4)
-    if (tagSig === 'desc' || tagSig === 'mluc') {
-      const textLen = readBe32(data, profileStart + descOffset + 8)
-      const textStart = profileStart + descOffset + 12
-      const name = readAscii(data, textStart, Math.min(textLen, 128))
-      if (name) {
-        fields.push({ key: '配置文件描述', value: name })
-      }
-    }
-  }
-
-  return fields
+function extractIcc(data: Uint8Array, segOffset: number, buffer: ArrayBuffer): ReadableField[] {
+  return buildIccReadableFromSegment(data, segOffset, buffer)
 }
 
 function extractAdobeApp14(data: Uint8Array, segOffset: number): ReadableField[] {
@@ -354,7 +286,7 @@ export function buildSegmentDetailReadable(
       extra = extractJfif(data, node.offset, node.length)
       break
     case 'PAR-JPEG-006':
-      extra = extractIcc(data, node.offset)
+      extra = extractIcc(data, node.offset, buffer)
       break
     case 'PAR-JPEG-008':
       extra = extractAdobeApp14(data, node.offset)

@@ -12,6 +12,7 @@ import { appendGrplNodes } from './GrplHandler.ts'
 import { enrichIpmaLabels } from './IpmaEnricher.ts'
 import { parseIloc } from './IlocParser.ts'
 import { applyLivePhotoLinks } from './LivePhotoLinker.ts'
+import { applyItemLabelEnrichment } from './ItemLabelEnricher.ts'
 import { appendMoovIfPresent, enrichTrackNodes } from './TrackCatalog.ts'
 
 export interface HeicParseResult {
@@ -31,6 +32,7 @@ export function parseHeicBuffer(buffer: ArrayBuffer): HeicParseResult {
 
   markPrimaryImageItem(tree.nodes, boxes)
   classifyAuxiliaryItems(tree.nodes, boxes)
+  applyItemLabelEnrichment(tree, boxes, buffer)
   attachItemLocations(tree.nodes, boxes, itemLocations)
   appendMoovIfPresent(tree.nodes, boxes)
   enrichTrackNodes(tree.nodes, boxes, buffer)

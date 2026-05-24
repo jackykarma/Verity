@@ -8,12 +8,6 @@ interface DetailPanelProps {
 function ReadableBody({ payload }: { payload: ReadablePayload }) {
   return (
     <>
-      {payload.hexPreview ? (
-        <section className="detail-panel__hex-section" data-testid="detail-hex-section">
-          <h4 className="detail-panel__section-title">原始数据 (Hex)</h4>
-          <pre className="detail-panel__hex">{payload.hexPreview}</pre>
-        </section>
-      ) : null}
       <h3>{payload.title}</h3>
       <ul className="detail-panel__fields">
         {payload.fields.map((f) => (
@@ -26,6 +20,12 @@ function ReadableBody({ payload }: { payload: ReadablePayload }) {
         <pre className="detail-panel__xml" data-testid="detail-text-body">
           {payload.textBody}
         </pre>
+      ) : null}
+      {payload.hexPreview ? (
+        <section className="detail-panel__hex-section" data-testid="detail-hex-section">
+          <h4 className="detail-panel__section-title">原始数据 (Hex)</h4>
+          <pre className="detail-panel__hex">{payload.hexPreview}</pre>
+        </section>
       ) : null}
     </>
   )

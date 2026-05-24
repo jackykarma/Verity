@@ -13,6 +13,7 @@ export function classifyHeicParseOutcome(
   truncated: boolean,
   env: HeicEnvReport,
   boxCount: number,
+  warnings: string[] = [],
 ): HeicFailureReport {
   if (boxCount === 0) {
     return {
@@ -26,6 +27,17 @@ export function classifyHeicParseOutcome(
       kind: 'truncated',
       userMessage: '文件不完整或 mdat 截断，已展示可解析部分',
     }
+  }
+
+  const vendorTail = warnings.some((w) => w.includes('非文件截断'))
+  if (vendorTail) {
+    if (env.level === 'C') {
+      return {
+        kind: 'unsupported_env',
+        userMessage: `${env.message}；结构树已完整解析（含厂商扩展尾部）`,
+      }
+    }
+    return { kind: 'none', userMessage: '' }
   }
 
   if (env.level === 'C' && status === 'success') {

@@ -9,9 +9,10 @@ export function markPrimaryImageItem(nodes: SegmentNodeDto[], boxes: BmffBox[]):
   }
 
   for (const node of nodes) {
-    if (node.label.includes(`#${pitm.itemId}`) && node.loadType === 'image') {
-      node.label = node.label.startsWith('★') ? node.label : `★ ${node.label}`
-      node.parCatalogId = 'PAR-HEIC-101'
+    if (node.label.includes(`#${pitm.itemId}`)) {
+      if (!node.label.startsWith('★')) {
+        node.label = `★ ${node.label}`
+      }
     }
   }
 }

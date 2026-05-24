@@ -1,20 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
 import { parseBmffBoxes } from '../BmffReader.ts'
 import { parseIpma, formatIpmaSummary } from '../IpmaParser.ts'
-
-const HEIC_SAMPLE = resolve(
-  import.meta.dirname,
-  '../../../../../specs/epics/EPIC-005-web-image-parser/test-assets/heic/S-HEIC-01_autumn.heic',
-)
+import { HEIC_GRID_SAMPLE } from './testAssets.ts'
 
 /**
  * @vitest-environment node
  */
 describe('IpmaParser', () => {
-  it('parses property associations from S-HEIC-01', () => {
-    const buf = readFileSync(HEIC_SAMPLE)
+  it('parses property associations from OPPO grid HEIC', () => {
+    const buf = readFileSync(HEIC_GRID_SAMPLE)
     const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
     const data = new Uint8Array(ab)
     const { boxes } = parseBmffBoxes(ab)
@@ -22,9 +17,8 @@ describe('IpmaParser', () => {
     expect(ipma).toBeTruthy()
 
     const entries = parseIpma(data, ipma!)
-    expect(entries.length).toBe(2)
-    expect(entries[0]?.itemId).toBe(1002)
-    expect(entries[0]?.associations.length).toBeGreaterThan(0)
-    expect(formatIpmaSummary(entries)).toContain('#1002')
+    expect(entries.length).toBeGreaterThan(40)
+    expect(entries.some((e) => e.itemId === 10048)).toBe(true)
+    expect(formatIpmaSummary(entries)).toContain('#10048')
   })
 })

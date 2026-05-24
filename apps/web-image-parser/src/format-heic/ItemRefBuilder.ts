@@ -11,9 +11,49 @@ export interface ItemReference {
 
 const REF_CATALOG: Record<string, { catalogId: string; label: string }> = {
   thmb: { catalogId: 'PAR-HEIC-C01', label: '主图↔缩略图' },
-  dimg: { catalogId: 'PAR-HEIC-302', label: 'Live Photo 关联' },
+  dimg: { catalogId: 'PAR-HEIC-C03', label: '网格分块关联' },
   auxl: { catalogId: 'PAR-HEIC-C04', label: 'HDR 增益关联' },
   dpnd: { catalogId: 'PAR-HEIC-C06', label: '深度图关联' },
+  cdsc: { catalogId: 'PAR-HEIC-010', label: '内容描述关联' },
+}
+
+/** Parse SingleItemTypeReferenceBox inside iref (FullBox + from_id + to_item_IDs). */
+function parseSingleItemRef(
+  data: Uint8Array,
+  offset: number,
+  size: number,
+): { fromId: number; toIds: number[] } | null {
+  if (size < 14) {
+    return null
+  }
+  const boxEnd = offset + size
+  const fromId = (data[offset + 12]! << 8) | data[offset + 13]!
+  const payloadStart = offset + 14
+  const payloadLen = size - 14
+  if (payloadLen <= 0) {
+    return { fromId, toIds: [] }
+  }
+  if (payloadLen % 2 !== 0) {
+    return null
+  }
+
+  const explicitCount = (data[payloadStart]! << 8) | data[payloadStart + 1]!
+  const explicitEnd = payloadStart + 2 + explicitCount * 2
+  if (explicitCount > 0 && explicitEnd === boxEnd) {
+    const toIds: number[] = []
+    for (let i = 0; i < explicitCount; i++) {
+      const toOff = payloadStart + 2 + i * 2
+      toIds.push((data[toOff]! << 8) | data[toOff + 1]!)
+    }
+    return { fromId, toIds }
+  }
+
+  // Some encoders (e.g. OPPO grid HEIC) omit reference_count; payload is only to_item_ID list.
+  const toIds: number[] = []
+  for (let i = 0; i < payloadLen; i += 2) {
+    toIds.push((data[payloadStart + i]! << 8) | data[payloadStart + i + 1]!)
+  }
+  return { fromId, toIds }
 }
 
 export function parseIrefReferences(data: Uint8Array, irefBox: BmffBox): ItemReference[] {
@@ -34,24 +74,18 @@ export function parseIrefReferences(data: Uint8Array, irefBox: BmffBox): ItemRef
       break
     }
 
-    const fromId = (data[offset + 12]! << 8) | data[offset + 13]!
-    const count = (data[offset + 14]! << 8) | data[offset + 15]!
-    const toIds: number[] = []
-    for (let i = 0; i < count; i++) {
-      const toOff = offset + 16 + i * 2
-      if (toOff + 1 >= end) {
-        break
-      }
-      toIds.push((data[toOff]! << 8) | data[toOff + 1]!)
+    const parsed = parseSingleItemRef(data, offset, size)
+    if (!parsed) {
+      break
     }
 
     const meta = REF_CATALOG[type] ?? { catalogId: 'PAR-HEIC-010', label: `${type} 引用` }
     refs.push({
       kind: type,
-      fromItemId: fromId,
-      toItemIds: toIds,
+      fromItemId: parsed.fromId,
+      toItemIds: parsed.toIds,
       catalogId: meta.catalogId,
-      label: `${meta.label}：项 #${fromId} → ${toIds.map((id) => `#${id}`).join(', ')}`,
+      label: `${meta.label}：项 #${parsed.fromId} → ${parsed.toIds.map((id) => `#${id}`).join(', ')}`,
     })
 
     offset += size
@@ -87,11 +121,13 @@ export function appendReferenceNodes(
         parCatalogId: ref.catalogId,
         offset: box.offset,
         length: box.size,
-        loadType: ref.kind === 'dimg' ? 'mixed' : 'metadata',
+        loadType: ref.kind === 'dimg' ? 'image' : 'metadata',
         warning: false,
       })
-      if (ref.kind === 'dimg') {
-        warnings.push(`Live Photo 关联：项 #${ref.fromItemId} ↔ ${ref.toItemIds.join(', #')}`)
+      if (ref.kind === 'dimg' && ref.toItemIds.length > 0) {
+        warnings.push(
+          `网格分块：项 #${ref.fromItemId} 由 ${ref.toItemIds.length} 个子块组成 (#${ref.toItemIds[0]}…#${ref.toItemIds[ref.toItemIds.length - 1]})`,
+        )
       }
     }
   }

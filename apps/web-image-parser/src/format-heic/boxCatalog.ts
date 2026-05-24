@@ -1,4 +1,5 @@
 import type { PayloadKind } from '../shared/types/present.ts'
+import { parseInfeBox } from './InfeParser.ts'
 
 export interface BoxCatalogEntry {
   parCatalogId: string
@@ -84,7 +85,7 @@ const BOX_CATALOG: Record<string, BoxCatalogEntry> = {
     parCatalogId: 'PAR-HEIC-010',
     label: 'iref',
     loadType: 'metadata',
-    isContainer: true,
+    isContainer: false,
     childHeaderSize: 12,
   },
   mdat: {
@@ -119,6 +120,13 @@ const BOX_CATALOG: Record<string, BoxCatalogEntry> = {
     parCatalogId: 'PAR-HEIC-013',
     label: 'uuid',
     loadType: 'other',
+    isContainer: false,
+    childHeaderSize: 8,
+  },
+  'QTI ': {
+    parCatalogId: 'PAR-HEIC-013',
+    label: 'QTI 调试元数据',
+    loadType: 'metadata',
     isContainer: false,
     childHeaderSize: 8,
   },
@@ -210,8 +218,8 @@ const BOX_CATALOG: Record<string, BoxCatalogEntry> = {
 
 const ITEM_TYPE_CATALOG: Record<string, { parCatalogId: string; label: string; loadType: PayloadKind }> =
   {
-    hvc1: { parCatalogId: 'PAR-HEIC-101', label: '主图像 (hvc1)', loadType: 'image' },
-    hev1: { parCatalogId: 'PAR-HEIC-101', label: '主图像 (hev1)', loadType: 'image' },
+    hvc1: { parCatalogId: 'PAR-HEIC-101', label: 'HEVC 图像项 (hvc1)', loadType: 'image' },
+    hev1: { parCatalogId: 'PAR-HEIC-101', label: 'HEVC 图像项 (hev1)', loadType: 'image' },
     avc1: { parCatalogId: 'PAR-HEIC-104', label: 'AVC 图像项', loadType: 'image' },
     jpeg: { parCatalogId: 'PAR-HEIC-105', label: 'JPEG 图像项', loadType: 'image' },
     Exif: { parCatalogId: 'PAR-HEIC-201', label: 'Exif 元数据项', loadType: 'metadata' },
@@ -285,21 +293,11 @@ export function readInfeItem(data: Uint8Array, offset: number, size: number): {
   itemId: number
   itemType: string
 } | null {
-  if (size < 20) {
+  const entry = parseInfeBox(data, offset, size)
+  if (!entry) {
     return null
   }
-  const version = data[offset + 8]
-  if (version === 2) {
-    const itemId = (data[offset + 12]! << 8) | data[offset + 13]!
-    const itemType = String.fromCharCode(
-      data[offset + 16]!,
-      data[offset + 17]!,
-      data[offset + 18]!,
-      data[offset + 19]!,
-    )
-    return { itemId, itemType }
-  }
-  return null
+  return { itemId: entry.itemId, itemType: entry.itemType }
 }
 
 export function readHdlrType(data: Uint8Array, offset: number, size: number): string | null {

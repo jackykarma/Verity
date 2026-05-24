@@ -56,13 +56,13 @@ export function WorkbenchPage() {
       if (session?.detectedFormat === 'heic' && detail?.tree && parseStatus) {
         const truncated =
           parseStatus === 'partial' ||
-          detail.message.includes('截断') ||
-          detail.tree.warnings.some((w) => w.includes('截断') || w.includes('超出'))
+          detail.tree.warnings.some((w) => w.includes('超出文件末尾'))
         const report = classifyHeicParseOutcome(
           parseStatus,
           truncated,
           heicEnv,
           detail.tree.nodes.length,
+          detail.tree.warnings,
         )
         setHeicParseHint(report.userMessage || null)
       } else {
