@@ -31,6 +31,11 @@ export interface ReadableField {
   value: string
 }
 
+/** 键与值同一行，全角冒号分隔 */
+export function formatReadableFieldLine(field: ReadableField): string {
+  return `${field.key}：${field.value}`
+}
+
 export interface ReadablePayload {
   title: string
   fields: ReadableField[]

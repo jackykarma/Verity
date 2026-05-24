@@ -79,6 +79,9 @@ export function classifyAppSegment(
   if (head5 === 'JFIF\0' || head5.startsWith('JFIF')) {
     return { parCatalogId: 'PAR-JPEG-003', label: labelForApp(appNum, 'JFIF'), loadType: 'metadata', priority: 'P0' }
   }
+  if (head5.startsWith('JFXX')) {
+    return { parCatalogId: 'PAR-JPEG-003', label: labelForApp(appNum, 'JFXX'), loadType: 'metadata', priority: 'P0' }
+  }
   if (head6.startsWith('Exif')) {
     return { parCatalogId: 'PAR-JPEG-004', label: labelForApp(appNum, 'EXIF'), loadType: 'metadata', priority: 'P0' }
   }

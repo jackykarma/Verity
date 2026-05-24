@@ -13,7 +13,7 @@ import {
 } from './MpfParser.ts'
 import { buildSegmentDetailReadable } from './SegmentDetailExtractor.ts'
 import { comText } from './SegmentTreeBuilder.ts'
-import { extractThumbnailInfo } from './ThumbnailExtractor.ts'
+import { extractThumbnailInfo, buildExifThumbnailGallery, buildThumbnailReadableFields } from './ThumbnailExtractor.ts'
 import { findXmpContainerInBuffer } from './XmpContainer.ts'
 import { formatByteOffset } from '../shared/formatUtils.ts'
 import { extractXmpFromApp1 } from './XmpExtractor.ts'
@@ -79,8 +79,16 @@ export async function toPresentRequest(
 
   let gallery: GalleryImage[] | undefined
 
+  const exifThumb = await extractThumbnailInfo(buffer)
+  const exifThumbFields = exifThumb ? buildThumbnailReadableFields(exifThumb) : undefined
+  const exifThumbGallery =
+    exifThumb && exifThumb.jpegBytes ? buildExifThumbnailGallery(exifThumb, sessionId) : undefined
+
   if (node.parCatalogId === 'PAR-JPEG-004' || node.parCatalogId === 'PAR-JPEG-005') {
-    readablePayload = await buildExifReadable(slice, buffer)
+    readablePayload = await buildExifReadable(slice, buffer, exifThumbFields)
+    if (exifThumbGallery?.length) {
+      gallery = exifThumbGallery
+    }
   } else if (node.parCatalogId === 'PAR-JPEG-C02') {
     const exif = await buildExifReadable(
       buffer.slice(node.offset, node.offset + node.length),
@@ -132,25 +140,37 @@ export async function toPresentRequest(
         { key: '说明', value: '来自 XMP Container Item:Semantic=MotionPhoto' },
       ],
     }
+  } else if (node.parCatalogId === 'PAR-JPEG-025') {
+    readablePayload = {
+      title: 'EXIF 缩略图 (ThumbnailImage)',
+      fields: exifThumb
+        ? buildThumbnailReadableFields(exifThumb)
+        : [{ key: '提示', value: '无 EXIF 缩略图' }],
+    }
   }
 
+  const hexSlice =
+    node.parCatalogId === 'PAR-JPEG-025' && exifThumb && exifThumb.length > 0
+      ? buffer.slice(exifThumb.fileOffset, exifThumb.fileOffset + exifThumb.length)
+      : slice
+
   if (readablePayload) {
-    readablePayload = attachSegmentHex(readablePayload, slice, Math.min(node.length, 512))
+    readablePayload = attachSegmentHex(readablePayload, hexSlice, Math.min(hexSlice.byteLength, 512))
   }
 
   let contentRef: ContentRef | null = null
   if (node.loadType === 'image' || IMAGE_PREVIEW_CATALOG.has(node.parCatalogId)) {
     if (node.parCatalogId === 'PAR-JPEG-025') {
-      const thumb = await extractThumbnailInfo(buffer)
+      const thumb = exifThumb
       if (thumb?.jpegBytes) {
         const blob = new Blob([thumb.jpegBytes], { type: 'image/jpeg' })
         contentRef = { kind: 'blobUrl', url: URL.createObjectURL(blob), mimeType: 'image/jpeg' }
-      } else {
+      } else if (thumb && thumb.fileOffset > 0 && thumb.length > 0) {
         contentRef = {
           kind: 'byteRange',
           sessionId,
-          offset: 0,
-          length: buffer.byteLength,
+          offset: thumb.fileOffset,
+          length: thumb.length,
         }
       }
     } else if (node.parCatalogId === 'PAR-JPEG-MPO-FRAME') {

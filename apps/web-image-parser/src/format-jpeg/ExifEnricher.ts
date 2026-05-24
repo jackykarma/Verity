@@ -74,9 +74,9 @@ export async function enrichTreeWithExif(
       exifChildIndex += 1
     }
 
-    const thumb = await extractThumbnailInfo(slice)
+    const thumb = await extractThumbnailInfo(buffer)
     if (thumb) {
-      appendThumbnailNode(nodes, parentNodeId, seg.offset, thumb, exifChildIndex)
+      appendThumbnailNode(nodes, parentNodeId, thumb, exifChildIndex)
       exifChildIndex += 1
     }
 

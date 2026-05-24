@@ -9,6 +9,7 @@ import {
   sofEncodingLabel,
 } from './jpegExifToolRef.ts'
 import { parseSofSummary } from './SegmentTreeBuilder.ts'
+import { extractJfifFromSegment } from './JfifParser.ts'
 
 const ICC_DEVICE_CLASS: Record<string, string> = {
   scnr: '输入设备（扫描仪）',
@@ -66,24 +67,8 @@ function appPayloadStart(segOffset: number): number {
   return segOffset + 4
 }
 
-function extractJfif(data: Uint8Array, segOffset: number): ReadableField[] {
-  const start = appPayloadStart(segOffset)
-  const fields: ReadableField[] = []
-  const id = readAscii(data, start, 5)
-  fields.push({ key: '标识', value: id || '（未知）' })
-  if (id.startsWith('JFIF') && start + 11 <= data.length) {
-    fields.push({ key: '版本', value: `${data[start + 5]}.${data[start + 6]}` })
-    const units = data[start + 7]
-    fields.push({
-      key: '密度单位',
-      value: units === 0 ? '无单位（比例）' : units === 1 ? 'dpi' : units === 2 ? 'dpcm' : String(units),
-    })
-    const xDensity = (data[start + 8]! << 8) | data[start + 9]!
-    const yDensity = (data[start + 10]! << 8) | data[start + 11]!
-    fields.push({ key: 'X 密度', value: String(xDensity) })
-    fields.push({ key: 'Y 密度', value: String(yDensity) })
-  }
-  return fields
+function extractJfif(data: Uint8Array, segOffset: number, segLength: number): ReadableField[] {
+  return extractJfifFromSegment(data, segOffset, segLength)
 }
 
 function extractIcc(data: Uint8Array, segOffset: number): ReadableField[] {
@@ -366,7 +351,7 @@ export function buildSegmentDetailReadable(
       extra = [{ key: '含义', value: 'End Of Image — JPEG 码流结束标记 (FF D9)' }]
       break
     case 'PAR-JPEG-003':
-      extra = extractJfif(data, node.offset)
+      extra = extractJfif(data, node.offset, node.length)
       break
     case 'PAR-JPEG-006':
       extra = extractIcc(data, node.offset)

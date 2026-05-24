@@ -1,4 +1,4 @@
-import type { GalleryImage, PresentResult, ReadablePayload } from '../../shared/types/present.ts'
+import { formatReadableFieldLine, type GalleryImage, type PresentResult, type ReadablePayload } from '../../shared/types/present.ts'
 
 interface DetailPanelProps {
   result: PresentResult | null
@@ -15,14 +15,13 @@ function ReadableBody({ payload }: { payload: ReadablePayload }) {
         </section>
       ) : null}
       <h3>{payload.title}</h3>
-      <dl>
+      <ul className="detail-panel__fields">
         {payload.fields.map((f) => (
-          <div key={f.key}>
-            <dt>{f.key}</dt>
-            <dd>{f.value}</dd>
-          </div>
+          <li key={f.key} className="detail-panel__field-line">
+            {formatReadableFieldLine(f)}
+          </li>
         ))}
-      </dl>
+      </ul>
       {payload.textBody ? (
         <pre className="detail-panel__xml" data-testid="detail-text-body">
           {payload.textBody}
