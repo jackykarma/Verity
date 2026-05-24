@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
 import {
   buildMpfGallery,
   buildMpfPreviewBytes,
@@ -7,6 +8,7 @@ import {
   enrichMpfEntriesWithContainer,
   extractEmbeddedJpegRange,
   extractJpegFromMpfByteRange,
+  resolveMpfEntryStart,
   normalizeMpfEntries,
   parseMpfSegment,
   type MpfImageEntry,
@@ -264,14 +266,93 @@ describe('MpfParser', () => {
     expect(preview).not.toEqual(buildMpfPreviewBytes(file.buffer, entries[0]!, entries))
   })
 
-  it('infers Gain Map Image from XMP Container when MP attr type is 0', () => {
+  it('enrichMpfEntriesWithContainer attaches xmpOffset without changing MPF fields', () => {
     const entry = bareEntry({ index: 0, offset: 100, size: 512, rawAttr: 0 })
     const enriched = enrichMpfEntriesWithContainer([entry], [
       { index: 0, semantic: 'GainMap', mime: 'image/jpeg', length: 512, padding: 0, offset: 200 },
+    ], 1024)
+    expect(enriched[0]?.imageType).toBe(0)
+    expect(enriched[0]?.imageTypeLabel).toBe('Undefined')
+    expect(enriched[0]?.xmpOffset).toBe(512)
+    expect(enriched[0]?.xmpLength).toBe(512)
+  })
+
+  it('resolves MPImageStart to SOI within MP Entry range (ExifTool behavior)', () => {
+    const primaryJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0xff, 0xda, 0xff, 0xd9])
+    const gap = 32
+    const gainMapJpeg = new Uint8Array([
+      0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
+      0x00, 0x01, 0x00, 0x00, 0xff, 0xd9,
     ])
-    expect(enriched[0]?.imageType).toBe(0x50000)
-    expect(enriched[0]?.imageTypeLabel).toBe('Gain Map Image')
-    const typeField = buildMpImageEntryFields(enriched[0]!)[2]
-    expect(typeField?.value).toBe('Gain Map Image (0x50000)')
+    const motion = new Uint8Array(64).fill(0x42)
+    const rawStart = primaryJpeg.length - 4
+    const gainSoi = rawStart + gap
+    const rawSize = gainSoi + gainMapJpeg.length + motion.length - rawStart
+    const file = new Uint8Array(gainSoi + gainMapJpeg.length + motion.length)
+    file.set(primaryJpeg, 0)
+    file.fill(0x00, primaryJpeg.length, rawStart)
+    file.set(gainMapJpeg, gainSoi)
+    file.set(motion, gainSoi + gainMapJpeg.length)
+
+    const entries = normalizeMpfEntries(file.buffer, [
+      bareEntry({
+        index: 0,
+        offset: 0,
+        size: primaryJpeg.length + 100,
+        imageType: 0x30000,
+        imageTypeLabel: 'Baseline MP Primary Image',
+        role: 'Baseline MP Primary Image',
+      }),
+      bareEntry({
+        index: 1,
+        offset: rawStart,
+        size: rawSize,
+        imageType: 0,
+        imageTypeLabel: 'Undefined',
+        role: '默认视图',
+      }),
+    ])
+
+    expect(entries[1]?.offset).toBe(gainSoi)
+    expect(entries[1]?.size).toBe(rawSize)
+    expect(entries[1]?.imageTypeLabel).toBe('Undefined')
+
+    const preview = buildMpfPreviewBytes(file.buffer, entries[1]!, entries)
+    expect(preview?.byteLength).toBe(gainMapJpeg.byteLength)
+    expect(preview?.[0]).toBe(0xff)
+    expect(preview?.[1]).toBe(0xd8)
+  })
+
+  it('matches ExifTool MPImage2 on OPPO IMG20260508185614.jpg', () => {
+    const filePath = join(
+      __dirname,
+      '../../../../../specs/epics/EPIC-005-web-image-parser/test-assets/jpeg/IMG20260508185614.jpg',
+    )
+    const buffer = readFileSync(filePath).buffer
+    const data = new Uint8Array(buffer)
+    let seg: { offset: number; length: number } | null = null
+    for (let i = 0; i + 4 < data.length; i++) {
+      if (data[i] === 0xff && data[i + 1] === 0xe2) {
+        const p = i + 4
+        if (data[p] === 0x4d && data[p + 1] === 0x50 && data[p + 2] === 0x46 && data[p + 3] === 0) {
+          const segLen = (data[i + 2]! << 8) | data[i + 3]!
+          seg = { offset: i, length: 2 + segLen }
+          break
+        }
+      }
+    }
+    expect(seg).not.toBeNull()
+
+    const mpf = parseMpfSegment(buffer, seg!.offset, seg!.length)
+    expect(mpf?.entries[0]?.offset).toBe(0)
+    expect(mpf?.entries[0]?.size).toBe(7339352)
+    expect(mpf?.entries[1]?.imageTypeLabel).toBe('Undefined')
+    expect(mpf?.entries[1]?.size).toBe(717318)
+    expect(mpf?.entries[1]?.offset).toBe(7340082)
+
+    const preview = buildMpfPreviewBytes(buffer, mpf!.entries[1]!, mpf!.entries)
+    expect(preview?.byteLength).toBe(717318)
+    expect(preview?.[0]).toBe(0xff)
+    expect(preview?.[1]).toBe(0xd8)
   })
 })

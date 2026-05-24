@@ -92,6 +92,61 @@ export function parseXmpContainerItems(xml: string): XmpContainerItem[] {
   return parseContainerItemsWithDom(xml)
 }
 
+/** OPPO / 部分厂商 MotionPhoto Item:Length 为 0，视频长度写在 OpCamera:VideoLength 等字段。 */
+export function patchMotionPhotoLengthFromXml(
+  items: XmpContainerItem[],
+  xml: string,
+): XmpContainerItem[] {
+  const motion = items.find((item) => item.semantic === 'MotionPhoto')
+  if (!motion || motion.length > 0) {
+    return items
+  }
+
+  const patterns = [
+    /OpCamera:VideoLength="(\d+)"/i,
+    /(?:Camera|oplus):VideoLength="(\d+)"/i,
+    /<[^>]*VideoLength="(\d+)"/i,
+  ]
+  for (const pattern of patterns) {
+    const match = xml.match(pattern)
+    if (match?.[1]) {
+      const length = Number.parseInt(match[1], 10)
+      if (length > 0) {
+        return items.map((item) =>
+          item.semantic === 'MotionPhoto' ? { ...item, length } : item,
+        )
+      }
+    }
+  }
+
+  return items
+}
+
+function scanApp1XmpXml(data: Uint8Array): string | null {
+  const candidates: string[] = []
+
+  for (let i = 0; i + 4 < data.length; i++) {
+    if (data[i] !== 0xff || data[i + 1] !== 0xe1) {
+      continue
+    }
+    const segLen = (data[i + 2]! << 8) | data[i + 3]!
+    if (segLen < 4 || i + 2 + segLen > data.length) {
+      continue
+    }
+    const xml = locateXmpXml(data.slice(i + 4, i + 2 + segLen))
+    if (xml && (xml.includes('Container:') || xml.includes('Item:Semantic'))) {
+      candidates.push(xml)
+    }
+  }
+
+  return (
+    candidates.find((xml) => xml.includes('GainMap')) ??
+    candidates.find((xml) => xml.includes('MotionPhoto')) ??
+    candidates[0] ??
+    null
+  )
+}
+
 /** Motion Photo / Ultra HDR：非 Primary 条目自文件尾向前堆叠。 */
 export function resolveContainerItemOffsets(
   fileSize: number,
@@ -119,18 +174,26 @@ export function resolveContainerItemOffsets(
 
 export function findXmpContainerInBuffer(buffer: ArrayBuffer): XmpContainerItem[] | null {
   const data = new Uint8Array(buffer)
-  const scanLen = Math.min(data.length, 512 * 1024)
-  const xml = locateXmpXml(data.slice(0, scanLen))
+  const xml =
+    scanApp1XmpXml(data) ??
+    locateXmpXml(data.slice(0, Math.min(data.length, 512 * 1024)))
   if (!xml || (!xml.includes('Container:') && !xml.includes('Item:Semantic'))) {
     return null
   }
 
-  const items = parseXmpContainerItems(xml)
+  let items = parseXmpContainerItems(xml)
   if (items.length === 0) {
     return null
   }
 
+  items = patchMotionPhotoLengthFromXml(items, xml)
   return resolveContainerItemOffsets(buffer.byteLength, items)
+}
+
+/** 读取 XMP 包文本（供 enrich 补全 Container 长度）。 */
+export function findXmpXmlInBuffer(buffer: ArrayBuffer): string | null {
+  const data = new Uint8Array(buffer)
+  return scanApp1XmpXml(data) ?? locateXmpXml(data.slice(0, Math.min(data.length, 512 * 1024)))
 }
 
 export function jpegContainerItems(items: XmpContainerItem[]): XmpContainerItem[] {

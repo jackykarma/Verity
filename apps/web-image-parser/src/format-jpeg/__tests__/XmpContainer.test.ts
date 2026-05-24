@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   enrichMpfEntriesWithContainer,
-  buildMpfPreviewBytes,
   normalizeMpfEntries,
 } from '../MpfParser.ts'
 import {
   buildContainerReadable,
   parseXmpContainerItems,
+  patchMotionPhotoLengthFromXml,
   resolveContainerItemOffsets,
 } from '../XmpContainer.ts'
 
@@ -57,7 +57,7 @@ describe('XmpContainer', () => {
     expect(Object.keys(map).some((k) => k.includes('Item:Padding'))).toBe(true)
   })
 
-  it('labels MPF frame 2 as GainMap and previews via XMP length', () => {
+  it('enrichMpfEntriesWithContainer attaches xmpOffset for matching MPF entry index', () => {
     const gainMapJpeg = new Uint8Array([
       0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
       0x00, 0x01, 0x00, 0x00, 0xff, 0xd9,
@@ -116,14 +116,94 @@ describe('XmpContainer', () => {
         },
       ]),
       container,
+      file.length,
     )
 
-    expect(entries[1]?.role).toBe('Gain Map Image')
+    expect(entries[1]?.semantic).toBe('GainMap')
     expect(entries[1]?.xmpOffset).toBe(primary.length)
+    expect(entries[1]?.xmpLength).toBe(gainMapJpeg.length)
+    expect(entries[1]?.imageTypeLabel).toBe('Gain Map Image')
+  })
 
-    const preview = buildMpfPreviewBytes(file.buffer, entries[1]!, entries)
-    expect(preview?.byteLength).toBe(gainMapJpeg.byteLength)
-    expect(preview?.[0]).toBe(0xff)
-    expect(preview?.[1]).toBe(0xd8)
+  it('enrich resolves GainMap tail offset when XMP Item:Length is 0 but MPF has size', () => {
+    const gainMapJpeg = new Uint8Array([
+      0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
+      0x00, 0x01, 0x00, 0x00, 0xff, 0xd9,
+    ])
+    const motion = new Uint8Array(1000).fill(0x42)
+    const primary = new Uint8Array(5000)
+    primary[0] = 0xff
+    primary[1] = 0xd8
+
+    const file = new Uint8Array(primary.length + gainMapJpeg.length + motion.length)
+    file.set(primary, 0)
+    file.set(gainMapJpeg, primary.length)
+    file.set(motion, primary.length + gainMapJpeg.length)
+
+    const container = [
+      { index: 0, semantic: 'Primary', mime: 'image/jpeg', length: 0, padding: 0 },
+      { index: 1, semantic: 'GainMap', mime: 'image/jpeg', length: 0, padding: 0 },
+      { index: 2, semantic: 'MotionPhoto', mime: 'video/mp4', length: motion.length, padding: 0 },
+    ]
+
+    const entries = enrichMpfEntriesWithContainer(
+      normalizeMpfEntries(file.buffer, [
+        {
+          index: 0,
+          rawAttr: 0,
+          flags: 0,
+          flagsLabel: 'Flags 0x0',
+          formatCode: 0,
+          format: 'JPEG',
+          imageType: 0x30000,
+          imageTypeLabel: 'Baseline MP Primary Image',
+          size: primary.length,
+          offset: 0,
+          role: 'Baseline MP Primary Image',
+          dependent1: 0,
+          dependent2: 0,
+        },
+        {
+          index: 1,
+          rawAttr: 0x50000,
+          flags: 0,
+          flagsLabel: 'Flags 0x0',
+          formatCode: 0,
+          format: 'JPEG',
+          imageType: 0x50000,
+          imageTypeLabel: 'Gain Map Image',
+          size: gainMapJpeg.length,
+          offset: primary.length - 100,
+          role: 'Gain Map Image',
+          dependent1: 0,
+          dependent2: 0,
+        },
+      ]),
+      container,
+      file.length,
+    )
+
+    expect(entries[1]?.xmpOffset).toBe(primary.length)
+    expect(entries[1]?.xmpLength).toBe(gainMapJpeg.length)
+  })
+
+  it('patches MotionPhoto length from OpCamera:VideoLength when Container length is 0', () => {
+    const items = parseXmpContainerItems(`<rdf:Seq>
+      <rdf:li rdf:parseType="Resource">
+        <Container:Item Item:Mime="image/jpeg" Item:Semantic="Primary" Item:Length="0"/>
+      </rdf:li>
+      <rdf:li rdf:parseType="Resource">
+        <Container:Item Item:Mime="image/jpeg" Item:Semantic="GainMap" Item:Length="100"/>
+      </rdf:li>
+      <rdf:li rdf:parseType="Resource">
+        <Container:Item Item:Mime="video/mp4" Item:Semantic="MotionPhoto" Item:Length="0"/>
+      </rdf:li>
+    </rdf:Seq>`)
+    const xml =
+      '<x:xmpmeta xmlns:OpCamera="http://ns.oplus.com/photos/1.0/camera/" OpCamera:VideoLength="5000"/>'
+    const patched = patchMotionPhotoLengthFromXml(items, xml)
+    const resolved = resolveContainerItemOffsets(6000, patched)
+    expect(resolved[2]?.length).toBe(5000)
+    expect(resolved[1]?.offset).toBe(900)
   })
 })

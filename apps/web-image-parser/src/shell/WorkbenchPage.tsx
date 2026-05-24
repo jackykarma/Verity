@@ -112,7 +112,7 @@ export function WorkbenchPage() {
         setPresentLoading(false)
       }
     }
-  }, [])
+  }, [tree])
 
   const handleIngestError = useCallback((type: FileFailureType, msg: string) => {
     setIngestError(msg)

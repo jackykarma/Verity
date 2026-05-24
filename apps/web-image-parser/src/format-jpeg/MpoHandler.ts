@@ -1,6 +1,6 @@
 import type { RawSegment } from './JpegSegmentScanner.ts'
 import type { SegmentNodeDto } from '../shared/types/parseMessages.ts'
-import { enrichMpfEntriesWithContainer, parseMpfSegment } from './MpfParser.ts'
+import { parseMpfSegment } from './MpfParser.ts'
 import { findXmpContainerInBuffer, semanticDisplayLabel } from './XmpContainer.ts'
 
 const MPF_SIGNATURE = 'MPF\0'
@@ -83,9 +83,7 @@ export function appendMpoNodes(
       })
 
       const mpf = parseMpfSegment(buffer, seg.offset, seg.length)
-      const entries = mpf?.entries.length
-        ? enrichMpfEntriesWithContainer(mpf.entries, containerItems)
-        : []
+      const entries = mpf?.entries ?? []
       if (entries.length) {
         for (const entry of entries) {
           nodes.push({
@@ -93,8 +91,8 @@ export function appendMpoNodes(
             parentId: mpfNodeId,
             label: `图像 ${entry.index + 1} · ${entry.role}`,
             parCatalogId: 'PAR-JPEG-MPO-FRAME',
-            offset: entry.xmpOffset ?? entry.offset,
-            length: entry.xmpLength && entry.xmpLength > 0 ? entry.xmpLength : entry.size,
+            offset: entry.offset,
+            length: entry.size,
             loadType: 'image',
             warning: false,
           })

@@ -1,6 +1,6 @@
 import type { GalleryImage, ReadableField, ReadablePayload } from '../shared/types/present.ts'
 import { formatByteOffset } from '../shared/formatUtils.ts'
-import { semanticDisplayLabel, type XmpContainerItem } from './XmpContainer.ts'
+import { resolveContainerItemOffsets, patchMotionPhotoLengthFromXml, semanticDisplayLabel, type XmpContainerItem } from './XmpContainer.ts'
 
 const MPF_TAG_VERSION = 0xb000
 const MPF_TAG_NUM_IMAGES = 0xb001
@@ -128,25 +128,6 @@ function mpfFormatLabel(code: number): string {
 
 function mpfImageTypeLabel(type: number): string {
   return MP_IMAGE_TYPES[type] ?? `0x${type.toString(16)}`
-}
-
-function inferImageTypeFromSemantic(
-  semantic: string,
-  currentType: number,
-): Pick<MpfImageEntry, 'imageType' | 'imageTypeLabel' | 'role'> | null {
-  if (currentType !== 0) {
-    return null
-  }
-  const semanticToType: Record<string, number> = {
-    Primary: 0x30000,
-    GainMap: 0x50000,
-  }
-  const inferred = semanticToType[semantic]
-  if (inferred == null) {
-    return null
-  }
-  const imageTypeLabel = mpfImageTypeLabel(inferred)
-  return { imageType: inferred, imageTypeLabel, role: imageTypeLabel }
 }
 
 function formatMpImageFlags(flags: number, flagsLabel: string): string {
@@ -379,50 +360,130 @@ export function parseMpfSegment(
   }
 }
 
+function findContainerItemForEntry(
+  entry: MpfImageEntry,
+  containerItems: XmpContainerItem[],
+): XmpContainerItem | undefined {
+  if (entry.imageType === 0x50000) {
+    const gain = containerItems.find((item) => item.semantic === 'GainMap')
+    if (gain) {
+      return gain
+    }
+  }
+  if (entry.imageType === 0x30000 || entry.index === 0) {
+    const primary = containerItems.find((item) => item.semantic === 'Primary')
+    if (primary) {
+      return primary
+    }
+  }
+  const jpegItems = containerItems.filter((item) => item.mime.startsWith('image/'))
+  return jpegItems[entry.index] ?? containerItems[entry.index]
+}
+
+/** XMP Container 中 GainMap Item:Length 常为 0，用 MPF MPImageLength 补全后再推算尾堆叠偏移。 */
+function effectiveContainerLengths(
+  entries: MpfImageEntry[],
+  containerItems: XmpContainerItem[],
+): XmpContainerItem[] {
+  return containerItems.map((item) => {
+    if (item.length > 0) {
+      return item
+    }
+    if (item.semantic === 'GainMap') {
+      const mpfGain = entries.find((e) => e.imageType === 0x50000)
+      if (mpfGain && mpfGain.size > 0) {
+        return { ...item, length: mpfGain.size }
+      }
+    }
+    return item
+  })
+}
+
+/** GainMap 尾堆叠：fileSize − MotionPhoto(Length+Padding) − GainMap(Length+Padding)。 */
+function resolveGainMapTailOffset(
+  fileSize: number,
+  gainLength: number,
+  gainPadding: number,
+  containerItems: XmpContainerItem[],
+): number | undefined {
+  if (gainLength <= 0 || fileSize <= 0) {
+    return undefined
+  }
+  const motion = containerItems.find((item) => item.semantic === 'MotionPhoto')
+  const motionBytes =
+    motion && motion.length > 0 ? motion.length + motion.padding : 0
+  if (motionBytes <= 0) {
+    return undefined
+  }
+  return Math.max(0, fileSize - motionBytes - gainLength - gainPadding)
+}
+
+export function mpfEntryOverlapsPrimary(
+  entry: MpfImageEntry,
+  allEntries: MpfImageEntry[],
+): boolean {
+  return mpfRangeOverlapsPrimary(entry, allEntries)
+}
+
 export function enrichMpfEntriesWithContainer(
   entries: MpfImageEntry[],
   containerItems: XmpContainerItem[] | null,
+  fileSize?: number,
+  xmpXml?: string | null,
 ): MpfImageEntry[] {
   if (!containerItems?.length) {
     return entries
   }
 
-  const jpegItems = containerItems.filter((item) => item.mime.startsWith('image/'))
+  let items = xmpXml ? patchMotionPhotoLengthFromXml(containerItems, xmpXml) : containerItems
+  const effectiveItems = effectiveContainerLengths(entries, items)
+  const resolved =
+    fileSize != null && fileSize > 0
+      ? resolveContainerItemOffsets(fileSize, effectiveItems)
+      : effectiveItems
 
   return entries.map((entry) => {
-    const container = jpegItems[entry.index]
+    const container = findContainerItemForEntry(entry, resolved)
     if (!container) {
       return entry
     }
 
-    const inferred = inferImageTypeFromSemantic(container.semantic, entry.imageType)
-    const semanticLabel = semanticDisplayLabel(container.semantic)
+    const xmpLength =
+      container.length > 0 ? container.length : entry.size > 0 ? entry.size : 0
+
+    let xmpOffset = container.offset
+    if (
+      (xmpOffset == null || xmpOffset <= 0) &&
+      xmpLength > 0 &&
+      fileSize != null &&
+      fileSize > 0 &&
+      container.semantic === 'GainMap'
+    ) {
+      xmpOffset = resolveGainMapTailOffset(
+        fileSize,
+        xmpLength,
+        container.padding,
+        resolved,
+      )
+    }
+
     return {
       ...entry,
       semantic: container.semantic,
-      imageType: inferred?.imageType ?? entry.imageType,
-      imageTypeLabel: inferred?.imageTypeLabel ?? entry.imageTypeLabel,
-      role: inferred?.role ?? (entry.imageTypeLabel !== 'Undefined' ? entry.role : semanticLabel),
-      xmpOffset: container.offset,
-      xmpLength: container.length,
+      xmpOffset,
+      xmpLength: xmpLength > 0 ? xmpLength : undefined,
     }
   })
 }
 
+/** @deprecated MPF 展示请用 parseMpfSegment；此函数仅保留供 Container 交叉引用测试。 */
 export function parseMpfWithContainer(
   buffer: ArrayBuffer,
   segOffset: number,
   segLength: number,
-  containerItems: XmpContainerItem[] | null,
+  _containerItems: XmpContainerItem[] | null,
 ): MpfParseResult | null {
-  const mpf = parseMpfSegment(buffer, segOffset, segLength)
-  if (!mpf) {
-    return null
-  }
-  return {
-    ...mpf,
-    entries: enrichMpfEntriesWithContainer(mpf.entries, containerItems),
-  }
+  return parseMpfSegment(buffer, segOffset, segLength)
 }
 
 export function buildMpfReadable(result: MpfParseResult): ReadablePayload {
@@ -477,9 +538,8 @@ export function extractJpegFromMpfByteRange(
 
   let start = offset
   if (!isLikelyJpeg(data, start)) {
-    const scanEnd = Math.min(rangeEnd, offset + 512)
     let found = -1
-    for (let i = offset; i < scanEnd - 1; i++) {
+    for (let i = offset; i < rangeEnd - 1; i++) {
       if (isLikelyJpeg(data, i)) {
         found = i
         break
@@ -497,6 +557,9 @@ export function extractJpegFromMpfByteRange(
     }
     if (data[i + 1] === 0xd9) {
       return data.slice(start, i + 2)
+    }
+    if (data[i + 1] === 0xd8 && i > start + 4) {
+      return data.slice(start, i)
     }
   }
 
@@ -608,21 +671,20 @@ function extractJpegFromSoi(data: Uint8Array, soiOffset: number, maxEnd = data.l
   return data.slice(range.offset, range.offset + range.length)
 }
 
-function buildFromXmpContainer(data: Uint8Array, entry: MpfImageEntry): Uint8Array | null {
-  if (entry.xmpOffset == null || !entry.xmpLength || entry.xmpLength <= 0) {
-    return null
-  }
+function isCompleteJpeg(bytes: Uint8Array | null): bytes is Uint8Array {
+  return bytes != null && bytes.length >= 4 && isLikelyJpeg(bytes, 0) && endsWithEoi(bytes, 0, bytes.length)
+}
 
-  const range = extractEmbeddedJpegRange(data, entry.xmpOffset, entry.xmpLength)
-  if (range) {
-    return data.slice(range.offset, range.offset + range.length)
+function mpfRangeOverlapsPrimary(entry: MpfImageEntry, allEntries: MpfImageEntry[]): boolean {
+  if (entry.index === 0 || entry.size <= 0) {
+    return false
   }
-
-  const end = Math.min(data.length, entry.xmpOffset + entry.xmpLength)
-  if (end - entry.xmpOffset < 4) {
-    return null
+  const primary = allEntries.find((e) => e.index === 0)
+  if (!primary || primary.size <= 0) {
+    return false
   }
-  return data.slice(entry.xmpOffset, end)
+  const primaryEnd = primary.offset + primary.size
+  return entry.offset < primaryEnd
 }
 
 function buildFromMpfEntry(
@@ -693,7 +755,7 @@ function buildFromMpfEntry(
   return withEoi
 }
 
-/** 提取可解码 JPEG：优先 MP Entry 的 MPImageStart + MPImageLength，再回退 SOI / XMP。 */
+/** 提取可解码 JPEG：基于 MP Entry 区间（含 SOI 解析后的 MPImageStart）。 */
 export function buildMpfPreviewBytes(
   buffer: ArrayBuffer,
   entry: MpfImageEntry,
@@ -707,36 +769,34 @@ export function buildMpfPreviewBytes(
 
   if (hasExplicitMpfRange(entry, data.length)) {
     const fromMpfRange = extractJpegFromMpfByteRange(data, entry.offset, entry.size)
+    if (isCompleteJpeg(fromMpfRange)) {
+      return fromMpfRange
+    }
     if (fromMpfRange && fromMpfRange.length >= 4 && isLikelyJpeg(fromMpfRange, 0)) {
       return fromMpfRange
     }
   }
 
   const fromEntry = buildFromMpfEntry(buffer, entry, allEntries)
-  if (fromEntry && fromEntry.length >= 4 && isLikelyJpeg(fromEntry, 0)) {
+  if (isCompleteJpeg(fromEntry)) {
     return fromEntry
   }
 
   const soiList = listCandidateSoiOffsets(data)
   const soiOffset = soiList[entry.index]
-  if (soiOffset !== undefined && !hasExplicitMpfRange(entry, data.length)) {
+  if (soiOffset !== undefined) {
     const nextSoi = soiList[entry.index + 1] ?? data.length
     const fromSoi = extractJpegFromSoi(data, soiOffset, nextSoi)
-    if (fromSoi && fromSoi.length >= 4) {
+    if (isCompleteJpeg(fromSoi)) {
       return fromSoi
     }
   }
 
-  const fromXmp = buildFromXmpContainer(data, entry)
-  if (fromXmp && fromXmp.length >= 4 && isLikelyJpeg(fromXmp, 0)) {
-    return fromXmp
+  if (fromEntry && fromEntry.length >= 4 && isLikelyJpeg(fromEntry, 0)) {
+    return fromEntry
   }
 
-  if (hasExplicitMpfRange(entry, data.length)) {
-    return extractJpegFromMpfByteRange(data, entry.offset, entry.size)
-  }
-
-  return fromEntry
+  return null
 }
 
 function isLikelyJpeg(data: Uint8Array, offset: number): boolean {
@@ -757,6 +817,10 @@ export function normalizeMpfEntries(buffer: ArrayBuffer, entries: MpfImageEntry[
 
   return sorted.map((entry, i) => {
     if (hasExplicitMpfRange(entry, data.length)) {
+      const resolvedStart = resolveMpfEntryStart(data, entry.offset, entry.size)
+      if (resolvedStart !== entry.offset) {
+        return { ...entry, offset: resolvedStart }
+      }
       return entry
     }
 
@@ -779,6 +843,28 @@ export function normalizeMpfEntries(buffer: ArrayBuffer, entries: MpfImageEntry[
     }
     return entry
   })
+}
+
+/** 在 MP Entry 声明的 [offset, offset+size) 内定位 JPEG SOI，对齐 ExifTool MPImageStart。 */
+export function resolveMpfEntryStart(data: Uint8Array, offset: number, size: number): number {
+  if (offset < 0 || size <= 0 || offset >= data.length) {
+    return offset
+  }
+  if (isLikelyJpeg(data, offset)) {
+    return offset
+  }
+
+  const rangeEnd = Math.min(data.length, offset + size)
+  for (let i = offset; i < rangeEnd - 1; i++) {
+    if (!isLikelyJpeg(data, i)) {
+      continue
+    }
+    if (i > 0 && data[i - 1] === 0xff) {
+      continue
+    }
+    return i
+  }
+  return offset
 }
 
 export function buildMpfGallery(
@@ -817,11 +903,9 @@ export function buildMpfFrameReadable(entry: MpfImageEntry): ReadablePayload {
   }))
 
   const title =
-    entry.imageTypeLabel === 'Gain Map Image' || entry.semantic === 'GainMap'
-      ? `HDR 增益图 (Gain Map)`
-      : entry.imageTypeLabel !== 'Undefined'
-        ? entry.imageTypeLabel
-        : `MPImage ${entry.index + 1}`
+    entry.imageTypeLabel !== 'Undefined'
+      ? entry.imageTypeLabel
+      : `MPImage ${entry.index + 1}`
 
   return { title, fields }
 }

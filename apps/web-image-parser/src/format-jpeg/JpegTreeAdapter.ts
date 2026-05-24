@@ -9,12 +9,12 @@ import {
   buildMpfReadable,
   createMpfFrameBlobRef,
   mpoFrameIndexFromNodeId,
-  parseMpfWithContainer,
+  parseMpfSegment,
+  type MpfImageEntry,
 } from './MpfParser.ts'
 import { buildSegmentDetailReadable } from './SegmentDetailExtractor.ts'
 import { comText } from './SegmentTreeBuilder.ts'
 import { extractThumbnailInfo, buildExifThumbnailGallery, buildThumbnailReadableFields } from './ThumbnailExtractor.ts'
-import { findXmpContainerInBuffer } from './XmpContainer.ts'
 import { formatByteOffset } from '../shared/formatUtils.ts'
 import { extractXmpFromApp1 } from './XmpExtractor.ts'
 
@@ -29,21 +29,46 @@ function findMpfSegmentForNode(
   node: SegmentNodeDto,
   allNodes: SegmentNodeDto[] | undefined,
 ): { offset: number; length: number } {
-  if (node.parCatalogId === 'PAR-JPEG-028') {
+  if (node.parCatalogId === 'PAR-JPEG-028' || node.parCatalogId === 'PAR-JPEG-019') {
     return { offset: node.offset, length: node.length }
   }
 
   if (node.parentId && allNodes) {
-    const parent = allNodes.find((n) => n.id === node.parentId)
-    if (parent?.parCatalogId === 'PAR-JPEG-028') {
-      return { offset: parent.offset, length: parent.length }
-    }
-    if (parent?.parCatalogId === 'PAR-JPEG-019') {
-      return { offset: parent.offset, length: parent.length }
+    let currentId: string | undefined = node.parentId
+    while (currentId) {
+      const parent = allNodes.find((n) => n.id === currentId)
+      if (!parent) {
+        break
+      }
+      if (parent.parCatalogId === 'PAR-JPEG-028' || parent.parCatalogId === 'PAR-JPEG-019') {
+        return { offset: parent.offset, length: parent.length }
+      }
+      currentId = parent.parentId ?? undefined
     }
   }
 
   return { offset: node.offset, length: node.length }
+}
+
+function resolveMpfFrameContext(
+  node: SegmentNodeDto,
+  buffer: ArrayBuffer,
+  allNodes?: SegmentNodeDto[],
+): { entry: MpfImageEntry; allEntries: MpfImageEntry[] } | null {
+  const mpfSeg = findMpfSegmentForNode(node, allNodes)
+  const mpf = parseMpfSegment(buffer, mpfSeg.offset, mpfSeg.length)
+  if (!mpf) {
+    return null
+  }
+  const frameIdx = mpoFrameIndexFromNodeId(node.id)
+  if (frameIdx == null) {
+    return null
+  }
+  const entry = mpf.entries.find((e) => e.index === frameIdx)
+  if (!entry) {
+    return null
+  }
+  return { entry, allEntries: mpf.entries }
 }
 
 function mpfPresentExtras(
@@ -53,8 +78,7 @@ function mpfPresentExtras(
   allNodes?: SegmentNodeDto[],
 ): { readablePayload: ReadablePayload; gallery: GalleryImage[] } {
   const { offset, length } = findMpfSegmentForNode(node, allNodes)
-  const containerItems = findXmpContainerInBuffer(buffer)
-  const mpf = parseMpfWithContainer(buffer, offset, length, containerItems)
+  const mpf = parseMpfSegment(buffer, offset, length)
   if (!mpf) {
     return {
       readablePayload: { title: node.label, fields: [{ key: '提示', value: '无法解析 MPF 结构' }] },
@@ -121,15 +145,10 @@ export async function toPresentRequest(
     readablePayload = extras.readablePayload ?? readablePayload
     gallery = extras.gallery
   } else if (node.parCatalogId === 'PAR-JPEG-MPO-FRAME') {
-    const mpfSeg = findMpfSegmentForNode(node, allNodes)
-    const containerItems = findXmpContainerInBuffer(buffer)
-    const mpf = parseMpfWithContainer(buffer, mpfSeg.offset, mpfSeg.length, containerItems)
-    const frameIdx = mpoFrameIndexFromNodeId(node.id)
-    const entry =
-      frameIdx != null
-        ? mpf?.entries.find((e) => e.index === frameIdx)
-        : mpf?.entries.find((e) => e.offset === node.offset && e.size === node.length)
-    readablePayload = entry ? buildMpfFrameReadable(entry) : { title: node.label, fields: [] }
+    const frame = resolveMpfFrameContext(node, buffer, allNodes)
+    readablePayload = frame
+      ? buildMpfFrameReadable(frame.entry)
+      : { title: node.label, fields: [] }
   } else if (node.parCatalogId === 'PAR-JPEG-MPO-MOTION') {
     readablePayload = {
       title: node.label,
@@ -174,21 +193,8 @@ export async function toPresentRequest(
         }
       }
     } else if (node.parCatalogId === 'PAR-JPEG-MPO-FRAME') {
-      const mpfSeg = findMpfSegmentForNode(node, allNodes)
-      const containerItems = findXmpContainerInBuffer(buffer)
-      const mpf = parseMpfWithContainer(buffer, mpfSeg.offset, mpfSeg.length, containerItems)
-      const frameIdx = mpoFrameIndexFromNodeId(node.id)
-      const entry =
-        frameIdx != null ? mpf?.entries.find((e) => e.index === frameIdx) : undefined
-      contentRef = entry && mpf ? createMpfFrameBlobRef(buffer, entry, mpf.entries) : null
-      if (!contentRef && entry?.index === 0) {
-        contentRef = {
-          kind: 'byteRange',
-          sessionId,
-          offset: 0,
-          length: buffer.byteLength,
-        }
-      }
+      const frame = resolveMpfFrameContext(node, buffer, allNodes)
+      contentRef = frame ? createMpfFrameBlobRef(buffer, frame.entry, frame.allEntries) : null
     } else {
       contentRef = {
         kind: 'byteRange',
