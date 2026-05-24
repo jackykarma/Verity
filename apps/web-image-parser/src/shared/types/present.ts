@@ -35,6 +35,14 @@ export interface ReadablePayload {
   title: string
   fields: ReadableField[]
   hexPreview?: string
+  textBody?: string
+}
+
+export interface GalleryImage {
+  label: string
+  alt: string
+  src: string
+  contentRef?: ContentRef
 }
 
 export interface PresentRequest {
@@ -44,6 +52,7 @@ export interface PresentRequest {
   auxSubtype: AuxSubtype | null
   contentRef: ContentRef | null
   readablePayload: ReadablePayload | null
+  gallery?: GalleryImage[]
 }
 
 export type PresentViewModel =
@@ -52,7 +61,7 @@ export type PresentViewModel =
   | { kind: 'video'; src: string; mimeType: string }
   | { kind: 'audio'; src: string; mimeType: string }
   | { kind: 'readable'; payload: ReadablePayload }
-  | { kind: 'mixed'; readable: ReadablePayload; media: PresentViewModel }
+  | { kind: 'mixed'; readable: ReadablePayload; media: PresentViewModel; gallery?: GalleryImage[] }
 
 export interface PresentResult {
   status: PresentStatus

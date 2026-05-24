@@ -1,5 +1,7 @@
 import type { RawSegment } from './JpegSegmentScanner.ts'
 import type { SegmentNodeDto } from '../shared/types/parseMessages.ts'
+import { enrichMpfEntriesWithContainer, parseMpfSegment } from './MpfParser.ts'
+import { findXmpContainerInBuffer, semanticDisplayLabel } from './XmpContainer.ts'
 
 const MPF_SIGNATURE = 'MPF\0'
 
@@ -39,6 +41,7 @@ export function appendMpoNodes(
   nodes: SegmentNodeDto[],
 ): void {
   const data = new Uint8Array(buffer)
+  const containerItems = findXmpContainerInBuffer(buffer)
   let mpoIndex = 0
 
   for (let i = 0; i < segments.length; i++) {
@@ -67,8 +70,9 @@ export function appendMpoNodes(
     })
 
     if (seg.parCatalogId === 'PAR-JPEG-028' || hasMpf) {
+      const mpfNodeId = `mpf-${mpoIndex++}`
       nodes.push({
-        id: `mpf-${mpoIndex++}`,
+        id: mpfNodeId,
         parentId: mpoId,
         label: 'MPF 多图象素功能段',
         parCatalogId: 'PAR-JPEG-028',
@@ -77,6 +81,41 @@ export function appendMpoNodes(
         loadType: 'metadata',
         warning: false,
       })
+
+      const mpf = parseMpfSegment(buffer, seg.offset, seg.length)
+      const entries = mpf?.entries.length
+        ? enrichMpfEntriesWithContainer(mpf.entries, containerItems)
+        : []
+      if (entries.length) {
+        for (const entry of entries) {
+          nodes.push({
+            id: `${mpfNodeId}-frame-${entry.index}`,
+            parentId: mpfNodeId,
+            label: `图像 ${entry.index + 1} · ${entry.role}`,
+            parCatalogId: 'PAR-JPEG-MPO-FRAME',
+            offset: entry.xmpOffset ?? entry.offset,
+            length: entry.xmpLength && entry.xmpLength > 0 ? entry.xmpLength : entry.size,
+            loadType: 'image',
+            warning: false,
+          })
+        }
+      }
+
+      const motionItem = containerItems?.find(
+        (item) => item.semantic === 'MotionPhoto' || item.mime.startsWith('video/'),
+      )
+      if (motionItem?.offset != null && motionItem.length > 0) {
+        nodes.push({
+          id: `${mpoId}-motion`,
+          parentId: mpoId,
+          label: `动态照片 · ${semanticDisplayLabel(motionItem.semantic)}`,
+          parCatalogId: 'PAR-JPEG-MPO-MOTION',
+          offset: motionItem.offset,
+          length: motionItem.length,
+          loadType: 'video',
+          warning: false,
+        })
+      }
     }
   }
 }

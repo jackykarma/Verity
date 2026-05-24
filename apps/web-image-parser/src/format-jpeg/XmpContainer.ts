@@ -1,0 +1,145 @@
+import { locateXmpXml } from './XmpExtractor.ts'
+import { formatByteOffset } from '../shared/formatUtils.ts'
+
+export interface XmpContainerItem {
+  index: number
+  semantic: string
+  mime: string
+  length: number
+  padding: number
+  offset?: number
+}
+
+const SEMANTIC_LABELS: Record<string, string> = {
+  Primary: '主图 (Primary)',
+  GainMap: 'HDR 增益图 (GainMap)',
+  MotionPhoto: '动态照片 (MotionPhoto)',
+  MotionPhotoPresentationTimestampUs: '动态照片时间戳',
+  Alternate: '备选视图 (Alternate)',
+}
+
+export function semanticDisplayLabel(semantic: string): string {
+  return SEMANTIC_LABELS[semantic] ?? semantic
+}
+
+function readItemAttr(block: string, name: string): string {
+  const patterns = [
+    new RegExp(`Item:${name}="([^"]*)"`, 'i'),
+    new RegExp(`Item\\:${name}="([^"]*)"`, 'i'),
+  ]
+  for (const pattern of patterns) {
+    const match = block.match(pattern)
+    if (match?.[1] !== undefined) {
+      return match[1]
+    }
+  }
+  return ''
+}
+
+function parseContainerItemsWithRegex(xml: string): XmpContainerItem[] {
+  if (!xml.includes('Container:') && !xml.includes('Item:Semantic')) {
+    return []
+  }
+
+  const items: XmpContainerItem[] = []
+  const liPattern = /<rdf:li[\s\S]*?<\/rdf:li>/gi
+  let match: RegExpExecArray | null
+  while ((match = liPattern.exec(xml)) !== null) {
+    const block = match[0] ?? ''
+    if (!block.includes('Container:Item') && !block.includes('Item:Semantic')) {
+      continue
+    }
+    items.push({
+      index: items.length,
+      mime: readItemAttr(block, 'Mime') || '未知',
+      semantic: readItemAttr(block, 'Semantic') || 'Unknown',
+      length: Number.parseInt(readItemAttr(block, 'Length') || '0', 10) || 0,
+      padding: Number.parseInt(readItemAttr(block, 'Padding') || '0', 10) || 0,
+    })
+  }
+  return items
+}
+
+function parseContainerItemsWithDom(xml: string): XmpContainerItem[] {
+  if (typeof DOMParser === 'undefined') {
+    return parseContainerItemsWithRegex(xml)
+  }
+
+  const doc = new DOMParser().parseFromString(xml, 'text/xml')
+  const items: XmpContainerItem[] = []
+  const nodes = doc.querySelectorAll('Container\\:Item, Item, [localName="Item"]')
+
+  nodes.forEach((node) => {
+    const el = node as Element
+    const mime = el.getAttribute('Item:Mime') ?? el.getAttribute('Mime') ?? ''
+    const semantic = el.getAttribute('Item:Semantic') ?? el.getAttribute('Semantic') ?? ''
+    if (!mime && !semantic) {
+      return
+    }
+    items.push({
+      index: items.length,
+      mime: mime || '未知',
+      semantic: semantic || 'Unknown',
+      length: Number.parseInt(el.getAttribute('Item:Length') ?? el.getAttribute('Length') ?? '0', 10) || 0,
+      padding: Number.parseInt(el.getAttribute('Item:Padding') ?? el.getAttribute('Padding') ?? '0', 10) || 0,
+    })
+  })
+
+  return items.length > 0 ? items : parseContainerItemsWithRegex(xml)
+}
+
+export function parseXmpContainerItems(xml: string): XmpContainerItem[] {
+  return parseContainerItemsWithDom(xml)
+}
+
+/** Motion Photo / Ultra HDR：非 Primary 条目自文件尾向前堆叠。 */
+export function resolveContainerItemOffsets(
+  fileSize: number,
+  items: XmpContainerItem[],
+): XmpContainerItem[] {
+  const tailSumAfter = new Array<number>(items.length).fill(0)
+  let accumulated = 0
+
+  for (let i = items.length - 1; i >= 0; i--) {
+    tailSumAfter[i] = accumulated
+    const item = items[i]
+    if (item && item.length > 0) {
+      accumulated += item.length + item.padding
+    }
+  }
+
+  return items.map((item, i) => ({
+    ...item,
+    offset:
+      item.length > 0
+        ? Math.max(0, fileSize - tailSumAfter[i]! - item.length - item.padding)
+        : 0,
+  }))
+}
+
+export function findXmpContainerInBuffer(buffer: ArrayBuffer): XmpContainerItem[] | null {
+  const data = new Uint8Array(buffer)
+  const scanLen = Math.min(data.length, 512 * 1024)
+  const xml = locateXmpXml(data.slice(0, scanLen))
+  if (!xml || (!xml.includes('Container:') && !xml.includes('Item:Semantic'))) {
+    return null
+  }
+
+  const items = parseXmpContainerItems(xml)
+  if (items.length === 0) {
+    return null
+  }
+
+  return resolveContainerItemOffsets(buffer.byteLength, items)
+}
+
+export function jpegContainerItems(items: XmpContainerItem[]): XmpContainerItem[] {
+  return items.filter((item) => item.mime.startsWith('image/'))
+}
+
+export function buildContainerReadable(items: XmpContainerItem[]): { key: string; value: string }[] {
+  return items.map((item) => ({
+    key: `Container · ${semanticDisplayLabel(item.semantic)}`,
+    value: `${item.mime} · Length ${item.length}${item.offset != null ? ` · 偏移 ${formatByteOffset(item.offset)}` : ''}`,
+  }))
+}

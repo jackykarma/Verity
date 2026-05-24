@@ -1,35 +1,83 @@
 import type { SegmentNodeDto } from '../shared/types/parseMessages.ts'
-import type { AuxSubtype, ContentRef, PresentRequest } from '../shared/types/present.ts'
-import { buildExifReadable, hexPreview } from './ExifExtractor.ts'
+import type { AuxSubtype, ContentRef, GalleryImage, PresentRequest, ReadablePayload } from '../shared/types/present.ts'
+import { attachSegmentHex, buildExifReadable } from './ExifExtractor.ts'
 import { extractIptcFromApp13 } from './IptcExtractor.ts'
 import { buildMakerNoteReadable, decodeMakerNote } from './MakerNoteDecoder.ts'
-import { comText, segmentReadableHint } from './SegmentTreeBuilder.ts'
+import {
+  buildMpfFrameReadable,
+  buildMpfGallery,
+  buildMpfReadable,
+  createMpfFrameBlobRef,
+  mpoFrameIndexFromNodeId,
+  parseMpfWithContainer,
+} from './MpfParser.ts'
+import { buildSegmentDetailReadable } from './SegmentDetailExtractor.ts'
+import { comText } from './SegmentTreeBuilder.ts'
 import { extractThumbnailInfo } from './ThumbnailExtractor.ts'
+import { findXmpContainerInBuffer } from './XmpContainer.ts'
+import { formatByteOffset } from '../shared/formatUtils.ts'
+import { extractXmpFromApp1 } from './XmpExtractor.ts'
 
 const IMAGE_PREVIEW_CATALOG = new Set([
   'PAR-JPEG-015',
   'PAR-JPEG-013',
   'PAR-JPEG-025',
+  'PAR-JPEG-MPO-FRAME',
 ])
+
+function findMpfSegmentForNode(
+  node: SegmentNodeDto,
+  allNodes: SegmentNodeDto[] | undefined,
+): { offset: number; length: number } {
+  if (node.parCatalogId === 'PAR-JPEG-028') {
+    return { offset: node.offset, length: node.length }
+  }
+
+  if (node.parentId && allNodes) {
+    const parent = allNodes.find((n) => n.id === node.parentId)
+    if (parent?.parCatalogId === 'PAR-JPEG-028') {
+      return { offset: parent.offset, length: parent.length }
+    }
+    if (parent?.parCatalogId === 'PAR-JPEG-019') {
+      return { offset: parent.offset, length: parent.length }
+    }
+  }
+
+  return { offset: node.offset, length: node.length }
+}
+
+function mpfPresentExtras(
+  node: SegmentNodeDto,
+  buffer: ArrayBuffer,
+  sessionId: string,
+  allNodes?: SegmentNodeDto[],
+): { readablePayload: ReadablePayload; gallery: GalleryImage[] } {
+  const { offset, length } = findMpfSegmentForNode(node, allNodes)
+  const containerItems = findXmpContainerInBuffer(buffer)
+  const mpf = parseMpfWithContainer(buffer, offset, length, containerItems)
+  if (!mpf) {
+    return {
+      readablePayload: { title: node.label, fields: [{ key: '提示', value: '无法解析 MPF 结构' }] },
+      gallery: [],
+    }
+  }
+
+  return {
+    readablePayload: buildMpfReadable(mpf),
+    gallery: buildMpfGallery(buffer, mpf, sessionId),
+  }
+}
 
 export async function toPresentRequest(
   node: SegmentNodeDto,
   sessionId: string,
   buffer: ArrayBuffer,
+  allNodes?: SegmentNodeDto[],
 ): Promise<PresentRequest> {
   const slice = buffer.slice(node.offset, node.offset + node.length)
-  let readablePayload = segmentReadableHint(
-    {
-      marker: 0,
-      label: node.label,
-      parCatalogId: node.parCatalogId,
-      offset: node.offset,
-      length: node.length,
-      loadType: node.loadType,
-      warning: node.warning,
-    },
-    new Uint8Array(buffer),
-  )
+  let readablePayload = buildSegmentDetailReadable(node, buffer)
+
+  let gallery: GalleryImage[] | undefined
 
   if (node.parCatalogId === 'PAR-JPEG-004' || node.parCatalogId === 'PAR-JPEG-005') {
     readablePayload = await buildExifReadable(slice, buffer)
@@ -58,14 +106,36 @@ export async function toPresentRequest(
       title: 'COM 注释',
       fields: [{ key: '内容', value: comText(new Uint8Array(buffer), node.offset, node.length) }],
     }
-  } else if (node.parCatalogId === 'PAR-JPEG-099' || node.loadType === 'other') {
+  } else if (node.parCatalogId === 'PAR-JPEG-021') {
+    readablePayload = extractXmpFromApp1(slice)
+  } else if (node.parCatalogId === 'PAR-JPEG-028' || node.parCatalogId === 'PAR-JPEG-019') {
+    const extras = mpfPresentExtras(node, buffer, sessionId, allNodes)
+    readablePayload = extras.readablePayload ?? readablePayload
+    gallery = extras.gallery
+  } else if (node.parCatalogId === 'PAR-JPEG-MPO-FRAME') {
+    const mpfSeg = findMpfSegmentForNode(node, allNodes)
+    const containerItems = findXmpContainerInBuffer(buffer)
+    const mpf = parseMpfWithContainer(buffer, mpfSeg.offset, mpfSeg.length, containerItems)
+    const frameIdx = mpoFrameIndexFromNodeId(node.id)
+    const entry =
+      frameIdx != null
+        ? mpf?.entries.find((e) => e.index === frameIdx)
+        : mpf?.entries.find((e) => e.offset === node.offset && e.size === node.length)
+    readablePayload = entry ? buildMpfFrameReadable(entry) : { title: node.label, fields: [] }
+  } else if (node.parCatalogId === 'PAR-JPEG-MPO-MOTION') {
     readablePayload = {
-      ...readablePayload,
+      title: node.label,
       fields: [
-        ...readablePayload.fields,
-        { key: '十六进制预览', value: hexPreview(slice) },
+        { key: '类型', value: 'Motion Photo 视频载荷' },
+        { key: '偏移', value: formatByteOffset(node.offset) },
+        { key: '大小', value: `${node.length} 字节` },
+        { key: '说明', value: '来自 XMP Container Item:Semantic=MotionPhoto' },
       ],
     }
+  }
+
+  if (readablePayload) {
+    readablePayload = attachSegmentHex(readablePayload, slice, Math.min(node.length, 512))
   }
 
   let contentRef: ContentRef | null = null
@@ -76,6 +146,22 @@ export async function toPresentRequest(
         const blob = new Blob([thumb.jpegBytes], { type: 'image/jpeg' })
         contentRef = { kind: 'blobUrl', url: URL.createObjectURL(blob), mimeType: 'image/jpeg' }
       } else {
+        contentRef = {
+          kind: 'byteRange',
+          sessionId,
+          offset: 0,
+          length: buffer.byteLength,
+        }
+      }
+    } else if (node.parCatalogId === 'PAR-JPEG-MPO-FRAME') {
+      const mpfSeg = findMpfSegmentForNode(node, allNodes)
+      const containerItems = findXmpContainerInBuffer(buffer)
+      const mpf = parseMpfWithContainer(buffer, mpfSeg.offset, mpfSeg.length, containerItems)
+      const frameIdx = mpoFrameIndexFromNodeId(node.id)
+      const entry =
+        frameIdx != null ? mpf?.entries.find((e) => e.index === frameIdx) : undefined
+      contentRef = entry && mpf ? createMpfFrameBlobRef(buffer, entry, mpf.entries) : null
+      if (!contentRef && entry?.index === 0) {
         contentRef = {
           kind: 'byteRange',
           sessionId,
@@ -112,5 +198,6 @@ export async function toPresentRequest(
     auxSubtype,
     contentRef,
     readablePayload,
+    gallery,
   }
 }

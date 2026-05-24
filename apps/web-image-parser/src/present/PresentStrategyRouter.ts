@@ -1,8 +1,12 @@
 import type { PresentFailureKind, PresentRequest, PresentStrategy } from '../shared/types/present.ts'
 
 export function resolvePresentStrategy(req: PresentRequest): PresentStrategy {
-  if (!req.contentRef && !req.readablePayload) {
+  if (!req.contentRef && !req.readablePayload && !(req.gallery && req.gallery.length > 0)) {
     return 'empty'
+  }
+
+  if (req.gallery && req.gallery.length > 0) {
+    return 'mixed'
   }
 
   switch (req.payloadKind) {

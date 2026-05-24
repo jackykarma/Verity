@@ -1,4 +1,5 @@
 import exifr from 'exifr'
+import { formatByteOffset } from '../shared/formatUtils.ts'
 import type { ReadableField, ReadablePayload } from '../shared/types/present.ts'
 
 const EXIF_TAGS: Record<string, string> = {
@@ -84,7 +85,33 @@ export function buildComReadable(text: string): ReadablePayload {
   }
 }
 
-export function hexPreview(buffer: ArrayBuffer, maxBytes = 64): string {
-  const bytes = new Uint8Array(buffer.slice(0, maxBytes))
-  return [...bytes].map((b) => b.toString(16).padStart(2, '0')).join(' ')
+export function hexPreview(buffer: ArrayBuffer, maxBytes = 256): string {
+  const total = buffer.byteLength
+  const cap = Math.min(total, maxBytes)
+  const bytes = new Uint8Array(buffer.slice(0, cap))
+  const lines: string[] = []
+
+  for (let i = 0; i < bytes.length; i += 16) {
+    const chunk = bytes.slice(i, i + 16)
+    const hex = [...chunk].map((b) => b.toString(16).padStart(2, '0')).join(' ')
+    const addr = formatByteOffset(i)
+    lines.push(`${addr}  ${hex}`)
+  }
+
+  if (total > cap) {
+    lines.push(`… 共 ${total} 字节，已显示前 ${cap} 字节`)
+  }
+
+  return lines.join('\n')
+}
+
+export function attachSegmentHex(
+  payload: import('../shared/types/present.ts').ReadablePayload,
+  slice: ArrayBuffer,
+  maxBytes = 256,
+): import('../shared/types/present.ts').ReadablePayload {
+  return {
+    ...payload,
+    hexPreview: hexPreview(slice, maxBytes),
+  }
 }

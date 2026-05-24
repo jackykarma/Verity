@@ -1,8 +1,48 @@
-import type { PresentResult } from '../../shared/types/present.ts'
+import type { GalleryImage, PresentResult, ReadablePayload } from '../../shared/types/present.ts'
 
 interface DetailPanelProps {
   result: PresentResult | null
   loading?: boolean
+}
+
+function ReadableBody({ payload }: { payload: ReadablePayload }) {
+  return (
+    <>
+      {payload.hexPreview ? (
+        <section className="detail-panel__hex-section" data-testid="detail-hex-section">
+          <h4 className="detail-panel__section-title">原始数据 (Hex)</h4>
+          <pre className="detail-panel__hex">{payload.hexPreview}</pre>
+        </section>
+      ) : null}
+      <h3>{payload.title}</h3>
+      <dl>
+        {payload.fields.map((f) => (
+          <div key={f.key}>
+            <dt>{f.key}</dt>
+            <dd>{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {payload.textBody ? (
+        <pre className="detail-panel__xml" data-testid="detail-text-body">
+          {payload.textBody}
+        </pre>
+      ) : null}
+    </>
+  )
+}
+
+function GalleryGrid({ gallery }: { gallery: GalleryImage[] }) {
+  return (
+    <div className="detail-panel__gallery" data-testid="detail-gallery">
+      {gallery.map((item) => (
+        <figure key={item.label} className="detail-panel__gallery-item">
+          <img src={item.src} alt={item.alt} className="detail-panel__gallery-image" />
+          <figcaption>{item.label}</figcaption>
+        </figure>
+      ))}
+    </div>
+  )
 }
 
 export function DetailPanel({ result, loading }: DetailPanelProps) {
@@ -27,7 +67,9 @@ export function DetailPanel({ result, loading }: DetailPanelProps) {
   return (
     <div className="detail-panel" data-testid="detail-panel">
       {status !== 'success' && failureKind ? (
-        <p className="detail-panel__error">{viewModel.kind === 'empty' ? viewModel.message : failureKind}</p>
+        <p className="detail-panel__error">
+          {viewModel.kind === 'empty' ? viewModel.message : failureKind}
+        </p>
       ) : null}
       {viewModel.kind === 'image' ? (
         <img src={viewModel.src} alt={viewModel.alt} className="detail-panel__image" />
@@ -42,25 +84,16 @@ export function DetailPanel({ result, loading }: DetailPanelProps) {
       ) : null}
       {viewModel.kind === 'readable' ? (
         <div className="detail-panel__readable">
-          <h3>{viewModel.payload.title}</h3>
-          <dl>
-            {viewModel.payload.fields.map((f) => (
-              <div key={f.key}>
-                <dt>{f.key}</dt>
-                <dd>{f.value}</dd>
-              </div>
-            ))}
-          </dl>
-          {viewModel.payload.hexPreview ? (
-            <pre className="detail-panel__hex">{viewModel.payload.hexPreview}</pre>
-          ) : null}
+          <ReadableBody payload={viewModel.payload} />
         </div>
       ) : null}
       {viewModel.kind === 'mixed' ? (
         <div className="detail-panel__mixed">
-          <h3>{viewModel.readable.title}</h3>
-          {viewModel.media.kind === 'image' ? (
-            <img src={viewModel.media.src} alt={viewModel.media.alt} />
+          <ReadableBody payload={viewModel.readable} />
+          {viewModel.gallery && viewModel.gallery.length > 0 ? (
+            <GalleryGrid gallery={viewModel.gallery} />
+          ) : viewModel.media.kind === 'image' ? (
+            <img src={viewModel.media.src} alt={viewModel.media.alt} className="detail-panel__image" />
           ) : null}
         </div>
       ) : null}

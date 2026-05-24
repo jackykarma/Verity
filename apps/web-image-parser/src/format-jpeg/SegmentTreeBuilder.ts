@@ -1,5 +1,6 @@
 import type { PayloadKind } from '../shared/types/present.ts'
 import type { SegmentNodeDto, SegmentTreeDto } from '../shared/types/parseMessages.ts'
+import { formatByteOffset } from '../shared/formatUtils.ts'
 import type { RawSegment } from './JpegSegmentScanner.ts'
 
 export function buildSegmentTree(segments: RawSegment[], fileLength: number): SegmentTreeDto {
@@ -74,7 +75,7 @@ export function segmentReadableHint(
 ): { title: string; fields: { key: string; value: string }[] } {
   const fields = [
     { key: '目录 ID', value: seg.parCatalogId },
-    { key: '偏移', value: `0x${seg.offset.toString(16)}` },
+    { key: '偏移', value: formatByteOffset(seg.offset) },
     { key: '长度', value: String(seg.length) },
   ]
 

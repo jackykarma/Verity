@@ -25,6 +25,10 @@ export async function renderImagePreview(req: PresentRequest): Promise<PresentRe
   return {
     status: 'success',
     failureKind: null,
-    viewModel: { kind: 'image', src, alt: req.segmentId },
+    viewModel: {
+      kind: 'image',
+      src,
+      alt: req.readablePayload?.title ?? req.segmentId,
+    },
   }
 }

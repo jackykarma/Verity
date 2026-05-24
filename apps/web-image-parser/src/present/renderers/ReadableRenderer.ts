@@ -7,7 +7,7 @@ export async function renderReadable(req: PresentRequest): Promise<PresentResult
     fields: [],
   }
 
-  if (payload.fields.length === 0 && !req.contentRef) {
+  if (payload.fields.length === 0 && !req.contentRef && !payload.textBody) {
     return {
       status: 'failed',
       failureKind: 'NO_CONTENT',

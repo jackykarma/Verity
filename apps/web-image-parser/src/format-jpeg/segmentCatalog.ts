@@ -1,4 +1,5 @@
 import type { PayloadKind } from '../shared/types/present.ts'
+import { matchAppPayload } from './jpegExifToolRef.ts'
 
 export interface SegmentCatalogEntry {
   parCatalogId: string
@@ -57,50 +58,85 @@ function readAscii(data: Uint8Array, offset: number, length: number): string {
   return out
 }
 
-export function classifyAppSegment(data: Uint8Array, offset: number, length: number): SegmentCatalogEntry {
+export function classifyAppSegment(
+  data: Uint8Array,
+  offset: number,
+  length: number,
+  appMarker?: number,
+): SegmentCatalogEntry {
   const payloadStart = offset + 4
   const payloadLen = Math.max(0, length - 4)
   if (payloadLen < 4) {
     return { parCatalogId: 'PAR-JPEG-099', label: 'APP（空）', loadType: 'other', priority: 'P0' }
   }
 
-  const head6 = readAscii(data, payloadStart, 6)
+  const appNum = appMarker !== undefined ? appMarker - 0xe0 : undefined
+  const etMatch = appNum !== undefined ? matchAppPayload(appNum, data, payloadStart) : null
+
   const head5 = readAscii(data, payloadStart, 5)
+  const head6 = readAscii(data, payloadStart, 6)
 
   if (head5 === 'JFIF\0' || head5.startsWith('JFIF')) {
-    return { parCatalogId: 'PAR-JPEG-003', label: 'APP0 (JFIF)', loadType: 'metadata', priority: 'P0' }
+    return { parCatalogId: 'PAR-JPEG-003', label: labelForApp(appNum, 'JFIF'), loadType: 'metadata', priority: 'P0' }
   }
   if (head6.startsWith('Exif')) {
-    return { parCatalogId: 'PAR-JPEG-004', label: 'APP1 (EXIF)', loadType: 'metadata', priority: 'P0' }
+    return { parCatalogId: 'PAR-JPEG-004', label: labelForApp(appNum, 'EXIF'), loadType: 'metadata', priority: 'P0' }
   }
   if (head5.startsWith('http:') || readAscii(data, payloadStart, 29).includes('ns.adobe.com/xap')) {
-    return { parCatalogId: 'PAR-JPEG-021', label: 'APP1 (XMP)', loadType: 'metadata', priority: 'P1' }
+    const xmpName = readAscii(data, payloadStart, 40).includes('xmp/extension') ? 'ExtendedXMP' : 'XMP'
+    return { parCatalogId: 'PAR-JPEG-021', label: labelForApp(appNum, xmpName), loadType: 'metadata', priority: 'P1' }
   }
   if (readAscii(data, payloadStart, 12).startsWith('ICC_PROFILE')) {
-    return { parCatalogId: 'PAR-JPEG-006', label: 'APP2 (ICC)', loadType: 'metadata', priority: 'P1' }
+    return { parCatalogId: 'PAR-JPEG-006', label: labelForApp(appNum, 'ICC_Profile'), loadType: 'metadata', priority: 'P1' }
   }
   const mpfHead = readAscii(data, payloadStart, 4)
   if (mpfHead === 'MPF\0' || mpfHead.startsWith('MPF')) {
     return {
       parCatalogId: 'PAR-JPEG-028',
-      label: 'APP2 (MPF)',
+      label: labelForApp(appNum, 'MPF'),
       loadType: 'metadata',
       priority: 'P1',
     }
   }
   if (readAscii(data, payloadStart, 10).startsWith('Photoshop')) {
-    return { parCatalogId: 'PAR-JPEG-007', label: 'APP13 (Photoshop)', loadType: 'metadata', priority: 'P1' }
+    return { parCatalogId: 'PAR-JPEG-007', label: labelForApp(appNum, 'Photoshop'), loadType: 'metadata', priority: 'P1' }
   }
   if (readAscii(data, payloadStart, 5) === 'Adobe') {
-    return { parCatalogId: 'PAR-JPEG-008', label: 'APP14 (Adobe)', loadType: 'metadata', priority: 'P1' }
+    return { parCatalogId: 'PAR-JPEG-008', label: labelForApp(appNum, 'Adobe'), loadType: 'metadata', priority: 'P1' }
+  }
+  if (readAscii(data, payloadStart, 8) === 'Adobe_CM') {
+    return { parCatalogId: 'PAR-JPEG-027', label: labelForApp(appNum, 'Adobe_CM'), loadType: 'metadata', priority: 'P1' }
+  }
+  if (readAscii(data, payloadStart, 11) === 'HDRGainInfo') {
+    return { parCatalogId: 'PAR-JPEG-029', label: labelForApp(appNum, 'HDRGainInfo'), loadType: 'metadata', priority: 'P1' }
+  }
+  if (readAscii(data, payloadStart, 8).startsWith('JPEG-HDR') || readAscii(data, payloadStart, 5) === 'JUMBF') {
+    const name = readAscii(data, payloadStart, 8).startsWith('JPEG-HDR') ? 'JPEG-HDR' : 'JUMBF'
+    return { parCatalogId: 'PAR-JPEG-030', label: labelForApp(appNum, name), loadType: 'metadata', priority: 'P1' }
+  }
+  if (readAscii(data, payloadStart, 5) === 'Ducky') {
+    return { parCatalogId: 'PAR-JPEG-031', label: labelForApp(appNum, 'Ducky'), loadType: 'metadata', priority: 'P2' }
+  }
+
+  if (etMatch && etMatch.tagName !== `APP${appNum}`) {
+    return {
+      parCatalogId: 'PAR-JPEG-009',
+      label: labelForApp(appNum, etMatch.tagName),
+      loadType: 'metadata',
+      priority: 'P1',
+    }
   }
 
   return {
     parCatalogId: 'PAR-JPEG-009',
-    label: '其他 APP 段',
+    label: appNum !== undefined ? `APP${appNum}` : '其他 APP 段',
     loadType: 'metadata',
     priority: 'P1',
   }
+}
+
+function labelForApp(appNum: number | undefined, tagName: string): string {
+  return appNum !== undefined ? `APP${appNum} (${tagName})` : tagName
 }
 
 export function catalogForMarker(
@@ -110,7 +146,7 @@ export function catalogForMarker(
   length: number,
 ): SegmentCatalogEntry {
   if (marker >= 0xe0 && marker <= 0xef) {
-    const appEntry = classifyAppSegment(data, offset, length)
+    const appEntry = classifyAppSegment(data, offset, length, marker)
     if (appEntry.parCatalogId !== 'PAR-JPEG-009' && appEntry.parCatalogId !== 'PAR-JPEG-099') {
       return appEntry
     }

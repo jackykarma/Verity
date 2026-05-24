@@ -5,6 +5,21 @@ import { renderReadable } from './renderers/ReadableRenderer.ts'
 
 export async function renderMixedPayload(req: PresentRequest): Promise<PresentResult> {
   const readable = req.readablePayload ?? { title: req.segmentId, fields: [] }
+  const gallery = req.gallery ?? []
+
+  if (gallery.length > 0) {
+    const primary = gallery[0]!
+    return {
+      status: 'success',
+      failureKind: null,
+      viewModel: {
+        kind: 'mixed',
+        readable,
+        media: { kind: 'image', src: primary.src, alt: primary.alt },
+        gallery,
+      },
+    }
+  }
 
   if (!req.contentRef) {
     return renderReadable(req)

@@ -1,6 +1,7 @@
 import type { SegmentNodeDto } from '../shared/types/parseMessages.ts'
 import type { AuxSubtype, ContentRef, PresentRequest } from '../shared/types/present.ts'
 import { buildExifReadable, hexPreview } from '../format-jpeg/ExifExtractor.ts'
+import { formatByteOffset } from '../shared/formatUtils.ts'
 import { detectHeicEnvironment } from './HeicEnvDetector.ts'
 import { buildIpmaReadable } from './IpmaEnricher.ts'
 import { extractMetadataItemReadable } from './MetadataItemExtractor.ts'
@@ -31,7 +32,7 @@ export async function toHeicPresentRequest(
   const slice = buffer.slice(node.offset, node.offset + node.length)
   const fields = [
     { key: '目录 ID', value: node.parCatalogId },
-    { key: '偏移', value: `0x${node.offset.toString(16)}` },
+    { key: '偏移', value: formatByteOffset(node.offset) },
     { key: '长度', value: String(node.length) },
   ]
 

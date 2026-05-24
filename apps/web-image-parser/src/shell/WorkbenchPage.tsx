@@ -92,7 +92,7 @@ export function WorkbenchPage() {
     try {
       const req =
         session.detectedFormat === 'jpeg'
-          ? await toPresentRequest(node, session.sessionId, session.buffer)
+          ? await toPresentRequest(node, session.sessionId, session.buffer, tree?.nodes)
           : await toHeicPresentRequest(node, session.sessionId, session.buffer)
 
       const result = await contentPresenter.present(req)
