@@ -235,7 +235,7 @@ git add *.png
   "type": "shell",
   "command": "python",
   "args": [
-    "${workspaceFolder}/.claude/skills/mermaid-exporter/scripts/export_mermaid.py",
+    "${workspaceFolder}/.cursor/skills/mermaid-exporter/scripts/export_mermaid.py",
     "${file}"
   ],
   "problemMatcher": []
@@ -249,7 +249,7 @@ git add *.png
 ## 脚本位置
 
 ```
-.claude/skills/mermaid-exporter/
+.cursor/skills/mermaid-exporter/
 └── scripts/
     └── export_mermaid.py
 ```

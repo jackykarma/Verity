@@ -134,7 +134,7 @@ $ARGUMENTS
    - 若 `EPIC_DIR/research/` 存在且非空：可读**代码调研快照**辅助理解调研当时的存量模块；**不得**当作约束或设计决策依据；**不得**因 design/CR 变更而回写 `research/`；设计仍须独立完整分析并做出自己的设计决策
    - 读取 `.specify/memory/constitution.md`
    - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`
-   - 读取 `.claude/rules/specify-diagram-requirements.mdc`、`.claude/rules/mermaid-style-guide.mdc`
+   - 读取 `.cursor/rules/specify-diagram-requirements.mdc`、`.cursor/rules/mermaid-style-guide.mdc`
    - **分析现有工程代码**：架构分层、模块划分、包组织、现有框架
 
 4. **根据参数产出**：
@@ -173,8 +173,8 @@ $ARGUMENTS
 
 核心规则：
 - 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的图表（关键类图、核心调用链时序图，及按需方案架构图）**直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**必须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举关键异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，**把核心技术方案与实现思路讲明白**——覆盖关键技术点、关键链路与每个关键环节如何达成，并与类图/时序图（及若有的方案架构图）一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环
-- 所有图表必须使用 **Mermaid 格式**，遵循 `.claude/rules/mermaid-style-guide.mdc`
-- 图表内容须基于本工程**实际架构与真实代码**，遵循 `.claude/rules/specify-diagram-requirements.mdc`
+- 所有图表必须使用 **Mermaid 格式**，遵循 `.cursor/rules/mermaid-style-guide.mdc`
+- 图表内容须基于本工程**实际架构与真实代码**，遵循 `.cursor/rules/specify-diagram-requirements.mdc`
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 plan.md 的技术规约共同约束实现
 - **L2 按需分文件并继承 KD**：`epic-design.md` §13 为索引、关联 KD、L2 状态与依赖总览；复杂/高风险 Story 的正文在各 Feature 的 `l2_design/ST-xxx_<slug>.md` 中，简单 Story 可由 `tasks.md` 的设计引用与 DoD 承接。凡涉及 KD 的 L2 必须继承 KD 关键方案，只能细化 Story 局部落码细节，不得与 KD 冲突或另起方案
 - **章节骨架先行**：首次（无参数）调用必须输出完整 §1~§13 骨架，未填充章节保留占位提示；后续调用仅更新指定章节

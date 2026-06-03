@@ -508,7 +508,7 @@ jobs:
       - uses: actions/setup-node@v3
       - run: npm install -g @mermaid-js/mermaid-cli
       - run: |
-          python .claude/skills/mermaid-exporter/scripts/export_mermaid.py ./docs/ --recursive
+          python .cursor/skills/mermaid-exporter/scripts/export_mermaid.py ./docs/ --recursive
       - run: git add *.png && git commit -m "docs: update diagrams" || true
 ```
 

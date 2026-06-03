@@ -22,7 +22,7 @@ pip install requests beautifulsoup4 lxml
 运行爬虫脚本：
 
 ```bash
-python .claude/skills/bbc-6-minute-crawler/scripts/crawler.py --config <配置名> --output <输出目录> [--days <天数>]
+python .cursor/skills/bbc-6-minute-crawler/scripts/crawler.py --config <配置名> --output <输出目录> [--days <天数>]
 ```
 
 **参数说明：**
@@ -41,7 +41,7 @@ python .claude/skills/bbc-6-minute-crawler/scripts/crawler.py --config <配置�
 
 ```bash
 # 爬取过去 30 天的内容到 docs/bbc-6-minutes/
-python .claude/skills/bbc-6-minute-crawler/scripts/crawler.py --config bbc-6-minute --output docs/bbc-6-minutes --days 30
+python .cursor/skills/bbc-6-minute-crawler/scripts/crawler.py --config bbc-6-minute --output docs/bbc-6-minutes --days 30
 ```
 
 **爬取内容：**
@@ -186,5 +186,5 @@ python scripts/crawler.py --config bbc-6-minute --output docs/bbc --no-audio
 
 ## 相关资源
 
-- 配置文件目录: `.claude/skills/bbc-6-minute-crawler/configs/`
-- 爬虫脚本: `.claude/skills/bbc-6-minute-crawler/scripts/crawler.py`
+- 配置文件目录: `.cursor/skills/bbc-6-minute-crawler/configs/`
+- 爬虫脚本: `.cursor/skills/bbc-6-minute-crawler/scripts/crawler.py`

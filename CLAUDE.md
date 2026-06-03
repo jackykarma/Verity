@@ -22,12 +22,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   templates/                    # 所有工作流产物的文档模板
   scripts/powershell/           # EPIC/Feature 管理 PowerShell 脚本
   workflow-overview.md          # 端到端流程总览（首先阅读此文件）
-.claude/
-  commands/aisdd.*.md           # 各工作流阶段的 AI 斜杠命令
-  rules/                        # 规则文件（.mdc），供命令主动读取
 .cursor/
-  commands/aisdd.*.md           # Cursor 斜杠命令（同步自 .claude/commands/）
-  rules/                        # Cursor 规则（.mdc），始终应用
+  commands/aisdd.*.md           # AISDD 斜杠命令
+  rules/                        # 项目 Rules（.mdc），始终应用
+  skills/                       # Agent Skills（SKILL.md）
 docs/
   template/                     # 提交信息、PRD、技术文档模板
   diagram-specification/        # Mermaid 配色参考
@@ -51,7 +49,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 
 ## AISDD 工作流命令
 
-以下斜杠命令定义于 `.claude/commands/aisdd.*.md`，驱动完整文档生命周期：
+以下斜杠命令定义于 `.cursor/commands/aisdd.*.md`，驱动完整文档生命周期：
 
 | 命令 | 产出物 | 说明 |
 |------|--------|------|
@@ -97,7 +95,7 @@ Windows 下避免中文乱码：将提交信息保存为 UTF-8 文件，再用 `
 
 ## 图表规范
 
-所有 Mermaid 图表必须使用 `.claude/rules/mermaid-style-guide.mdc` 中定义的 Material Design 配色。标准 init 块：
+所有 Mermaid 图表必须使用 `.cursor/rules/mermaid-style-guide.mdc` 中定义的 Material Design 配色。标准 init 块：
 
 ```
 %%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#E3F2FD', 'primaryTextColor': '#1565C0', 'primaryBorderColor': '#1976D2', 'lineColor': '#546E7A'}}}%%
