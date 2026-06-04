@@ -1,1 +1,4 @@
 .tmp/
+.cursor/skills/pptx/scripts/node_modules/
+**/__pycache__/
+*.pyc
