@@ -9,7 +9,7 @@
 | Feature ID | FEAT-[编号] |
 | Feature 类型 | Product / Capability |
 | Feature Version | v0.1.0 |
-| 状态 | 草稿 / 待澄清 / 就绪（可进入 Plan） / 冻结（Implement 中） |
+| 状态 | 草稿 / 待澄清 / 就绪（可进入 techspec） / 冻结（Implement 中） |
 | EPIC 分支 | `epic/EPIC-[编号]-[short-name]` |
 | Feature 目录 | `specs/epics/EPIC-[编号]-[short-name]/features/FEAT-[编号]-[short-name]/` |
 | 创建时间 | [YYYY-MM-DD] |
@@ -63,7 +63,7 @@
 ## 完整场景矩阵 *（必填）*
 
 > 须覆盖以下 7 类场景：**正常流程 / 替代流程 / 边界值 / 异常错误 / 并发竞态 / 生命周期 / 跨 Feature 集成**。不适用的类别须保留行并在「场景名称」列标注 `N/A：[理由]`。
-> 每条场景须关联至少一个 FR/NFR；优先级：**P0**（不通过则不可交付）、**P1**（重要，进入 Plan 前确认覆盖）、**P2**（增强，可后续迭代）。
+> 每条场景须关联至少一个 FR/NFR；优先级：**P0**（不通过则不可交付）、**P1**（重要，进入 `/aisdd.techspec` 前确认覆盖）、**P2**（增强，可后续迭代）。
 > 完整性自检：每条 FR 须至少被一条 P0/P1 场景覆盖。
 
 | 场景ID | 类别 | 场景名称 | 前提 | 操作 | 预期结果 | 关联 FR/NFR | 优先级 |

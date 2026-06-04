@@ -3,7 +3,7 @@
 **Epic**：EPIC-005 - Web 端图片数据解析器  
 **Feature ID**：FEAT-003  
 **Feature Version**：v0.3.0  
-**Plan Version**：v0.1.0  
+**Tech Spec Version**：v0.1.0  
 **Tasks Version**：v0.1.0  
 **输入**：`spec.md` §解析内容目录、`tech-spec.md` FEAT-003、`epic-design.md` §十二、`l2_design/ST-301_heic_container_tree.md`、`KD_005_heic_structure.md`
 

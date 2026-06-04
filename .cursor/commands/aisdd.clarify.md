@@ -1,9 +1,10 @@
 ---
 description: 需求澄清。AI 主动提问，明确需求的方方面面（范围、行为、验收、角色、边界等），将答案整合回 spec；不讨论技术方案，技术选型与实现细节在 techspec / epicdesign 阶段讨论。
 handoffs:
-- label: 制定技术方案
+  - label: 制定技术方案
     agent: aisdd.techspec
-  prompt: 为该规格说明制定方案。我正在基于……进行开发
+    prompt: 为该规格说明制定方案。我正在基于……进行开发
+    send: false
 ---
 
 ## 用户输入
@@ -38,7 +39,7 @@ $ARGUMENTS
 1. 从代码库根目录**执行一次** `.specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly`（组合模式 `--json --paths-only` / 简写 `-Json -PathsOnly`）。解析JSON返回结果中的核心字段：
     - `FEATURE_DIR`（功能目录）
     - `FEATURE_SPEC`（功能规格说明文件路径）
-    - （可选）捕获 `IMPL_PLAN`（实现方案）、`TASKS`（任务），用于后续链式流程。
+    - （可选）捕获 `TECH_SPEC`（EPIC 根 `tech-spec.md`；JSON 兼容字段 `IMPL_PLAN` 同义）、`TASKS`（任务），用于后续链式流程。
     - 若JSON解析失败，终止操作并告知用户重新运行 `/aisdd.featurespec`（创建 Feature 文档目录与 spec.md）或检查 `SPECIFY_FEATURE`/当前 EPIC 上下文是否正确。
     - 对于参数中包含单引号的场景（如 "I'm Groot"），使用转义语法：例如 'I'\''m Groot'（或尽可能使用双引号："I'm Groot"）。
 
@@ -100,7 +101,7 @@ $ARGUMENTS
     - 相关信息更适合推迟至规划阶段（内部记录即可）
 
 3. （内部）生成优先级排序的候选澄清问题队列（最多5个）。**禁止一次性输出所有问题**。需遵循以下约束：
-    - 整个会话中最多提出10个问题。
+    - 整个会话中最多提出 5 个问题。
     - 每个问题的答案类型需为以下之一：
         - 简短选择题（2-5个互斥的明确选项）
         - 单字/短句回答（明确限制：“答案≤5个字”）。

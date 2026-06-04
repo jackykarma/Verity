@@ -1,6 +1,6 @@
 # EPIC 软件设计说明书：EPIC-[编号] - [EPIC 名称]
 
-> **定位**：EPIC 需求级别的技术设计方案，面向人类评审与后续 Task 拆解、Implement 阶段的 AI 编码参考。与各 Feature 的 `plan.md`（技术规约）共同约束 tasks.md 与代码实现。
+> **定位**：EPIC 需求级别的技术设计方案，面向人类评审与后续 Task 拆解、Implement 阶段的 AI 编码参考。与各 Feature 的 `tech-spec.md`（技术规约）共同约束 tasks.md 与代码实现。
 >
 > **输入**：`epic.md`、`tech-spec.md`、各 `features/*/spec.md`、`ux-design.md`（若已产出）、现有工程代码
 >
@@ -41,12 +41,12 @@
 
 ## 设计前置检查（必须，在开始设计前完成）
 
-> **目的**：确保本 EPIC 设计基于整体规划，跨 Feature 技术策略已明确，避免各 Feature 重复设计共享组件。与各 Feature 的 plan.md「Plan 前置检查」形成上下级一致（本 EPIC 设计确立策略，各 Feature plan 复用并落单）。
+> **目的**：确保本 EPIC 设计基于整体规划，跨 Feature 技术策略已明确，避免各 Feature 重复设计共享组件。与各 Feature 的 tech-spec.md「Tech Spec 前置检查」形成上下级一致（本 EPIC 设计确立策略，tech-spec.md 第二部分各 Feature 节复用并落单）。
 >
 > **强制规则**：
 >
 > - 在开始 EPIC 设计之前，**必须完成以下检查**
-> - 共享能力须在 `epic.md` 的「跨 Feature 技术策略」中明确 Owner Feature，各 Feature 的 plan 须复用、不得另起炉灶
+> - 共享能力须在 `epic.md` 的「跨 Feature 技术策略」中明确 Owner Feature，各 Feature 在 `tech-spec.md` 中须复用、不得另起炉灶
 > - 若在设计过程中发现新的共享需求，**必须先更新 epic.md 的「跨 Feature 技术策略」**，再在本文中引用
 
 ### 前置检查清单
@@ -54,7 +54,7 @@
 - 已阅读 `epic.md` 的「跨 Feature 技术策略」章节（若尚未定稿，本设计说明书产出后须与之同步）
 - 已阅读 `tech-spec.md`，确认本 EPIC 下各 Feature 的**执行顺序与依赖关系**
 - 本 EPIC 涉及的**共享能力**已在 `epic.md` 中登记 Owner Feature（或将在本设计说明书中拟定并回流至 epic.md）
-- 若已有部分 Feature 的 **plan.md**，已阅读并识别可复用的组件/接口与约束，避免本设计说明书与既有 plan 冲突
+- 若已有部分 Feature 的 **tech-spec.md**，已阅读并识别可复用的组件/接口与约束，避免本设计说明书与既有 tech-spec 冲突
 - 已通读所有 Feature 的 `spec.md`「完整场景矩阵」，确认每个 **P0 场景**在后续架构/时序设计中有对应覆盖策略；多 Feature EPIC 须特别关注「跨 Feature 集成」类场景
 
 ### 本 EPIC 跨 Feature 共享能力登记情况（与 epic.md 一致）
@@ -62,13 +62,13 @@
 > 列出本 EPIC 范围内由各 Feature 提供或复用的共享能力，与 `epic.md`「跨 Feature 技术策略」保持一致。设计说明书中的架构（§四、§五）应与此表对齐。
 
 
-| 共享能力名称       | Owner Feature | 消费方 Feature        | 设计/契约位置（本文或 plan 章节）               |
+| 共享能力名称       | Owner Feature | 消费方 Feature        | 设计/契约位置（本文或 tech-spec.md 章节）               |
 | ------------ | ------------- | ------------------ | ---------------------------------- |
-| [例如：UI 基础框架] | FEAT-001      | FEAT-002, FEAT-003 | 本文 §5.3 组件清单 / FEAT-001 plan.md §四 |
-| [例如：错误处理]    | FEAT-001      | FEAT-002           | 本文 §5.3 / FEAT-001 plan.md §四      |
+| [例如：UI 基础框架] | FEAT-001      | FEAT-002, FEAT-003 | 本文 §5.3 组件清单 / FEAT-001 tech-spec.md §四 |
+| [例如：错误处理]    | FEAT-001      | FEAT-002           | 本文 §5.3 / FEAT-001 tech-spec.md §四      |
 
 
-> 若某共享能力 Owner 的 plan 尚未完成，后续 Feature 的 plan 需**等待**或与其**协商能力边界**后再设计（见各 Feature plan.md 前置检查）。
+> 若某共享能力 Owner 的 tech-spec 第二节尚未完成，后续 Feature 的 tech-spec 第二节需**等待**或与其**协商能力边界**后再设计（见各 Feature tech-spec.md 前置检查）。
 
 ### P0 场景覆盖快照（与各 Feature spec.md 完整场景矩阵对照）
 
@@ -310,7 +310,7 @@ flowchart TB
 
 ### 5.2 组件清单与职责（必须）
 
-> **组件定义**：组件是职责内聚的一组类/接口构成的**子模块**，粒度介于工程模块与单个类之间。本表是 EPIC 的**组件目录**，从架构视角自顶向下设计，与各 Feature plan.md 中定义的接口与契约须保持**双向一致**——组件的对外接口须能支撑 Feature 契约，Feature 契约的变更须回检组件边界。若本表调整了组件边界或接口，须通过增量变更流程同步更新相关 Feature 的 plan.md。
+> **组件定义**：组件是职责内聚的一组类/接口构成的**子模块**，粒度介于工程模块与单个类之间。本表是 EPIC 的**组件目录**，从架构视角自顶向下设计，与各 Feature tech-spec.md 中定义的接口与契约须保持**双向一致**——组件的对外接口须能支撑 Feature 契约，Feature 契约的变更须回检组件边界。若本表调整了组件边界或接口，须通过增量变更流程同步更新相关 Feature 的 tech-spec.md。
 
 
 | 组件    | 所属模块          | 职责（一句话） | 输入/输出   | 依赖          | 约束             |
@@ -322,7 +322,7 @@ flowchart TB
 
 > **目的**：用带分区的流程图展示组件之间的**端到端协作流程**，覆盖正常 + 关键异常路径。每个 subgraph 分区对应 5.2 中的组件/模块边界，与 5.1 框架图形成互补——5.1 展示静态结构，本图展示动态控制流与异常分支。
 >
-> 本图从架构视角设计，须与各 Feature plan.md 中定义的能力边界保持**双向一致**；若全局视角下发现组件协作方式与 Feature 规约存在矛盾，须通过增量变更流程双向同步。
+> 本图从架构视角设计，须与各 Feature tech-spec.md 中定义的能力边界保持**双向一致**；若全局视角下发现组件协作方式与 Feature 规约存在矛盾，须通过增量变更流程双向同步。
 >
 > **要求**：
 >
@@ -539,7 +539,7 @@ flowchart LR
 
 > **说明**：Story 是 Feature 内的**技术开发分解单位**，从技术视角拆分，服务于**并行开发**和**分笔 git 提交**。Feature 才是最小交付单位（面向 PM/QA 演示验收），Story 不要求独立可交付。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）对应 Feature `l2_design/ST-xxx_<slug>.md` 中的 L2 详细设计。
 >
-> **下游追溯**：`/aisdd.featuretasks` 执行时在各 Feature 的 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵；不反向修改已冻结的 `spec.md` 或 `plan.md`。若发现上下游矛盾，须先通过 CR 或指定设计章节更新后再生成任务。
+> **下游追溯**：`/aisdd.featuretasks` 执行时在各 Feature 的 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵；不反向修改已冻结的 `spec.md` 或 `tech-spec.md`。若发现上下游矛盾，须先通过 CR 或指定设计章节更新后再生成任务。
 
 ### 12.1 拆解策略与约束（摘要）
 
@@ -736,21 +736,21 @@ flowchart TB
 
 ---
 
-## 附录 A：设计说明书与 plan/tasks 的对应关系
+## 附录 A：设计说明书与 tech-spec/tasks 的对应关系
 
 
-| 本设计说明书章节                          | plan.md 对应关系      | tasks.md 设计引用                                  |
+| 本设计说明书章节                          | tech-spec.md 对应关系      | tasks.md 设计引用                                  |
 | --------------------------------- | ----------------- | ---------------------------------------------- |
 | 一、简介                              | —                 | 范围/背景参考                                        |
 | 二、需求概述                            | —                 | 需求边界参考                                         |
 | 三、领域模型                            | —                 | 命名权威参考                                         |
-| 四、零层架构                            | plan.md §一/§二 的约束摘要与增量边界 | 阶段/边界参考                                        |
-| 五、一层架构                            | plan.md §二/§三 的增量约束、能力边界与外部依赖 | 模块/组件参考                                        |
+| 四、零层架构                            | tech-spec.md 第一部分 + 本 Feature · 二 约束摘要 | 阶段/边界参考                                        |
+| 五、一层架构                            | 本 Feature · 二～· 三 增量约束、能力边界与外部依赖 | 模块/组件参考                                        |
 | 六、技术风险与边界场景（设计输入）                 | —                 | NFR/风险参考；§七 的设计约束输入                         |
 | 七、疑难点/亮点（策略+流程图）                  | —                 | 设计决策参考：`epic-design.md` §7.1 清单 + `key-func-design/KD_*_*.md`；KD 内类图/时序图即为完整编码蓝图 |
 | 八、技术评估（设计产出验证）                    | —                 | **`nfr.md`**：NFR 量化验证；Task 验收标准；其中 **8.7 RomSize** 作为包体发布决策依据 |
-| 九、接口设计（→ `interface-design.md`）       | plan.md §三 能力边界与外部依赖对齐；plan 不写方法签名/字段 | **`interface-design.md`**：接口设计事实源；Task 接口实现依据           |
-| 十、数据库设计（→ `database-design.md`）     | plan.md §四 数据硬约束对齐；plan 不写表结构/字段/索引   | **`database-design.md`**：数据表结构参考；Task 数据层实现依据         |
+| 九、接口设计（→ `interface-design.md`）       | tech-spec.md 本 Feature · 三 能力边界对齐；tech-spec 不写方法签名/字段 | **`interface-design.md`**：接口设计事实源；Task 接口实现依据           |
+| 十、数据库设计（→ `database-design.md`）     | tech-spec.md 本 Feature · 四 数据硬约束对齐；tech-spec 不写表结构/字段/索引   | **`database-design.md`**：数据表结构参考；Task 数据层实现依据         |
 | 十一、埋点技术方案（→ `analytics-tracking.md`） | —                 | **`analytics-tracking.md`**：埋点事件与字段规约参考                |
 | 十二、Story 拆解                       | tasks.md 直接引用      | 每个 Task 绑定 ST-xxx                              |
 | 十三、二层 Story 详细设计（L2）索引 → `features/*/l2_design/ST-xxx_*.md` | —                 | 设计引用：`features/FEAT-xxx/l2_design/ST-xxx_<slug>.md:功能设计:类图/时序图` |

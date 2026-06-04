@@ -1,11 +1,10 @@
 ---
-描述：基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、`tech-spec.md`（本 Feature 章节）的技术规约与 spec.md 的 FR/NFR，为该 Feature 生成一份可执行、按依赖关系排序且内置追溯矩阵的 tasks.md 文件（Story → Task），严禁反向改写已冻结的 spec/tech-spec/design 技术决策（本工作流由 SE/TL 在 EPIC 分支产出与维护）。
-交接项：
-  - 标签：项目实施
-    执行主体：aisdd.implement
-    提示语：分阶段启动实施工作（/aisdd.analyze 为可选，非前置条件）
-    发送状态：是
-
+description: "基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、EPIC 根 tech-spec.md（本 Feature 章节）的技术规约与 spec.md 的 FR/NFR，为该 Feature 生成可执行、按依赖排序且内置追溯矩阵的 tasks.md（Story → Task）；严禁反向改写已冻结的 spec/tech-spec/design（SE/TL 在 EPIC 分支产出与维护）。"
+handoffs:
+  - label: 项目实施
+    agent: aisdd.implement
+    prompt: 分阶段启动实施工作（/aisdd.analyze 为可选，非前置条件）
+    send: true
 ---
 
 ## 用户输入
@@ -29,10 +28,10 @@ $ARGUMENTS
 2. **加载设计文档**：从 FEATURE_DIR 及 EPIC 目录中读取以下文档：
     - **必需文档**：
         - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三，若有）、**关键类图与关键时序**（§七 KD，若有）、**架构章节**（§一～§六）
-        - tech-spec.md（**轻量技术规约**：增量约束、能力边界、数据/NFR/安全硬约束）
+        - EPIC 根 `tech-spec.md`（本 Feature 对应第二节：增量约束、能力边界、数据/NFR/安全硬约束）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
-    - **可选文档**：tech-spec.md（EPIC 级技术约束）、data-model.md、contracts/、research.md、quickstart.md
-    - 注意：并非所有项目都包含全部文档。需基于实际可用的文档生成任务。
+    - **可选文档**：EPIC 根 `ux-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`research/codebase-*.md`（调研快照，只读辅助）
+    - 注意：并非所有 EPIC 都包含全部可选文档。需基于实际存在的文件生成任务。
 
 3. **追溯矩阵生成与一致性核对（只写入 tasks.md）**：
     - 从 `epic-design.md` §十二.6 覆盖矩阵提取 FR/NFR → Story 映射，并在 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵。
@@ -45,8 +44,7 @@ $ARGUMENTS
     - 从 **EPIC 软件设计说明书**的 **§十二 Story 拆解** 提取 Story 列表（ST-xxx），包括：目标、改动范围、依赖、覆盖 FR/NFR、验证条件
     - 从 spec.md 提取 FR/NFR 与 AC（验收标准）
     - 从 `database-design.md` 或各 L2 提取实体/表结构并映射至对应 Story
-    - 从 `interface-design.md`、contracts/ 目录或各 L2 提取接口端点并映射至对应 Story
-    - 若存在 research.md：提取决策信息并纳入环境搭建阶段任务
+    - 从 EPIC 根 `interface-design.md` 或各 L2 提取接口契约并映射至对应 Story
     - 按 Story 组织生成任务（详见下文「任务生成规则」）
     - 生成展示 Story 完成顺序的依赖关系章节（Story/Task 双层）
     - 为每个 Story 生成并行执行示例（仅列 [P] 任务）
@@ -126,7 +124,7 @@ $ARGUMENTS
     - 标注 Story 间依赖（以设计说明书为准）
 
 2. **基于接口设计**：
-    - 将 `interface-design.md`、contracts/ 或 L2 中的每个契约/接口端点映射至其服务对应的 Story
+    - 将 EPIC 根 `interface-design.md` 或 L2 中的每个契约/接口端点映射至其服务对应的 Story
 
 3. **基于数据设计**：
     - 将 `database-design.md` 或 L2 中的每个实体/表结构映射至其所属 Story

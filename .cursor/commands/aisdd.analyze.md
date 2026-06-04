@@ -60,7 +60,7 @@ $ARGUMENTS
 .specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
 ```
 
-解析 `FEATURE_DIR`、`FEATURE_SPEC`、`IMPL_PLAN`、`TASKS`。任一缺失则终止并提示补全前置命令。
+解析 `FEATURE_DIR`、`FEATURE_SPEC`、`TECH_SPEC`（或兼容字段 `IMPL_PLAN`，均指向 EPIC 根 `tech-spec.md`）、`TASKS`。任一缺失则终止并提示补全前置命令。
 
 ### 2. 加载工件（渐进式披露）
 

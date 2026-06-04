@@ -144,7 +144,8 @@ function Get-FeaturePathsEnv {
         FEATURE_KEY     = $featureKey
         FEATURE_DIR     = $featureDir
         FEATURE_SPEC    = Join-Path $featureDir 'spec.md'
-        IMPL_PLAN       = Join-Path $featureDir 'plan.md'
+        # IMPL_PLAN：兼容旧 JSON 字段名；EPIC 工作流下指向 EPIC 根 tech-spec.md，否则回退 legacy plan.md
+        IMPL_PLAN       = if ($techSpec) { $techSpec } else { Join-Path $featureDir 'plan.md' }
         UX_DESIGN       = $uxDesign
         DESIGN_DIR      = $designDir
         EPIC_DIR        = $epicDir

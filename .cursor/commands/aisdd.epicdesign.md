@@ -9,7 +9,6 @@ handoffs:
     agent: aisdd.analyze
     prompt: （可选）运行 /aisdd.analyze epic pre-tasks；跳过可直接 featuretasks
     send: false
-    send: false
   - label: 生成任务（Story → Task）
     agent: aisdd.featuretasks
     prompt: 将设计说明书中的 Story 拆解为可执行 tasks.md

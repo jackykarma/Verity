@@ -40,10 +40,10 @@ OPTIONS:
   -Help, -h           Show this help message
 
 EXAMPLES:
-  # Check task prerequisites (plan.md required)
+  # Check task prerequisites (EPIC tech-spec.md required)
   .\check-prerequisites.ps1 -Json
   
-  # Check implementation prerequisites (plan.md + tasks.md required)
+  # Check implementation prerequisites (tech-spec.md + tasks.md required)
   .\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
   
   # Get feature paths only (no validation)
@@ -105,8 +105,8 @@ if ($paths.EPIC_DIR) {
         exit 1
     }
 } elseif (-not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
-    Write-Output "ERROR: plan.md not found in $($paths.FEATURE_DIR)"
-    Write-Output "Run /aisdd.techspec (EPIC workflow) or legacy plan workflow first."
+    Write-Output "ERROR: tech-spec.md not found (EPIC workflow) and legacy plan.md not found in $($paths.FEATURE_DIR)"
+    Write-Output "Run /aisdd.techspec first to create the EPIC technical specification."
     exit 1
 }
 

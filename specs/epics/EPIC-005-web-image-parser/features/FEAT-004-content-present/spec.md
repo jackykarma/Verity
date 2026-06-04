@@ -8,7 +8,7 @@
 | Feature ID | FEAT-004 |
 | Feature 类型 | Capability |
 | Feature Version | v0.2.0 |
-| 状态 | 就绪（可进入 Plan） |
+| 状态 | 就绪（可进入 techspec） |
 | EPIC 分支 | `epic/EPIC-005-web-image-parser` |
 | Feature 目录 | `specs/epics/EPIC-005-web-image-parser/features/FEAT-004-content-present/` |
 | 创建时间 | 2026-05-22 |

@@ -8,7 +8,7 @@
 | Feature ID | FEAT-003 |
 | Feature 类型 | Product |
 | Feature Version | v0.3.0 |
-| 状态 | 就绪（可进入 Plan） |
+| 状态 | 就绪（可进入 techspec） |
 | EPIC 分支 | `epic/EPIC-005-web-image-parser` |
 | Feature 目录 | `specs/epics/EPIC-005-web-image-parser/features/FEAT-003-heic-structure/` |
 | 创建时间 | 2026-05-22 |

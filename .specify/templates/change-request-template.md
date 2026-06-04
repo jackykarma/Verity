@@ -6,7 +6,7 @@ description: "Change Request（CR）变更请求模板：用于需求/交互/视
 
 > **用途**：作为任何变更的**唯一入口**。先把“改了什么/为什么/影响谁/要更新哪些产物”说清楚，再进入增量更新与实现。
 >
-> **适用变更**：需求（Scope/FR/NFR/AC 的新增、修改、删除；含**中途新增需求**）、交互（流程/状态/反馈）、视觉&动效、技术方案（Plan 决策）。
+> **适用变更**：需求（Scope/FR/NFR/AC 的新增、修改、删除；含**中途新增需求**）、交互（流程/状态/反馈）、视觉&动效、技术方案（`tech-spec.md` / `epic-design.md` 决策）。
 >
 > **走流程**：推荐运行 `/aisdd.cr` 命令自动执行（影响分析 → 生成 CR → 分步更新下游产物）；或手动填写本 CR 并评审通过后，按类型走 [workflow-overview.md §七](../workflow-overview.md#七变更管理)——需求类走 7.1，技术方案类走 7.2，按「下游更新清单」逐项更新产物。
 
@@ -27,7 +27,7 @@ description: "Change Request（CR）变更请求模板：用于需求/交互/视
 - **删除**：
   - …
 
-> 建议：用 ID/引用定位到事实源，例如 `FR-001`、`AC-002`、`NFR-PERF-001`、`ux-design.md:页面/流程ID`、`plan.md:A2/A3/ST-xxx`。
+> 建议：用 ID/引用定位到事实源，例如 `FR-001`、`AC-002`、`NFR-PERF-001`、`ux-design.md:页面/流程ID`、`tech-spec.md`（第一部分或 Feature 节）、`epic-design.md` §章节、`ST-xxx`。
 
 ---
 
@@ -45,7 +45,7 @@ description: "Change Request（CR）变更请求模板：用于需求/交互/视
 - **EPIC/Feature**：EPIC-…；FEAT-…（可多选）
 - **Spec（FR/NFR/AC/边界）**：FR-… / NFR-… / AC-… / 边界/异常…
 - **UX（页面/流程/动效）**：UI-… / Flow-… / Motion-…
-- **Plan（约束/能力边界）**：§一～§四…；设计说明书：Story 拆解/L2/接口/数据库…
+- **Tech Spec（`tech-spec.md` 约束/能力边界）**：第一部分 §一～§四、第二部分各 Feature 节…；设计说明书：Story 拆解/L2/接口/数据库…
 - **Story/Task**：ST-… / T…
 
 ### 3.2 风险与回滚

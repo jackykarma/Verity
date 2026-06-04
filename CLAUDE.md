@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   memory/constitution.md        # 核心章程（AI 行为约束规则）
   templates/                    # 所有工作流产物的文档模板
   scripts/powershell/           # EPIC/Feature 管理 PowerShell 脚本
-  workflow-overview.md          # 端到端流程总览（首先阅读此文件）
+docs/aisdd/workflow-overview.md # 端到端流程总览（首先阅读此文件）
 .claude/
   commands/aisdd.*.md           # 各工作流阶段的 AI 斜杠命令
   rules/                        # 规则文件（.mdc），供命令主动读取
@@ -55,7 +55,7 @@ pwsh -NoProfile -File .\.specify\scripts\powershell\get-epic-paths.ps1 -EpicId E
 
 | 命令 | 产出物 | 说明 |
 |------|--------|------|
-| `/aisdd.research` | `research/codebase-*-<date>.md`（可选） | **前置代码考古**：只记录存量代码事实快照；不做方案决策；plan/design/CR **不回写** |
+| `/aisdd.research` | `research/codebase-*-<date>.md`（可选） | **前置代码考古**：只记录存量代码事实快照；不做方案决策；techspec/design/CR **不回写** |
 | `/aisdd.epicspec` | `epic.md` | EPIC 入口，运行 `create-new-epic.ps1` |
 | `/aisdd.featurespec` | 各 Feature `spec.md` | FR / NFR / AC |
 | `/aisdd.techspec` | `tech-spec.md` | **EPIC 唯一技术规格书**（合并原 epic-plan + 各 Feature plan） |

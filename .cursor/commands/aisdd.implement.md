@@ -1,5 +1,5 @@
 ---
-description: "执行实施计划，处理并执行 tasks.md 中定义的所有任务（开发者在 Story 分支执行；严格遵循 EPIC 分支冻结的 spec/tech-spec/epic-design/tasks）"
+description: "执行实施计划，处理并执行 tasks.md 中定义的所有任务（在 EPIC 分支上按 Task 实施；严格遵循已冻结的 spec/tech-spec/epic-design/tasks）"
 ---
 
 ## 用户输入
@@ -20,15 +20,12 @@ $ARGUMENTS
 
 2. 加载并分析实施上下文：
     - **必填**：读取 tasks.md 获取完整任务列表和执行计划
-    - **必填**：读取 tech-spec.md 获取**技术规格**（约束/契约/边界）
+    - **必填**：读取 EPIC 根 `tech-spec.md`（第一部分 EPIC 公共约束 + 本 Feature 第二节）获取技术规约（约束/能力边界/数据与 NFR 硬约束）
     - **必填**：读取 **EPIC 软件设计说明书**（`epic-design.md`）获取**架构设计、全景类图、关键时序、Story 拆解**——这是代码实现的**架构事实源**
-    - **必填**：读取各 Feature **`l2_design/ST-xxx_*.md`** 获取 **Story L2 详细设计（类图、时序图、触发条件）**——这是代码实现的**详细设计事实源**
+    - **必填**：读取本 Feature **`l2_design/ST-xxx_*.md`**（若有）获取 **Story L2 详细设计（类图、时序图、触发条件）**——这是代码实现的**详细设计事实源**
     - **必填**：读取 spec.md 获取 FR/NFR 与验收边界
-    - **若存在**：读取 tech-spec.md 获取 EPIC 级技术约束
-    - **若存在**：读取 data-model.md 获取实体及关系
-    - **若存在**：读取 contracts/ 目录获取 API 规范
-    - **若存在**：读取 research.md 获取技术决策
-    - **若存在**：读取 quickstart.md 获取集成场景
+    - **若存在**：读取 EPIC 根 `ux-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md` 获取体验与专项设计约束
+    - **若存在**：读取 `research/codebase-*.md` 辅助理解存量代码（只读事实快照，非约束源、非技术决策依据）
 
    **强制约束（不可越权）**：
     - Implement 阶段 **不得**擅自改写 `tech-spec.md` 的技术规约、`epic-design.md` 的架构与 Story 设计，也不得改写 `spec.md` 的 FR/NFR/AC。

@@ -35,7 +35,7 @@ $ARGUMENTS
 
 在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）产出 **唯一** `tech-spec.md`，结构见 `.specify/templates/tech-spec-template.md`：
 
-- **第一部分**：原 `epic-plan` 内容（EPIC 公共约束、跨 Feature 边界、运行时、数据总约束、共享能力、编写顺序）
+- **第一部分**：原 `epic-plan.md` 对应内容（EPIC 公共约束、跨 Feature 边界、运行时、数据总约束、共享能力、编写顺序）
 - **第二部分**：为 `epic.md` 中**每个 Feature** 各一节（规约摘要、增量约束、能力边界、数据/NFR/安全硬约束）
 
 **禁止写入**：架构图、类图、时序、接口签名、表字段、Story、NFR 预算表（→ `nfr.md`）、接口契约（→ `interface-design.md`）。

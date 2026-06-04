@@ -97,12 +97,12 @@ $ARGUMENTS
 
 **判断分界点**：「删掉这条后，EPIC 的业务范围与拆分逻辑是否仍完整？」仍完整 → 删除；不完整 → 改写为业务语言后保留。
 
-**Feature 拆分条目的合法字段**：Feature 名称（业务语言）、Feature 类型（Product / Capability）、目标、In Scope / Out of Scope、依赖关系（Feature 间 / 外部团队）、验收意图、拆分动机。**禁止**在 Feature 条目里出现"该 Feature 将使用 xxx 框架/库/类实现"等技术决策——这些属于 `tech-spec.md` 或tech-spec.md（第二部分各 Feature 节）。
+**Feature 拆分条目的合法字段**：Feature 名称（业务语言）、Feature 类型（Product / Capability）、目标、In Scope / Out of Scope、依赖关系（Feature 间 / 外部团队）、验收意图、拆分动机。**禁止**在 Feature 条目里出现"该 Feature 将使用 xxx 框架/库/类实现"等技术决策——这些属于 EPIC 根 `tech-spec.md`（第二部分各 Feature 节）。
 
 **拦截提示格式**：
 
 ```
-⚠️ 边界检查：以下内容疑似属于 tech-spec.md / tech-spec.md / epic-design.md 而非 epic.md：
+⚠️ 边界检查：以下内容疑似属于 tech-spec.md / epic-design.md 而非 epic.md：
 
 1. [原文条目] → 命中类别：[...] → 建议归入 [...]
 

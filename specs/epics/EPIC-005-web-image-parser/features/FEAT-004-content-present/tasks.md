@@ -3,7 +3,7 @@
 **Epic**：EPIC-005 - Web 端图片数据解析器  
 **Feature ID**：FEAT-004  
 **Feature Version**：v0.2.0（来自 `spec.md`）  
-**Plan Version**：v0.1.0（来自 `tech-spec.md`）  
+**Tech Spec Version**：v0.1.0（来自 EPIC 根 `tech-spec.md`）  
 **Tasks Version**：v0.1.0  
 **输入**：`spec.md`、`tech-spec.md`（EPIC + Feature FEAT-004 章节）、`epic-design.md` §十二、`l2_design/ST-401_present_contract.md`、`interface-design.md`
 

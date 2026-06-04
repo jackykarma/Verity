@@ -7,7 +7,7 @@ description: "Story → Task 落地任务清单模板"
 **Epic**：EPIC-[编号] - [名称]
 **Feature ID**：FEAT-[编号，例如 001]
 **Feature Version**：v0.1.0（来自 `spec.md`）
-**Plan Version**：v0.1.0（来自 `tech-spec.md`）
+**Tech Spec Version**：v0.1.0（来自 EPIC 根 `tech-spec.md`）
 **Tasks Version**：v0.1.0
 **输入**：来自 `Feature 目录/` 的设计文档（`spec.md`、`tech-spec.md` 以及可选工件）
 
@@ -79,10 +79,10 @@ description: "Story → Task 落地任务清单模板"
 - [ ] T001 在 `specs/[###-feature-short-name]/` 中核对 `spec.md`、`tech-spec.md`、EPIC 软件设计说明书（若存在）的 Version 字段一致性，并在本 `tasks.md` 中记录输入基线
   - **依赖**：无
   - **步骤**：
-    - 1) 确认 `Feature Version`、`Plan Version` 已填写
+    - 1) 确认 `Feature Version`、`Tech Spec Version` 已填写
     - 2) 确认 EPIC 软件设计说明书中的 Story 拆解已完成（ST-xxx）
   - **验证**：
-    - [ ] tasks.md 中 `Plan Version` 与 tech-spec.md 一致
+    - [ ] tasks.md 中 `Tech Spec Version` 与 EPIC 根 `tech-spec.md` 的 Tech Spec Version 一致
   - **产物**：`spec.md`、`tech-spec.md`、`tasks.md`
 
 ---

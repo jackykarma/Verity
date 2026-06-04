@@ -1,12 +1,12 @@
 #!/usr/bin/env pwsh
 <#!
 .SYNOPSIS
-Update agent context files with information from plan.md (PowerShell version)
+Update agent context files with information from tech-spec.md (PowerShell version)
 
 .DESCRIPTION
 Mirrors the behavior of scripts/bash/update-agent-context.sh:
  1. Environment Validation
- 2. Plan Data Extraction
+ 2. Tech Spec Data Extraction
  3. Agent File Management (create from template or update existing)
  4. Content Generation (technology stack, recent changes, timestamp)
  5. Multi-Agent Support (claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, roo, codebuddy, amp, shai, q, bob, qoder)
@@ -41,7 +41,8 @@ $REPO_ROOT     = $envData.REPO_ROOT
 $CURRENT_BRANCH = $envData.CURRENT_BRANCH
 $HAS_GIT       = $envData.HAS_GIT
 $IMPL_PLAN     = $envData.IMPL_PLAN
-$NEW_PLAN = $IMPL_PLAN
+$TECH_SPEC     = $envData.TECH_SPEC
+$NEW_PLAN = if ($TECH_SPEC -and (Test-Path -LiteralPath $TECH_SPEC)) { $TECH_SPEC } else { $IMPL_PLAN }
 
 # Agent file paths
 $CLAUDE_FILE   = Join-Path $REPO_ROOT 'CLAUDE.md'
@@ -63,7 +64,7 @@ $BOB_FILE      = Join-Path $REPO_ROOT 'AGENTS.md'
 
 $TEMPLATE_FILE = Join-Path $REPO_ROOT '.specify/templates/agent-file-template.md'
 
-# Parsed plan data placeholders
+# Parsed tech-spec data placeholders
 $script:NEW_LANG = ''
 $script:NEW_FRAMEWORK = ''
 $script:NEW_DB = ''
@@ -108,7 +109,7 @@ function Validate-Environment {
         exit 1
     }
     if (-not (Test-Path $NEW_PLAN)) {
-        Write-Err "No plan.md found at $NEW_PLAN"
+        Write-Err "No tech-spec.md found at $NEW_PLAN"
         Write-Info 'Ensure you are working on a feature with a corresponding spec directory'
         if (-not $HAS_GIT) { Write-Info 'Use: $env:SPECIFY_FEATURE=your-feature-name or create a new feature first' }
         exit 1
@@ -144,7 +145,7 @@ function Parse-PlanData {
         [string]$PlanFile
     )
     if (-not (Test-Path $PlanFile)) { Write-Err "Plan file not found: $PlanFile"; return $false }
-    Write-Info "Parsing plan data from $PlanFile"
+    Write-Info "Parsing tech-spec data from $PlanFile"
     $script:NEW_LANG        = Extract-PlanField -FieldPattern 'Language/Version' -PlanFile $PlanFile
     $script:NEW_FRAMEWORK   = Extract-PlanField -FieldPattern 'Primary Dependencies' -PlanFile $PlanFile
     $script:NEW_DB          = Extract-PlanField -FieldPattern 'Storage' -PlanFile $PlanFile
@@ -235,7 +236,7 @@ function New-AgentFile {
         $techStackForTemplate = "- $escaped_framework ($escaped_branch)"
     }
     
-    $content = $content -replace '\[EXTRACTED FROM ALL PLAN.MD FILES\]',$techStackForTemplate
+    $content = $content -replace '\[EXTRACTED FROM ALL PLAN.MD FILES\]',$techStackForTemplate  # template placeholder; source is tech-spec.md
     # For project structure we manually embed (keep newlines)
     $escapedStructure = [Regex]::Escape($projectStructure)
     $content = $content -replace '\[ACTUAL STRUCTURE FROM PLANS\]',$escapedStructure
@@ -430,7 +431,7 @@ function Print-Summary {
 function Main {
     Validate-Environment
     Write-Info "=== Updating agent context files for feature $CURRENT_BRANCH ==="
-    if (-not (Parse-PlanData -PlanFile $NEW_PLAN)) { Write-Err 'Failed to parse plan data'; exit 1 }
+    if (-not (Parse-PlanData -PlanFile $NEW_PLAN)) { Write-Err 'Failed to parse tech-spec data'; exit 1 }
     $success = $true
     if ($AgentType) {
         Write-Info "Updating specific agent: $AgentType"
