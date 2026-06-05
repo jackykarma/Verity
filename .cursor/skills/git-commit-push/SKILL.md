@@ -202,7 +202,8 @@ Closes #789
 1. git add (上述文件)
 2. git commit -F .git-msg.txt （Windows 下推荐；需先将上述提交信息写入 UTF-8 文件）
    或 git commit -m "..." （Unix/Linux/macOS）
-3. git push origin <当前分支>
+3. 删除临时文件 `.git-msg.txt`（**必做**，无论 commit 是否成功）
+4. git push origin <当前分支>
 
 ---
 
@@ -232,7 +233,9 @@ git add .  # 如果用户要求添加所有文件
 # 1. 将提交信息写入 UTF-8 文件
 # 2. 执行提交
 git commit -F .git-msg.txt
-# 提交完成后可删除 .git-msg.txt
+# 3. 立即删除临时文件（必做）
+Remove-Item .git-msg.txt -ErrorAction SilentlyContinue   # PowerShell
+# rm -f .git-msg.txt                                      # Unix/Linux/macOS
 ```
 
 **备选（Unix/Linux/macOS）**: 使用 HEREDOC 确保多行格式正确：
@@ -253,7 +256,16 @@ EOF
 
 **注意**: Windows PowerShell 下 `git commit -m "中文"` 易乱码，务必使用 `-F` 读取 UTF-8 文件。
 
-**5.3 推送到远程**
+**5.3 清理临时提交信息文件（必做）**
+
+使用 `.git-msg.txt` 提交后，**必须**立即删除该文件，避免遗留未跟踪文件或误提交：
+
+```bash
+Remove-Item .git-msg.txt -ErrorAction SilentlyContinue   # PowerShell
+# rm -f .git-msg.txt                                      # Unix/Linux/macOS
+```
+
+**5.4 推送到远程**
 ```bash
 git push origin <branch-name>
 ```
@@ -380,8 +392,9 @@ git push --force-with-lease origin <branch>
 用户说"仅提交"、"先 commit 不 push"时:
 
 1. 执行 `git add` 和 `git commit -F .git-msg.txt`（或 `-m`）
-2. **跳过** `git push`
-3. 向用户报告: "✅ 已提交到本地，未推送。需要推送时请告诉我。"
+2. **删除** `.git-msg.txt`（若使用了 `-F`）
+3. **跳过** `git push`
+4. 向用户报告: "✅ 已提交到本地，未推送。需要推送时请告诉我。"
 
 ### 场景 7: 使用 Commit 模板
 
@@ -412,8 +425,9 @@ git commit
 1. ❌ 提交信息过于简单: "修改"、"更新"、"fix bug"
 2. ❌ 一次提交包含多个不相关的改动
 3. ❌ 提交敏感信息 (密钥、密码、token)
-4. ❌ 提交后不推送导致远程分支落后
-5. ❌ 直接在 main/master 分支提交 (应使用功能分支)
+4. ❌ 提交后不删除 `.git-msg.txt` 临时文件
+5. ❌ 提交后不推送导致远程分支落后
+6. ❌ 直接在 main/master 分支提交 (应使用功能分支)
 
 ### 🔐 安全检查清单
 

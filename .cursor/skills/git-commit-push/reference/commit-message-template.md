@@ -171,6 +171,8 @@ BREAKING CHANGE:   # 不兼容改动，需单独一行说明
 git commit -F .git-msg.txt
 ```
 
+3. **立即删除**临时文件 `.git-msg.txt`（必做，该文件已在 `.gitignore` 中）
+
 ## 八、配置 Git 使用模板（可选）
 
 ```bash
