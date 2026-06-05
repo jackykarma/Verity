@@ -108,7 +108,7 @@ $ARGUMENTS
    | 条件 | 提醒内容 |
    |------|---------|
    | 可选（质量加码） | 可运行 `/aisdd.analyze` / `/aisdd.analyze epic` 确认变更后各产物无矛盾；**非** implement 前置必做 |
-   | tasks.md 有更新 | 受影响的 Task（列出 Task ID）需重新执行 `/aisdd.implement`；实现后对照更新后的设计与 spec 自检 |
+   | tasks.md 有更新 | 受影响的 Task（列出 Task ID）需重新执行 `/aisdd.implement Txxx` 或 `/aisdd.implement ST-xxx`；实现后对照更新后的设计与 spec 自检 |
    | epic-design / l2_design 有更新 | 更新对应文档 Version 与变更记录；可选重跑 `/aisdd.analyze epic` |
    | tasks.md 有更新 | 更新 Version 与变更记录；可选重跑 `/aisdd.analyze`（feature） |
    | 代码已实现部分受影响的 Story | 重新实现或修复后，对照更新后的 `epic-design.md` / L2 与 `spec.md` 自检实现一致性 |

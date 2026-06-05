@@ -244,6 +244,6 @@ $ARGUMENTS
 /aisdd.featurespec × N  →  /aisdd.challenge spec  →  /aisdd.techspec / epicuidesign
 /aisdd.techspec × N  →  /aisdd.challenge techspec  →  /aisdd.epicdesign
 /aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.analyze epic pre-tasks（可选）  →  /aisdd.featuretasks
-/aisdd.featuretasks × N →  /aisdd.implement（analyze 全程可选，可插入 epic / feature 分析）
-/aisdd.implement        →  实现自检 / 合并发布
+/aisdd.featuretasks × N →  /aisdd.implement（全量 / ST-xxx / Txxx；analyze 全程可选）
+/aisdd.implement [all|ST-xxx|Txxx]  →  实现自检 / 合并发布
 ```

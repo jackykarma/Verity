@@ -1,5 +1,5 @@
 ---
-description: "当用户输入 /aisdd.implement 时触发：分阶段执行 tasks.md 中的任务，实现代码"
+description: "当用户输入 /aisdd.implement 时触发：分阶段执行 tasks.md 中的任务，实现代码；支持全量、按 ST-xxx 或 Txxx 指定范围"
 alwaysApply: false
 ---
 
@@ -7,7 +7,24 @@ alwaysApply: false
 
 ## 触发
 
-用户输入 `/aisdd.implement`，可附带 Task ID（如 `T101`）或 Story ID（如 `ST-001`）。
+用户输入 `/aisdd.implement`。作用于当前 Feature。
+
+## 范围参数
+
+| 参数 | 行为 |
+|------|------|
+| 无参数 / `all` | 执行 `tasks.md` 中全部未完成 Task |
+| `ST-xxx`（可多个） | 仅执行指定 Story 的未完成 Task + 依赖闭包 |
+| `Txxx`（可多个） | 仅执行指定 Task + 依赖闭包 |
+| `-h` | 输出帮助，不执行代码 |
+
+`all` 与 `ST-xxx` / `Txxx` 互斥；`ST-xxx` 与 `Txxx` 互斥。
+
+## 依赖闭包
+
+- 从目标 Task 的 **依赖** 字段递归纳入仍为 `- [ ]` 的 `T???`
+- 已 `- [x]` 的 Task 跳过
+- Story 模式：起始集 = 带 `[ST-xxx]` 的未完成 Task；闭包可含阶段 0～2 或其他 Story 的阻塞 Task
 
 ## 目的
 
@@ -15,29 +32,31 @@ alwaysApply: false
 
 ## 前置条件
 
-1. 本 Feature 的 `tasks.md` 已完成
-2. **不要求**事先运行 `/aisdd.analyze`（可选、非阻塞）
+1. 本 Feature 的 `tasks.md` 已存在
+2. Story / Task 模式下，目标 Story 或 Task 已在 `tasks.md` 中定义
+3. **不要求**事先运行 `/aisdd.analyze`（可选、非阻塞）
 
 ## 输入（必须阅读）
 
-1. **本 Feature 的 `tasks.md`**：完整任务列表和执行计划
+1. **本 Feature 的 `tasks.md`**：完整任务列表 + 本次执行集
 2. **本 Feature 的 `tech-spec.md`**：技术规格（约束/契约/边界）
 3. **`epic-design.md`**：架构设计、全景类图、关键时序、Story 拆解——架构事实源
-4. **各 Feature 的 `l2_design/ST-xxx_*.md`**：复杂/高风险 Story 的 L2 详细设计（若有）；简单 Story 以 `tasks.md` 的设计引用与 DoD 承接
+4. **各 Feature 的 `l2_design/ST-xxx_*.md`**：执行集涉及 Story 的 L2 详细设计（若有）
 5. **本 Feature 的 `spec.md`**：FR/NFR 与验收边界
-6. **`tech-spec.md`**（若存在）：EPIC 级技术约束
+6. **EPIC 根 `tech-spec.md`**（若存在）：EPIC 级技术约束
 7. **现有工程代码**：被修改的文件及其上下文
 
 ## 执行流程
 
-1. **解析任务结构**：提取任务阶段（搭建/测试/核心开发/集成/优化）、依赖关系、设计引用
-2. **分阶段执行**：完成一个阶段后再进入下一阶段
-   - **遵循依赖关系**：顺序任务按序执行，并行任务 `[P]` 可同时执行
-   - **引用设计**：实现每个 Task 时，先读取其设计引用指向的 `epic-design.md` 章节或 `l2_design/ST-xxx_<slug>.md`，确保实现与设计一致
-   - **基于文件的协调**：影响同一文件的任务必须顺序执行
-3. **验证检查点**：每个阶段完成后执行验证项
-4. **标记完成**：任务完成后在 tasks.md 中将对应任务标记为 `[x]`
-5. **进度跟踪**：每个任务完成后汇报进度；非并行任务失败则终止；并行任务失败则继续执行成功的任务并上报失败
+1. **解析范围参数**，构建执行集并在报告开头列出
+2. **解析任务结构**：提取执行集内的阶段、依赖、设计引用
+3. **分阶段执行**（仅执行集）：
+   - **遵循依赖关系**：顺序任务按序，并行 `[P]` 可同时
+   - **引用设计**：先读设计引用再编码
+   - **基于文件的协调**：同文件 Task 顺序执行
+4. **验证检查点**：按模式验证（全量 / Story 检查点 / Task 验证项）
+5. **标记完成**：执行成功的 Task 在 `tasks.md` 中改为 `[x]`
+6. **进度跟踪**：非并行失败终止本次执行集；并行失败继续成功项并上报
 
 ## 执行顺序规则
 
@@ -49,16 +68,17 @@ alwaysApply: false
 
 ## 行为约束（不可越权）
 
-- **不得擅自改写设计**：实现必须与 `epic-design.md` 的架构图/类图/时序图和 `tech-spec.md` 的技术规约一致；允许在细节上做必要调整但不得偏离整体设计方向
-- **不得擅自改写 FR/NFR/AC**：`spec.md` 中的需求是实现的验收标准
-- **遵循 EPIC 技术约束**：分层/线程/错误处理/命名等必须与 tech-spec.md 一致
+- **不得擅自改写设计**：实现必须与 `epic-design.md` 和 `tech-spec.md` 一致
+- **不得擅自改写 FR/NFR/AC**：`spec.md` 是验收标准
+- **遵循 EPIC 技术约束**：分层/线程/错误处理/命名等与 tech-spec 一致
 - **演进式实现**：基于现有代码扩展，不得大规模重写（constitution §二）
-- **最小改动原则**：能用 3 行代码解决的不要写 300 行（constitution §五）
-- **发现设计缺口时**：停止 Implement，提交变更提案（建议使用 `change-request-template.md` 作为 CR 模板），由 SE/TL 先更新设计文档再继续
+- **最小改动原则**：能用 3 行解决的不要写 300 行（constitution §五）
+- **发现设计缺口时**：停止 Implement，提交变更提案，由 SE/TL 先更新设计文档再继续
 
 ## 完成后
 
 提示用户：
-1. 输出最终状态，汇总已完成的工作
-2. 检查已实现功能是否匹配 `spec.md` 的 FR/NFR/AC
-3. 对照 spec/tech-spec/epic-design 完成实现自检，通过后合并/发布；偏离走 `/aisdd.cr`
+1. 输出本次执行范围、已完成 Task、仍为 `- [ ]` 的 Task
+2. Story 模式：可对下一 Story 运行 `/aisdd.implement ST-xxx`
+3. 全量且全部完成：对照 spec/techspec/design 自检，通过后合并/发布
+4. 偏离走 `/aisdd.cr`

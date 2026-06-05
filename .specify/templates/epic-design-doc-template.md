@@ -539,7 +539,7 @@ flowchart LR
 
 > **说明**：Story 是 Feature 内的**技术开发分解单位**，从技术视角拆分，服务于**并行开发**和**分笔 git 提交**。Feature 才是最小交付单位（面向 PM/QA 演示验收），Story 不要求独立可交付。Task 在 tasks.md 中拆解，须引用本设计说明书及（若存在）对应 Feature `l2_design/ST-xxx_<slug>.md` 中的 L2 详细设计。
 >
-> **下游追溯**：`/aisdd.featuretasks` 执行时在各 Feature 的 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵；不反向修改已冻结的 `spec.md` 或 `tech-spec.md`。若发现上下游矛盾，须先通过 CR 或指定设计章节更新后再生成任务。
+> **下游追溯**：`/aisdd.featuretasks` 执行时在各 Feature 的 `tasks.md` 中生成 FR/NFR → Story → Task 追溯矩阵（支持全量 `all` 或按 `ST-xxx` 增量合并）；不反向修改已冻结的 `spec.md` 或 `tech-spec.md`。若发现上下游矛盾，须先通过 CR 或指定设计章节更新后再生成任务。
 
 ### 12.1 拆解策略与约束（摘要）
 
@@ -729,7 +729,7 @@ flowchart TB
 ### 13.3 L2 覆盖度检查
 
 - 所有 §十二 Story 拆解中的 ST-xxx 在 §十三.1 索引表中有对应条目，且 **l2_design/** 下存在同名前缀文件 `ST-xxx_*.md`
-- 所有 L2 设计状态为「已完成」（进入 featuretasks 的前置条件）
+- 目标 Story 的 L2 设计状态为「已完成」，或 §十三 已标注由 `tasks.md` DoD 承接（进入 `/aisdd.featuretasks ST-xxx` 的前置条件；全量 `all` 要求本 Feature 全部 Story 满足）
 - 所有涉及 §七 KD 关键设计的 Story，在 §十三.1「关联 KD」与 L2 文件首部「L2 依赖与引用」中均已列出对应 KD
 - 所有 L2 中与关联 KD 重叠的核心类、接口契约、状态流转、异常策略、并发/持久化策略与 KD 保持一致；若存在调整，已先更新 KD 或记录设计变更
 - §十三.1「前置依赖」与 §十三.2、各 L2 文件首部「L2 依赖与引用」**无矛盾**

@@ -63,6 +63,10 @@ description: "Story → Task 落地任务清单模板"
 - spec.md 的 FR/NFR（用于验证与追溯）
 - （可选）data-model.md、contracts/、research.md、quickstart.md
 
+**生成范围**：
+- 无参数 / `all`：为本 Feature 全部 Story 整份生成 tasks.md
+- `ST-xxx`（可多个）：仅为指定 Story 增量合并进已有 tasks.md，保留其他 Story 的 Task 与 `- [x]` 进度
+
 任务必须按 Story（ST-xxx）组织，确保每个 Story：
 - 可独立实现
 - 可独立验证（验收方式明确）

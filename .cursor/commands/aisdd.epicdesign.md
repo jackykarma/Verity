@@ -165,7 +165,7 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
    - key 完成 → 提示继续 `nfr`
    - nfr 完成 → 提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.analyze epic pre-tasks`（多 Feature 可选）→ `/aisdd.featuretasks`（在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
+   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.analyze epic pre-tasks`（多 Feature 可选）→ `/aisdd.featuretasks`（全量 `all` 或按 Story 增量 `ST-xxx`；在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
 
 核心规则：
 - 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的图表（关键类图、核心调用链时序图，及按需方案架构图）**直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**必须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举关键异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，**把核心技术方案与实现思路讲明白**——覆盖关键技术点、关键链路与每个关键环节如何达成，并与类图/时序图（及若有的方案架构图）一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环

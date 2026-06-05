@@ -50,7 +50,7 @@ $ARGUMENTS
 
 ### 运行本命令时的输入要求（非流程门禁）
 
-用户**选择运行** feature 分析时，须已有完整 `tasks.md`（通常由 `/aisdd.featuretasks` 产出）；缺失则终止并提示先补 tasks——**这不表示** workflow 必须先跑 analyze。
+用户**选择运行** feature 分析时，须已有 `tasks.md`（通常由 `/aisdd.featuretasks` 产出；增量模式下至少含目标 Story 的 Task）；缺失则终止并提示先补 tasks——**这不表示** workflow 必须先跑 analyze。
 
 ### 1. 初始化
 

@@ -161,8 +161,8 @@ flowchart TD
     Step3 --> Step5["/aisdd.epicuidesign<br/>解析设计稿 → ux-design.md"]
     Step5 -.-> Step4
     Step4 --> Step6["/aisdd.epicdesign<br/>key → nfr<br/>→ story → l2"]
-    Step6 --> Step7["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（内置追溯矩阵）"]
-    Step7 --> Step8["/aisdd.implement<br/>按 Task 逐个实现代码"]
+    Step6 --> Step7["/aisdd.featuretasks<br/>产出各 Feature tasks.md<br/>（全量 all 或增量 ST-xxx）"]
+    Step7 --> Step8["/aisdd.implement<br/>全量 / ST-xxx / Txxx"]
     Step8 --> Step9([交付 / 合并主分支])
 
     style Step0 fill:#F3E5F5,stroke:#7B1FA2
@@ -183,10 +183,10 @@ flowchart TD
 | 6 | `/aisdd.epicdesign` | `epic-design.md` + 子文件（`key` / `nfr` / `story` / `l2`） | 分阶段。前置：`get-epic-paths.ps1 -Json` 中 `HAS_TECH_SPEC` 为 true |
 | 6.5 | `/aisdd.challenge design` | 挑战报告（不写入文件）：从三视角对抗性检测安全漏洞、性能可达性、Android 生态兼容性 | **可选**；多 Feature EPIC 强烈推荐；CR 变更后必须运行。进入 `featuretasks` 前运行 |
 | 6.6 | `/aisdd.analyze epic pre-tasks` | EPIC 跨 Feature 分析报告（不写入文件） | **可选**；多 Feature EPIC；`epicdesign` 后、`featuretasks` 前；不要求 tasks.md |
-| 7 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 每个 Feature 一次 |
+| 7 | `/aisdd.featuretasks` | 各 Feature `tasks.md`（内置 FR/NFR → Story → Task 追溯矩阵） | 每个 Feature 一次；**全量**（无参数/`all`）或**增量**（`ST-xxx`，可多次合并） |
 | 7.5 | `/aisdd.analyze epic` | EPIC 全量一致性分析报告（含各 Feature tasks） | **可选**；多 Feature 质量加码；**非** implement 前置必做 |
 | 7.6 | `/aisdd.analyze` | 单 Feature 分析报告（scope=feature，默认） | **可选**；每个 Feature 至多一次；**非阻塞** implement |
-| 8 | `/aisdd.implement` | 代码 | 按 Task 逐个执行；完成后对照 spec/techspec/design 自检 |
+| 8 | `/aisdd.implement` | 代码 | **全量**（无参数/`all`）、**Story**（`ST-xxx`）或 **Task**（`Txxx`）；含依赖闭包；完成后对照 spec/techspec/design 自检 |
 | — | `/aisdd.cr` | CR 文件 + 下游产物增量更新 | 变更时按需（自动影响分析 → 生成 CR → 分步更新） |
 
 ---
@@ -347,7 +347,7 @@ gantt
 
 **关键规则**：
 
-1. **Feature 级交付是最小可并行单元**——SE 产出某 Feature 的 `tasks.md` 后，该 Feature 即可交给 DEV 开始实现
+1. **Feature 级交付是最小可并行单元**——SE 产出某 Feature 的 `tasks.md`（可先对单个 Story 跑 `/aisdd.featuretasks ST-xxx` 增量生成）后，该 Feature 即可交给 DEV 开始实现
 2. **SE 必须先完成** `epic.md`、全部 `spec.md` 与 **`tech-spec.md`** 再进入 `epic-design` / `featuretasks`
 3. **Feature 内部 Story/Task 可以按依赖关系进一步拆分给多个 DEV**（见 §8.4）
 
@@ -474,6 +474,8 @@ DEV-B:                                                          [====== FEAT-2 �
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
+| v1.7.4 | 2026-06-06 | `/aisdd.implement` 支持全量、`ST-xxx` Story 范围、`Txxx` Task 范围；依赖闭包自动纳入未完成的前置 Task |
+| v1.7.3 | 2026-06-06 | `/aisdd.featuretasks` 支持全量（无参数/`all`）与按 Story 增量（`ST-xxx`）两种模式；增量模式合并进已有 `tasks.md` 并保留其他 Story 进度 |
 | v1.7.2 | 2026-06-05 | 术语统一：「Plan 阶段」→ techspec（`tech-spec.md`）；章程、模板、命令、脚本与流程图节点去过时 plan 表述 |
 | v1.7.1 | 2026-06-05 | 修复 epic-plan 合并后的文档替换残留；§六 命令表步骤编号与流程图对齐；命令 front matter（featuretasks/clarify/epicdesign）与 implement/featuretasks 遗留 spec-kit 引用 |
 | v1.7.0 | 2026-05-22 | **方案 C**：合并 `epic-plan.md` + 各 Feature `plan.md` → EPIC 根唯一 `tech-spec.md`；新增 `/aisdd.techspec`、`setup-techspec.ps1`、`tech-spec-template.md`；废弃 `/aisdd.epicplan`、`/aisdd.featureplan`；`get-epic-paths.ps1` 改为 `HAS_TECH_SPEC` |
