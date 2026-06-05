@@ -63,7 +63,7 @@ description: 为需求生成完整的技术设计方案，包含 0 层架构、1
 
 ### 图表配色规范
 
-> 详见 `.claude/rules/mermaid-style-guide.mdc`
+> 详见 `.cursor/rules/mermaid-style-guide.mdc`
 
 所有图表必须使用 Material Design 配色方案。
 

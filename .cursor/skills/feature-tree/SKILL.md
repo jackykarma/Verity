@@ -230,7 +230,7 @@ mindmap
 
 - 层级 ≤ 3 层：使用 `mindmap`（结构清晰、易读）
 - 层级 > 3 层或节点 > 30 个：拆为多张子树图，每张对应一个一级功能
-- 所有图表使用项目标准 init 块（见 CLAUDE.md 图表规范）
+- 所有图表使用项目标准 init 块（见 `.cursor/rules/mermaid-style-guide.mdc` 样式规范与 `.cursor/rules/specify-diagram-requirements.mdc` 内容规范）
 
 **mindmap 节点形状参考：**
 ```

@@ -408,7 +408,7 @@ git config commit.template
 git commit
 ```
 
-**本项目的模板**: `reference/commit-message-template.md`。可配置 `git config commit.template .claude/skills/git-commit-push/reference/commit-message-template.md`。
+**本项目的模板**: `reference/commit-message-template.md`。可配置 `git config commit.template .cursor/skills/git-commit-push/reference/commit-message-template.md`。
 
 ## 注意事项
 
@@ -441,7 +441,7 @@ git commit
 
 ### 📄 提交模板
 
-项目提供 [commit-message-template.md](reference/commit-message-template.md)，包含各类型的完整模板。可配置 `git config commit.template .claude/skills/git-commit-push/reference/commit-message-template.md`。
+项目提供 [commit-message-template.md](reference/commit-message-template.md)，包含各类型的完整模板。可配置 `git config commit.template .cursor/skills/git-commit-push/reference/commit-message-template.md`。
 
 ## 快速参考
 
