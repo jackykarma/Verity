@@ -61,7 +61,7 @@ description: "Story → Task 落地任务清单模板"
 /aisdd.featuretasks 命令必须基于以下内容替换为实际任务：
 - epic-design.md §十二 Story 拆解（ST-xxx）
 - spec.md 的 FR/NFR（用于验证与追溯）
-- （可选）data-model.md、contracts/、research.md、quickstart.md
+- （可选）interface-design.md、database-design.md、各 l2_design/ST-xxx_*.md、research/codebase-*.md
 
 **生成范围**：
 - 无参数 / `all`：为本 Feature 全部 Story 整份生成 tasks.md

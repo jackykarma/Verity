@@ -1,6 +1,6 @@
 ---
-
-## description: "EPIC 规格说明模板（输入为大需求容器，输出 Feature 列表与边界）"
+description: "EPIC 规格说明模板（输入为大需求容器，输出 Feature 列表与边界）"
+---
 
 # EPIC 规格说明：[EPIC 名称]
 

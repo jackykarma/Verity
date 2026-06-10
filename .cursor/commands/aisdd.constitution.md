@@ -44,8 +44,8 @@ $ARGUMENTS
     - 读取 `.specify/templates/tech-spec-template.md`，确保其中所有“章程检查项”或规则与更新后的原则保持一致。
     - 读取 `.specify/templates/spec-template.md`，检查范围/要求的一致性——若章程新增/移除了强制性章节或约束条件，需同步更新该文件。
     - 读取 `.specify/templates/tasks-template.md`，确保任务分类能体现新增或移除的、由原则驱动的任务类型（例如可观测性、版本控制、测试规范）。
-    - 读取 `.specify/templates/commands/*.md` 路径下的所有命令文件（包括本文件），验证当需要通用指引时，不存在过时的专属引用（仅保留 CLAUDE 等智能体专属名称）。
-    - 读取所有运行时指引文档（例如 `README.md`、`docs/quickstart.md`，或存在的智能体专属指引文件）。若原则有变更，需更新相关引用内容。
+    - 读取 `.cursor/commands/aisdd.*.md` 路径下的所有命令文件（包括本文件），验证当需要通用指引时，不存在过时的引用。
+    - 读取所有运行时指引文档（例如 `README.md`、`docs/aisdd/workflow-overview.md`）。若原则有变更，需更新相关引用内容。
 
 5. 生成同步影响报告（更新后作为 HTML 注释添加在章程文件顶部）：
     - 版本变更：旧版本 → 新版本
@@ -80,4 +80,3 @@ $ARGUMENTS
 若缺失关键信息（例如确实无法确定通过日期），插入 `TODO(<字段名>): 说明`，并在同步影响报告的“延后处理项”中列出。
 
 禁止创建新模板；始终基于现有 `.specify/memory/constitution.md` 文件进行操作。
-```

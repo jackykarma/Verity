@@ -264,81 +264,43 @@ EPIC 上下文：
 
 ### spec / ux-design 边界守护（必须）
 
-> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part B** 了解 spec↔ux 边界。
+> **识别特征详表（权威）**：`.cursor/rules/aisdd-document-boundaries.mdc` **Part B**（§B.2 三维度划分、§B.3 异常与状态重叠地带、§B.4 实操判断清单）。
 
-写入 `spec.md` 时，**必须检查**每条内容是否属于 spec 的事实源范围。若检测到以下**越界内容**，**禁止直接写入**，必须先向用户列出疑似越界条目并获得明确确认后再写入：
+写入 `spec.md` 时，**必须检查**每条内容是否越界进入 ux 事实源：**交互形态**（控件/手势/动画/反馈形式）、**视觉细节**（色值/间距/圆角/字号/动效参数）、**布局结构**、**状态视觉表现**（「长什么样」而非「何时进入/退出」）均归 `ux-design.md`。命中时**禁止直接写入**，按 block_ask 向用户列出条目并三选一：（a）移入 ux-design 待写清单（推荐）；（b）确认保留并说明理由；（c）拆分——行为部分留 spec，呈现部分移 ux-design。
 
-| 越界类型 | 识别特征 | 正确归属 |
-|----------|----------|----------|
-| 交互形态 | 描述用什么控件/手势/动画/反馈形式（如 BottomSheet、Snackbar、骨架屏） | `ux-design.md` 交互说明 |
-| 视觉细节 | 涉及色值、间距、圆角、字号、动效参数 | `ux-design.md` 视觉规范 |
-| 布局结构 | 描述界面区域划分、组件排列方式 | `ux-design.md` 布局结构 |
-| 状态视觉表现 | 描述某状态「长什么样」而非「何时进入/退出」 | `ux-design.md` 状态定义 |
-
-**提示格式**：
-
-```
-⚠️ 边界检查：以下内容疑似属于 ux-design.md 而非 spec.md：
-
-1. [具体条目] → 建议归入 ux-design.md「[目标章节]」
-2. [具体条目] → 建议归入 ux-design.md「[目标章节]」
-
-请确认：
-(a) 移入 ux-design 待写清单（推荐）
-(b) 确认保留在 spec.md（需说明理由）
-(c) 拆分：行为部分留 spec，呈现部分移 ux-design
-```
-
-**spec.md 中关于异常/状态的正确写法**：只写「系统必须……」级别的行为结果与量化指标，不写交互形态与视觉表现。例如：
-- ✅ spec：「网络失败时系统须提示错误并提供重试能力；已加载数据不丢失」
-- ❌ spec：「网络失败时显示错误插画 + 重试按钮（FilledButton），背景 #FFEBEE」← 属于 ux-design
+**异常/状态的正确写法**：只写「系统必须……」级别的行为结果与量化指标。
+- ✅「网络失败时系统须提示错误并提供重试能力；已加载数据不丢失」
+- ❌「网络失败时显示错误插画 + 重试按钮（FilledButton），背景 #FFEBEE」← 属于 ux-design
 
 ### spec / 技术细节边界守护（必须）
 
-> 参见 `.cursor/rules/aisdd-document-boundaries.mdc` **Part A** 了解 spec 纯净度与 techspec/design 边界。
+> **识别特征详表（权威）**：`.cursor/rules/aisdd-document-boundaries.mdc` **Part A**（§A.2 污染识别清单、§A.3 判断分界点、§A.4 NFR 特殊处理）。写入 `specs/**` 文件时该规则会自动附加，本节不重复详表。
 
-`spec.md` 是**纯粹的产品规格**，只写「系统必须做什么」与可测试的需求；**禁止**任何技术实现细节。写入 `spec.md` 时，**必须逐条扫描**是否含以下「技术污染」特征，命中即按 block_ask 流程拦截：
+`spec.md` 是**纯粹的产品规格**，只写「系统必须做什么」与可测试的需求；**禁止**任何技术实现细节。写入前**必须逐条扫描** 8 类技术污染特征，命中即按 block_ask 流程拦截：
 
-| 污染类别 | 识别特征（关键词 / 模式） | 正确归属 |
-|----------|---------------------------|----------|
-| 类名 / 接口名 | PascalCase 带技术后缀：`*ViewModel` / `*Repository` / `*UseCase` / `*Manager` / `*Service` / `*DataSource` / `*Mapper` / `*Provider` / `*Helper` / `*Controller` / `*Presenter` | `tech-spec.md` 对应 Feature §三 / `epic-design.md` 类图 |
-| 框架 / 库名 | Hilt / Dagger / Room / Compose / Coroutines / Flow / LiveData / Retrofit / OkHttp / WorkManager / Glide / Coil / RxJava / Moshi / Gson / Kotlinx.serialization 等命名 | `tech-spec.md` 第一部分或 Feature §二 |
-| 数据存储细节 | Room / DAO / Entity / 表名 / 字段名 / 字段类型 / SQL 语句 / 索引 / 主键 / 外键 / 触发器 | `database-design.md` |
-| API / 接口细节 | URL 路径（`/v1/...`、`/api/...`） / HTTP 方法（GET/POST 等） / 状态码 / Header / DTO 字段 / 请求体 schema | `interface-design.md` |
-| 代码结构 | 包路径（`com.xxx.yyy`） / 文件路径（`*.kt`/`*.java`） / Gradle 模块名 / 代码片段 / 函数签名 | `epic-design.md §一～§六` 架构 |
-| 线程 / 并发原语 | `Dispatchers.IO/Main/Default` / `viewModelScope` / `launch` / `withContext` / `Mutex` / `Semaphore` / `synchronized` | `tech-spec.md` / `epic-design.md` |
-| 设计模式实现 | "用单例 / 观察者 / 策略 / 工厂模式实现……"且涉及代码语义而非业务语义 | `epic-design.md` |
-| 埋点字段 | 事件名（如 `click_gallery_btn`） / 参数 key / SDK 名（Firebase / 友盟 / 神策 / Mixpanel 等） | `analytics-tracking.md` |
+**8 类污染清单**：① 类名/接口名（`*ViewModel`/`*Repository` 等）② 框架/库名（Hilt/Room/Compose 等）③ 数据存储细节（DAO/表名/字段/SQL）④ API/接口细节（URL 路径/HTTP 方法/DTO 字段）⑤ 代码结构（包路径/文件路径/代码片段/函数签名）⑥ 线程/并发原语（`Dispatchers.*`/`Mutex` 等）⑦ 设计模式实现（代码语义层表述）⑧ 埋点字段（事件名/参数 key/SDK 名）。各类别的正确归属（tech-spec / epic-design / database-design / interface-design / analytics-tracking）见上述规则 §A.2。
 
-**判断分界点**（自问）：「删掉这条后，'系统必须做什么 + 在什么前提下 + 达到什么可验收结果' 是否仍完整？」
-- **仍完整** → 这是技术细节，应删除或改写
-- **不完整** → 这是需求，**改写为业务语言**后保留
-
-**NFR 例外**：量化指标本身（如 `p95 ≤ 300ms`、`内存峰值 ≤ 200MB`、`日均功耗增量 ≤ 5mAh`）属于 NFR 合法内容，不算污染；但**「用 xxx 库实现 xxx 优化」属于污染**，应归 `tech-spec.md`。
+**判断分界点**：「删掉这条后，'系统必须做什么 + 在什么前提下 + 达到什么可验收结果' 是否仍完整？」仍完整 → 技术细节，删除或改写；不完整 → 需求，改写为业务语言后保留。
+**NFR 例外**：量化指标本身（如 `p95 ≤ 300ms`、`日均功耗增量 ≤ 5mAh`）合法；「用 xxx 库实现 xxx 优化」属污染。
 
 **拦截后的提示格式**：
 
 ```
 ⚠️ 边界检查：以下内容疑似属于 tech-spec.md / epic-design.md 而非 spec.md：
 
-1. [具体条目，原文引用] → 命中类别：[类名/框架/数据存储/...] → 建议归入 [tech-spec.md §x / epic-design.md §y / database-design.md / interface-design.md / analytics-tracking.md]
-2. [具体条目，原文引用] → 命中类别：... → 建议归入 ...
+1. [具体条目，原文引用] → 命中类别：[...] → 建议归入 [...]
 
 请确认：
-(a) 改写为业务语言后留在 spec.md（推荐——保留业务意图，剥离技术词汇）
-(b) 移出 spec.md，记入待写清单交由 tech-spec / epic-design 处理（推荐，若该信息属于技术决策）
-(c) 确认保留原文（需说明理由——例如该术语已成为业务固定称呼）
+(a) 改写为业务语言后留在 spec.md（推荐）
+(b) 移出 spec.md，记入待写清单交由 tech-spec / epic-design 处理
+(c) 确认保留原文（需说明理由）
 (d) 拆分：业务部分留 spec，技术部分移入下游
 ```
 
-**正反例**：
+**正反例**（速查）：
 
-- ❌ spec：「使用 Room 数据库缓存最近 100 张照片」（含 `Room` 框架名）
-- ✅ spec：「系统须本地缓存最近 100 张照片，支持离线浏览；缓存命中率 ≥ 95%」
-- ❌ spec：「`PhotoRepository` 须提供 `loadRecent(limit: Int): Flow<List<Photo>>` 接口」（类名 + 方法签名）
-- ✅ spec：「系统须支持按数量批量加载最近照片，并在新照片入库时通知订阅方」（业务能力描述）
-- ❌ spec：「Top5% 用户单日新增 ≤ 5mAh，通过 `WorkManager` 调度后台任务实现」（含 `WorkManager`）
-- ✅ NFR：「Top5% 用户单日新增 ≤ 5mAh（前提：单日触发上限 200 次、单次任务 ≤ 30s）」
+- ❌「使用 Room 数据库缓存最近 100 张照片」→ ✅「系统须本地缓存最近 100 张照片，支持离线浏览；缓存命中率 ≥ 95%」
+- ❌「`PhotoRepository` 须提供 `loadRecent(limit: Int)` 接口」→ ✅「系统须支持按数量批量加载最近照片，并在新照片入库时通知订阅方」
 
 ### AI 生成规则
 
@@ -360,10 +322,10 @@ EPIC 上下文：
 **合理默认值示例**（无需询问）：
 
 - 数据留存：所属领域的行业通用做法
-- 性能指标：除非特别说明，否则采用标准 Web/移动应用的预期值
+- 性能指标：除非特别说明，否则采用标准移动应用的预期值（启动/响应/滚动流畅度）
 - 错误处理：用户友好的提示信息及适当的降级方案
-- 认证方式：Web 应用默认采用基于会话或 OAuth2 认证
-- 集成模式：除非特别说明，否则默认采用 RESTful API
+- 运行时权限：按需最小化申请；被拒绝时提供可用的降级体验
+- 离线与弱网：除非特别说明，默认要求已加载内容可用、操作可重试
 
 ### 成功标准编写指南
 
@@ -382,6 +344,6 @@ EPIC 上下文：
 
 **反面示例**（聚焦实现细节）：
 
-- "API 响应时间低于 200 毫秒"（过于技术化）
-- "数据库可处理 1000 TPS"（实现细节）
-- "React 组件渲染高效"（框架相关）
+- "API 响应时间低于 200 毫秒"（过于技术化，应改为"用户可即时看到结果"）
+- "数据库可处理 1000 TPS"（实现细节，应改为面向用户的指标）
+- "Compose 组件渲染高效"（框架相关）

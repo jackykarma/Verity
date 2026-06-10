@@ -63,27 +63,7 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
 
 **推荐顺序**：（无参数）→ arch → key → nfr → story → l2
 
-**`-h` 帮助输出**（当且仅当参数为 `-h` 时输出，不执行写入）：
-
-```
-/aisdd.epicdesign 参数说明：
-
-  (无参数)   首次调用，建立 epic-design.md 完整章节骨架 + 填充 §1~§6（架构 + 技术风险与边界场景），§7~§13 占位
-  arch       重新生成零层/一层架构（§1~§6）
-  key        按需产出关键设计（§7）→ key-func-design/KD_*_*.md（不产出根目录 key-func-design.md）；无关键疑难点时 §7 标注 N/A；更新 epic-design.md §7.1 清单与 §7.2 引用；KD 撰稿遵循 key-func-design-kd-template.md；**KD 内类图须含全量公共方法签名，时序须穷举全异常分支**
-  nfr        按需产出 nfr.md（§8 全文）+ interface-design.md + database-design.md + analytics-tracking.md；
-             epic-design.md §8～§11 均为摘要 + 链接（不粘贴子文件正文）
-             建议在 key 完成后、story 前执行
-  story      产出 Story 拆解（§12）
-  l2         按需产出 L2 详细设计（§13）→ 复杂/高风险 Story 生成 l2_design/ST-xxx_<slug>.md；简单 Story 可仅在 epic-design §13.1/13.2 标注由 tasks.md DoD 承接
-             若 Story 涉及 KD 关键设计，必须继承对应 KD 的核心类、接口契约、状态流转、异常策略和协作链，不得另起技术方案
-             可指定范围：l2 FEAT-001 或 l2 ST-001
-  all        一次性产出全部适用章节 §1~§13（含按需 l2），适用于高风险 EPIC 或上下文充裕时
-             依次执行：arch → key → nfr → story → l2
-  -h         显示本帮助信息
-
-推荐顺序：(默认) → arch → key → nfr → story → l2
-```
+**`-h` 帮助输出**：当且仅当参数为 `-h` 时，输出上方「章节范围参数」表格与推荐顺序作为帮助，不读写文件。
 
 ## 产出文件组
 
@@ -135,11 +115,14 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
 
 4. **根据参数产出**：
 
-   > **各阶段通用禁令（arch / key / nfr / story / l2 / all 均适用）**：本阶段仅产出设计事实源（`epic-design.md` 及子文件）；对 `spec.md`、`tech-spec.md` **仅只读消费**。**禁止**反向修改上述规格/规约文件的任何章节。发现 spec/tech-spec 缺口须**停止本阶段**，引导 `/aisdd.cr` 或 `/aisdd.clarify`；不得在 design 产物中「顺便」回写 spec/tech-spec。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
+   > **各阶段通用禁令（arch / key / nfr / story / l2 / all 均适用）**：
+   >
+   > 1. **只产出设计事实源**：本阶段仅产出 `epic-design.md` 及子文件；对 `spec.md`、`tech-spec.md` **仅只读消费**，**禁止**反向修改其任何章节。发现 spec/tech-spec 缺口须**停止本阶段**，引导 `/aisdd.cr` 或 `/aisdd.clarify`；不得在 design 产物中「顺便」回写 spec/tech-spec。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
+   > 2. **禁止产出废弃文件**：任何阶段（含 `all`、含 L2 阶段「补图」诉求）**不得**创建 EPIC 根目录 `key-func-design.md`、`key-diagram-epic.md`、`features/*/key-diagram.md` 或单独的流程图集——全景/子类图与完整时序已收敛在 §七各 KD 与 §十三 L2，图表只画在 `key-func-design/KD_*_*.md` 与 `l2_design/ST-xxx_*.md` 内。
 
    - **无参数**：生成/更新 `epic-design.md`，含完整 §1~§13 骨架；§1~§6 填充内容，§7~§13 占位（提示运行对应参数产出）。
    - **arch**：重写 `epic-design.md` 的 §1~§6。
-   - **key**：先判断是否存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计；若不存在，在 `epic-design.md` §7 标注 N/A 与原因，不创建 KD 文件。若适用，确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。**禁止**创建 EPIC 根目录 `key-func-design.md`，**不再**单独产出流程图集。KD 须含**核心方案**+**关键类图**（全量公共方法签名）+**核心调用链时序图**（穷举关键异常分支），按需可加方案架构图；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
+   - **key**：先判断是否存在关键疑难点、跨 Feature 核心方案、公共接口/状态机/并发/持久化等高风险设计；若不存在，在 `epic-design.md` §7 标注 N/A 与原因，不创建 KD 文件。若适用，确保存在目录 `EPIC_DIR/key-func-design/`；按 `key-func-design-kd-template.md` 为每个 KD 产出 **`key-func-design/KD_001_<slug>.md`** 等（命名 `KD_${三位序号}_${slug}.md`）；更新 `epic-design.md` **§7.1**（清单：层级/类型、前置 KD、路径、关联）和 **§7.2**（逐文件链接）。图表只画在各 KD 文件内，**不得**创建废弃的根目录/全景图表文件（见上方通用禁令 2）。KD 须含**核心方案**+**关键类图**（全量公共方法签名）+**核心调用链时序图**（穷举关键异常分支），按需可加方案架构图；跨 KD / 跨 Feature 流程在相关 KD 中互链说明。
    - **nfr**：先判断 §8～§11 各子文件是否适用；不适用时只在 `epic-design.md` 对应章节标注 N/A 与原因，不创建空子文件。适用时，按 `nfr-template.md` 产出/更新 **`EPIC_DIR/nfr.md`**（含 §8.1～§8.7 全文）；按需分别按 `epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md` 产出/更新 **`EPIC_DIR/interface-design.md`**、**`database-design.md`**、**`analytics-tracking.md`**（各子节如不适用须标注 N/A 并简述原因）；最后更新 `epic-design.md` **§8～§11** 为摘要 + 链接或 N/A 说明（**禁止**在 `epic-design.md` 内重复粘贴上述子文件正文）。
    - **story**：按模板「§12.1 摘要（约束见 `.cursor/rules/aisdd-story-splitting.mdc`）→ §12.2 本 EPIC 拆解说明（1～3 句）→ §12.3 Story 自检清单（9 项全部通过）」依序完成，产出 `epic-design.md` 的 §12（Story 列表含预估工作量、依赖图、FR/NFR 覆盖矩阵、工作量汇总）。Lite/Fast Track 不复制指南全文。
    - **l2**：

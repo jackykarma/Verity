@@ -229,21 +229,6 @@ $ARGUMENTS
 
 ## 与现有命令的关系
 
-| 命令 | 职责 | 适用阶段 | 性质 |
-|------|------|----------|------|
-| `/aisdd.challenge spec` | 对抗性挑战 spec 漏洞、NFR 可行性、范围边界 | `featurespec` 完成后，进入 `techspec` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.challenge techspec` | 对抗性挑战架构风险、技术债务、可测试性 | `/aisdd.techspec` 完成后，进入 `epicdesign` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.challenge design` | 对抗性挑战安全、性能可达性、生态兼容性 | `epicdesign` 完成后，进入 `featuretasks` 前 | **可选（多 Feature 推荐）** |
-| `/aisdd.analyze feature` | 单 Feature 一致性（spec↔techspec↔tasks） | **可选**；`tasks` 就绪后、`implement` 前 | 默认 scope |
-| `/aisdd.analyze epic` | EPIC 跨 Feature 一致性 | **可选**；`epicdesign` 后或全量 tasks 后 | 不 gate implement |
-| `/aisdd.cr` | 变更请求（修复 challenge 发现的 BLOCK/WARN） | challenge 后发现问题时 | 已有 |
+三个挑战目标分别插在阶段转换前：`spec`（featurespec 后 → techspec 前）、`techspec`（techspec 后 → epicdesign 前）、`design`（epicdesign 后 → featuretasks 前），均为**可选（多 Feature 推荐，CR 变更后必须）**。
 
-**建议执行顺序**（多 Feature EPIC）：
-
-```
-/aisdd.featurespec × N  →  /aisdd.challenge spec  →  /aisdd.techspec / epicuidesign
-/aisdd.techspec × N  →  /aisdd.challenge techspec  →  /aisdd.epicdesign
-/aisdd.epicdesign       →  /aisdd.challenge design  →  /aisdd.analyze epic pre-tasks（可选）  →  /aisdd.featuretasks
-/aisdd.featuretasks × N →  /aisdd.implement（全量 / ST-xxx / Txxx；analyze 全程可选）
-/aisdd.implement [all|ST-xxx|Txxx]  →  实现自检 / 合并发布
-```
+完整的命令执行顺序与各步骤可选性见 `docs/aisdd/workflow-overview.md` §六（含 3.5 / 4.5 / 6.5 challenge 插入点）；发现 BLOCK/WARN 后走 `/aisdd.cr` 修复。

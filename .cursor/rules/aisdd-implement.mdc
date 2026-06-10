@@ -5,80 +5,8 @@ alwaysApply: false
 
 # /aisdd.implement — 代码实现
 
-## 触发
+用户输入 `/aisdd.implement`（无参数/`all` 全量、`ST-xxx` Story 范围、`Txxx` Task 范围、`-h` 帮助）时触发：按当前 Feature 的 `tasks.md` 分阶段实现代码。
 
-用户输入 `/aisdd.implement`。作用于当前 Feature。
+**唯一事实源**：范围参数、依赖闭包规则、必读输入清单与执行流程见 `.cursor/commands/aisdd.implement.md`，执行前**必须完整阅读**该命令文件。
 
-## 范围参数
-
-| 参数 | 行为 |
-|------|------|
-| 无参数 / `all` | 执行 `tasks.md` 中全部未完成 Task |
-| `ST-xxx`（可多个） | 仅执行指定 Story 的未完成 Task + 依赖闭包 |
-| `Txxx`（可多个） | 仅执行指定 Task + 依赖闭包 |
-| `-h` | 输出帮助，不执行代码 |
-
-`all` 与 `ST-xxx` / `Txxx` 互斥；`ST-xxx` 与 `Txxx` 互斥。
-
-## 依赖闭包
-
-- 从目标 Task 的 **依赖** 字段递归纳入仍为 `- [ ]` 的 `T???`
-- 已 `- [x]` 的 Task 跳过
-- Story 模式：起始集 = 带 `[ST-xxx]` 的未完成 Task；闭包可含阶段 0～2 或其他 Story 的阻塞 Task
-
-## 目的
-
-按 `tasks.md` 中的 Task 分阶段实现代码，确保实现与设计一致。
-
-## 前置条件
-
-1. 本 Feature 的 `tasks.md` 已存在
-2. Story / Task 模式下，目标 Story 或 Task 已在 `tasks.md` 中定义
-3. **不要求**事先运行 `/aisdd.analyze`（可选、非阻塞）
-
-## 输入（必须阅读）
-
-1. **本 Feature 的 `tasks.md`**：完整任务列表 + 本次执行集
-2. **本 Feature 的 `tech-spec.md`**：技术规格（约束/契约/边界）
-3. **`epic-design.md`**：架构设计、全景类图、关键时序、Story 拆解——架构事实源
-4. **各 Feature 的 `l2_design/ST-xxx_*.md`**：执行集涉及 Story 的 L2 详细设计（若有）
-5. **本 Feature 的 `spec.md`**：FR/NFR 与验收边界
-6. **EPIC 根 `tech-spec.md`**（若存在）：EPIC 级技术约束
-7. **现有工程代码**：被修改的文件及其上下文
-
-## 执行流程
-
-1. **解析范围参数**，构建执行集并在报告开头列出
-2. **解析任务结构**：提取执行集内的阶段、依赖、设计引用
-3. **分阶段执行**（仅执行集）：
-   - **遵循依赖关系**：顺序任务按序，并行 `[P]` 可同时
-   - **引用设计**：先读设计引用再编码
-   - **基于文件的协调**：同文件 Task 顺序执行
-4. **验证检查点**：按模式验证（全量 / Story 检查点 / Task 验证项）
-5. **标记完成**：执行成功的 Task 在 `tasks.md` 中改为 `[x]`
-6. **进度跟踪**：非并行失败终止本次执行集；并行失败继续成功项并上报
-
-## 执行顺序规则
-
-- **搭建优先**：初始化项目结构、依赖项、配置项
-- **先测后码**（若适用）：先完成测试任务
-- **核心开发**：实现模型、服务、接口端点
-- **集成工作**：数据库连接、中间件、日志
-- **优化与验证**：性能优化、文档完善
-
-## 行为约束（不可越权）
-
-- **不得擅自改写设计**：实现必须与 `epic-design.md` 和 `tech-spec.md` 一致
-- **不得擅自改写 FR/NFR/AC**：`spec.md` 是验收标准
-- **遵循 EPIC 技术约束**：分层/线程/错误处理/命名等与 tech-spec 一致
-- **演进式实现**：基于现有代码扩展，不得大规模重写（constitution §二）
-- **最小改动原则**：能用 3 行解决的不要写 300 行（constitution §五）
-- **发现设计缺口时**：停止 Implement，提交变更提案，由 SE/TL 先更新设计文档再继续
-
-## 完成后
-
-提示用户：
-1. 输出本次执行范围、已完成 Task、仍为 `- [ ]` 的 Task
-2. Story 模式：可对下一 Story 运行 `/aisdd.implement ST-xxx`
-3. 全量且全部完成：对照 spec/techspec/design 自检，通过后合并/发布
-4. 偏离走 `/aisdd.cr`
+速记红线：必读 EPIC 根 `tech-spec.md`、`epic-design.md`、涉及 Story 的 `l2_design/ST-xxx_*.md`（若有）与 `spec.md`；**不得**擅自改写已冻结的 spec/tech-spec/design（变更走 `/aisdd.cr`）；完成的 Task 须在 `tasks.md` 标记 `[x]`；`/aisdd.analyze` 可选、非阻塞。

@@ -30,16 +30,7 @@ $ARGUMENTS
 | `apply CR-xxx` | 基于已有 CR 文件（EPIC 目录下的 `CR-xxx.md`），直接执行下游更新 |
 | `-h` | 显示本帮助信息 |
 
-**`-h` 帮助输出**（当且仅当参数为 `-h` 时输出，不执行写入）：
-
-```
-/aisdd.cr 参数说明：
-
-  (无参数)     交互式创建 CR：收集变更描述 → 影响分析 → 生成 CR 文件 → 分步执行下游更新
-  analyze      仅执行影响分析并输出下游更新清单，不执行更新
-  apply CR-xxx 基于已有 CR 文件，直接执行下游更新
-  -h           显示本帮助信息
-```
+**`-h` 帮助输出**：当且仅当参数为 `-h` 时，输出上方「参数说明」表格作为帮助，不执行任何文件操作。
 
 ## 大纲
 
@@ -108,9 +99,8 @@ $ARGUMENTS
    | 条件 | 提醒内容 |
    |------|---------|
    | 可选（质量加码） | 可运行 `/aisdd.analyze` / `/aisdd.analyze epic` 确认变更后各产物无矛盾；**非** implement 前置必做 |
-   | tasks.md 有更新 | 受影响的 Task（列出 Task ID）需重新执行 `/aisdd.implement Txxx` 或 `/aisdd.implement ST-xxx`；实现后对照更新后的设计与 spec 自检 |
+   | tasks.md 有更新 | 更新 Version 与变更记录；受影响的 Task（列出 Task ID）需重新执行 `/aisdd.implement Txxx` 或 `/aisdd.implement ST-xxx`，实现后对照更新后的设计与 spec 自检 |
    | epic-design / l2_design 有更新 | 更新对应文档 Version 与变更记录；可选重跑 `/aisdd.analyze epic` |
-   | tasks.md 有更新 | 更新 Version 与变更记录；可选重跑 `/aisdd.analyze`（feature） |
    | 代码已实现部分受影响的 Story | 重新实现或修复后，对照更新后的 `epic-design.md` / L2 与 `spec.md` 自检实现一致性 |
 
 核心规则：

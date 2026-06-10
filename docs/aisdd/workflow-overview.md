@@ -389,7 +389,7 @@ flowchart LR
 
 | 依赖类型 | SE 策略 | DEV 策略 |
 |----------|---------|---------|
-| **无依赖**（Feature 间独立） | 按复杂度排序逐个设计，或 `--batch` 并行生成 tech-spec | 各 DEV 分别认领独立 Feature，完全并行实现 |
+| **无依赖**（Feature 间独立） | 按复杂度排序逐个设计；spec 阶段可用 `/aisdd.featurespec --batch` 并行生成，tech-spec 第二部分各 Feature 节可并行起草 | 各 DEV 分别认领独立 Feature，完全并行实现 |
 | **接口依赖**（B 调用 A 的 API） | 先在 A 的 `tech-spec.md` 记录能力边界与调用约束，详细接口在 `interface-design.md` 或 L2 中设计；B 的 `tech-spec.md` 引用该能力边界 | DEV-1 先实现 A 的接口层（Stub/空实现）→ DEV-2 可基于接口开始 B 的实现 |
 | **数据依赖**（B 消费 A 产出的数据） | 先在 A 的 `tech-spec.md` 记录 SoR 与生命周期等数据约束，详细数据模型和存储方案在 `database-design.md` 或 L2 中设计，B 引用该方案 | A 的数据层实现完毕后 B 才能联调；B 可先用 Mock 数据并行开发 |
 | **紧耦合依赖**（A/B 共享状态/深度交互） | 考虑合并为同一 Feature，或在 `tech-spec.md` 中定义共享契约 | 同一 DEV 负责两者，或两 DEV 频繁同步 |
@@ -465,7 +465,7 @@ DEV-B:                                                          [====== FEAT-2 �
 |--------|----------|------|
 | 批量生成 spec | `/aisdd.featurespec --batch` | 所有 Feature 的 `spec.md` 并行生成 |
 | tech-spec 与 ux-design 并行 | `/aisdd.techspec` + `/aisdd.epicuidesign` | 两者仅依赖 `spec.md`，互不依赖 |
-| 分阶段 epicdesign | `/aisdd.epicdesign diagram FEAT-xxx` | 按 Feature 逐个产出类图/时序图，完成一个即可交出 tasks |
+| 分阶段 epicdesign | `/aisdd.epicdesign l2 FEAT-xxx`（或 `l2 ST-xxx`） | 按 Feature/Story 逐个产出 L2 详细设计，完成一个即可交出 tasks |
 | 多模块代码调研 | `/aisdd.research --parallel` | 并行考古代码多个不相关主题 |
 
 ---
@@ -474,6 +474,7 @@ DEV-B:                                                          [====== FEAT-2 �
 
 | 版本 | 日期 | 变更摘要 |
 |------|------|---------|
+| v1.7.5 | 2026-06-11 | 流程与模板瘦身：7 个 `aisdd-*.mdc` 触发规则薄壳化（唯一事实源收敛至 `.cursor/commands/`，消除 implement/featuretasks 规则中 Feature 级 tech-spec 残留漂移）；8 类污染表与 ux 边界表收敛至 `aisdd-document-boundaries.mdc`（epicspec/featurespec 命令改为引用）；epicspec 与 featurespec 的 AI 生成规则/成功标准去重并 Android 语境化；四命令 `-h` 帮助文本双写删除；challenge/analyze 末尾流程顺序表改为引用本文档 §六；修复 §8.7 `diagram` 过时参数与 §8.3.2 `--batch` tech-spec 误述；删除孤儿模板 `domain-business-knowledge-template.md`、clarify 命令翻译说明残留；修复 epic-template frontmatter、constitution 命令失效路径、cr 完成报告重复行、tasks-template spec-kit 文件引用残留；epicuidesign 规则独有内容（ux 写入侧守护、AI 视觉理解验证图）迁入命令 |
 | v1.7.4 | 2026-06-06 | `/aisdd.implement` 支持全量、`ST-xxx` Story 范围、`Txxx` Task 范围；依赖闭包自动纳入未完成的前置 Task |
 | v1.7.3 | 2026-06-06 | `/aisdd.featuretasks` 支持全量（无参数/`all`）与按 Story 增量（`ST-xxx`）两种模式；增量模式合并进已有 `tasks.md` 并保留其他 Story 进度 |
 | v1.7.2 | 2026-06-05 | 术语统一：「Plan 阶段」→ techspec（`tech-spec.md`）；章程、模板、命令、脚本与流程图节点去过时 plan 表述 |

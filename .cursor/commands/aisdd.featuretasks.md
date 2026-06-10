@@ -34,17 +34,7 @@ $ARGUMENTS
 /aisdd.featuretasks -h
 ```
 
-**`-h` 帮助输出**（当且仅当参数为 `-h` 时输出，不执行写入）：
-
-```text
-/aisdd.featuretasks 参数说明：
-
-  (无参数) / all   为本 Feature 全部 Story 生成 tasks.md（整份重写）
-  ST-xxx           仅为指定 Story 增量生成/更新 Task（可多个：ST-001 ST-002 或 ST-001,ST-002）
-  -h               显示本帮助信息
-
-推荐：L2 就绪后先对首个 Story 跑 ST-xxx 增量生成；全部 Story 就绪后跑 all 做全量核对；或一次性 all。
-```
+**`-h` 帮助输出**：当且仅当参数为 `-h` 时，输出上方「范围参数」表格与示例作为帮助（附一句推荐：L2 就绪后先对首个 Story 跑 `ST-xxx` 增量生成，全部就绪后跑 `all` 做全量核对），不读写文件。
 
 ## 前置条件
 
