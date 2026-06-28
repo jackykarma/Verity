@@ -106,7 +106,7 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
    - 读取 `EPIC_DIR/epic.md`
    - 读取 **`tech-spec.md`**（第一部分 EPIC 级 + 第二部分各 Feature 章节）作为技术规约输入
    - 读取各 `EPIC_DIR/features/*/spec.md`（含「完整场景矩阵」，P0 场景须在设计中可追溯）
-   - 若存在：读取 `EPIC_DIR/ux-design.md`
+   - 读取各 `EPIC_DIR/features/*/ux-design.md`（若有）
    - 若 `EPIC_DIR/research/` 存在且非空：可读**代码调研快照**辅助理解调研当时的存量模块；**不得**当作约束或设计决策依据；**不得**因 design/CR 变更而回写 `research/`；设计仍须独立完整分析并做出自己的设计决策
    - 读取 `.specify/memory/constitution.md`
    - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`

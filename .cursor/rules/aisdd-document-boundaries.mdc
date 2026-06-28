@@ -1,6 +1,6 @@
 ---
 description: "AISDD 文档边界：spec 纯净度、spec↔tech-spec/epic-design、spec↔ux-design"
-globs: specs/**/spec.md, specs/**/epic.md, specs/**/ux-design.md, specs/**/tech-spec.md, specs/**/epic-design.md
+globs: specs/**/spec.md, specs/**/epic.md, specs/**/features/**/ux-design.md, specs/**/tech-spec.md, specs/**/epic-design.md
 alwaysApply: false
 ---
 
@@ -71,7 +71,7 @@ NFR 只写**结果性指标 + 业务触发条件**，不写实现方式。❌ `D
 
 **写入侧**：`aisdd.featurespec` / `aisdd.epicspec` / `aisdd.clarify` / `aisdd.cr`；模板 `spec-template.md`、`epic-template.md`、`change-request-template.md`。
 
-**读取侧（禁反写 spec）**：`aisdd.techspec`、`aisdd.epicuidesign`、`aisdd.epicdesign`、`aisdd.featuretasks`、`aisdd.implement`。
+**读取侧（禁反写 spec）**：`aisdd.techspec`、`aisdd.featureuidesign`、`aisdd.epicdesign`、`aisdd.featuretasks`、`aisdd.implement`。
 
 ### A.7 速记
 
@@ -88,7 +88,7 @@ NFR 只写**结果性指标 + 业务触发条件**，不写实现方式。❌ `D
 | 文档 | 角色 | 主要内容 |
 |------|------|----------|
 | `spec.md` | **需求事实源** | 范围、FR/NFR、AC、边界与异常场景 |
-| `ux-design.md` | **体验呈现事实源** | 信息架构、交互规则、视觉规范、动效、设计稿索引 |
+| `ux-design.md`（**Feature 级**，`features/FEAT-xxx/`） | **体验呈现事实源** | 本 Feature 信息架构、交互规则、视觉规范、动效、设计稿索引 |
 
 **一句话**：`spec.md` = 系统必须做什么；`ux-design.md` = 用户如何感知与操作。
 
@@ -136,8 +136,8 @@ ux-design.md（怎么呈现）─┘
 ### B.6 工作流守护
 
 - **featurespec 写 spec**：检出交互/视觉/布局越界 → block_ask，不归 ux 的直接写入 spec。
-- **epicuidesign 写 ux**：检出行为契约/量化指标/范围 → block_ask，不归 spec 的直接写入 ux。
-- **结构化输入**：`design-notes.md` > `design-tokens.json` > Pencil > 图片；冲突记入 ux「输入源冲突」。
+- **featureuidesign 写 ux**：检出行为契约/量化指标/范围 → block_ask，不归 spec 的直接写入 ux。
+- **设计素材输入**：三种来源——本地图片、Figma MCP、Pencil MCP；交互稿与视觉稿均可来自任一来源。优先级：Figma MCP ≈ Pencil > 本地图片；冲突记入 ux「输入源冲突」。
 - **AI 理解验证图**：`design/ai-understanding/`，在 ux-design 引用。
 
 ### B.7 速记

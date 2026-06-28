@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# 解析 EPIC 目录路径，供 /aisdd.epicuidesign、/aisdd.techspec、/aisdd.epicdesign 使用。
+# 解析 EPIC 目录路径，供 /aisdd.techspec、/aisdd.epicdesign 使用。
 # 通过 -EpicId 或 $env:SPECIFY_EPIC 指定 EPIC（如 EPIC-002 或 EPIC-002-android-english-learning）。
 
 [CmdletBinding()]
@@ -40,7 +40,6 @@ $hasResearch = Test-Path -LiteralPath $researchDir
 if ($Json) {
     [PSCustomObject]@{
         EPIC_DIR              = $p.EPIC_DIR
-        EPIC_UX_DESIGN        = $p.EPIC_UX_DESIGN
         EPIC_DESIGN_DIR       = $p.EPIC_DESIGN_DIR
         TECH_SPEC             = $techSpecPath
         EPIC_RESEARCH_DIR     = $researchDir
@@ -50,7 +49,6 @@ if ($Json) {
     } | ConvertTo-Json -Compress
 } else {
     'EPIC_DIR: ' + $p.EPIC_DIR | Write-Output
-    'EPIC_UX_DESIGN: ' + $p.EPIC_UX_DESIGN | Write-Output
     'EPIC_DESIGN_DIR: ' + $p.EPIC_DESIGN_DIR | Write-Output
     'TECH_SPEC: ' + $techSpecPath | Write-Output
     'HAS_TECH_SPEC: ' + $hasTechSpec | Write-Output

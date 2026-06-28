@@ -2,7 +2,7 @@
 
 > **定位**：EPIC 需求级别的技术设计方案，面向人类评审与后续 Task 拆解、Implement 阶段的 AI 编码参考。与各 Feature 的 `tech-spec.md`（技术规约）共同约束 tasks.md 与代码实现。
 >
-> **输入**：`epic.md`、`tech-spec.md`、各 `features/*/spec.md`、`ux-design.md`（若已产出）、现有工程代码
+> **输入**：`epic.md`、`tech-spec.md`、各 `features/*/spec.md`、各 Feature `ux-design.md`（若已产出）、现有工程代码
 >
 > **图表规范**：样式遵循 `.cursor/rules/mermaid-style-guide.mdc`；**内容与结构**须基于本工程实际架构与真实代码，遵循 `.cursor/rules/specify-diagram-requirements.mdc`。
 >
@@ -114,7 +114,7 @@
 |---|---|---|
 | EPIC 规格 | [`epic.md`](./epic.md) | [In/Out 摘要或「见原文」] |
 | EPIC 技术约束 | [`tech-spec.md`](./tech-spec.md) | [有则填；见原文或摘要] |
-| UX（若有） | [`ux-design.md`](./ux-design.md) | [交互/视觉约束摘要或 N/A] |
+| UX（若有） | 各 Feature [`features/*/ux-design.md`](./features/) | [按 Feature 摘要交互/视觉约束或 N/A] |
 
 ## 二、需求概述
 

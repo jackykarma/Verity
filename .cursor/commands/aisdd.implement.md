@@ -93,8 +93,19 @@ $ARGUMENTS
     - **必填**：读取 **EPIC 软件设计说明书**（`epic-design.md`）获取**架构设计、全景类图、关键时序、Story 拆解**——这是代码实现的**架构事实源**
     - **必填**：读取本 Feature **`l2_design/ST-xxx_*.md`**（执行集涉及的 Story；若有）获取 **Story L2 详细设计**——这是代码实现的**详细设计事实源**
     - **必填**：读取 spec.md 获取 FR/NFR 与验收边界
-    - **若存在**：读取 EPIC 根 `ux-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md` 获取体验与专项设计约束
+    - **若存在**：读取本 Feature **`ux-design.md`**，及 EPIC 级 `nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md` 获取体验与专项设计约束
     - **若存在**：读取 `research/codebase-*.md` 辅助理解存量代码（只读事实快照，非约束源、非技术决策依据）
+
+   **体验设计输入（UI 相关 Task 适用）**：
+    - **主来源**：本 Feature **`ux-design.md`**（若存在，由 `/aisdd.featureuidesign` 产出）
+    - **不读取** `.specify/templates/ux-design-template.md`（产出模板，非 implement 输入）
+    - **回查原始设计稿**（以下任一条件触发）：
+      1. 本 Feature `ux-design.md` **不存在**
+      2. UI Task 对应条目为 `❓ 低` / `⚠️ 中`，或未覆盖
+      3. Task/L2 引用界面但 ux-design 无对应章节
+    - **回查方式**（与 featureuidesign 一致）：`{FEATURE_DIR}/design/` → `{EPIC_DIR}/design/{FEAT-xxx}/` → `{EPIC_DIR}/design/`（可归属本 Feature 时）
+    - **采信优先级**：`ux-design.md` 中 `✅ 高` > 原始设计稿 > `⚠️ 中` / `❓ 低`；`✅ 高` 与原稿冲突时暂停，走 `/aisdd.cr` 或 `/aisdd.featureuidesign` 增量更新
+    - **无 ux-design 且无原始设计稿**：Material 3 默认 + `spec.md`；完成报告标注「建议补跑 featureuidesign 或提供 design/ 素材」
 
    **强制约束（不可越权）**：
     - Implement 阶段 **不得**擅自改写 `tech-spec.md` 的技术规约、`epic-design.md` 的架构与 Story 设计，也不得改写 `spec.md` 的 FR/NFR/AC。
@@ -111,6 +122,7 @@ $ARGUMENTS
     - **分阶段执行**：完成一个阶段后再进入下一个阶段（跳过执行集外的阶段内容，但保留阶段 0～2 若其在闭包内）
     - **遵循依赖关系**：顺序任务按序执行，并行任务 [P] 可同时执行
     - **引用设计**：实现每个 Task 时，先读取其**设计引用**指向的 `epic-design.md` 章节（架构图、全景类图/时序）或 `l2_design/ST-xxx_<slug>.md`（L2 类图、时序图），确保实现与设计一致
+    - **UI Task 补充**：若 Task 涉及界面/交互/视觉，除 L2 外还须对照 `ux-design.md`（若存在）；触发「回查原始设计稿」条件时，按步骤 4 体验设计输入规则读取 `design/` 素材后再编码
     - **基于文件的协调规则**：影响同一文件的任务必须顺序执行
     - **验证检查点**：每个阶段完成后执行验证项；Story 模式在目标 Story 检查点停止并汇报
 
@@ -132,10 +144,11 @@ $ARGUMENTS
     - **Story**：验证目标 Story 检查点与 Task 验证项；说明闭包内非目标 Story Task 若被一并执行的原因
     - **Task**：验证指定 Task 及其验证项
     - 确认实施过程符合 `tech-spec.md` 与 `epic-design.md` / L2 设计
+    - 若本次执行集含 UI Task：确认与 `ux-design.md` 和/或回查的原始设计稿一致；列出仍依赖 Material 默认或未覆盖的 UX 项
     - 输出最终状态，汇总本次已完成的工作与仍为 `- [ ]` 的 Task
 
 10. **完成提示**：
-    - 完成后对照 `spec.md` FR/NFR/AC、`tech-spec.md` 约束与 `epic-design.md` / L2 设计完成实现自检
+    - 完成后对照 `spec.md` FR/NFR/AC、`tech-spec.md` 约束与 `epic-design.md` / L2 设计完成实现自检；含 UI 时一并核对 `ux-design.md` 或回查的设计稿
     - **Story / Task 模式**：提示可对下一 Story 运行 `/aisdd.implement ST-xxx`，或继续指定 Task
     - **全量且全部 [x]**：通过即可合并/发布
     - 若发现实现与设计偏离：走 `/aisdd.cr` 更新设计或修复代码，勿在 implement 阶段擅自改写冻结的 spec/tech-spec/design

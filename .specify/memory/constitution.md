@@ -119,7 +119,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 **本工作流采用“单一事实源（Source of Truth）”分层治理，避免口径漂移与实现期争论。**
 
 - `spec.md` 是 **需求事实源**：范围（In/Out）、FR/NFR、验收标准、边界与异常场景
-- `ux-design.md`（EPIC 级）是 **体验呈现事实源**：信息架构、交互规则与状态、视觉规范、动效清单与说明、设计稿索引
+- `ux-design.md`（**Feature 级**，`features/FEAT-xxx/`）是 **体验呈现事实源**：本 Feature 信息架构、交互规则与状态、视觉规范、动效、设计稿索引；由 `/aisdd.featureuidesign` 在 `spec.md` 之后产出
 - `tech-spec.md`（EPIC 根，**唯一**技术规约事实源）：**第一部分**为 EPIC 公共约束（技术栈、跨 Feature 边界、共享能力 Owner、运行时与数据总约束）；**第二部分**按 Feature 分节记录增量约束、能力边界、数据/NFR/安全硬约束；不得写详细设计；**NFR 量化评估**由 `nfr.md`（`/aisdd.epicdesign nfr`）承接
 - **EPIC 软件设计说明书**（EPIC 级）是 **架构与详细设计事实源**：0 层/1 层架构图、全景类图与关键时序、关键功能与疑难设计、接口字段、数据库表结构、Story 拆解与 L2 索引（§十三）；L2 详细设计按 Story 分文件写在各 Feature 的 **`l2_design/ST-xxx_<slug>.md`** 中；供人类评审与 Task/Implement 阶段引用
 - `tasks.md` 是 **执行事实源**：将设计说明书中的 Story 拆解为可执行 Task，并引用 `tech-spec.md` 约束与对应 `l2_design/ST-xxx_*.md` 中的设计片段

@@ -127,7 +127,7 @@ CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖�
 
 ### 2. 加载 EPIC 级产物
 
-`epic.md`、`tech-spec.md`、`epic-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`ux-design.md`（按存在性）、`constitution.md`。
+`epic.md`、`tech-spec.md`、`epic-design.md`、`nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、各 Feature `ux-design.md`（按存在性）、`constitution.md`。
 
 ### 3. 加载各 Feature 产物
 

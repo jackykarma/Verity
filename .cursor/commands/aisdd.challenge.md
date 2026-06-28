@@ -211,7 +211,7 @@ $ARGUMENTS
 - **若存在 BLOCK**：运行 `/aisdd.cr` 发起变更请求修复后，可重新运行 `/aisdd.challenge [目标]` 验证
 - **若存在 WARN**：评估风险后选择修复（`/aisdd.cr`）或记录「已知风险，人工确认自担」后继续
 - **NOTE 问题**：可作为技术债务记录，纳入后续迭代
-- **进入下一阶段**：评级 ✅ 或 ⚠️（人工确认后）→ spec 后 `/aisdd.techspec` 或 `/aisdd.epicuidesign`；techspec 后 `/aisdd.epicdesign`；design 后 `/aisdd.featuretasks`
+- **进入下一阶段**：评级 ✅ 或 ⚠️（人工确认后）→ spec 后 `/aisdd.featureuidesign`（可选）→ 全部 Feature spec 就绪后 `/aisdd.techspec`；techspec 后 `/aisdd.epicdesign`；design 后 `/aisdd.featuretasks`
 ```
 
 ### 6. 提供整改建议

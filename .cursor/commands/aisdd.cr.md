@@ -57,7 +57,7 @@ $ARGUMENTS
    - 读取各 `EPIC_DIR/features/*/spec.md`、`tech-spec.md`、`tasks.md`（若有）
    - 读取 `EPIC_DIR/tech-spec.md`（若有）
    - 读取 `EPIC_DIR/epic-design.md`（若有）
-   - 读取 `EPIC_DIR/ux-design.md`（若有）
+   - 读取各 `EPIC_DIR/features/*/ux-design.md`（若有）
    - 读取 `.specify/templates/change-request-template.md`
 
 4. **影响分析**：

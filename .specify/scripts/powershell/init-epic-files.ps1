@@ -1,7 +1,7 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-Initialize EPIC-level files from templates (tech-spec.md, ux-design.md, epic-design.md, nfr.md) and directory key-func-design/.
+Initialize EPIC-level files from templates (tech-spec.md, epic-design.md, nfr.md) and directory key-func-design/.
 
 .DESCRIPTION
 Creates EPIC-level design files in the EPIC directory from their respective templates.
@@ -16,8 +16,8 @@ Overwrite existing files.
 
 .PARAMETER FilesOnly
 Comma-separated list of files to create. Default: all.
-Valid values: tech-spec, ux-design, epic-design, key-func-design-dir, nfr, story-detail
-  (story-detail: per-Feature l2_design/.gitkeep；L2 正文由 /aisdd.epicdesign l2 按复杂/高风险 Story 生成)
+Valid values: tech-spec, epic-design, key-func-design-dir, nfr, story-detail, feature-ux-design-dir
+  (story-detail: per-Feature l2_design/.gitkeep；feature-ux-design-dir: per-Feature design/.gitkeep)
 
 .PARAMETER Json
 Output JSON result.
@@ -40,7 +40,7 @@ if ($Help) {
     Write-Host ''
     Write-Host 'Files created:'
     Write-Host '  tech-spec.md              -> EPIC root'
-    Write-Host '  ux-design.md              -> EPIC root'
+    Write-Host '  ux-design.md              -> features/FEAT-xxx/ (由 /aisdd.featureuidesign 产出)'
     Write-Host '  epic-design.md            -> EPIC root'
     Write-Host '  key-func-design/          -> EPIC subdirectory (empty + .gitkeep)'
     Write-Host '  nfr.md                    -> EPIC root (from nfr-template.md)'
@@ -77,7 +77,6 @@ $templatesDir = Join-Path $repoRoot '.specify/templates'
 
 $fileMap = @{
     'tech-spec'        = @{ template = 'tech-spec-template.md';        target = 'tech-spec.md' }
-    'ux-design'        = @{ template = 'ux-design-template.md';        target = 'ux-design.md' }
     'epic-design'      = @{ template = 'epic-design-doc-template.md'; target = 'epic-design.md' }
     'nfr'              = @{ template = 'nfr-template.md';             target = 'nfr.md' }
 }
@@ -85,7 +84,7 @@ $fileMap = @{
 $filesToCreate = if ($FilesOnly) {
     $FilesOnly -split ',' | ForEach-Object { $_.Trim() }
 } else {
-    @('tech-spec', 'ux-design', 'epic-design', 'key-func-design-dir', 'nfr', 'story-detail')
+    @('tech-spec', 'epic-design', 'key-func-design-dir', 'nfr', 'story-detail', 'feature-ux-design-dir')
 }
 
 # Legacy key-diagram files are deprecated and no longer created.
@@ -117,7 +116,7 @@ foreach ($fileKey in $filesToCreate) {
         continue
     }
 
-    if ($fileKey -eq 'story-detail') {
+    if ($fileKey -eq 'story-detail' -or $fileKey -eq 'feature-ux-design-dir') {
         $featuresDir = Join-Path $epicDir 'features'
         if (Test-Path $featuresDir) {
             $featureDirs = Get-ChildItem -Path $featuresDir -Directory -ErrorAction SilentlyContinue
@@ -134,11 +133,23 @@ foreach ($fileKey in $filesToCreate) {
                         New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
                         $results += @{ file = ($featDir.Name + '/l2_design/.gitkeep'); status = 'created' }
                     }
-                    continue
+                }
+                if ($fileKey -eq 'feature-ux-design-dir') {
+                    $designDir = Join-Path $featDir.FullName 'design'
+                    if (-not (Test-Path $designDir)) {
+                        New-Item -ItemType Directory -Path $designDir -Force | Out-Null
+                    }
+                    $gitkeepPath = Join-Path $designDir '.gitkeep'
+                    if ((Test-Path $gitkeepPath) -and -not $Force) {
+                        $results += @{ file = ($featDir.Name + '/design/.gitkeep'); status = 'skipped (exists)' }
+                    } else {
+                        New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
+                        $results += @{ file = ($featDir.Name + '/design/.gitkeep'); status = 'created' }
+                    }
                 }
             }
         } else {
-            $results += @{ file = 'l2_design/.gitkeep'; status = 'no features directory' }
+            $results += @{ file = $fileKey; status = 'no features directory' }
         }
         continue
     }

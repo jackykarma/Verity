@@ -27,7 +27,7 @@ $ARGUMENTS
 
 1. `epic.md` 已存在
 2. **所有** Feature 的 `spec.md` 已完成（Spec Ready）
-3. 可与 `/aisdd.epicuidesign` 并行（若已有 `ux-design.md` 须读取）
+3. 各 Feature 的 `ux-design.md`（若存在，由 `/aisdd.featureuidesign` 产出）须在 techspec 前读取
 
 可选：多 Feature EPIC 在运行前先执行 `/aisdd.challenge spec`。
 
@@ -69,7 +69,7 @@ $ARGUMENTS
 - `epic.md`、各 `features/*/spec.md`
 - `.specify/templates/tech-spec-template.md`
 - `constitution.md`
-- `ux-design.md`（若存在）
+- `features/*/ux-design.md`（若存在，汇总各 Feature 体验约束）
 - `research/`（若存在，只读辅助，不得作为约束依据，不得回写 research）
 - **现有工程代码**（差距分析、技术栈校准）
 

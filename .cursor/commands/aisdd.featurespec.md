@@ -9,13 +9,13 @@ handoffs:
     agent: aisdd.challenge
     prompt: 所有 Feature spec 生成后，运行 /aisdd.challenge spec 对 spec 进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
     send: false
-  - label: 交互与视觉设计（EPIC 级，可选）
-    agent: aisdd.epicuidesign
-    prompt: 若 UX/视觉稿已就绪且尚未运行，可运行 /aisdd.epicuidesign "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；本步骤可选——若 UX 尚未就绪可跳过
+  - label: 交互与视觉设计（可选）
+    agent: aisdd.featureuidesign
+    prompt: 本 Feature spec 完成后，若 UX/视觉稿已就绪，运行 /aisdd.featureuidesign（解析本 Feature 设计稿，产出 ux-design.md）；设计稿未就绪可跳过
     send: false
   - label: EPIC 技术规格书
     agent: aisdd.techspec
-    prompt: 运行 /aisdd.techspec "EPIC-xxx"（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有）→ techspec
+    prompt: 所有 Feature 的 spec 输出之后运行 /aisdd.techspec "EPIC-xxx"（各 Feature 可选 ux-design.md 供 techspec 读取）
     send: false
 ---
 
@@ -191,8 +191,8 @@ EPIC 上下文：
 
 1. **（推荐）** `/aisdd.challenge spec` — 三视角对抗性质量挑战，多 Feature EPIC 强烈推荐
 2. 需澄清具体 Feature 细节：`/aisdd.clarify`（逐个运行）
-3. 若 UX/视觉稿已就绪：`/aisdd.epicuidesign "EPIC-xxx"`
-4. 所有 spec 确认无误后：`/aisdd.techspec` 或 `/aisdd.epicuidesign`（可选）
+3. 若 UX/视觉稿已就绪：`/aisdd.featureuidesign`（本 Feature）
+4. 所有 Feature spec 确认无误后：`/aisdd.techspec`
 ```
 
 ---
@@ -240,10 +240,10 @@ EPIC 上下文：
 输出 Feature Key、spec.md 路径，并提示下一步：
 
 - `/aisdd.clarify`（建议先做）
-- 若 UX/视觉稿已就绪且尚未运行：**`/aisdd.epicuidesign "EPIC-xxx"`**（可选，须在所有 Feature 的 spec 输出之后）
-- 若尚未做 EPIC 技术规约：**`/aisdd.techspec "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）；推荐顺序：epicuidesign（若有） → techspec
-- 或直接 `/aisdd.techspec`（会引用 EPIC 级 ux-design，若存在）
-- 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`**，再进入 `/aisdd.techspec` 或 `/aisdd.epicuidesign`
+- 若 UX/视觉稿已就绪：**`/aisdd.featureuidesign`**（本 Feature，可选）
+- 若尚未做 EPIC 技术规约：**`/aisdd.techspec "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）
+- techspec 会读取各 Feature 的 `ux-design.md`（若存在）
+- 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`**，再进入 `/aisdd.techspec`
 
 ---
 

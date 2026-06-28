@@ -4,7 +4,7 @@
 >
 > **禁止写入**：0/1 层架构图、组件清单、类图、时序图、流程图、接口方法签名、数据库表字段、Story 拆解、L2 设计、NFR 预算表（→ `nfr.md`）、接口契约细节（→ `interface-design.md`）。
 >
-> **输入**：`epic.md`、各 `features/*/spec.md`、现有工程代码、`.specify/memory/constitution.md`；`ux-design.md`（若存在）为可选输入。
+> **输入**：`epic.md`、各 `features/*/spec.md`、现有工程代码、`.specify/memory/constitution.md`；各 Feature `ux-design.md`（若存在，由 `/aisdd.featureuidesign` 产出）为可选输入。
 >
 > **产出命令**：`/aisdd.techspec`。
 
