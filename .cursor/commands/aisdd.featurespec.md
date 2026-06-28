@@ -9,9 +9,9 @@ handoffs:
     agent: aisdd.featureuidesign
     prompt: 本 Feature spec 完成后，若 UX/视觉稿已就绪，运行 /aisdd.featureuidesign（解析本 Feature 设计稿，产出 ux-design.md）；设计稿未就绪可跳过
     send: false
-  - label: 熟悉相关代码（推荐）
-    agent: aisdd.research
-    prompt: spec 完成后（及可选 ux-design 后）运行 /aisdd.research，调研本 Feature 需求所涉存量代码
+  - label: 代码调研（Brownfield）
+    agent: aisdd.featureresearch
+    prompt: spec（及可选 ux-design）完成后，若本 Feature 有存量代码，运行 /aisdd.featureresearch（熟悉代码并为 epicdesign 提供设计参考）；纯 Greenfield 可跳过
     send: false
   - label: EPIC 技术规格书
     agent: aisdd.techspec
@@ -192,7 +192,7 @@ EPIC 上下文：
 
 1. **（推荐）** `/aisdd.challenge spec` — 三视角对抗性质量评审，多 Feature EPIC 强烈推荐
 2. 需澄清具体 Feature 细节：`/aisdd.featurespec --clarify`（逐个运行，对已有 spec）
-3. 熟悉存量代码（Brownfield 推荐）：`/aisdd.research`（默认写入各 Feature `research/`）
+3. 调研存量代码（**仅 Brownfield**）：`/aisdd.featureresearch`（弄清**技术实现流程与原理**，默认写入 `research/`）；**纯 Greenfield 跳过**
 4. 若 UX/视觉稿已就绪：`/aisdd.featureuidesign`（本 Feature）
 5. 全部 Feature spec / ux / research（推荐）确认无误后：`/aisdd.techspec`
 ```
@@ -277,7 +277,8 @@ spec 写入完成后，**立即执行** §需求澄清（内置）。用户已�
 
 - 若跳过澄清：可运行 `/aisdd.featurespec --clarify` 补做
 - 若 UX/视觉稿已就绪：**`/aisdd.featureuidesign`**（本 Feature，可选）；无稿可跳过
-- **推荐**：**`/aisdd.research`**（熟悉本 Feature 相关存量代码，默认写入 `features/FEAT-xxx/research/`）；纯 Greenfield 可用 `--skip`
+- **Brownfield**：**`/aisdd.featureresearch`**（熟悉存量代码，并为 epicdesign 提供设计参考；默认写入 `features/FEAT-xxx/research/`）
+- **纯 Greenfield**：**跳过** featureresearch（无存量代码可调研）；可用 `/aisdd.featureresearch --skip` 显式声明
 - 若尚未做 EPIC 技术规约：**`/aisdd.techspec "EPIC-xxx"`**（须在所有 Feature 的 spec 及推荐 research 就绪后）
 - techspec 会读取各 Feature 的 `ux-design.md`（若存在）
 - 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`**，再进入 `/aisdd.techspec`

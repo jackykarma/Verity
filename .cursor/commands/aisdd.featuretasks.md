@@ -63,7 +63,7 @@ $ARGUMENTS
         - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三，若有）、**关键类图与关键时序**（§七 KD，若有）、**架构章节**（§一～§六）
         - EPIC 根 `tech-spec.md`（本 Feature 对应第二节：增量约束、能力边界、数据/NFR/安全硬约束）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
-    - **可选文档**：本 Feature `ux-design.md`、本 Feature `research/codebase-*.md`（代码熟悉快照，只读辅助）、EPIC 级 `nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`
+    - **可选文档**：本 Feature `ux-design.md`、本 Feature `research/codebase-*.md`（代码调研快照，只读辅助）、EPIC 级 `nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`
     - 注意：并非所有 EPIC 都包含全部可选文档。需基于实际存在的文件生成任务。
 
 4. **追溯矩阵生成与一致性核对（只写入 tasks.md）**：

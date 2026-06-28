@@ -107,7 +107,7 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
    - 读取 **`tech-spec.md`**（第一部分 EPIC 级 + 第二部分各 Feature 章节）作为技术规约输入
    - 读取各 `EPIC_DIR/features/*/spec.md`（含「完整场景矩阵」，P0 场景须在设计中可追溯）
    - 读取各 `EPIC_DIR/features/*/ux-design.md`（若有）
-   - 各 Feature `features/*/research/codebase-*.md`（若存在）：可读**代码熟悉快照**辅助理解调研时的存量模块；**不得**当作约束或设计决策依据；**不得**因 design/CR 变更而回写；设计仍须独立完整分析并做出自己的设计决策
+   - 各 Feature `features/*/research/codebase-*.md`（若存在）：**设计参考** — 帮助设计者熟悉调研时刻的存量模块（流程、原理、异常与状态）；**不得**当作约束或设计决策依据；**不得**因 design/CR 变更而回写；设计仍须独立完整分析现有工程代码并做出自己的设计决策
    - 读取 `.specify/memory/constitution.md`
    - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`
    - 读取 `.cursor/rules/specify-diagram-requirements.mdc`、`.cursor/rules/mermaid-style-guide.mdc`

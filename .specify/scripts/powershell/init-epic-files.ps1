@@ -45,7 +45,7 @@ if ($Help) {
     Write-Host '  key-func-design/          -> EPIC subdirectory (empty + .gitkeep)'
     Write-Host '  nfr.md                    -> EPIC root (from nfr-template.md)'
     Write-Host '  features/*/l2_design/.gitkeep -> L2 placeholder directory'
-    Write-Host '  features/*/research/.gitkeep -> 代码熟悉报告目录（由 /aisdd.research 产出）'
+    Write-Host '  features/*/research/.gitkeep -> 代码调研报告目录（由 /aisdd.featureresearch 产出）'
     Write-Host ''
     exit 0
 }

@@ -63,7 +63,7 @@ $ARGUMENTS
 4. **影响分析**：
    - **判断变更类型**：需求类（Scope/FR/NFR/AC）/ 交互类 / 技术方案类 / 混合
    - **定位受影响的产物**：逐个检查 spec/ux-design/tech-spec/epic-design/l2_design（各 ST 文件）/tasks，列出需要更新的文件与章节
-   - **`features/*/research/` 永久排除**：各 Feature 下代码熟悉快照**不得**列入下游更新清单；方案或需求变更时**不**修订、不覆盖已有调研报告（需新调研则在该 Feature 的 `research/` 下新建带日期的文件，走 `/aisdd.research`）
+   - **`features/*/research/` 永久排除**：各 Feature 下代码调研快照**不得**列入下游更新清单；方案或需求变更时**不**修订、不覆盖已有调研报告（需新调研则在该 Feature 的 `research/` 下新建带日期的文件，走 `/aisdd.featureresearch`）
    - **参考 workflow-overview.html §7.3 变更影响速查表**确定更新链路
    - **风险评估**：识别变更带来的风险（性能/兼容/工期等）
 
@@ -104,7 +104,7 @@ $ARGUMENTS
    | 代码已实现部分受影响的 Story | 重新实现或修复后，对照更新后的 `epic-design.md` / L2 与 `spec.md` 自检实现一致性 |
 
 核心规则：
-- **`features/*/research/` 不回写**：代码熟悉快照不参与 CR；禁止将任何 Feature 的 `research/` 纳入影响范围或执行更新
+- **`features/*/research/` 不回写**：代码调研快照不参与 CR；禁止将任何 Feature 的 `research/` 纳入影响范围或执行更新
 - **精准更新**：只更新 CR 影响分析中列出的产物章节，不扩散修改
 - **版本追踪**：每份更新的文档须更新 Version 与变更记录表
 - **分步确认**：每步更新后提示用户 check，不一次性全部改完

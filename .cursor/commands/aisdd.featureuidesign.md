@@ -1,9 +1,9 @@
 ---
 description: "**Feature 级**设计稿解析：在本 Feature 的 spec.md 完成后，从交互稿/视觉稿提取并结构化交互逻辑与视觉规范，产出 features/FEAT-xxx/ux-design.md。支持本地图片、Figma MCP、Pencil。可选步骤；无设计稿时进入兜底模式。"
 handoffs:
-  - label: 熟悉相关代码（推荐）
-    agent: aisdd.research
-    prompt: 本 Feature spec 与 ux-design 就绪后，运行 /aisdd.research 调研需求所涉存量代码
+  - label: 代码调研（Brownfield）
+    agent: aisdd.featureresearch
+    prompt: 若本 Feature 有存量代码，运行 /aisdd.featureresearch（熟悉代码并为 epicdesign 提供设计参考）；纯 Greenfield 跳过
     send: false
   - label: 继续下一 Feature spec
     agent: aisdd.featurespec
@@ -34,7 +34,7 @@ $ARGUMENTS
 
 - 本 Feature 的 **`spec.md` 已完成**
 - **不要求**其他 Feature 的 spec 或 ux-design 已完成
-- **推荐顺序**：`/aisdd.featurespec` → **`/aisdd.featureuidesign`**（可选）→ **`/aisdd.research`**（Brownfield 推荐）→ … 全部 Feature 就绪后 → `/aisdd.techspec`
+- **推荐顺序**：`/aisdd.featurespec` → **`/aisdd.featureuidesign`**（可选）→ **`/aisdd.featureresearch`**（**仅 Brownfield**，弄清实现流程与原理）→ … 全部 Feature 就绪后 → `/aisdd.techspec`
 
 ## 大纲
 
@@ -128,7 +128,8 @@ $ARGUMENTS
 输出路径、质量等级、解析统计、置信度分布、遗漏/待确认摘要；提示：
 - review「遗漏与待确认」与 `❓ 低` 条目
 - 若 EPIC 尚有 Feature 未做 ux-design：可对下一 Feature 运行 `/aisdd.featureuidesign`
-- **推荐下一步**：`/aisdd.research`（熟悉本 Feature 相关存量代码，产出至 `research/`）
+- **Brownfield 下一步**：`/aisdd.featureresearch`（熟悉存量代码，并为 epicdesign 提供设计参考，产出至 `research/`）
+- **纯 Greenfield**：跳过 featureresearch，直接进入下一 Feature 或 techspec
 - 当**全部 Feature** spec / ux / research（推荐）就绪：运行 `/aisdd.challenge spec`（多 Feature 推荐）→ `/aisdd.techspec`
 
 ---

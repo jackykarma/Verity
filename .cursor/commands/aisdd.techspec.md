@@ -28,7 +28,7 @@ $ARGUMENTS
 1. `epic.md` 已存在
 2. **所有** Feature 的 `spec.md` 已完成（Spec Ready）
 3. 各 Feature 的 `ux-design.md`（若存在）须在 techspec 前读取
-4. 各 Feature 的 `research/codebase-*.md`（**Brownfield 强烈推荐**；纯 Greenfield 可缺）须在 techspec 前读取，辅助差距分析
+4. 各 Feature 的 `research/codebase-*.md`（**Brownfield 强烈推荐**，须含**技术实现流程与原理**；**纯 Greenfield 无存量代码可跳过**，techspec 直接读码做差距分析）
 
 可选：多 Feature EPIC 在运行前先执行 `/aisdd.challenge spec`。
 
