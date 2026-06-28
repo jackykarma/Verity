@@ -168,7 +168,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
   - 可跳过 `ux-design.md`
   - `epic-design.md` 可精简为仅含 Story 拆解 + 关键类图
   - `l2_design/` 下 L2 文件可跳过
-- 详细裁剪规则与判断流程见 `workflow-overview.md` §四
+- 详细裁剪规则与判断流程见 `workflow-overview.html` §四
 
 ## AI 在 techspec（技术规约）阶段的职责边界
 

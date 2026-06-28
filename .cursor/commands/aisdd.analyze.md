@@ -174,7 +174,7 @@ CRITICAL / HIGH / MEDIUM / LOW（章程违规、缺失核心工件、无覆盖�
 
 ## 可选参考顺序（多 Feature EPIC，质量加码时用）
 
-必经链路仅为 `featuretasks → implement`；analyze 可在 `epicdesign` 后（`epic pre-tasks`）、全量 tasks 后（`epic`）或单 Feature tasks 后（默认 scope）任意插入，任一步均可省略。完整命令顺序见 `docs/aisdd/workflow-overview.md` §六（6.6 / 7.5 / 7.6 为 analyze 插入点）。
+必经链路仅为 `featuretasks → implement`；analyze 可在 `epicdesign` 后（`epic pre-tasks`）、全量 tasks 后（`epic`）或单 Feature tasks 后（默认 scope）任意插入，任一步均可省略。完整命令顺序见 `docs/aisdd/workflow-overview.html` §六（6.6 / 7.5 / 7.6 为 analyze 插入点）。
 
 ## 操作原则
 

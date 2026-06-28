@@ -8,7 +8,7 @@ description: "Change Request（CR）变更请求模板：用于需求/交互/视
 >
 > **适用变更**：需求（Scope/FR/NFR/AC 的新增、修改、删除；含**中途新增需求**）、交互（流程/状态/反馈）、视觉&动效、技术方案（`tech-spec.md` / `epic-design.md` 决策）。
 >
-> **走流程**：推荐运行 `/aisdd.cr` 命令自动执行（影响分析 → 生成 CR → 分步更新下游产物）；或手动填写本 CR 并评审通过后，按类型走 [workflow-overview.md §七](../workflow-overview.md#七变更管理)——需求类走 7.1，技术方案类走 7.2，按「下游更新清单」逐项更新产物。
+> **走流程**：推荐运行 `/aisdd.cr` 命令自动执行（影响分析 → 生成 CR → 分步更新下游产物）；或手动填写本 CR 并评审通过后，按类型走 [workflow-overview §七](../workflow-overview.html#h13)——需求类走 7.1，技术方案类走 7.2，按「下游更新清单」逐项更新产物。
 
 **CR-ID**：CR-[YYYYMMDD]-[短编号]  
 **类型**：需求 / 交互 / 视觉&动效 / 技术方案 / 混合  

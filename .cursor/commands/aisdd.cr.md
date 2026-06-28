@@ -64,7 +64,7 @@ $ARGUMENTS
    - **判断变更类型**：需求类（Scope/FR/NFR/AC）/ 交互类 / 技术方案类 / 混合
    - **定位受影响的产物**：逐个检查 spec/ux-design/tech-spec/epic-design/l2_design（各 ST 文件）/tasks，列出需要更新的文件与章节
    - **`research/` 永久排除**：`EPIC_DIR/research/` 下代码调研快照**不得**列入下游更新清单；方案或需求变更时**不**修订、不覆盖已有调研报告（需新调研则新建带日期的文件，走 `/aisdd.research`）
-   - **参考 workflow-overview.md §7.3 变更影响速查表**确定更新链路
+   - **参考 workflow-overview.html §7.3 变更影响速查表**确定更新链路
    - **风险评估**：识别变更带来的风险（性能/兼容/工期等）
 
 5. **生成 CR 文件**（无参数模式）：
@@ -79,7 +79,7 @@ $ARGUMENTS
 
 7. **分步执行下游更新**（无参数/apply 模式）：
    - 提示用户确认下游更新清单
-   - 按变更类型走对应流程（参考 workflow-overview.md §7.1 / §7.2）：
+   - 按变更类型走对应流程（参考 workflow-overview.html §7.1 / §7.2）：
      - **需求类**：更新 spec → 检查 ux-design → 检查 tech-spec → 检查 epic-design → 检查 l2_design（各 ST 文件）→ 更新 tasks
        - **更新 spec 的硬约束**：**只允许**修改 FR / NFR（量化指标） / AC / 范围（In/Out，含背景与价值表中的 In/Out） / 完整场景矩阵；**绝对禁止**写入类名、接口、框架、库、表名、字段、SQL、API 路径、代码片段、包路径、文件路径、线程原语、埋点字段等技术实现细节（业务假设、平台/合规约束、领域实体语义改 `tech-spec.md` §二～§四 或 `epic-design.md` §三；详见 `.cursor/rules/aisdd-document-boundaries.mdc`）
      - **技术方案类**：检查 NFR 是否需调整 → 更新 tech-spec.md → 更新 epic-design → 更新 l2_design（各 ST 文件）→ 检查 Story 拆解 → 更新 tasks

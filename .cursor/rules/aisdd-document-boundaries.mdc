@@ -8,7 +8,7 @@ alwaysApply: false
 
 > **定位**：治理 AISDD 工作流中各事实源文档的职责划分、污染识别、守护机制与实操判断。**Part A** 覆盖 `spec.md` ↔ `tech-spec.md` / `epic-design.md`；**Part B** 覆盖 `spec.md` ↔ `ux-design.md`。二者互补不重叠。
 >
-> **相关**：`.specify/memory/constitution.md`、`.specify/templates/spec-template.md`、`change-request-template.md`、`docs/aisdd/workflow-overview.md`
+> **相关**：`.specify/memory/constitution.md`、`.specify/templates/spec-template.md`、`change-request-template.md`、`docs/aisdd/workflow-overview.html`
 
 ---
 

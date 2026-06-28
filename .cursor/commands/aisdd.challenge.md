@@ -231,4 +231,4 @@ $ARGUMENTS
 
 三个挑战目标分别插在阶段转换前：`spec`（featurespec 后 → techspec 前）、`techspec`（techspec 后 → epicdesign 前）、`design`（epicdesign 后 → featuretasks 前），均为**可选（多 Feature 推荐，CR 变更后必须）**。
 
-完整的命令执行顺序与各步骤可选性见 `docs/aisdd/workflow-overview.md` §六（含 3.5 / 4.5 / 6.5 challenge 插入点）；发现 BLOCK/WARN 后走 `/aisdd.cr` 修复。
+完整的命令执行顺序与各步骤可选性见 `docs/aisdd/workflow-overview.html` §六（含 3.5 / 4.5 / 6.5 challenge 插入点）；发现 BLOCK/WARN 后走 `/aisdd.cr` 修复。

@@ -45,7 +45,7 @@ $ARGUMENTS
     - 读取 `.specify/templates/spec-template.md`，检查范围/要求的一致性——若章程新增/移除了强制性章节或约束条件，需同步更新该文件。
     - 读取 `.specify/templates/tasks-template.md`，确保任务分类能体现新增或移除的、由原则驱动的任务类型（例如可观测性、版本控制、测试规范）。
     - 读取 `.cursor/commands/aisdd.*.md` 路径下的所有命令文件（包括本文件），验证当需要通用指引时，不存在过时的引用。
-    - 读取所有运行时指引文档（例如 `README.md`、`docs/aisdd/workflow-overview.md`）。若原则有变更，需更新相关引用内容。
+    - 读取所有运行时指引文档（例如 `README.md`、`docs/aisdd/workflow-overview.html`）。若原则有变更，需更新相关引用内容。
 
 5. 生成同步影响报告（更新后作为 HTML 注释添加在章程文件顶部）：
     - 版本变更：旧版本 → 新版本
