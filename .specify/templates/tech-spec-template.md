@@ -1,6 +1,6 @@
 # EPIC 技术规格书（Tech Spec）：EPIC-[编号] - [EPIC 名称]
 
-> **定位**：本 EPIC **唯一**的技术规约事实源，合并原 `epic-plan.md` 与各 Feature `plan.md`。只冻结约束与边界，不承载详细设计（架构图、类图、时序、接口字段、表结构、Story 拆解由 `/aisdd.epicdesign` 产出）。
+> **定位**：本 EPIC **唯一**的技术规约事实源。只冻结约束与边界，不承载详细设计（架构图、类图、时序、接口字段、表结构、Story 拆解由 `/aisdd.epicdesign` 产出）。
 >
 > **禁止写入**：0/1 层架构图、组件清单、类图、时序图、流程图、接口方法签名、数据库表字段、Story 拆解、L2 设计、NFR 预算表（→ `nfr.md`）、接口契约细节（→ `interface-design.md`）。
 >

@@ -39,7 +39,7 @@ $ARGUMENTS
 1. 从代码库根目录**执行一次** `.specify/scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly`（组合模式 `--json --paths-only` / 简写 `-Json -PathsOnly`）。解析JSON返回结果中的核心字段：
     - `FEATURE_DIR`（功能目录）
     - `FEATURE_SPEC`（功能规格说明文件路径）
-    - （可选）捕获 `TECH_SPEC`（EPIC 根 `tech-spec.md`；JSON 兼容字段 `IMPL_PLAN` 同义）、`TASKS`（任务），用于后续链式流程。
+    - （可选）捕获 `TECH_SPEC`（EPIC 根 `tech-spec.md`）、`TASKS`（任务），用于后续链式流程。
     - 若JSON解析失败，终止操作并告知用户重新运行 `/aisdd.featurespec`（创建 Feature 文档目录与 spec.md）或检查 `SPECIFY_FEATURE`/当前 EPIC 上下文是否正确。
     - 对于参数中包含单引号的场景（如 "I'm Groot"），使用转义语法：例如 'I'\''m Groot'（或尽可能使用双引号："I'm Groot"）。
 

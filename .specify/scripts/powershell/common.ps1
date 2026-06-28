@@ -144,15 +144,12 @@ function Get-FeaturePathsEnv {
         FEATURE_KEY     = $featureKey
         FEATURE_DIR     = $featureDir
         FEATURE_SPEC    = Join-Path $featureDir 'spec.md'
-        # IMPL_PLAN：兼容旧 JSON 字段名；EPIC 工作流下指向 EPIC 根 tech-spec.md，否则回退 legacy plan.md
-        IMPL_PLAN       = if ($techSpec) { $techSpec } else { Join-Path $featureDir 'plan.md' }
+        TECH_SPEC       = $techSpec
         UX_DESIGN       = $uxDesign
         DESIGN_DIR      = $designDir
         EPIC_DIR        = $epicDir
         EPIC_UX_DESIGN  = $epicUx
         EPIC_DESIGN_DIR = $epicDesign
-        TECH_SPEC       = $techSpec
-        EPIC_PLAN       = $techSpec
         TASKS           = Join-Path $featureDir 'tasks.md'
         RESEARCH        = Join-Path $featureDir 'research.md'
         DATA_MODEL      = Join-Path $featureDir 'data-model.md'
@@ -178,7 +175,6 @@ function Get-EpicPathsForUidesign {
         EPIC_UX_DESIGN   = Join-Path $dir.FullName 'ux-design.md'
         EPIC_DESIGN_DIR  = Join-Path $dir.FullName 'design'
         TECH_SPEC        = Join-Path $dir.FullName 'tech-spec.md'
-        EPIC_PLAN        = Join-Path $dir.FullName 'tech-spec.md'
     }
 }
 

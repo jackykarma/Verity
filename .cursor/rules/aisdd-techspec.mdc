@@ -1,5 +1,5 @@
 ---
-description: "当用户输入 /aisdd.techspec 时触发：产出 EPIC 根目录 tech-spec.md（合并 epic-plan 与各 Feature plan）"
+description: "当用户输入 /aisdd.techspec 时触发：产出 EPIC 根目录 tech-spec.md"
 alwaysApply: false
 ---
 
@@ -9,4 +9,4 @@ alwaysApply: false
 
 **唯一事实源**：完整前置条件、执行步骤、章节结构与行为约束见 `.cursor/commands/aisdd.techspec.md`，执行前**必须完整阅读**该命令文件；模板见 `.specify/templates/tech-spec-template.md`。
 
-速记红线：所有 Feature `spec.md` 完成后才可运行；不得创建 `epic-plan.md` / Feature 级 `plan.md`；不写详细设计（架构图/类图/时序/接口签名/表字段 → `/aisdd.epicdesign`）；对 `spec.md` 只读，禁止反写。
+速记红线：所有 Feature `spec.md` 完成后才可运行；技术规约仅存在于 EPIC 根 `tech-spec.md`；不写详细设计（架构图/类图/时序/接口签名/表字段 → `/aisdd.epicdesign`）；对 `spec.md` 只读，禁止反写。

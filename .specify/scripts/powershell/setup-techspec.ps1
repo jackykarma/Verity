@@ -48,7 +48,6 @@ if ($Json) {
     [PSCustomObject]@{
         EPIC_DIR   = $p.EPIC_DIR
         TECH_SPEC  = $techSpec
-        EPIC_PLAN  = $techSpec   # 兼容旧字段名
         HAS_TECH_SPEC = (Test-Path -LiteralPath $techSpec)
     } | ConvertTo-Json -Compress
 } else {

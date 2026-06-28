@@ -92,9 +92,8 @@ $filesToCreate = if ($FilesOnly) {
 $results = @()
 $expanded = [System.Collections.ArrayList]::new()
 foreach ($k in $filesToCreate) {
-    if ($k -eq 'epic-plan') {
-        $results += @{ file = $k; status = 'deprecated (use tech-spec; run /aisdd.techspec or -FilesOnly tech-spec)' }
-    } elseif ($k -eq 'key-diagram' -or $k -eq 'key-diagram-epic' -or $k -eq 'key-diagram-feature') {
+    if ($k -eq 'epic-plan') { $k = 'tech-spec' }
+    if ($k -eq 'key-diagram' -or $k -eq 'key-diagram-epic' -or $k -eq 'key-diagram-feature') {
         $results += @{ file = $k; status = 'deprecated (use key-func-design/KD_*_*.md)' }
     } else {
         [void]$expanded.Add($k)

@@ -1,5 +1,5 @@
 ---
-description: "产出 EPIC 根目录唯一技术规格书 tech-spec.md（合并原 epic-plan 与各 Feature plan）。基于 epic.md、各 spec.md 及现有工程代码，冻结 EPIC 级公共约束与各 Feature 增量规约。不含详细设计。"
+description: "产出 EPIC 根目录唯一技术规格书 tech-spec.md。基于 epic.md、各 spec.md 及现有工程代码，冻结 EPIC 级公共约束与各 Feature 增量规约。不含详细设计。"
 handoffs:
   - label: 对抗性挑战（多 Feature 推荐）
     agent: aisdd.challenge
@@ -35,7 +35,7 @@ $ARGUMENTS
 
 在 **EPIC 根**（`specs/epics/<EPIC-xxx>/`）产出 **唯一** `tech-spec.md`，结构见 `.specify/templates/tech-spec-template.md`：
 
-- **第一部分**：原 `epic-plan.md` 对应内容（EPIC 公共约束、跨 Feature 边界、运行时、数据总约束、共享能力、编写顺序）
+- **第一部分**：EPIC 级公共规约（技术栈、跨 Feature 边界、运行时、数据总约束、共享能力、编写顺序）
 - **第二部分**：为 `epic.md` 中**每个 Feature** 各一节（规约摘要、增量约束、能力边界、数据/NFR/安全硬约束）
 
 **禁止写入**：架构图、类图、时序、接口签名、表字段、Story、NFR 预算表（→ `nfr.md`）、接口契约（→ `interface-design.md`）。
@@ -105,5 +105,5 @@ $ARGUMENTS
 
 - **演进式设计**、**差距分析**、**模板结构保护**（constitution）
 - **spec 单向消费**：禁止修改任何 `spec.md`
-- **一份事实源**：不得再创建 `epic-plan.md` 或各 Feature `plan.md`
+- **唯一事实源**：EPIC 根 `tech-spec.md` 为技术规约唯一载体
 - SE/TL 产出；DEV 只读，变更走 CR

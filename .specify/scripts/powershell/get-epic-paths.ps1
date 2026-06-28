@@ -43,11 +43,9 @@ if ($Json) {
         EPIC_UX_DESIGN        = $p.EPIC_UX_DESIGN
         EPIC_DESIGN_DIR       = $p.EPIC_DESIGN_DIR
         TECH_SPEC             = $techSpecPath
-        EPIC_PLAN             = $techSpecPath
         EPIC_RESEARCH_DIR     = $researchDir
         HAS_RESEARCH          = $hasResearch
         HAS_TECH_SPEC         = $hasTechSpec
-        HAS_EPIC_PLAN         = $hasTechSpec
         EPIC_CONSTRAINT_SOURCE = $epicConstraintSource
     } | ConvertTo-Json -Compress
 } else {

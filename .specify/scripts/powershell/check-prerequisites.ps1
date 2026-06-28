@@ -71,7 +71,7 @@ if ($PathsOnly) {
             BRANCH       = $paths.CURRENT_BRANCH
             FEATURE_DIR  = $paths.FEATURE_DIR
             FEATURE_SPEC = $paths.FEATURE_SPEC
-            IMPL_PLAN    = $paths.IMPL_PLAN
+            TECH_SPEC    = $paths.TECH_SPEC
             UX_DESIGN    = $paths.UX_DESIGN
             DESIGN_DIR   = $paths.DESIGN_DIR
             TASKS        = $paths.TASKS
@@ -81,7 +81,7 @@ if ($PathsOnly) {
         Write-Output "BRANCH: $($paths.CURRENT_BRANCH)"
         Write-Output "FEATURE_DIR: $($paths.FEATURE_DIR)"
         Write-Output "FEATURE_SPEC: $($paths.FEATURE_SPEC)"
-        Write-Output "IMPL_PLAN: $($paths.IMPL_PLAN)"
+        Write-Output "TECH_SPEC: $($paths.TECH_SPEC)"
         Write-Output "UX_DESIGN: $($paths.UX_DESIGN)"
         Write-Output "DESIGN_DIR: $($paths.DESIGN_DIR)"
         Write-Output "TASKS: $($paths.TASKS)"
@@ -96,16 +96,15 @@ if (-not (Test-Path $paths.FEATURE_DIR -PathType Container)) {
     exit 1
 }
 
-# EPIC 工作流：技术规约为 EPIC 根目录 tech-spec.md；旧版 Feature plan.md 不再作为前置
-if ($paths.EPIC_DIR) {
-    $techSpec = Join-Path $paths.EPIC_DIR 'tech-spec.md'
-    if (-not (Test-Path $techSpec -PathType Leaf)) {
-        Write-Output "ERROR: tech-spec.md not found in $($paths.EPIC_DIR)"
-        Write-Output "Run /aisdd.techspec first to create the EPIC technical specification."
-        exit 1
-    }
-} elseif (-not (Test-Path $paths.IMPL_PLAN -PathType Leaf)) {
-    Write-Output "ERROR: tech-spec.md not found (EPIC workflow) and legacy plan.md not found in $($paths.FEATURE_DIR)"
+# 技术规约：EPIC 根目录 tech-spec.md
+if (-not $paths.EPIC_DIR) {
+    Write-Output "ERROR: EPIC directory not resolved for $($paths.FEATURE_DIR)"
+    Write-Output "Ensure the feature is under specs/epics/EPIC-xxx/features/FEAT-xxx."
+    exit 1
+}
+$techSpec = Join-Path $paths.EPIC_DIR 'tech-spec.md'
+if (-not (Test-Path $techSpec -PathType Leaf)) {
+    Write-Output "ERROR: tech-spec.md not found in $($paths.EPIC_DIR)"
     Write-Output "Run /aisdd.techspec first to create the EPIC technical specification."
     exit 1
 }
