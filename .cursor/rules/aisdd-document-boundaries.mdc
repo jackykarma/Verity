@@ -69,7 +69,7 @@ NFR 只写**结果性指标 + 业务触发条件**，不写实现方式。❌ `D
 
 ### A.6 工作流守护
 
-**写入侧**：`aisdd.featurespec` / `aisdd.epicspec` / `aisdd.clarify` / `aisdd.cr`；模板 `spec-template.md`、`epic-template.md`、`change-request-template.md`。
+**写入侧**：`aisdd.featurespec`（含 `--clarify` 澄清模式）/ `aisdd.epicspec` / `aisdd.cr`；模板 `spec-template.md`、`epic-template.md`、`change-request-template.md`。
 
 **读取侧（禁反写 spec）**：`aisdd.techspec`、`aisdd.featureuidesign`、`aisdd.epicdesign`、`aisdd.featuretasks`、`aisdd.implement`。
 

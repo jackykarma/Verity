@@ -1,11 +1,7 @@
 ---
-description: 基于 Feature 描述在当前 EPIC 下创建 Feature 文档目录并生成 spec.md（本工作流 Feature 不创建 git 分支），供 /aisdd.techspec → /aisdd.featuretasks → /aisdd.implement 使用。支持 --batch 模式从 epic.md 批量并行生成所有 Feature 的 spec.md。
+description: 基于 Feature 描述创建 Feature 文档目录并生成 spec.md；内置交互式需求澄清（默认单 Feature 生成后执行，--skip-clarify 跳过，--clarify 仅澄清已有 spec）。支持 --batch 批量并行生成。
 handoffs:
-  - label: 澄清规格说明要求
-    agent: aisdd.clarify
-    prompt: 澄清规格说明的相关要求
-    send: true
-  - label: 对抗性挑战（多 Feature 推荐）
+  - label: 对抗性评审（多 Feature 推荐）
     agent: aisdd.challenge
     prompt: 所有 Feature spec 生成后，运行 /aisdd.challenge spec 对 spec 进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
     send: false
@@ -13,9 +9,13 @@ handoffs:
     agent: aisdd.featureuidesign
     prompt: 本 Feature spec 完成后，若 UX/视觉稿已就绪，运行 /aisdd.featureuidesign（解析本 Feature 设计稿，产出 ux-design.md）；设计稿未就绪可跳过
     send: false
+  - label: 熟悉相关代码（推荐）
+    agent: aisdd.research
+    prompt: spec 完成后（及可选 ux-design 后）运行 /aisdd.research，调研本 Feature 需求所涉存量代码
+    send: false
   - label: EPIC 技术规格书
     agent: aisdd.techspec
-    prompt: 所有 Feature 的 spec 输出之后运行 /aisdd.techspec "EPIC-xxx"（各 Feature 可选 ux-design.md 供 techspec 读取）
+    prompt: 全部 Feature 的 spec、可选 ux-design 与 research 就绪后，运行 /aisdd.techspec "EPIC-xxx"
     send: false
 ---
 
@@ -30,7 +30,8 @@ $ARGUMENTS
 **模式判断（最先执行）**：
 
 - 若 `$ARGUMENTS` 包含 `--batch`、`-batch` 或 `--all`：进入**批量模式**，执行 §批量模式执行步骤
-- 否则：进入**单 Feature 模式**（默认），`$ARGUMENTS` 为单个 Feature 的描述，执行 §单 Feature 模式执行步骤
+- 若 `$ARGUMENTS` 含 `--clarify` / `-clarify` 且**无**新 Feature 描述（或仅为 `FEAT-xxx` 标识）：进入**澄清模式**，对已有 `spec.md` 执行 §需求澄清（内置）
+- 否则：进入**单 Feature 模式**（默认），`$ARGUMENTS` 为单个 Feature 的描述；生成 spec 后**默认进入** §需求澄清，除非含 `--skip-clarify` / `-skip-clarify`
 
 ---
 
@@ -189,11 +190,42 @@ EPIC 上下文：
 
 ### 下一步建议
 
-1. **（推荐）** `/aisdd.challenge spec` — 三视角对抗性质量挑战，多 Feature EPIC 强烈推荐
-2. 需澄清具体 Feature 细节：`/aisdd.clarify`（逐个运行）
-3. 若 UX/视觉稿已就绪：`/aisdd.featureuidesign`（本 Feature）
-4. 所有 Feature spec 确认无误后：`/aisdd.techspec`
+1. **（推荐）** `/aisdd.challenge spec` — 三视角对抗性质量评审，多 Feature EPIC 强烈推荐
+2. 需澄清具体 Feature 细节：`/aisdd.featurespec --clarify`（逐个运行，对已有 spec）
+3. 熟悉存量代码（Brownfield 推荐）：`/aisdd.research`（默认写入各 Feature `research/`）
+4. 若 UX/视觉稿已就绪：`/aisdd.featureuidesign`（本 Feature）
+5. 全部 Feature spec / ux / research（推荐）确认无误后：`/aisdd.techspec`
 ```
+
+---
+
+## 需求澄清（内置）
+
+> **定位**：检测并减少 spec 中的模糊点，将澄清内容直接记录到 `spec.md`。**只讨论需求**，不讨论技术方案（技术选型在 `/aisdd.techspec` / `/aisdd.epicdesign` 阶段）。
+
+**触发方式**：
+- 单 Feature 模式：spec 生成后**默认自动进入**（`--skip-clarify` 跳过）
+- 澄清模式：`/aisdd.featurespec --clarify` 或 `/aisdd.featurespec --clarify FEAT-001`（仅澄清，不重新生成 spec）
+- 批量模式：不自动澄清；对各 Feature 单独运行 `--clarify`
+
+**边界（必须遵守）**：
+- 只问需求侧：做什么、谁用、验收标准、范围、边界、异常、合规约束
+- **禁止**技术选型、架构、实现方式、技术栈类问题
+
+**执行步骤**：
+
+1. 运行 `check-prerequisites.ps1 -Json -PathsOnly`，解析 `FEATURE_DIR`、`FEATURE_SPEC`；spec 缺失则终止
+2. 按分类体系扫描模糊点（功能范围、领域模型、交互流程、NFR、集成依赖、边缘场景、术语、验收可测试性等），标记 Clear / Partial / Missing
+3. 生成优先级队列（**最多 5 个问题**），**每次仅提一个问题**；选择题须给出推荐选项及理由
+4. **顺序提问循环**：用户回答后整合至 spec；用户回复「完成」「停止」或达 5 问上限时结束
+5. **每次整合前纯净度自检**（8 类污染清单，见 §spec / 技术细节边界守护）；命中则 block_ask，不得直接写入
+6. 在 spec 中维护 `## 澄清内容` → `### 会话 YYYY-MM-DD` 记录问答；同步更新 FR/NFR/AC/场景等对应章节
+7. **完成报告**：已解答问题数、涉及章节、覆盖度汇总（已解决/已推迟/清晰/未解决）、建议下一步
+
+**行为规则**：
+- 无核心模糊点 → 「未检测到需正式澄清的核心模糊点。」并建议继续推进
+- 禁止超过 5 个问题（单题追问不计入新问题）
+- 后续需求变更：直接说明更新范围，由 AI 更新 spec 并在变更记录留痕（不必重跑完整澄清）
 
 ---
 
@@ -228,20 +260,25 @@ EPIC 上下文：
 
 ### 4. Feature 规格填写规则（必须）
 
-- 必须填写 `Epic`（例如 `EPIC-001 - xxx`），若未知写 `TODO(Epic)` 并交由 `/aisdd.clarify` 补齐
+- 必须填写 `Epic`（例如 `EPIC-001 - xxx`），若未知写 `TODO(Epic)` 并在 §需求澄清 中补齐
 - Feature Version 初始为 `v0.1.0`
 - FR 必须可测试
 - NFR 必须覆盖至少：性能/功耗/内存/安全隐私/可观测性/可靠性（可少量 `[需澄清]`，但不得缺失整类）
 - AC（验收标准）必须引用 FR/NFR ID
 - **完整场景矩阵**须覆盖 7 类场景（正常/替代/边界值/异常错误/并发竞态/生命周期/跨 Feature 集成），不适用的类别标注 `N/A` 及理由；每条场景须关联 FR/NFR ID 并标注优先级（P0/P1/P2）
 
-### 5. 完成报告
+### 5. 需求澄清（默认执行，除非 `--skip-clarify`）
 
-输出 Feature Key、spec.md 路径，并提示下一步：
+spec 写入完成后，**立即执行** §需求澄清（内置）。用户已明确 `--skip-clarify` 时跳过，并在完成报告中提示后续可运行 `/aisdd.featurespec --clarify`。
 
-- `/aisdd.clarify`（建议先做）
-- 若 UX/视觉稿已就绪：**`/aisdd.featureuidesign`**（本 Feature，可选）
-- 若尚未做 EPIC 技术规约：**`/aisdd.techspec "EPIC-xxx"`**（须在所有 Feature 的 spec 输出之后）
+### 6. 完成报告
+
+输出 Feature Key、spec.md 路径、澄清摘要（若已执行），并提示下一步：
+
+- 若跳过澄清：可运行 `/aisdd.featurespec --clarify` 补做
+- 若 UX/视觉稿已就绪：**`/aisdd.featureuidesign`**（本 Feature，可选）；无稿可跳过
+- **推荐**：**`/aisdd.research`**（熟悉本 Feature 相关存量代码，默认写入 `features/FEAT-xxx/research/`）；纯 Greenfield 可用 `--skip`
+- 若尚未做 EPIC 技术规约：**`/aisdd.techspec "EPIC-xxx"`**（须在所有 Feature 的 spec 及推荐 research 就绪后）
 - techspec 会读取各 Feature 的 `ux-design.md`（若存在）
 - 若这是**最后一个** Feature 且 EPIC 有多个 Feature：**建议先运行 `/aisdd.challenge spec`**，再进入 `/aisdd.techspec`
 
@@ -254,7 +291,7 @@ EPIC 上下文：
 - 聚焦用户**需要什么**以及**为什么需要**。
 - 避免描述**如何**实现（不提及技术栈、API、代码结构）。
 - 面向业务相关方编写，而非开发人员。
-- 请勿在规格说明中嵌入检查清单；需求质量评审使用 `/aisdd.challenge spec`（多 Feature 推荐）或 `/aisdd.clarify`。
+- 请勿在规格说明中嵌入检查清单；需求质量评审使用 `/aisdd.challenge spec`（多 Feature 推荐）或本命令 `--clarify` 模式。
 
 ### 章节要求
 

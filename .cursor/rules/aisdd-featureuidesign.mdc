@@ -9,6 +9,4 @@ alwaysApply: false
 
 **唯一事实源**：在 `/aisdd.featurespec` 之后、按 Feature 运行；三种输入（本地图片 / Figma MCP / Pencil）；设计素材优先 `features/FEAT-xxx/design/`。详见 `.cursor/commands/aisdd.featureuidesign.md`；模板见 `.specify/templates/ux-design-template.md`。
 
-**已废弃**：`/aisdd.epicuidesign`（EPIC 级一次性解析）——请改用本命令按 Feature 执行。
-
 速记红线：须本 Feature `spec.md` 已完成；对 spec/epic 只读；每条提取标来源与置信度；跨 Feature 全局壳层在「交界」节摘要，细节留在各 Feature ux-design。

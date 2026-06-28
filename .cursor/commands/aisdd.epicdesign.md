@@ -5,17 +5,17 @@ handoffs:
     agent: aisdd.challenge
     prompt: epicdesign 完成（至少 story 阶段）后，运行 /aisdd.challenge design 对设计进行对抗性质量挑战（多 Feature EPIC 强烈推荐）
     send: false
-  - label: EPIC 级跨 Feature 分析（可选）
-    agent: aisdd.analyze
-    prompt: （可选）运行 /aisdd.analyze epic pre-tasks；跳过可直接 featuretasks
+  - label: EPIC 级跨 Feature 一致性评审（可选）
+    agent: aisdd.challenge
+    prompt: （可选）运行 /aisdd.challenge epic pre-tasks；跳过可直接 featuretasks
     send: false
   - label: 生成任务（Story → Task）
     agent: aisdd.featuretasks
     prompt: 将设计说明书中的 Story 拆解为可执行 tasks.md
     send: true
   - label: 补充需求或澄清
-    agent: aisdd.clarify
-    prompt: 需补充设计边界或约束时，澄清后可再运行 epicdesign 或直接说明要更新的章节/参数由 AI 做增量更新
+    agent: aisdd.featurespec
+    prompt: 需补充设计边界或约束时，运行 /aisdd.featurespec --clarify 澄清 spec；澄清后可再运行 epicdesign 或直接说明要更新的章节/参数
     send: false
 ---
 
@@ -107,7 +107,7 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
    - 读取 **`tech-spec.md`**（第一部分 EPIC 级 + 第二部分各 Feature 章节）作为技术规约输入
    - 读取各 `EPIC_DIR/features/*/spec.md`（含「完整场景矩阵」，P0 场景须在设计中可追溯）
    - 读取各 `EPIC_DIR/features/*/ux-design.md`（若有）
-   - 若 `EPIC_DIR/research/` 存在且非空：可读**代码调研快照**辅助理解调研当时的存量模块；**不得**当作约束或设计决策依据；**不得**因 design/CR 变更而回写 `research/`；设计仍须独立完整分析并做出自己的设计决策
+   - 各 Feature `features/*/research/codebase-*.md`（若存在）：可读**代码熟悉快照**辅助理解调研时的存量模块；**不得**当作约束或设计决策依据；**不得**因 design/CR 变更而回写；设计仍须独立完整分析并做出自己的设计决策
    - 读取 `.specify/memory/constitution.md`
    - 读取 `.specify/templates/epic-design-doc-template.md`、`key-func-design-kd-template.md`、`nfr-template.md`、`epic-design-interface-template.md`、`epic-design-database-template.md`、`epic-design-analytics-tracking-template.md`、`story_detail_design_template.md`
    - 读取 `.cursor/rules/specify-diagram-requirements.mdc`、`.cursor/rules/mermaid-style-guide.mdc`
@@ -117,7 +117,7 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
 
    > **各阶段通用禁令（arch / key / nfr / story / l2 / all 均适用）**：
    >
-   > 1. **只产出设计事实源**：本阶段仅产出 `epic-design.md` 及子文件；对 `spec.md`、`tech-spec.md` **仅只读消费**，**禁止**反向修改其任何章节。发现 spec/tech-spec 缺口须**停止本阶段**，引导 `/aisdd.cr` 或 `/aisdd.clarify`；不得在 design 产物中「顺便」回写 spec/tech-spec。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
+   > 1. **只产出设计事实源**：本阶段仅产出 `epic-design.md` 及子文件；对 `spec.md`、`tech-spec.md` **仅只读消费**，**禁止**反向修改其任何章节。发现 spec/tech-spec 缺口须**停止本阶段**，引导 `/aisdd.cr` 或 `/aisdd.featurespec --clarify`；不得在 design 产物中「顺便」回写 spec/tech-spec。详见 `.cursor/rules/aisdd-document-boundaries.mdc`。
    > 2. **禁止产出废弃文件**：任何阶段（含 `all`、含 L2 阶段「补图」诉求）**不得**创建 EPIC 根目录 `key-func-design.md`、`key-diagram-epic.md`、`features/*/key-diagram.md` 或单独的流程图集——全景/子类图与完整时序已收敛在 §七各 KD 与 §十三 L2，图表只画在 `key-func-design/KD_*_*.md` 与 `l2_design/ST-xxx_*.md` 内。
 
    - **无参数**：生成/更新 `epic-design.md`，含完整 §1~§13 骨架；§1~§6 填充内容，§7~§13 占位（提示运行对应参数产出）。
@@ -148,7 +148,7 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
    - key 完成 → 提示继续 `nfr`
    - nfr 完成 → 提示继续 `story`
    - story 完成 → 提示继续 `l2`
-   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.analyze epic pre-tasks`（多 Feature 可选）→ `/aisdd.featuretasks`（全量 `all` 或按 Story 增量 `ST-xxx`；在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
+   - l2 完成 → 提示：**`/aisdd.challenge design`**（多 Feature EPIC 强烈推荐）→ `/aisdd.challenge epic pre-tasks`（多 Feature 可选）→ `/aisdd.featuretasks`（全量 `all` 或按 Story 增量 `ST-xxx`；在 `tasks.md` 内生成 FR/NFR → Story → Task 追溯矩阵）
 
 核心规则：
 - 产出各 `key-func-design/KD_*_*.md` 时须遵循 `key-func-design-kd-template.md`：各 KD 的图表（关键类图、核心调用链时序图，及按需方案架构图）**直接画在该 KD 文件内**；跨 KD / 跨 Feature 流程在相关 KD 中互链说明；**必须含「关键类图」**（全量公共方法签名）及**核心调用链时序图**（穷举关键异常分支），且时序图 participant 与类图一致；**核心方案**为清晰连贯正文，**把核心技术方案与实现思路讲明白**——覆盖关键技术点、关键链路与每个关键环节如何达成，并与类图/时序图（及若有的方案架构图）一致；**§7.1 与文首「依赖的其他 KD」须一致**，依赖须为 DAG、无循环
@@ -157,4 +157,4 @@ EPIC 根 `tech-spec.md` 应已完成（`/aisdd.techspec`）。可选先运行 `/
 - 设计说明书是 tasks.md 与 implement 阶段的**设计事实源**，与 `tech-spec.md` 的技术规约共同约束实现
 - **L2 按需分文件并继承 KD**：`epic-design.md` §13 为索引、关联 KD、L2 状态与依赖总览；复杂/高风险 Story 的正文在各 Feature 的 `l2_design/ST-xxx_<slug>.md` 中，简单 Story 可由 `tasks.md` 的设计引用与 DoD 承接。凡涉及 KD 的 L2 必须继承 KD 关键方案，只能细化 Story 局部落码细节，不得与 KD 冲突或另起方案
 - **章节骨架先行**：首次（无参数）调用必须输出完整 §1~§13 骨架，未填充章节保留占位提示；后续调用仅更新指定章节
-- **spec / tech-spec 单向消费（禁写红线）**：本命令对 `spec.md`、`tech-spec.md` 仅**只读**消费——读取 FR/NFR/AC/边界/场景矩阵与技术规约作为设计输入；**禁止**反向修改上述文件的任何章节。设计过程中发现的 spec/tech-spec 缺口必须**停止本命令**，引导 `/aisdd.cr` 或 `/aisdd.clarify`。§12 Story 拆解**不得**将 Story 定义反写入 spec。详见 `.cursor/rules/aisdd-document-boundaries.mdc`
+- **spec / tech-spec 单向消费（禁写红线）**：本命令对 `spec.md`、`tech-spec.md` 仅**只读**消费——读取 FR/NFR/AC/边界/场景矩阵与技术规约作为设计输入；**禁止**反向修改上述文件的任何章节。设计过程中发现的 spec/tech-spec 缺口必须**停止本命令**，引导 `/aisdd.cr` 或 `/aisdd.featurespec --clarify`。§12 Story 拆解**不得**将 Story 定义反写入 spec。详见 `.cursor/rules/aisdd-document-boundaries.mdc`

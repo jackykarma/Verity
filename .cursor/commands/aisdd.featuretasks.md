@@ -3,7 +3,7 @@ description: "基于 EPIC 软件设计说明书的 Story 拆解（ST-xxx）、EP
 handoffs:
   - label: 项目实施
     agent: aisdd.implement
-    prompt: 分阶段启动实施（全量 all、Story ST-xxx 或 Task Txxx；/aisdd.analyze 为可选，非前置条件）
+    prompt: 分阶段启动实施（全量 all、Story ST-xxx 或 Task Txxx；/aisdd.challenge feature 为可选，非前置条件）
     send: true
 ---
 
@@ -43,7 +43,7 @@ $ARGUMENTS
 | **全量**（无参数 / `all`） | `epic-design.md` §十二 Story 拆解已完成；本 Feature 各 Story 的 L2 已就绪，或 §十三 已标注由 `tasks.md` DoD 承接 |
 | **增量**（`ST-xxx`） | 指定 Story 已在 §十二 中定义；该 Story 的 L2 已就绪，或 §十三 已标注由 `tasks.md` DoD 承接；**不要求**其他 Story 的 L2 已完成 |
 
-完成后**可直接**进入 `/aisdd.implement`（可仅实现已生成 Task 的 Story）；`/aisdd.analyze`（feature / epic）为**可选**质量检查，非必经、非阻塞。
+完成后**可直接**进入 `/aisdd.implement`（可仅实现已生成 Task 的 Story）；`/aisdd.challenge feature` / `/aisdd.challenge epic` 为**可选**质量评审，非必经、非阻塞。
 
 ## 大纲
 
@@ -63,7 +63,7 @@ $ARGUMENTS
         - **EPIC 软件设计说明书**（`epic-design.md`，从 EPIC_DIR 读取）：提取 **Story 拆解**（§十二：Story 列表、依赖关系、§十二.6 FR/NFR 覆盖矩阵）、**L2 详细设计**（各 `l2_design/`，索引见 §十三，若有）、**关键类图与关键时序**（§七 KD，若有）、**架构章节**（§一～§六）
         - EPIC 根 `tech-spec.md`（本 Feature 对应第二节：增量约束、能力边界、数据/NFR/安全硬约束）
         - spec.md（Epic/Feature 元信息、FR/NFR、验收与边界场景）
-    - **可选文档**：本 Feature `ux-design.md`、EPIC 级 `nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`、`research/codebase-*.md`（调研快照，只读辅助）
+    - **可选文档**：本 Feature `ux-design.md`、本 Feature `research/codebase-*.md`（代码熟悉快照，只读辅助）、EPIC 级 `nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md`
     - 注意：并非所有 EPIC 都包含全部可选文档。需基于实际存在的文件生成任务。
 
 4. **追溯矩阵生成与一致性核对（只写入 tasks.md）**：

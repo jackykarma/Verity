@@ -68,7 +68,7 @@ $ARGUMENTS
 | **Story** | `tasks.md` 中目标 Story 已有 Task |
 | **Task** | `tasks.md` 中存在目标 `Txxx` |
 
-**不要求**事先运行 `/aisdd.analyze`（可选、非阻塞；未运行不得作为拒绝实现的理由）。
+**不要求**事先运行 `/aisdd.challenge feature`（可选、非阻塞；未运行不得作为拒绝实现的理由）。
 
 ## 大纲
 
@@ -94,7 +94,7 @@ $ARGUMENTS
     - **必填**：读取本 Feature **`l2_design/ST-xxx_*.md`**（执行集涉及的 Story；若有）获取 **Story L2 详细设计**——这是代码实现的**详细设计事实源**
     - **必填**：读取 spec.md 获取 FR/NFR 与验收边界
     - **若存在**：读取本 Feature **`ux-design.md`**，及 EPIC 级 `nfr.md`、`interface-design.md`、`database-design.md`、`analytics-tracking.md` 获取体验与专项设计约束
-    - **若存在**：读取 `research/codebase-*.md` 辅助理解存量代码（只读事实快照，非约束源、非技术决策依据）
+    - **若存在**：读取本 Feature **`research/codebase-*.md`** 辅助理解存量代码（只读事实快照，非约束源、非技术决策依据）
 
    **体验设计输入（UI 相关 Task 适用）**：
     - **主来源**：本 Feature **`ux-design.md`**（若存在，由 `/aisdd.featureuidesign` 产出）

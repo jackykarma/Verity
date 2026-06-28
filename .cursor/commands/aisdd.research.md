@@ -1,13 +1,13 @@
 ---
-description: "前置代码调研：在 EPIC/Feature 规格或方案制定前，考古存量代码、熟悉相关模块与现状事实。只记录「代码里有什么」，不做技术方案决策；报告为一次性快照，方案变更时不回写。"
+description: "Feature 级代码熟悉：在本 Feature 的 spec.md（及可选 ux-design.md）完成后，调研需求所涉存量代码；报告默认写入 features/FEAT-xxx/research/。"
 handoffs:
-  - label: 进入 EPIC 规格说明
-    agent: aisdd.epicspec
-    prompt: 代码调研完成，已熟悉相关模块现状，开始填写 EPIC 规格说明（规格与方案决策不依赖调研报告中的任何「建议」）
-    send: false
-  - label: 进入 Feature 规格说明
+  - label: 继续下一 Feature
     agent: aisdd.featurespec
-    prompt: 代码调研完成，开始编写 spec.md（需求事实源；技术方案在后续 techspec/design 阶段独立决策）
+    prompt: 若 EPIC 尚有 Feature 未完成 spec/ux/research，继续下一 Feature；否则进入 techspec
+    send: false
+  - label: EPIC 技术规格书
+    agent: aisdd.techspec
+    prompt: 全部 Feature 的 spec（及可选 ux-design、research）就绪后，运行 /aisdd.techspec
     send: false
 ---
 
@@ -19,39 +19,43 @@ $ARGUMENTS
 
 在继续操作前，你**必须**参考用户输入（若不为空）。
 
-**参数解析（最先执行）**：
+**参数（极简）**：
 
-| 参数格式 | 说明 |
-|---------|------|
-| `codebase <topic>` | **显式**指定调研主题（模块/能力/业务域，如 `codebase 媒体播放模块`） |
-| 自由文本 / 无参数 | 将全文视为调研主题，按 **codebase** 执行 |
-| `--save` | 写入 `EPIC_DIR/research/codebase-<slug>-<YYYYMMDD>.md`（须能解析 EPIC 目录；否则仅对话输出） |
-| `--parallel` | 多个**互不相关**的代码主题时，并行子 Agent 各写一份快照 |
+| 输入 | 说明 |
+|------|------|
+| （空） | 当前 Feature（`check-prerequisites.ps1` 解析） |
+| `FEAT-xxx` | 指定 Feature |
+| 自由文本 | 可选，缩小调研子范围（如「批量删除流程」）；默认以整份 spec + ux 驱动 |
+| `--skip` | 本 Feature 为纯 Greenfield，跳过调研（不写报告） |
 
-**不支持**（本命令职责外，请用其他方式处理）：
-- `platform` / `library` / `pattern` / `feasibility` — 不做平台选型、库评估、架构模式决策、可行性裁决
-- 任何「推荐方案」「下游文档输入建议」「综合评级可否开工」类输出
+**不支持**：`--save`（**默认即保存**）、平台选型、方案建议类输出。
 
 示例：
-- `/aisdd.research 视频播放与缓存相关代码`
-- `/aisdd.research codebase 登录与会话 --save`
-- `/aisdd.research codebase 相册导入 codebase 后台同步 --parallel --save`
+- `/aisdd.research`
+- `/aisdd.research FEAT-002`
+- `/aisdd.research 相册批量删除`
+- `/aisdd.research FEAT-001 --skip`
 
 ---
 
-## 目标
+## 目标与时机
 
-在 `epicspec` / `featurespec` / `techspec` / `epicdesign` **之前**，通过阅读**真实工程代码**，建立对相关模块的**事实性认知**，降低写需求/规格时的「想当然」。
+**时机**：本 Feature **`spec.md` 完成之后**；若存在 **`ux-design.md`** 须先读完。**位于** featurespec / featureuidesign **之后**、techspec **之前**。
 
-**本命令产出什么**：
-- 模块在哪、做什么、公开 API 与数据模型长什么样
-- 典型调用链与依赖关系（现状）
-- 可核对的限制/技术债**观察**（不带修复方案）
+**目的**：在 techspec/epicdesign 之前，熟悉本 Feature 需求所涉存量代码——模块、逻辑、异常处理、状态与调用链。
 
-**本命令不产出什么**：
-- 技术选型、架构调整、复用/新建/扩展**决策**
-- 对 `spec.md` / `tech-spec.md` / `epic-design.md` 的修改建议清单
-- 风险消解方案、可行性 ✅/❌ 评级、否决/推荐方案
+**产出（默认落盘）**：
+- `{FEATURE_DIR}/research/codebase-{slug}-{YYYYMMDD}.md`
+- 需求 ↔ 代码落点、调用链、异常路径现状、技术债观察（仅事实，无方案）
+
+---
+
+## 前置条件
+
+1. 本 Feature **`spec.md` 已存在**
+2. **`ux-design.md`**：若已产出则必读
+3. 运行 `check-prerequisites.ps1 -Json -PathsOnly`，解析 `FEATURE_DIR`、`FEATURE_SPEC`
+4. **`FEATURE_DIR` 不可解析则终止**（无法默认保存）
 
 ---
 
@@ -59,128 +63,81 @@ $ARGUMENTS
 
 | 规则 | 说明 |
 |------|------|
-| **一次性快照** | 报告反映**调研当日**代码事实；写完即视为冻结 |
-| **方案变更不回写** | `techspec` / `epic-design` / `tasks` / CR **不得**要求更新 `research/` 下已有文件 |
-| **需要新认知时** | **新建** `codebase-<topic>-<新日期>.md`，不修订旧报告 |
-| **非事实源** | 下游命令可读 `research/` 辅助**理解存量代码**，但**不得**把调研报告当作约束或决策依据 |
-| **CR 排除** | `/aisdd.cr` 影响分析与下游更新清单**不得**包含 `research/` 目录 |
+| **存放位置** | `{FEATURE_DIR}/research/` |
+| **默认保存** | 调研完成**必须**写入文件，不仅对话输出 |
+| **一次性快照** | 写完即冻结；techspec/design/CR **不得**回写 |
+| **更新认知** | 新建带新日期的文件，不修订旧报告 |
+| **非事实源** | 下游只读辅助，不得当作约束或决策依据 |
 
 ---
 
 ## 操作约束
 
-- **严格只读**：不修改任何代码或既有文档（含已有调研报告）
-- **事实优先**：每条结论须可追溯到**文件路径**（可选行号）或测试/注释证据
-- **禁止方案化表述**：不出现「建议采用」「应重构为」「推荐在 tech-spec 中写入」等措辞
-- **禁止替代设计**：调研 ≠ `tech-spec.md` ≠ `epic-design.md`；所有技术决策在后续阶段**独立**做出
-- **基于真实代码**：participant、类名、包路径须来自工程，禁止编造示例类
+- **严格只读**：不修改代码或既有文档
+- **事实优先**：结论须可追溯至文件路径
+- **禁止方案化表述**：不写「应复用/应重构/推荐在 tech-spec 中…」
+- **基于真实代码**：类名、包路径须来自工程
 
 ---
 
 ## 执行步骤
 
-### 1. 解析调研主题
+### 1. 解析
 
-从 `$ARGUMENTS` 提取：
-- 调研主题（模块名、能力域、FR 草稿中的关键词均可）
-- `--save`、`--parallel`
-
-若包含多个独立主题且带 `--parallel`，进入**并行模式**（步骤 3P）；否则单主题执行步骤 2～4。
+- 解析 Feature 标识、可选子主题、`--skip`
+- `--skip` → 记录原因，建议下一步，终止
 
 ### 2. 加载上下文
 
-**必载**：
-- `.specify/memory/constitution.md`（仅用于识别工程分层惯例，**不**用于推导方案）
-- `.specify/templates/research-template.md`（输出结构）
+必载：`spec.md`、`research-template.md`、`constitution.md`（分层惯例）  
+按需：`ux-design.md`、`epic.md`、工程源码
 
-**按需**：
-- 若可解析 `EPIC_DIR`：读 `epic.md`（仅用于对齐调研范围，**不**写入方案性结论）
-- 用户给出的 Android 工程根路径 / 模块名（须在对话或参数中明确；否则在工作区内搜索相关包名）
+### 3. 代码熟悉
 
-### 3. 代码考古（单主题）
+按下列维度**只记录现状**（范围由 spec/ux 驱动，不做无关穷举）：
 
-按下列维度**只记录现状**：
+1. **需求 ↔ 代码落点索引（必填）** — FR / 关键 AC / P0 场景 → 包/类/方法或「未见实现」；ux 入口 → UI 层入口类
+2. **模块定位** — 包/Gradle module、分层位置
+3. **关键类型与公开接口** — 已有签名与字段（据源码）
+4. **典型调用链与数据流** — UI 到 Data 现有路径（Mermaid 类名须真实）
+5. **异常、边界与失败路径（必填）** — 对照 spec 场景矩阵，记录代码中已有处理或「未见实现」
+6. **状态、生命周期与持久化**
+7. **依赖与耦合**
+8. **测试与样例**（若存在）
+9. **观察到的限制与技术债**（仅事实，无修复建议）
 
-1. **模块定位**
-   - 包/目录/Gradle module 路径
-   - 在 UI / Domain / Data（或工程实际分层）中的位置
+**搜索策略**：入口类、导航、ViewModel、Repository、DI Module → 沿调用链向下。
 
-2. **关键类型与公开接口**
-   - 类/接口/object 名称
-   - **已有**方法签名、主要字段（据源码摘录）
-   - 对外暴露的 Repository / UseCase / ViewModel 等（以工程实际为准）
+### 4. 生成并保存报告（强制）
 
-3. **典型调用链**
-   - 从 UI 事件或入口到 Data 层的**现有**路径（文字说明；复杂时可附 Mermaid，类名须真实）
-   - 同步/协程/Flow 等并发方式（据代码事实描述）
+1. 按 `research-template.md` 生成 Markdown
+2. **立即写入** `{FEATURE_DIR}/research/codebase-{slug}-{YYYYMMDD}.md`（目录不存在则创建）
+3. `slug`：子主题或 `feature-overview`
+4. **禁止覆盖**已有文件
 
-4. **依赖与耦合**
-   - 本模块依赖哪些内部/外部模块
-   - 被谁依赖（反向引用，据 import/调用）
+多子主题需拆分时可写多个文件，均落在同一 `research/` 目录，**无需额外参数**。
 
-5. **持久化与网络（若涉及）**
-   - Room 表/DAO、Retrofit 接口等**已存在**定义（摘录，不设计新表）
+### 5. 完成提示
 
-6. **测试与样例**
-   - 已有单测/仪器测试路径及覆盖点（事实）
-
-7. **观察到的限制与技术债**
-   - 仅列可核对事实（废弃 API、TODO、明显硬编码），**不写**修复建议
-
-8. **与需求描述的关联索引（可选）**
-   - 将用户/EPIC 中的关键词映射到代码落点
-   - 允许写「代码中未见相关实现」；**禁止**写「应复用/应新建」
-
-**搜索策略**：SemanticSearch + Grep + Read；优先读入口类、接口定义、Module/DI 绑定处。
-
-### 3P. 并行模式
-
-每个子 Agent 只负责一个主题，返回符合 `research-template.md` 结构的 Markdown 片段（禁止含方案/建议/评级）。父 Agent 合并为一份总报告或按主题拆成多文件（`--save` 时每个主题一个文件）。
-
-### 4. 生成报告
-
-按 `.specify/templates/research-template.md` 输出完整 Markdown。
-
-**报告末尾不得包含**：
-- 「推荐方案」「替代方案」「否决方案」
-- 「下游文档输入建议」
-- 「综合评级」
-- 「风险登记表」中的 mitigation/消解方案（若记录风险，仅限**已存在于代码/注释中的事实**，且无对策列）
-
-### 5. 持久化（`--save`）
-
-- 路径：`{EPIC_DIR}/research/codebase-{slug}-{YYYYMMDD}.md`
-- `slug`：主题英文或拼音短名，小写连字符
-- 文件头保留模板中的「文档性质」说明块
-- **禁止**覆盖同日同 slug 以外文件；若用户要求更新旧报告，应说明须**新建日期后缀文件**
-
-### 6. 完成提示
-
-输出：
-- 3～5 条**事实摘要**（模块位置、核心入口、与主题相关的现状）
-- 明确声明：**本报告不承载技术决策；后续 techspec/design/CR 变更时无需、也不应回写本报告**
-- 建议下一步：`/aisdd.epicspec` 或 `/aisdd.featurespec`（按是否已有 EPIC）
-- 若 `--save`：给出写入路径
-
----
-
-## 调研原则
-
-- **先读代码，再写一句话**：避免未打开文件就概括模块职责
-- **演进式视角只用于找代码**：可以说「某能力在 `FooRepository`」；不能说「应在 tech-spec 中扩展 Foo」
-- **适度广度**：覆盖与主题相关的直接依赖即可，不追求全仓库穷举
-- **时效标注**：写明调研日期与代码基线（分支/commit，能取则取）
+- 3～5 条事实摘要
+- **已写入路径**：`{FEATURE_DIR}/research/codebase-...md`
+- 声明：非事实源，techspec/design/CR 不回写
+- 下一步：继续下一 Feature 或全部就绪后 `/aisdd.techspec`
 
 ---
 
 ## 与现有命令的关系
 
-| 命令 | 与 research 的关系 |
-|------|-------------------|
-| `/aisdd.epicspec` | 可选前置：熟悉代码后再写 EPIC 边界 |
-| `/aisdd.featurespec` | 可选前置：写 FR/AC 时知道现有能力边界（事实），不抄调研做方案 |
-| `/aisdd.techspec` / `/aisdd.techspec` | 可读 `research/` 了解**调研时**的代码现状；**独立**做技术决策；**不更新**调研报告 |
-| `/aisdd.epicdesign` | 同上 |
-| `/aisdd.cr` | **不得**将 `research/` 列入下游更新清单 |
-| `/aisdd.clarify` | 澄清**需求**歧义；代码事实以 research 或现场读码为准 |
-| `/aisdd.challenge` | 在 spec/techspec/design **之后**；与 research 无依赖 |
+```text
+featurespec → featureuidesign（可选）→ research → … 全部 Feature 完成后 → techspec → epicdesign → …
+```
+
+| 命令 | 关系 |
+|------|------|
+| featurespec / featureuidesign | 前置 |
+| techspec / epicdesign | 后续；可读 research 辅助差距分析 |
+| cr | 不得更新 `features/*/research/` |
+
+## 上下文
+
+$ARGUMENTS

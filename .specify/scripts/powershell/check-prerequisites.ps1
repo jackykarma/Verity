@@ -2,9 +2,6 @@
 
 # Consolidated prerequisite checking script (PowerShell)
 #
-# This script provides unified prerequisite checking for Spec-Driven Development workflow.
-# It replaces the functionality previously spread across multiple scripts.
-#
 # Usage: ./check-prerequisites.ps1 [OPTIONS]
 #
 # OPTIONS:
@@ -25,12 +22,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Show help if requested
 if ($Help) {
     Write-Output @"
 Usage: check-prerequisites.ps1 [OPTIONS]
 
-Consolidated prerequisite checking for Spec-Driven Development workflow.
+Prerequisite checking for AISDD workflow.
 
 OPTIONS:
   -Json               Output in JSON format
@@ -40,68 +36,63 @@ OPTIONS:
   -Help, -h           Show this help message
 
 EXAMPLES:
-  # Check task prerequisites (EPIC tech-spec.md required)
   .\check-prerequisites.ps1 -Json
-  
-  # Check implementation prerequisites (tech-spec.md + tasks.md required)
   .\check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
-  
-  # Get feature paths only (no validation)
   .\check-prerequisites.ps1 -PathsOnly
 
 "@
     exit 0
 }
 
-# Source common functions
 . "$PSScriptRoot/common.ps1"
 
-# Get feature paths and validate branch
 $paths = Get-FeaturePathsEnv
 
-if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit:$paths.HAS_GIT)) { 
-    exit 1 
+if (-not (Test-FeatureBranch -Branch $paths.CURRENT_BRANCH -HasGit:$paths.HAS_GIT)) {
+    exit 1
 }
 
-# If paths-only mode, output paths and exit (support combined -Json -PathsOnly)
 if ($PathsOnly) {
     if ($Json) {
         [PSCustomObject]@{
-            REPO_ROOT    = $paths.REPO_ROOT
-            BRANCH       = $paths.CURRENT_BRANCH
-            FEATURE_DIR  = $paths.FEATURE_DIR
-            FEATURE_SPEC = $paths.FEATURE_SPEC
-            TECH_SPEC    = $paths.TECH_SPEC
-            UX_DESIGN    = $paths.UX_DESIGN
-            DESIGN_DIR   = $paths.DESIGN_DIR
-            TASKS        = $paths.TASKS
+            REPO_ROOT     = $paths.REPO_ROOT
+            BRANCH        = $paths.CURRENT_BRANCH
+            FEATURE_DIR   = $paths.FEATURE_DIR
+            FEATURE_SPEC  = $paths.FEATURE_SPEC
+            EPIC_DIR      = $paths.EPIC_DIR
+            TECH_SPEC     = $paths.TECH_SPEC
+            UX_DESIGN     = $paths.UX_DESIGN
+            DESIGN_DIR    = $paths.DESIGN_DIR
+            RESEARCH_DIR  = $paths.RESEARCH_DIR
+            TASKS         = $paths.TASKS
         } | ConvertTo-Json -Compress
     } else {
         Write-Output "REPO_ROOT: $($paths.REPO_ROOT)"
         Write-Output "BRANCH: $($paths.CURRENT_BRANCH)"
         Write-Output "FEATURE_DIR: $($paths.FEATURE_DIR)"
         Write-Output "FEATURE_SPEC: $($paths.FEATURE_SPEC)"
+        Write-Output "EPIC_DIR: $($paths.EPIC_DIR)"
         Write-Output "TECH_SPEC: $($paths.TECH_SPEC)"
         Write-Output "UX_DESIGN: $($paths.UX_DESIGN)"
         Write-Output "DESIGN_DIR: $($paths.DESIGN_DIR)"
+        Write-Output "RESEARCH_DIR: $($paths.RESEARCH_DIR)"
         Write-Output "TASKS: $($paths.TASKS)"
     }
     exit 0
 }
 
-# Validate required directories and files
 if (-not (Test-Path $paths.FEATURE_DIR -PathType Container)) {
     Write-Output "ERROR: Feature directory not found: $($paths.FEATURE_DIR)"
     Write-Output "Run /aisdd.featurespec first to create the Feature directory and spec.md."
     exit 1
 }
 
-# 技术规约：EPIC 根目录 tech-spec.md
 if (-not $paths.EPIC_DIR) {
     Write-Output "ERROR: EPIC directory not resolved for $($paths.FEATURE_DIR)"
     Write-Output "Ensure the feature is under specs/epics/EPIC-xxx/features/FEAT-xxx."
     exit 1
 }
+
 $techSpec = Join-Path $paths.EPIC_DIR 'tech-spec.md'
 if (-not (Test-Path $techSpec -PathType Leaf)) {
     Write-Output "ERROR: tech-spec.md not found in $($paths.EPIC_DIR)"
@@ -109,56 +100,37 @@ if (-not (Test-Path $techSpec -PathType Leaf)) {
     exit 1
 }
 
-# Check for tasks.md if required
 if ($RequireTasks -and -not (Test-Path $paths.TASKS -PathType Leaf)) {
     Write-Output "ERROR: tasks.md not found in $($paths.FEATURE_DIR)"
     Write-Output "Run /aisdd.featuretasks first to create the task list."
     exit 1
 }
 
-# Build list of available documents
 $docs = @()
 
-# Always check these optional docs
-if (Test-Path $paths.RESEARCH) { $docs += 'research.md' }
-if (Test-Path $paths.DATA_MODEL) { $docs += 'data-model.md' }
-
-# Check contracts directory (only if it exists and has files)
-if ((Test-Path $paths.CONTRACTS_DIR) -and (Get-ChildItem -Path $paths.CONTRACTS_DIR -ErrorAction SilentlyContinue | Select-Object -First 1)) { 
-    $docs += 'contracts/' 
+if ((Test-Path $paths.RESEARCH_DIR -PathType Container) -and (Get-ChildItem -Path $paths.RESEARCH_DIR -Filter 'codebase-*.md' -ErrorAction SilentlyContinue | Select-Object -First 1)) {
+    $docs += 'research/'
 }
 
-if (Test-Path $paths.QUICKSTART) { $docs += 'quickstart.md' }
-
-# UX design (optional)
 if (Test-Path $paths.UX_DESIGN) { $docs += 'ux-design.md' }
 
-# Include tasks.md if requested and it exists
-if ($IncludeTasks -and (Test-Path $paths.TASKS)) { 
-    $docs += 'tasks.md' 
+if ($IncludeTasks -and (Test-Path $paths.TASKS)) {
+    $docs += 'tasks.md'
 }
 
-# Output results
 if ($Json) {
-    # JSON output（UX_DESIGN 为 Feature 级路径，与 spec.md 同目录）
-    [PSCustomObject]@{ 
-        FEATURE_DIR = $paths.FEATURE_DIR
+    [PSCustomObject]@{
+        FEATURE_DIR    = $paths.FEATURE_DIR
         AVAILABLE_DOCS = $docs
-        UX_DESIGN = $paths.UX_DESIGN
-        DESIGN_DIR = $paths.DESIGN_DIR
+        UX_DESIGN      = $paths.UX_DESIGN
+        DESIGN_DIR     = $paths.DESIGN_DIR
+        RESEARCH_DIR   = $paths.RESEARCH_DIR
     } | ConvertTo-Json -Compress
 } else {
-    # Text output
     Write-Output "FEATURE_DIR:$($paths.FEATURE_DIR)"
     Write-Output "AVAILABLE_DOCS:"
-    
-    # Show status of each potential document
-    Test-FileExists -Path $paths.RESEARCH -Description 'research.md' | Out-Null
-    Test-FileExists -Path $paths.DATA_MODEL -Description 'data-model.md' | Out-Null
-    Test-DirHasFiles -Path $paths.CONTRACTS_DIR -Description 'contracts/' | Out-Null
-    Test-FileExists -Path $paths.QUICKSTART -Description 'quickstart.md' | Out-Null
+    Test-DirHasFiles -Path $paths.RESEARCH_DIR -Description 'research/' | Out-Null
     Test-FileExists -Path $paths.UX_DESIGN -Description 'ux-design.md' | Out-Null
-
     if ($IncludeTasks) {
         Test-FileExists -Path $paths.TASKS -Description 'tasks.md' | Out-Null
     }

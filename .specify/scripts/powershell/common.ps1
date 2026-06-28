@@ -147,12 +147,8 @@ function Get-FeaturePathsEnv {
         DESIGN_DIR      = $designDir
         EPIC_DIR        = $epicDir
         EPIC_DESIGN_DIR = $epicDesign
-        EPIC_UX_DESIGN  = $null
         TASKS           = Join-Path $featureDir 'tasks.md'
-        RESEARCH        = Join-Path $featureDir 'research.md'
-        DATA_MODEL      = Join-Path $featureDir 'data-model.md'
-        QUICKSTART      = Join-Path $featureDir 'quickstart.md'
-        CONTRACTS_DIR   = Join-Path $featureDir 'contracts'
+        RESEARCH_DIR    = Join-Path $featureDir 'research'
     }
 }
 

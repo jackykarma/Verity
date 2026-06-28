@@ -10,8 +10,8 @@ handoffs:
     prompt: tech-spec 完成后产出 EPIC 软件设计说明书
     send: true
   - label: 补充需求或澄清
-    agent: aisdd.clarify
-    prompt: 需补充技术边界时澄清；若 tech-spec.md 已存在可说明更新范围做增量更新
+    agent: aisdd.featurespec
+    prompt: 需补充技术边界时运行 /aisdd.featurespec --clarify；若 tech-spec.md 已存在可说明更新范围做增量更新
     send: false
 ---
 
@@ -27,7 +27,8 @@ $ARGUMENTS
 
 1. `epic.md` 已存在
 2. **所有** Feature 的 `spec.md` 已完成（Spec Ready）
-3. 各 Feature 的 `ux-design.md`（若存在，由 `/aisdd.featureuidesign` 产出）须在 techspec 前读取
+3. 各 Feature 的 `ux-design.md`（若存在）须在 techspec 前读取
+4. 各 Feature 的 `research/codebase-*.md`（**Brownfield 强烈推荐**；纯 Greenfield 可缺）须在 techspec 前读取，辅助差距分析
 
 可选：多 Feature EPIC 在运行前先执行 `/aisdd.challenge spec`。
 
@@ -52,10 +53,10 @@ $ARGUMENTS
 
 解析 `EPIC_DIR`、`TECH_SPEC`、`HAS_TECH_SPEC`。未设 `SPECIFY_EPIC` 且无 EPIC 标识时**终止**。
 
-若 `HAS_TECH_SPEC` 为 false，创建文件：
+若 `HAS_TECH_SPEC` 为 false，从模板创建：
 
 ```powershell
-.specify/scripts/powershell/setup-techspec.ps1 -EpicId "EPIC-002" -Json
+.specify/scripts/powershell/init-epic-files.ps1 -EpicId "EPIC-002" -FilesOnly tech-spec -Json
 ```
 
 若 `HAS_TECH_SPEC` 为 true 且用户未说明更新范围：**终止**并提示「请说明要更新的章节（如：第一部分 §三、或 FEAT-002 整节）」。
@@ -70,7 +71,7 @@ $ARGUMENTS
 - `.specify/templates/tech-spec-template.md`
 - `constitution.md`
 - `features/*/ux-design.md`（若存在，汇总各 Feature 体验约束）
-- `research/`（若存在，只读辅助，不得作为约束依据，不得回写 research）
+- `features/*/research/codebase-*.md`（若存在，只读辅助差距分析，不得作为约束依据，不得回写 research）
 - **现有工程代码**（差距分析、技术栈校准）
 
 ### 4. 填充 tech-spec.md

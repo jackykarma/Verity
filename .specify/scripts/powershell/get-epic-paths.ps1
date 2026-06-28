@@ -34,16 +34,21 @@ if (-not $p) {
 $techSpecPath = $p.TECH_SPEC
 $hasTechSpec = Test-Path -LiteralPath $techSpecPath
 $epicConstraintSource = if ($hasTechSpec) { $techSpecPath } else { $null }
-$researchDir = Join-Path $p.EPIC_DIR 'research'
-$hasResearch = Test-Path -LiteralPath $researchDir
+$featuresDir = Join-Path $p.EPIC_DIR 'features'
+$hasFeatureResearch = $false
+if (Test-Path -LiteralPath $featuresDir) {
+    $hasFeatureResearch = @(Get-ChildItem -Path $featuresDir -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+        $rd = Join-Path $_.FullName 'research'
+        if ((Test-Path -LiteralPath $rd) -and (Get-ChildItem -Path $rd -Filter 'codebase-*.md' -ErrorAction SilentlyContinue | Select-Object -First 1)) { $true }
+    }) -contains $true
+}
 
 if ($Json) {
     [PSCustomObject]@{
         EPIC_DIR              = $p.EPIC_DIR
         EPIC_DESIGN_DIR       = $p.EPIC_DESIGN_DIR
         TECH_SPEC             = $techSpecPath
-        EPIC_RESEARCH_DIR     = $researchDir
-        HAS_RESEARCH          = $hasResearch
+        HAS_FEATURE_RESEARCH  = $hasFeatureResearch
         HAS_TECH_SPEC         = $hasTechSpec
         EPIC_CONSTRAINT_SOURCE = $epicConstraintSource
     } | ConvertTo-Json -Compress

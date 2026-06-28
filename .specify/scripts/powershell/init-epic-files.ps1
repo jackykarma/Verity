@@ -16,8 +16,8 @@ Overwrite existing files.
 
 .PARAMETER FilesOnly
 Comma-separated list of files to create. Default: all.
-Valid values: tech-spec, epic-design, key-func-design-dir, nfr, story-detail, feature-ux-design-dir
-  (story-detail: per-Feature l2_design/.gitkeep；feature-ux-design-dir: per-Feature design/.gitkeep)
+Valid values: tech-spec, epic-design, key-func-design-dir, nfr, story-detail, feature-ux-design-dir, feature-research-dir
+  (story-detail: per-Feature l2_design/.gitkeep；feature-ux-design-dir: per-Feature design/.gitkeep；feature-research-dir: per-Feature research/.gitkeep)
 
 .PARAMETER Json
 Output JSON result.
@@ -45,6 +45,7 @@ if ($Help) {
     Write-Host '  key-func-design/          -> EPIC subdirectory (empty + .gitkeep)'
     Write-Host '  nfr.md                    -> EPIC root (from nfr-template.md)'
     Write-Host '  features/*/l2_design/.gitkeep -> L2 placeholder directory'
+    Write-Host '  features/*/research/.gitkeep -> 代码熟悉报告目录（由 /aisdd.research 产出）'
     Write-Host ''
     exit 0
 }
@@ -84,21 +85,11 @@ $fileMap = @{
 $filesToCreate = if ($FilesOnly) {
     $FilesOnly -split ',' | ForEach-Object { $_.Trim() }
 } else {
-    @('tech-spec', 'epic-design', 'key-func-design-dir', 'nfr', 'story-detail', 'feature-ux-design-dir')
+    @('tech-spec', 'epic-design', 'key-func-design-dir', 'nfr', 'story-detail', 'feature-ux-design-dir', 'feature-research-dir')
 }
 
-# Legacy key-diagram files are deprecated and no longer created.
+# Legacy key-diagram / epic-plan file keys removed; use tech-spec + key-func-design/ instead.
 $results = @()
-$expanded = [System.Collections.ArrayList]::new()
-foreach ($k in $filesToCreate) {
-    if ($k -eq 'epic-plan') { $k = 'tech-spec' }
-    if ($k -eq 'key-diagram' -or $k -eq 'key-diagram-epic' -or $k -eq 'key-diagram-feature') {
-        $results += @{ file = $k; status = 'deprecated (use key-func-design/KD_*_*.md)' }
-    } else {
-        [void]$expanded.Add($k)
-    }
-}
-$filesToCreate = @($expanded)
 
 foreach ($fileKey in $filesToCreate) {
     if ($fileKey -eq 'key-func-design-dir') {
@@ -116,7 +107,7 @@ foreach ($fileKey in $filesToCreate) {
         continue
     }
 
-    if ($fileKey -eq 'story-detail' -or $fileKey -eq 'feature-ux-design-dir') {
+    if ($fileKey -eq 'story-detail' -or $fileKey -eq 'feature-ux-design-dir' -or $fileKey -eq 'feature-research-dir') {
         $featuresDir = Join-Path $epicDir 'features'
         if (Test-Path $featuresDir) {
             $featureDirs = Get-ChildItem -Path $featuresDir -Directory -ErrorAction SilentlyContinue
@@ -145,6 +136,19 @@ foreach ($fileKey in $filesToCreate) {
                     } else {
                         New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
                         $results += @{ file = ($featDir.Name + '/design/.gitkeep'); status = 'created' }
+                    }
+                }
+                if ($fileKey -eq 'feature-research-dir') {
+                    $researchDir = Join-Path $featDir.FullName 'research'
+                    if (-not (Test-Path $researchDir)) {
+                        New-Item -ItemType Directory -Path $researchDir -Force | Out-Null
+                    }
+                    $gitkeepPath = Join-Path $researchDir '.gitkeep'
+                    if ((Test-Path $gitkeepPath) -and -not $Force) {
+                        $results += @{ file = ($featDir.Name + '/research/.gitkeep'); status = 'skipped (exists)' }
+                    } else {
+                        New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
+                        $results += @{ file = ($featDir.Name + '/research/.gitkeep'); status = 'created' }
                     }
                 }
             }

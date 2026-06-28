@@ -1,6 +1,10 @@
 ---
 description: "**Feature 级**设计稿解析：在本 Feature 的 spec.md 完成后，从交互稿/视觉稿提取并结构化交互逻辑与视觉规范，产出 features/FEAT-xxx/ux-design.md。支持本地图片、Figma MCP、Pencil。可选步骤；无设计稿时进入兜底模式。"
 handoffs:
+  - label: 熟悉相关代码（推荐）
+    agent: aisdd.research
+    prompt: 本 Feature spec 与 ux-design 就绪后，运行 /aisdd.research 调研需求所涉存量代码
+    send: false
   - label: 继续下一 Feature spec
     agent: aisdd.featurespec
     prompt: 若 EPIC 尚有 Feature 未写 spec，继续 featurespec；否则进入 techspec
@@ -10,8 +14,8 @@ handoffs:
     prompt: 所有 Feature 的 spec（及可选 ux-design）就绪后，运行 /aisdd.techspec
     send: false
   - label: 澄清交互/视觉约束
-    agent: aisdd.clarify
-    prompt: 需补充交互或视觉约束时澄清；若 ux-design.md 已存在可说明更新范围做增量更新
+    agent: aisdd.featurespec
+    prompt: 需补充需求侧交互/视觉约束时运行 /aisdd.featurespec --clarify；若 ux-design.md 已存在可说明更新范围做增量更新
     send: false
 ---
 
@@ -30,7 +34,7 @@ $ARGUMENTS
 
 - 本 Feature 的 **`spec.md` 已完成**
 - **不要求**其他 Feature 的 spec 或 ux-design 已完成
-- **推荐顺序**：`/aisdd.featurespec` → **`/aisdd.featureuidesign`**（可选）→ … 全部 Feature spec/ux 就绪后 → `/aisdd.techspec`
+- **推荐顺序**：`/aisdd.featurespec` → **`/aisdd.featureuidesign`**（可选）→ **`/aisdd.research`**（Brownfield 推荐）→ … 全部 Feature 就绪后 → `/aisdd.techspec`
 
 ## 大纲
 
@@ -124,7 +128,8 @@ $ARGUMENTS
 输出路径、质量等级、解析统计、置信度分布、遗漏/待确认摘要；提示：
 - review「遗漏与待确认」与 `❓ 低` 条目
 - 若 EPIC 尚有 Feature 未做 ux-design：可对下一 Feature 运行 `/aisdd.featureuidesign`
-- 当**所有 Feature spec 就绪**（及可选 ux-design）：运行 `/aisdd.techspec`
+- **推荐下一步**：`/aisdd.research`（熟悉本 Feature 相关存量代码，产出至 `research/`）
+- 当**全部 Feature** spec / ux / research（推荐）就绪：运行 `/aisdd.challenge spec`（多 Feature 推荐）→ `/aisdd.techspec`
 
 ---
 

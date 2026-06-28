@@ -9,4 +9,4 @@ alwaysApply: false
 
 **唯一事实源**：模式参数、影响分析步骤、各变更类型的更新链路与 spec 纯净度红线见 `.cursor/commands/aisdd.cr.md`，执行前**必须完整阅读**该命令文件；CR 模板见 `.specify/templates/change-request-template.md`。
 
-速记红线：技术方案类 CR 默认不动 `spec.md`（唯一例外：NFR 指标数值/口径）；`research/` 永不回写；精准更新、分步确认、每份文档更新 Version 与变更记录；变更影响超过 3 个 Feature 或需重构架构时建议新建 EPIC。
+速记红线：技术方案类 CR 默认不动 `spec.md`（唯一例外：NFR 指标数值/口径）；`features/*/research/` 永不回写；精准更新、分步确认、每份文档更新 Version 与变更记录；变更影响超过 3 个 Feature 或需重构架构时建议新建 EPIC。

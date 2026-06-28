@@ -124,7 +124,7 @@ AI 的角色是：**资深 Android 工程师 / 技术负责人助理**，
 - **EPIC 软件设计说明书**（EPIC 级）是 **架构与详细设计事实源**：0 层/1 层架构图、全景类图与关键时序、关键功能与疑难设计、接口字段、数据库表结构、Story 拆解与 L2 索引（§十三）；L2 详细设计按 Story 分文件写在各 Feature 的 **`l2_design/ST-xxx_<slug>.md`** 中；供人类评审与 Task/Implement 阶段引用
 - `tasks.md` 是 **执行事实源**：将设计说明书中的 Story 拆解为可执行 Task，并引用 `tech-spec.md` 约束与对应 `l2_design/ST-xxx_*.md` 中的设计片段
 - **实现交付**：代码实现须对照 `spec.md`、`tech-spec.md`、`epic-design.md` 与 L2 设计完成自检；发现偏离时走 CR 流程更新设计或修复实现，不在 implement 阶段擅自改写冻结文档
-- **`/aisdd.analyze`（可选，非阻塞）**：`feature` / `epic` 范围的一致性分析报告**不是** `featuretasks` 或 `implement` 的前置门禁；团队可按风险选择运行，未运行不得作为拒绝实现的理由
+- **`/aisdd.challenge`（可选，非阻塞）**：对抗性（spec/techspec/design）与一致性（feature/epic/epic pre-tasks）评审报告**不是** `featuretasks` 或 `implement` 的前置门禁；团队可按风险选择运行，未运行不得作为拒绝实现的理由
 
 ### 七.1 分支策略（Branch Strategy）
 

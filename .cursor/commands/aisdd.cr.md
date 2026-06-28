@@ -2,12 +2,12 @@
 description: 变更请求（CR）：中途新增/修改/删除需求或技术方案变更时，创建 CR、自动影响分析、生成下游更新清单并按流程分步执行更新。
 handoffs:
   - label: 澄清变更需求
-    agent: aisdd.clarify
-    prompt: 澄清变更的具体内容与边界
+    agent: aisdd.featurespec
+    prompt: 运行 /aisdd.featurespec --clarify 澄清变更的具体内容与边界
     send: true
-  - label: 一致性分析
-    agent: aisdd.analyze
-    prompt: 运行一致性分析，确认变更后各产物无矛盾
+  - label: 一致性评审
+    agent: aisdd.challenge
+    prompt: 运行 /aisdd.challenge epic 或 feature，确认变更后各产物无矛盾
     send: true
 ---
 
@@ -63,7 +63,7 @@ $ARGUMENTS
 4. **影响分析**：
    - **判断变更类型**：需求类（Scope/FR/NFR/AC）/ 交互类 / 技术方案类 / 混合
    - **定位受影响的产物**：逐个检查 spec/ux-design/tech-spec/epic-design/l2_design（各 ST 文件）/tasks，列出需要更新的文件与章节
-   - **`research/` 永久排除**：`EPIC_DIR/research/` 下代码调研快照**不得**列入下游更新清单；方案或需求变更时**不**修订、不覆盖已有调研报告（需新调研则新建带日期的文件，走 `/aisdd.research`）
+   - **`features/*/research/` 永久排除**：各 Feature 下代码熟悉快照**不得**列入下游更新清单；方案或需求变更时**不**修订、不覆盖已有调研报告（需新调研则在该 Feature 的 `research/` 下新建带日期的文件，走 `/aisdd.research`）
    - **参考 workflow-overview.html §7.3 变更影响速查表**确定更新链路
    - **风险评估**：识别变更带来的风险（性能/兼容/工期等）
 
@@ -98,13 +98,13 @@ $ARGUMENTS
 
    | 条件 | 提醒内容 |
    |------|---------|
-   | 可选（质量加码） | 可运行 `/aisdd.analyze` / `/aisdd.analyze epic` 确认变更后各产物无矛盾；**非** implement 前置必做 |
+   | 可选（质量加码） | 可运行 `/aisdd.challenge feature` / `/aisdd.challenge epic` 确认变更后各产物无矛盾；**非** implement 前置必做 |
    | tasks.md 有更新 | 更新 Version 与变更记录；受影响的 Task（列出 Task ID）需重新执行 `/aisdd.implement Txxx` 或 `/aisdd.implement ST-xxx`，实现后对照更新后的设计与 spec 自检 |
-   | epic-design / l2_design 有更新 | 更新对应文档 Version 与变更记录；可选重跑 `/aisdd.analyze epic` |
+   | epic-design / l2_design 有更新 | 更新对应文档 Version 与变更记录；可选重跑 `/aisdd.challenge epic` |
    | 代码已实现部分受影响的 Story | 重新实现或修复后，对照更新后的 `epic-design.md` / L2 与 `spec.md` 自检实现一致性 |
 
 核心规则：
-- **`research/` 不回写**：代码调研快照不参与 CR；禁止将 `research/` 纳入影响范围或执行更新
+- **`features/*/research/` 不回写**：代码熟悉快照不参与 CR；禁止将任何 Feature 的 `research/` 纳入影响范围或执行更新
 - **精准更新**：只更新 CR 影响分析中列出的产物章节，不扩散修改
 - **版本追踪**：每份更新的文档须更新 Version 与变更记录表
 - **分步确认**：每步更新后提示用户 check，不一次性全部改完
